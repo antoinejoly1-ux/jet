@@ -3,8 +3,9 @@
 A web portal where aircraft owners see their share of a plane (hours, budget, flights, invoices, maintenance), and where
 the operator's team runs the business from the same app behind a **Client | Admin** toggle.
 
-This is **Phase 0 — Foundation** of the foundation plan: accounts, roles, permissions, the full database schema, the app
-shell for both sides, French and English, and the test and CI setup every later phase builds on.
+**Built so far:** Phase 0 (foundation: accounts, roles, permissions, the full schema, both app shells, French and
+English, tests and CI), staff two-factor authentication, and Phase 1 (admin core: owners, aircraft and shares, View as
+owner, team and roles, audit log).
 
 ## Stack
 
@@ -35,11 +36,14 @@ pnpm dev                            # http://localhost:3000
 
 Demo logins created by the seed (password `demo-password-2026`):
 
-| Email               | Role                                 |
-| ------------------- | ------------------------------------ |
-| `admin@jet.test`    | Admin (sees the Client/Admin toggle) |
-| `dispatch@jet.test` | Dispatcher                           |
-| `owner@jet.test`    | Owner of 25% of C-GJTA               |
+| Email               | Role                   | 2FA                                     |
+| ------------------- | ---------------------- | --------------------------------------- |
+| `admin@jet.test`    | Admin                  | On (demo key printed by `pnpm db:seed`) |
+| `dispatch@jet.test` | Dispatcher             | On (same demo key)                      |
+| `finance@jet.test`  | Finance                | Not set up: signing in shows the setup  |
+| `owner@jet.test`    | Owner of 25% of C-GJTA | Not required for owners                 |
+
+Add the demo key to any authenticator app, or use one of the printed backup codes.
 
 Without `RESEND_API_KEY`, emails (verification, magic links, invitations) are printed in the terminal running
 `pnpm dev`; copy the link from there. Google sign-in appears once `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are
@@ -55,7 +59,14 @@ set (redirect URI: `{BETTER_AUTH_URL}/api/auth/callback/google`).
   `src/lib/auth/policy.ts` and is tested permission by permission in `tests/unit/policy.test.ts`.
 - **The toggle** switches staff between the Client and Admin sides. It is a view switch only: every page, action and
   service checks permissions on the server.
-- **2FA** is required for staff when `REQUIRE_STAFF_2FA=true` (keep it on in staging and production).
+- **2FA** is required for staff when `REQUIRE_STAFF_2FA=true` (on by default; keep it on everywhere but local
+  experiments). It applies to **every** sign-in method: Better Auth only challenges password sign-ins, so
+  `src/lib/auth/second-factor-everywhere.ts` applies the same challenge to magic links, Google and email verification.
+  Staff without 2FA are guided through `/setup-2fa` (QR code, one code, backup codes) on their first visit to Admin.
+  Codes submit at the sixth digit, devices are trusted for 30 days by default, and backup codes are one tap away.
+- **View as owner** (owner page → "View as this owner") shows the Client side exactly as that owner sees it, read-only,
+  with a banner to exit. It uses a signed cookie bound to the staff member and expiring after an hour, and every start
+  and end is written to the audit log.
 - **Rate limits** on sign-in, sign-up, magic links, password reset and 2FA are stored in Postgres so they hold across
   serverless instances.
 
@@ -87,16 +98,16 @@ checks permissions, validates input, writes in a transaction and records the aud
 
 ## Commands
 
-| Command                     | What it does                                                    |
-| --------------------------- | --------------------------------------------------------------- |
-| `pnpm dev`                  | Development server                                              |
-| `pnpm check`                | Typecheck, lint, format check and tests: run before every push  |
-| `pnpm test`                 | Unit and integration tests (needs the `jet_test` database)      |
-| `pnpm exec playwright test` | End-to-end tests on desktop and phone (needs a seeded database) |
-| `pnpm db:generate`          | Create a migration after changing `src/lib/db/schema/*`         |
-| `pnpm db:migrate`           | Apply migrations                                                |
-| `pnpm db:seed`              | Reset and reseed demo data (refuses to run in production)       |
-| `pnpm db:studio`            | Browse the database                                             |
+| Command                | What it does                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| `pnpm dev`             | Development server                                                            |
+| `pnpm check`           | Typecheck, lint, format check and tests: run before every push                |
+| `pnpm test`            | Unit and integration tests (needs the `jet_test` database)                    |
+| `scripts/e2e-local.sh` | End-to-end tests on desktop and phone, as CI runs them (reseeds the database) |
+| `pnpm db:generate`     | Create a migration after changing `src/lib/db/schema/*`                       |
+| `pnpm db:migrate`      | Apply migrations                                                              |
+| `pnpm db:seed`         | Reset and reseed demo data (refuses to run in production)                     |
+| `pnpm db:studio`       | Browse the database                                                           |
 
 ## House rules
 
@@ -112,8 +123,17 @@ checks permissions, validates input, writes in a transaction and records the aud
 - **Cache Components is off.** Almost every page is per-user, so request-time rendering is the simpler default.
   Revisit if public or shared pages appear.
 - **Sentry, PostHog and Inngest** are planned but not installed yet; they arrive with the phases that need them.
-- **Hosting region** for the database and files depends on the Law 25 decision in the foundation plan.
+
+## Hosting (decided: Canada)
+
+The business is Canadian, so client data stays in Canada:
+
+- **Database:** PostgreSQL in AWS `ca-central-1` (Montreal), through AWS RDS or Supabase. Set `DATABASE_URL`.
+- **Files** (invoices, imports): a private S3 bucket in `ca-central-1`, arriving with Phase 2.
+- **App:** Vercel. Its servers process requests but don't store client data; run the functions in the region closest
+  to Montreal (`iad1`) and note it in the Law 25 privacy assessment.
 
 ## What's next
 
-Phase 1 (admin core): create and edit owners, aircraft and shares; owner detail; View as owner; audit log viewer.
+Phase 2 (finance and invoices): budgets, transactions, hours ledger, invoice upload, spreadsheet import, and the owner's
+Finances and Invoices screens.

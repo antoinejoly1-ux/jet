@@ -14,7 +14,7 @@ env:
   TEST_DATABASE_URL: postgresql://jet:jet@localhost:5432/jet_test
   BETTER_AUTH_SECRET: ci-secret-ci-secret-ci-secret-ci-secret-00
   BETTER_AUTH_URL: http://localhost:3000
-  REQUIRE_STAFF_2FA: "false"
+  REQUIRE_STAFF_2FA: "true"
 
 jobs:
   check:

@@ -10,6 +10,7 @@ import { actionEmail } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
 import { env, googleEnabled } from "@/lib/env";
 import { recordAudit } from "@/lib/services/audit";
+import { secondFactorEverywhere } from "./second-factor-everywhere";
 import { notifyAdminsOfUninvitedSignUp } from "@/lib/services/notifications";
 
 const asLocale = (value: unknown) => (value === "en" ? "en" : "fr");
@@ -113,6 +114,9 @@ export const auth = betterAuth({
     }),
     // Authenticator-app 2FA. Passwordless users (Google, magic link) can enable it too.
     twoFactor({ issuer: "Jet", allowPasswordless: true }),
+    // The plugin above only challenges password sign-ins; this covers magic links,
+    // Google and email verification, so 2FA can't be skipped by changing method.
+    secondFactorEverywhere(),
     // Checks new passwords against known breaches. Needs outbound network, so production only.
     ...(process.env.NODE_ENV === "production" ? [haveIBeenPwned()] : []),
     nextCookies(),

@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth/auth-client";
+import { fullPageLoad } from "@/lib/full-page-load";
 import { GoogleButton } from "./google-button";
 
 export function SignInForm({
@@ -36,9 +37,12 @@ export function SignInForm({
       setError(error.status === 403 ? t("errors.unverified") : t("errors.invalidCredentials"));
       return;
     }
-    // Accounts with 2FA are sent to the code screen by the auth client.
-    if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) return;
-    window.location.href = next;
+    // Accounts with 2FA continue to the code screen, then to where they were going.
+    if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
+      fullPageLoad(`/two-factor?next=${encodeURIComponent(next)}`);
+      return;
+    }
+    fullPageLoad(next);
   }
 
   async function onMagicLink() {

@@ -26,7 +26,7 @@ const TONE = {
   not_found: "neutral",
 } as const;
 
-export default async function InvitationsPage() {
+export default async function InvitationsPage({ searchParams }: PageProps<"/admin/invitations">) {
   const viewer = await requireStaff();
   const t = await getTranslations("invitations");
   const format = await getFormatter();
@@ -40,6 +40,7 @@ export default async function InvitationsPage() {
     );
   }
 
+  const { owner: preselected } = await searchParams;
   const [owners, rows] = await Promise.all([listOwners(db, viewer), listInvitations(db, viewer)]);
 
   return (
@@ -49,6 +50,7 @@ export default async function InvitationsPage() {
         <Card className="self-start">
           <CardTitle className="mb-4">{t("newInvitation")}</CardTitle>
           <InviteForm
+            defaultTarget={typeof preselected === "string" ? `owner:${preselected}` : undefined}
             owners={owners.map(({ id, legalName }) => ({ id, legalName }))}
             canInviteStaff={can(viewer, "team:manage")}
           />

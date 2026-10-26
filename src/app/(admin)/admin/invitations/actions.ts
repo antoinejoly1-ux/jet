@@ -10,7 +10,7 @@ import { createInvitation, revokeInvitation } from "@/lib/services/invitations";
 
 export type InviteState =
   | { status: "idle" }
-  | { status: "error"; code: "invalid" | "forbidden" }
+  | { status: "error"; code: "invalid" | "forbidden"; values: { email: string; target: string } }
   | { status: "sent"; email: string; url: string };
 
 export async function createInvitationAction(_prev: InviteState, formData: FormData): Promise<InviteState> {
@@ -25,8 +25,8 @@ export async function createInvitationAction(_prev: InviteState, formData: FormD
     revalidatePath("/admin/invitations");
     return { status: "sent", email: email.trim().toLowerCase(), url };
   } catch (err) {
-    if (err instanceof ForbiddenError) return { status: "error", code: "forbidden" };
-    if (err instanceof z.ZodError) return { status: "error", code: "invalid" };
+    if (err instanceof ForbiddenError) return { status: "error", code: "forbidden", values: { email, target } };
+    if (err instanceof z.ZodError) return { status: "error", code: "invalid", values: { email, target } };
     throw err;
   }
 }

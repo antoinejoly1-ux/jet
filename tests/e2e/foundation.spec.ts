@@ -2,33 +2,8 @@
  * Phase 0 "done when" checks, run against the real app with seeded data
  * (pnpm db:seed). Email links are read from the local outbox file.
  */
-import { existsSync, readFileSync } from "node:fs";
-import { expect, test, type Page } from "@playwright/test";
-
-const PASSWORD = "demo-password-2026";
-const OUTBOX = "tmp/emails.jsonl";
-
-function latestLink(to: string): string {
-  if (!existsSync(OUTBOX)) throw new Error("No email outbox; start the app with EMAIL_OUTBOX_FILE set.");
-  const emails = readFileSync(OUTBOX, "utf8")
-    .trim()
-    .split("\n")
-    .map((line) => JSON.parse(line) as { to: string; text: string });
-  const email = emails.filter((e) => e.to === to).at(-1);
-  const url = email?.text.match(/https?:\/\/\S+/)?.[0];
-  if (!url) throw new Error(`No email with a link for ${to}`);
-  return url;
-}
-
-async function signIn(page: Page, email: string) {
-  await page.goto("/sign-in");
-  await page.getByLabel(/^(Courriel|Email)$/).fill(email);
-  await page.getByLabel(/^(Mot de passe|Password)$/).fill(PASSWORD);
-  await page.getByRole("button", { name: /^(Se connecter|Sign in)$/ }).click();
-  await page.waitForURL((url) => !url.pathname.startsWith("/sign-in"));
-}
-
-const unique = () => `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+import { expect, test } from "@playwright/test";
+import { latestLink, PASSWORD, signIn, unique } from "./support";
 
 test("an owner sees their own aircraft on Home", async ({ page }) => {
   await signIn(page, "owner@jet.test");
