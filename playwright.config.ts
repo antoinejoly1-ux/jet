@@ -16,7 +16,8 @@ export default defineConfig({
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"], viewport: { width: 1440, height: 900 } } },
-    { name: "phone", use: { ...devices["Pixel 7"] } },
+    // 360px: the narrow end of common phones, so layouts that only just fit fail here, not in CI.
+    { name: "phone", use: { ...devices["Pixel 7"], viewport: { width: 360, height: 780 } } },
   ],
   webServer: {
     command: "pnpm start",
