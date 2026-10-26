@@ -16,6 +16,7 @@ import {
   type FlightInput,
 } from "@/lib/validation/operations";
 import { recordAudit } from "./audit";
+import { emit } from "./outbox";
 import { alertIfHoursLow } from "./hour-alerts";
 import { sendPendingEmails } from "./owner-notifications";
 import { ConflictError, NotFoundError } from "./errors";
@@ -117,6 +118,7 @@ export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput) {
       entityId: row.id,
       after: input,
     });
+    await emit(tx, "flight.scheduled", flightPayload(row));
     return row;
   });
 }
@@ -181,6 +183,18 @@ export async function cancelFlight(db: Db, actor: Actor, id: string, reason: str
   });
 }
 
+const flightPayload = (f: Flight) => ({
+  flightId: f.id,
+  aircraftId: f.aircraftId,
+  shareId: f.shareId,
+  fromAirport: f.fromAirport,
+  toAirport: f.toAirport,
+  departsAt: f.departsAt.toISOString(),
+  arrivesAt: f.arrivesAt?.toISOString() ?? null,
+  blockMinutes: f.blockMinutes,
+  status: f.status,
+});
+
 export async function lockFlight(tx: Tx, id: string): Promise<Flight> {
   const [flight] = await tx.select().from(flights).where(eq(flights.id, id)).for("update");
   if (!flight) throw new NotFoundError("flight");
@@ -206,6 +220,7 @@ export async function applyCompletion(
     .set({ status: "completed", blockMinutes, arrivesAt: arrival })
     .where(eq(flights.id, flight.id))
     .returning();
+  await emit(tx, "flight.completed", flightPayload(row!));
   if (flight.shareId)
     await tx.insert(hourLedger).values({
       shareId: flight.shareId,
@@ -242,6 +257,7 @@ export async function applyCancellation(
       });
   }
   const [row] = await tx.update(flights).set({ status: "cancelled" }).where(eq(flights.id, flight.id)).returning();
+  await emit(tx, "flight.cancelled", { ...flightPayload(row!), wasCompleted: flight.status === "completed" });
   return row!;
 }
 

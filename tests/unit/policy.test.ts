@@ -105,6 +105,20 @@ describe("accounts without access", () => {
   });
 });
 
+describe("API keys", () => {
+  const key = actor({ id: "creator", staffRole: "admin", apiScopes: ["finance:read"] });
+
+  it("get exactly their scopes, whatever their creator's role", () => {
+    expect(can(key, "finance:read")).toBe(true);
+    expect(can(key, "finance:write")).toBe(false);
+    expect(can(key, "team:manage")).toBe(false);
+  });
+
+  it("read across owners like staff do", () => {
+    expect(can(key, "finance:read", { ownerIds: [OWNER_A] })).toBe(true);
+  });
+});
+
 describe("authorize", () => {
   it("throws ForbiddenError when denied", () => {
     expect(() => authorize(actor({ staffRole: "dispatcher" }), "finance:write")).toThrow(ForbiddenError);

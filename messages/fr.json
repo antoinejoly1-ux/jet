@@ -446,7 +446,11 @@
       "peopleConcerned": "Indiquez qui est touché.",
       "measures": "Indiquez les mesures prises.",
       "severity": "Choisissez un niveau.",
-      "response": "Écrivez une réponse."
+      "response": "Écrivez une réponse.",
+      "url": "Adresse HTTPS valide requise.",
+      "scopes": "Choisissez au moins un accès.",
+      "events": "Choisissez au moins un événement.",
+      "name": "Entrez un nom (2 caractères minimum)."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -480,7 +484,11 @@
     "message_empty": "Écrivez un message ou joignez un fichier.",
     "assignee_cannot_reply": "Cette personne ne peut pas répondre aux propriétaires.",
     "privacy_request_open": "Une demande de ce type est déjà en cours.",
-    "privacy_request_closed": "Cette demande est déjà fermée."
+    "privacy_request_closed": "Cette demande est déjà fermée.",
+    "api_key_revoked": "Cette clé est déjà révoquée.",
+    "webhook_disabled": "Ce webhook est désactivé.",
+    "webhook_private_address": "Cette adresse mène à un réseau privé; utilisez une adresse publique.",
+    "webhook_test_failed": "Le test n'a pas été reçu."
   },
   "aircraft": {
     "title": "Appareils",
@@ -556,7 +564,9 @@
     "removeFromTeam": "Retirer de l'équipe",
     "save": "Enregistrer",
     "privacyTitle": "Renseignements personnels (Loi 25)",
-    "privacyBody": "Demandes des propriétaires et registre des incidents."
+    "privacyBody": "Demandes des propriétaires et registre des incidents.",
+    "developersTitle": "Développeurs",
+    "developersBody": "Clés d'API et webhooks pour relier d'autres logiciels."
   },
   "audit": {
     "empty": "Rien à afficher pour l'instant.",
@@ -1222,5 +1232,51 @@
     "reportedToCaiOn": "Déclaré à la CAI le",
     "peopleNotifiedOn": "Personnes avisées le",
     "saveReporting": "Enregistrer"
+  },
+  "developers": {
+    "title": "Développeurs",
+    "subtitle": "Reliez la comptabilité, Zapier ou Make au portail : une API REST avec des clés à portée limitée, et des webhooks signés.",
+    "openapi": "Spécification OpenAPI",
+    "keysTitle": "Clés d'API",
+    "noKeys": "Aucune clé pour l'instant.",
+    "revoked": "Révoquée",
+    "lastUsed": "utilisée {when}",
+    "never": "jamais",
+    "revoke": "Révoquer",
+    "revokeQuestion": "Révoquer cette clé?",
+    "keyName": "Nom de la clé",
+    "keyNamePlaceholder": "ex. Logiciel comptable",
+    "scopes": "Accès accordés",
+    "pickOne": "Choisissez au moins une option.",
+    "createKey": "Créer la clé",
+    "keyCreated": "Copiez cette clé maintenant : elle ne sera plus affichée.",
+    "copy": "Copier",
+    "copied": "Copiée",
+    "scopeNames": {
+      "owners_read": "Lire les propriétaires",
+      "fleet_read": "Lire la flotte et les vols",
+      "finance_read": "Lire les finances",
+      "finance_write": "Écrire au registre",
+      "operations_write": "Planifier et terminer des vols"
+    },
+    "hooksTitle": "Webhooks",
+    "noHooks": "Aucun webhook pour l'instant.",
+    "active": "Actif",
+    "disabled": "Désactivé",
+    "delivered": "livré",
+    "retrying": "nouvel essai ({attempts} échecs)",
+    "gaveUp": "abandonné",
+    "sendTest": "Envoyer un test",
+    "testOk": "Test reçu ({status}).",
+    "testFailed": "Échec du test : {detail}",
+    "enable": "Réactiver",
+    "disable": "Désactiver",
+    "hookName": "Nom",
+    "url": "Adresse de réception",
+    "urlHint": "HTTPS obligatoire. Chaque envoi est signé (en-tête Jet-Signature).",
+    "events": "Événements",
+    "createHook": "Créer le webhook",
+    "secretCreated": "Copiez ce secret de signature maintenant : il ne sera plus affiché.",
+    "docsHint": "Les clés et webhooks sont réservés aux administrateurs. Le guide d'intégration se trouve dans docs/api.md du dépôt."
   }
 }

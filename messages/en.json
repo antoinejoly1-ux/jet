@@ -446,7 +446,11 @@
       "peopleConcerned": "Say who is affected.",
       "measures": "Say what was done.",
       "severity": "Choose a level.",
-      "response": "Write an answer."
+      "response": "Write an answer.",
+      "url": "A valid HTTPS address is required.",
+      "scopes": "Choose at least one access.",
+      "events": "Choose at least one event.",
+      "name": "Enter a name (at least 2 characters)."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -480,7 +484,11 @@
     "message_empty": "Write a message or attach a file.",
     "assignee_cannot_reply": "This person can't answer owners.",
     "privacy_request_open": "A request of this kind is already open.",
-    "privacy_request_closed": "This request is already closed."
+    "privacy_request_closed": "This request is already closed.",
+    "api_key_revoked": "This key is already revoked.",
+    "webhook_disabled": "This webhook is disabled.",
+    "webhook_private_address": "This address leads to a private network; use a public one.",
+    "webhook_test_failed": "The test wasn't received."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -556,7 +564,9 @@
     "removeFromTeam": "Remove from team",
     "save": "Save",
     "privacyTitle": "Personal information (Law 25)",
-    "privacyBody": "Owners' requests and the incident register."
+    "privacyBody": "Owners' requests and the incident register.",
+    "developersTitle": "Developers",
+    "developersBody": "API keys and webhooks to connect other software."
   },
   "audit": {
     "empty": "Nothing to show yet.",
@@ -1222,5 +1232,51 @@
     "reportedToCaiOn": "Reported to the CAI on",
     "peopleNotifiedOn": "People notified on",
     "saveReporting": "Save"
+  },
+  "developers": {
+    "title": "Developers",
+    "subtitle": "Connect accounting, Zapier or Make to the portal: a REST API with scoped keys, and signed webhooks.",
+    "openapi": "OpenAPI spec",
+    "keysTitle": "API keys",
+    "noKeys": "No keys yet.",
+    "revoked": "Revoked",
+    "lastUsed": "used {when}",
+    "never": "never",
+    "revoke": "Revoke",
+    "revokeQuestion": "Revoke this key?",
+    "keyName": "Key name",
+    "keyNamePlaceholder": "e.g. Accounting software",
+    "scopes": "Access granted",
+    "pickOne": "Choose at least one.",
+    "createKey": "Create the key",
+    "keyCreated": "Copy this key now: it won't be shown again.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "scopeNames": {
+      "owners_read": "Read owners",
+      "fleet_read": "Read the fleet and flights",
+      "finance_read": "Read finances",
+      "finance_write": "Write to the ledger",
+      "operations_write": "Schedule and complete flights"
+    },
+    "hooksTitle": "Webhooks",
+    "noHooks": "No webhooks yet.",
+    "active": "Active",
+    "disabled": "Disabled",
+    "delivered": "delivered",
+    "retrying": "retrying ({attempts} failed)",
+    "gaveUp": "gave up",
+    "sendTest": "Send a test",
+    "testOk": "Test received ({status}).",
+    "testFailed": "Test failed: {detail}",
+    "enable": "Enable",
+    "disable": "Disable",
+    "hookName": "Name",
+    "url": "Receiving URL",
+    "urlHint": "HTTPS required. Every delivery is signed (Jet-Signature header).",
+    "events": "Events",
+    "createHook": "Create the webhook",
+    "secretCreated": "Copy this signing secret now: it won't be shown again.",
+    "docsHint": "Keys and webhooks are for admins only. The integration guide is docs/api.md in the repository."
   }
 }

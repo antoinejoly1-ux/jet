@@ -19,6 +19,8 @@ const schema = z.object({
   LOCAL_STORAGE_DIR: z.string().default("tmp/storage"),
   /** "off" only for end-to-end test runs, which sign in many times a minute. */
   AUTH_RATE_LIMIT: z.enum(["on", "off"]).default("on"),
+  /** 32 random bytes, base64: encrypts webhook secrets and integration credentials. Derived from BETTER_AUTH_SECRET if unset. */
+  ENCRYPTION_KEY: z.string().optional().default(""),
   /** Shared secret scheduled jobs send to /api/cron/*. Jobs refuse to run without it. */
   CRON_SECRET: z
     .string()

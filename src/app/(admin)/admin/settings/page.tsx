@@ -1,4 +1,4 @@
-import { ChevronRight, MailPlus, ScrollText, Settings, ShieldCheck, ShieldAlert } from "lucide-react";
+import { ChevronRight, Code, MailPlus, ScrollText, Settings, ShieldCheck, ShieldAlert } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -89,6 +89,16 @@ export default async function SettingsPage() {
               <div className="flex-1">
                 <p className="font-semibold">{t("auditTitle")}</p>
                 <p className="text-muted text-sm">{t("auditBody")}</p>
+              </div>
+              <ChevronRight className="text-muted size-4" aria-hidden />
+            </Card>
+          </Link>
+          <Link href="/admin/settings/developers" className="group">
+            <Card className="group-hover:bg-surface-muted flex items-center gap-4 transition-colors">
+              <Code className="text-muted size-5" aria-hidden />
+              <div className="flex-1">
+                <p className="font-semibold">{t("developersTitle")}</p>
+                <p className="text-muted text-sm">{t("developersBody")}</p>
               </div>
               <ChevronRight className="text-muted size-4" aria-hidden />
             </Card>

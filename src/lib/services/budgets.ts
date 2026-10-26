@@ -5,6 +5,7 @@ import { aircraft, budgetLines, budgets, owners, shares } from "@/lib/db/schema"
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { budgetLinesInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
+import { emit } from "./outbox";
 import { ConflictError, NotFoundError } from "./errors";
 import { listCategories, monthlyTotals, spentByCategory } from "./ledger";
 import { notifyOwnerMembers, sendPendingEmails } from "./owner-notifications";
@@ -116,6 +117,7 @@ export async function publishBudget(db: Db, actor: Actor, shareId: string, year:
       entityId: shareId,
       after: { year },
     });
+    await emit(tx, "budget.published", { shareId, year });
     return notifyOwnerMembers(
       tx,
       row.ownerId,

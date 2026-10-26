@@ -53,6 +53,7 @@ test("admin screens", async ({ page }) => {
     "/admin/invitations",
     "/admin/settings",
     "/admin/settings/privacy",
+    "/admin/settings/developers",
     "/admin/settings/audit",
   ])
     await audit(page, path);

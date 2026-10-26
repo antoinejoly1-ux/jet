@@ -1,11 +1,12 @@
 import "server-only";
 import { and, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL } from "drizzle-orm";
 import type { Db } from "@/lib/db";
-import { aircraft, files, invoices, outboxEvents, owners, shares } from "@/lib/db/schema";
+import { aircraft, files, invoices, owners, shares } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { formatMoney } from "@/lib/format";
 import { invoiceInput, type InvoiceInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
+import { emit } from "./outbox";
 import { ConflictError, NotFoundError } from "./errors";
 import { notifyOwnerMembers, sendPendingEmails } from "./owner-notifications";
 
@@ -109,9 +110,14 @@ export async function createInvoice(db: Db, actor: Actor, raw: InvoiceInput) {
       entityId: invoice.id,
       after: { number: invoice.number, totalCents: invoice.totalCents },
     });
-    await tx
-      .insert(outboxEvents)
-      .values({ type: "invoice.issued", payload: { invoiceId: invoice.id, number: invoice.number } });
+    await emit(tx, "invoice.issued", {
+      invoiceId: invoice.id,
+      number: invoice.number,
+      shareId: invoice.shareId,
+      totalCents: invoice.totalCents,
+      currency: invoice.currency,
+      issuedOn: invoice.issuedOn,
+    });
 
     const emails = await notifyOwnerMembers(
       tx,
@@ -138,9 +144,10 @@ export async function markInvoicePaid(db: Db, actor: Actor, id: string) {
       .update(invoices)
       .set({ status: "paid" })
       .where(and(eq(invoices.id, id), eq(invoices.status, "issued")))
-      .returning({ id: invoices.id });
+      .returning({ id: invoices.id, number: invoices.number });
     if (!row) throw new ConflictError("invoice_not_open");
     await recordAudit(tx, { actorUserId: actor.id, action: "invoice.paid", entityType: "invoice", entityId: id });
+    await emit(tx, "invoice.paid", { invoiceId: id, number: row.number });
   });
 }
 
@@ -154,8 +161,9 @@ export async function voidInvoice(db: Db, actor: Actor, id: string, reason: stri
       .update(invoices)
       .set({ status: "void", voidReason: text })
       .where(and(eq(invoices.id, id), inArray(invoices.status, ["issued", "paid"])))
-      .returning({ id: invoices.id });
+      .returning({ id: invoices.id, number: invoices.number });
     if (!row) throw new ConflictError("invoice_already_void");
+    await emit(tx, "invoice.voided", { invoiceId: id, number: row.number, reason: text });
     await recordAudit(tx, {
       actorUserId: actor.id,
       action: "invoice.void",
