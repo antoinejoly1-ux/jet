@@ -11,7 +11,9 @@ import { createInvitationAction, type InviteState } from "./actions";
 export function InviteForm({
   owners,
   canInviteStaff,
+  defaultTarget,
 }: {
+  defaultTarget?: string;
   owners: { id: string; legalName: string }[];
   canInviteStaff: boolean;
 }) {
@@ -27,12 +29,22 @@ export function InviteForm({
           <span className="mt-1 block font-mono text-xs break-all">{state.url}</span>
         </Alert>
       ) : null}
-      <Field id="email" name="email" type="email" autoComplete="off" label={t("email")} required />
+      <Field
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="off"
+        label={t("email")}
+        defaultValue={state.status === "error" ? state.values.email : ""}
+        required
+      />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="target">{t("access")}</Label>
         <select
+          key={state.status === "error" ? state.values.target : (defaultTarget ?? "")}
           id="target"
           name="target"
+          defaultValue={state.status === "error" ? state.values.target : defaultTarget}
           required
           className="border-border bg-surface h-11 rounded-md border px-3 text-base sm:text-sm"
         >

@@ -1,0 +1,63 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { requireStaff } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { formError, formValues, type FormState } from "@/lib/forms";
+import { addShare, createAircraft, endShare, updateAircraft } from "@/lib/services/aircraft";
+import type { AircraftInput, ShareInput } from "@/lib/validation/admin";
+
+export async function createAircraftAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const viewer = await requireStaff();
+  let id: string;
+  try {
+    id = (await createAircraft(db, viewer, formValues(formData) as unknown as AircraftInput)).id;
+  } catch (err) {
+    return formError(err, formValues(formData));
+  }
+  revalidatePath("/admin/aircraft");
+  redirect(`/admin/aircraft/${id}`);
+}
+
+export async function updateAircraftAction(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const viewer = await requireStaff();
+  try {
+    await updateAircraft(db, viewer, id, formValues(formData) as unknown as AircraftInput);
+  } catch (err) {
+    return formError(err, formValues(formData));
+  }
+  revalidatePath(`/admin/aircraft/${id}`);
+  redirect(`/admin/aircraft/${id}`);
+}
+
+export async function addShareAction(aircraftId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const viewer = await requireStaff();
+  const values = formValues(formData);
+  try {
+    await addShare(db, viewer, aircraftId, {
+      ...values,
+      annualHours: values.annualHours === "" ? undefined : values.annualHours,
+    } as unknown as ShareInput);
+  } catch (err) {
+    return formError(err, formValues(formData));
+  }
+  revalidatePath(`/admin/aircraft/${aircraftId}`);
+  return { status: "success" };
+}
+
+export async function endShareAction(
+  aircraftId: string,
+  shareId: string,
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  const viewer = await requireStaff();
+  try {
+    await endShare(db, viewer, shareId, { endsOn: String(formData.get("endsOn") ?? "") });
+  } catch (err) {
+    return formError(err, formValues(formData));
+  }
+  revalidatePath(`/admin/aircraft/${aircraftId}`);
+  return { status: "success" };
+}
