@@ -1,0 +1,24 @@
+name: Scheduled jobs
+
+# Calls the app's /api/cron/* endpoints. Works on any Vercel plan (Vercel Cron
+# on the Hobby plan only runs once a day). Needs two repository settings:
+#   - variable APP_URL, e.g. https://portal.example.com
+#   - secret CRON_SECRET, the same value as the app's CRON_SECRET
+# Until both exist, the job does nothing.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Delayed notification emails
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_URL" ] || [ -z "$CRON_SECRET" ]; then echo "APP_URL or CRON_SECRET not set; skipping."; exit 0; fi
+          curl --fail --silent --show-error --max-time 60 -H "Authorization: Bearer $CRON_SECRET" "$APP_URL/api/cron/notifications"

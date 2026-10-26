@@ -75,6 +75,42 @@ const copy = {
       cta: "View my finances",
     },
   },
+  newMessage: {
+    fr: {
+      subject: "Nouveau message de notre équipe",
+      body: "Notre équipe vous a répondu : « {preview} »",
+      cta: "Lire et répondre",
+    },
+    en: {
+      subject: "New message from our team",
+      body: "Our team replied: \u201c{preview}\u201d",
+      cta: "Read and reply",
+    },
+  },
+  hoursLow: {
+    fr: {
+      subject: "Il vous reste {hours} sur {aircraft}",
+      body: "Votre solde d'heures sur {aircraft} est passé sous 10 % de votre allocation annuelle : il reste {hours}.",
+      cta: "Voir mon solde",
+    },
+    en: {
+      subject: "{hours} left on {aircraft}",
+      body: "Your hours on {aircraft} are below 10% of your annual allotment: {hours} remain.",
+      cta: "See my balance",
+    },
+  },
+  maintenancePlanned: {
+    fr: {
+      subject: "Maintenance prévue sur {aircraft}",
+      body: "{title} est prévue sur {aircraft} ({when}). L'appareil ne sera pas disponible pendant ce temps.",
+      cta: "Voir l'appareil",
+    },
+    en: {
+      subject: "Maintenance planned on {aircraft}",
+      body: "{title} is planned on {aircraft} ({when}). The aircraft won't be available during that time.",
+      cta: "View the aircraft",
+    },
+  },
 } as const;
 
 export type TemplateName = keyof typeof copy;

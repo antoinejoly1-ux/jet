@@ -16,6 +16,8 @@ import {
   type FlightInput,
 } from "@/lib/validation/operations";
 import { recordAudit } from "./audit";
+import { alertIfHoursLow } from "./hour-alerts";
+import { sendPendingEmails } from "./owner-notifications";
 import { ConflictError, NotFoundError } from "./errors";
 
 type Flight = typeof flights.$inferSelect;
@@ -143,7 +145,7 @@ export async function updateFlight(db: Db, actor: Actor, id: string, raw: Flight
 export async function completeFlight(db: Db, actor: Actor, id: string, raw: CompleteFlightInput) {
   authorize(actor, "operations:write");
   const input = completeFlightInput.parse(raw);
-  return db.transaction(async (tx) => {
+  const { row, emails } = await db.transaction(async (tx) => {
     const flight = await lockFlight(tx, id);
     // Guards against completing the wrong row; the scheduling sync trusts the vendor instead.
     if (flight.status === "scheduled" && flight.departsAt > new Date()) throw new ConflictError("flight_not_departed");
@@ -155,8 +157,11 @@ export async function completeFlight(db: Db, actor: Actor, id: string, raw: Comp
       entityId: id,
       after: { blockMinutes: input.blockTime },
     });
-    return row;
+    const emails = flight.shareId ? await alertIfHoursLow(tx, flight.shareId, input.blockTime) : [];
+    return { row, emails };
   });
+  await sendPendingEmails(db, emails);
+  return row;
 }
 
 export async function cancelFlight(db: Db, actor: Actor, id: string, reason: string) {

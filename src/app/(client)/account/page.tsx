@@ -8,8 +8,10 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireViewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { EmailPreferencesForm } from "@/components/account/email-preferences-form";
 import { listSignInMethods } from "@/lib/services/account";
-import { setLocaleAction } from "./actions";
+import { getEmailPreferences } from "@/lib/services/notification-center";
+import { saveEmailPreferencesAction, setLocaleAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("account"))("title") };
@@ -19,7 +21,10 @@ export default async function AccountPage() {
   const viewer = await requireViewer();
   const t = await getTranslations("account");
   const locale = await getLocale();
-  const methods = await listSignInMethods(db, viewer.id);
+  const [methods, emails] = await Promise.all([
+    listSignInMethods(db, viewer.id),
+    viewer.ownerIds.length && !viewer.viewingAs ? getEmailPreferences(db, viewer) : Promise.resolve(null),
+  ]);
 
   return (
     <>
@@ -60,6 +65,18 @@ export default async function AccountPage() {
             ))}
           </form>
         </Card>
+
+        {emails ? (
+          <Card>
+            <CardTitle>{t("emailsTitle")}</CardTitle>
+            <p className="text-muted mt-1 text-sm">{t("emailsBody")}</p>
+            <EmailPreferencesForm
+              action={saveEmailPreferencesAction}
+              preferences={emails}
+              disabled={!!viewer.viewingAs}
+            />
+          </Card>
+        ) : null}
 
         <Link href="/account/security" className="group">
           <Card className="group-hover:bg-surface-muted flex items-center gap-4 transition-colors">

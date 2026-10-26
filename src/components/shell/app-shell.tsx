@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import type { Viewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { unreadMessageCount } from "@/lib/services/messages";
+import { unreadNotificationCount } from "@/lib/services/notification-center";
+import { NotificationBell } from "./bell";
 import { BottomTabs, Sidebar, type Side } from "./nav";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
@@ -24,7 +26,11 @@ function Wordmark() {
  */
 export async function AppShell({ side, viewer, children }: { side: Side; viewer: Viewer; children: ReactNode }) {
   const t = await getTranslations("viewAs");
-  const badges = { messages: await unreadMessageCount(db, viewer, side) };
+  const [messages, notifications] = await Promise.all([
+    unreadMessageCount(db, viewer, side),
+    unreadNotificationCount(db, viewer),
+  ]);
+  const badges = { messages };
   return (
     <>
       {viewer.viewingAs ? (
@@ -57,6 +63,7 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
             </div>
             <div className="ml-auto flex items-center gap-3">
               {viewer.staffRole ? <SideToggle current={side} /> : null}
+              <NotificationBell side={side} unread={notifications} />
               <UserMenu name={viewer.name} email={viewer.email} />
             </div>
           </header>

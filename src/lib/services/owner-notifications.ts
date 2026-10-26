@@ -5,6 +5,7 @@ import { notifications, ownerMembers, user } from "@/lib/db/schema";
 import { actionEmail, type TemplateName } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
 import { env } from "@/lib/env";
+import { emailOffFor } from "./notification-center";
 
 export type PendingEmail = {
   template: TemplateName;
@@ -32,13 +33,20 @@ export async function notifyOwnerMembers(
     .where(eq(ownerMembers.ownerId, ownerId));
   if (members.length === 0) return [];
   await tx.insert(notifications).values(members.map((m) => ({ userId: m.userId, type, data })));
-  return members.map((m) => ({
-    template: email.template,
-    to: m.email,
-    locale: m.locale,
-    path: email.path,
-    vars: data,
-  }));
+  // Everyone sees it in the app; the email only goes to those who haven't turned it off.
+  const off = await emailOffFor(
+    tx,
+    members.map((m) => m.userId),
+  );
+  return members
+    .filter((m) => !off.get(m.userId)?.has(type))
+    .map((m) => ({
+      template: email.template,
+      to: m.email,
+      locale: m.locale,
+      path: email.path,
+      vars: data,
+    }));
 }
 
 /**

@@ -4,12 +4,14 @@
  * open job makes it available again. Planned windows block availability.
  */
 import "server-only";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
-import { aircraft, maintenanceEvents } from "@/lib/db/schema";
+import { aircraft, maintenanceEvents, shares } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { maintenanceInput, type MaintenanceInput } from "@/lib/validation/operations";
+import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { recordAudit } from "./audit";
+import { notifyOwnerMembers, sendPendingEmails, type PendingEmail } from "./owner-notifications";
 import { ConflictError, NotFoundError } from "./errors";
 
 export type MaintenanceStatus = (typeof maintenanceEvents.$inferSelect)["status"];
@@ -73,9 +75,9 @@ export async function getMaintenance(db: Db, actor: Actor, id: string) {
 export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInput) {
   authorize(actor, "operations:write");
   const input = maintenanceInput.parse(raw);
-  return db.transaction(async (tx) => {
+  const { row, emails } = await db.transaction(async (tx) => {
     const [plane] = await tx
-      .select({ id: aircraft.id })
+      .select({ id: aircraft.id, registration: aircraft.registration })
       .from(aircraft)
       .where(and(eq(aircraft.id, input.aircraftId), isNull(aircraft.deletedAt)));
     if (!plane) throw new NotFoundError("aircraft");
@@ -87,9 +89,35 @@ export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInpu
       entityId: row.id,
       after: input,
     });
-    return row;
+    // Owners hear about work that will take their aircraft out of service.
+    const emails: PendingEmail[] = [];
+    if (input.startsAt) {
+      const holders = await tx
+        .selectDistinct({ ownerId: shares.ownerId })
+        .from(shares)
+        .where(and(eq(shares.aircraftId, input.aircraftId), activeShare()));
+      const when = new Intl.DateTimeFormat("fr-CA", {
+        timeZone: OPERATOR_TIME_ZONE,
+        dateStyle: "long",
+      }).format(input.startsAt);
+      for (const h of holders)
+        emails.push(
+          ...(await notifyOwnerMembers(
+            tx,
+            h.ownerId,
+            "maintenance.planned",
+            { aircraft: plane.registration, title: input.title, when },
+            { template: "maintenancePlanned", path: "/aircraft" },
+          )),
+        );
+    }
+    return { row, emails };
   });
+  await sendPendingEmails(db, emails);
+  return row;
 }
+
+const activeShare = () => or(isNull(shares.endsOn), gt(shares.endsOn, sql`current_date`));
 
 /** Edits an open job. The aircraft can't change; finished jobs are history. */
 export async function updateMaintenance(db: Db, actor: Actor, id: string, raw: MaintenanceInput) {

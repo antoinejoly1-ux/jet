@@ -215,7 +215,44 @@
     },
     "security": "Security",
     "twoFactorOn": "Two-step verification is on",
-    "twoFactorOff": "Two-step verification is off"
+    "twoFactorOff": "Two-step verification is off",
+    "emailsTitle": "Emails",
+    "emailsBody": "Choose what we send you by email. Everything stays visible in the portal.",
+    "emailsAlwaysOn": "Security emails (sign-in links, password changes) are always sent.",
+    "saveEmails": "Save",
+    "emailsSaved": "Preferences saved.",
+    "emailTypes": {
+      "invoice": {
+        "issued": {
+          "label": "New invoices",
+          "hint": "When an invoice is issued."
+        }
+      },
+      "budget": {
+        "published": {
+          "label": "Budget published",
+          "hint": "When your yearly budget is ready."
+        }
+      },
+      "hours": {
+        "low": {
+          "label": "Low hours",
+          "hint": "When less than 10% of your hours remain."
+        }
+      },
+      "maintenance": {
+        "planned": {
+          "label": "Maintenance planned",
+          "hint": "When your aircraft will be out of service."
+        }
+      },
+      "message": {
+        "from_dispatch": {
+          "label": "Messages from the team",
+          "hint": "If you haven't read them in the portal after 5 minutes."
+        }
+      }
+    }
   },
   "adminDashboard": {
     "title": "Dashboard",
@@ -936,5 +973,38 @@
     "me": "{name} (me)",
     "resolve": "Resolved",
     "reopen": "Reopen"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "What happened on your account recently.",
+    "emptyTitle": "Nothing new",
+    "emptyBody": "Invoices, budgets, messages and alerts will appear here.",
+    "unread": "unread",
+    "bellUnread": "Notifications, {count} unread",
+    "types": {
+      "invoice": {
+        "issued": "New invoice {number} of {amount} for {aircraft}"
+      },
+      "budget": {
+        "published": "Your {year} budget for {aircraft} is published"
+      },
+      "hours": {
+        "low": "{hours} left on {aircraft}",
+        "low_staff": "{ownerName} has only {hours} left on {aircraft}"
+      },
+      "maintenance": {
+        "planned": "{title} planned on {aircraft} on {when}"
+      },
+      "message": {
+        "from_dispatch": "New message from the team: “{preview}”",
+        "from_owner": "{ownerName}: “{preview}”"
+      },
+      "access": {
+        "uninvited_sign_up": "{email} signed up without an invitation"
+      },
+      "sync": {
+        "failed": "The scheduling software sync had {failed} error(s)"
+      }
+    }
   }
 }

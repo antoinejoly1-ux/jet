@@ -215,7 +215,44 @@
     },
     "security": "Sécurité",
     "twoFactorOn": "Vérification en deux étapes activée",
-    "twoFactorOff": "Vérification en deux étapes désactivée"
+    "twoFactorOff": "Vérification en deux étapes désactivée",
+    "emailsTitle": "Courriels",
+    "emailsBody": "Choisissez ce que nous vous envoyons par courriel. Tout reste visible dans le portail.",
+    "emailsAlwaysOn": "Les courriels de sécurité (liens de connexion, changement de mot de passe) sont toujours envoyés.",
+    "saveEmails": "Enregistrer",
+    "emailsSaved": "Préférences enregistrées.",
+    "emailTypes": {
+      "invoice": {
+        "issued": {
+          "label": "Nouvelles factures",
+          "hint": "Quand une facture est émise."
+        }
+      },
+      "budget": {
+        "published": {
+          "label": "Budget publié",
+          "hint": "Quand votre budget annuel est prêt."
+        }
+      },
+      "hours": {
+        "low": {
+          "label": "Heures basses",
+          "hint": "Quand il reste moins de 10 % de vos heures."
+        }
+      },
+      "maintenance": {
+        "planned": {
+          "label": "Maintenance prévue",
+          "hint": "Quand votre appareil sera immobilisé."
+        }
+      },
+      "message": {
+        "from_dispatch": {
+          "label": "Messages de l'équipe",
+          "hint": "Si vous ne les avez pas lus dans le portail après 5 minutes."
+        }
+      }
+    }
   },
   "adminDashboard": {
     "title": "Tableau de bord",
@@ -936,5 +973,38 @@
     "me": "{name} (moi)",
     "resolve": "Résolue",
     "reopen": "Rouvrir"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Ce qui s'est passé récemment sur votre compte.",
+    "emptyTitle": "Rien de nouveau",
+    "emptyBody": "Les factures, budgets, messages et alertes apparaîtront ici.",
+    "unread": "non lue",
+    "bellUnread": "{count, plural, one {Notifications, # non lue} other {Notifications, # non lues}}",
+    "types": {
+      "invoice": {
+        "issued": "Nouvelle facture {number} de {amount} pour {aircraft}"
+      },
+      "budget": {
+        "published": "Votre budget {year} de {aircraft} est publié"
+      },
+      "hours": {
+        "low": "Il vous reste {hours} sur {aircraft}",
+        "low_staff": "{ownerName} n'a plus que {hours} sur {aircraft}"
+      },
+      "maintenance": {
+        "planned": "{title} prévue sur {aircraft} le {when}"
+      },
+      "message": {
+        "from_dispatch": "Nouveau message de l'équipe : « {preview} »",
+        "from_owner": "{ownerName} : « {preview} »"
+      },
+      "access": {
+        "uninvited_sign_up": "{email} s'est inscrit sans invitation"
+      },
+      "sync": {
+        "failed": "La synchronisation du logiciel de planification a {failed} erreur(s)"
+      }
+    }
   }
 }
