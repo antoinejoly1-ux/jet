@@ -12,7 +12,8 @@ import { notifyOwnerMembers, sendPendingEmails } from "./owner-notifications";
 export type BudgetView = Awaited<ReturnType<typeof loadBudget>>;
 
 /** A share's budget for a year: every category with planned, spent and remaining. */
-async function loadBudget(db: Db, shareId: string, year: number) {
+/** Budget lines with actual spending for one share and year. Callers check access first. */
+export async function loadBudget(db: Db, shareId: string, year: number) {
   const [budget] = await db
     .select()
     .from(budgets)

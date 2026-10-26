@@ -617,7 +617,8 @@
     "pdfHint": "PDF, PNG ou JPG, 25 Mo maximum",
     "saving": "Émission…",
     "issue": "Émettre la facture",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "exportCsv": "Exporter (CSV)"
   },
   "ownerInvoices": {
     "title": "Factures",
@@ -628,7 +629,8 @@
     "view": "Voir",
     "download": "Télécharger",
     "viewNumber": "Voir la facture {number}",
-    "downloadNumber": "Télécharger la facture {number}"
+    "downloadNumber": "Télécharger la facture {number}",
+    "exportCsv": "Exporter (CSV)"
   },
   "transactions": {
     "title": "Transactions",
@@ -663,7 +665,8 @@
     "description": "Description",
     "add": "Ajouter",
     "added": "Entrée ajoutée.",
-    "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne."
+    "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne.",
+    "exportCsv": "Exporter (CSV)"
   },
   "budgets": {
     "title": "Budgets et heures",
@@ -701,7 +704,8 @@
     "hours": "Heures",
     "hoursHint": "Négatif pour retirer",
     "note": "Note",
-    "addHours": "Ajouter"
+    "addHours": "Ajouter",
+    "statementPdf": "Relevé PDF"
   },
   "imports": {
     "title": "Importations",
@@ -758,7 +762,9 @@
     "remaining": "Restant",
     "byCategory": "Par catégorie",
     "byMonth": "Dépenses par mois",
-    "peak": "Mois le plus élevé : {amount}"
+    "peak": "Mois le plus élevé : {amount}",
+    "exportCsv": "Exporter (CSV)",
+    "statementPdf": "Relevé {year} (PDF)"
   },
   "flights": {
     "title": "Vols",
@@ -806,7 +812,8 @@
     "cancelReason": "Raison (facultatif)",
     "cancelFlight": "Annuler le vol",
     "cancelCompleted": "Annuler et rendre les heures",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "exportCsv": "Exporter (CSV)"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -894,7 +901,8 @@
     "noUpcomingTitle": "Aucun vol à venir",
     "noUpcomingBody": "Vos prochains vols apparaîtront ici dès qu'ils seront planifiés.",
     "noPastTitle": "Aucun vol passé",
-    "noPastBody": "L'historique de vos vols apparaîtra ici."
+    "noPastBody": "L'historique de vos vols apparaîtra ici.",
+    "exportCsv": "Exporter (CSV)"
   },
   "ownerAircraft": {
     "title": "Votre appareil",
@@ -1005,6 +1013,71 @@
       "sync": {
         "failed": "La synchronisation du logiciel de planification a {failed} erreur(s)"
       }
+    }
+  },
+  "exports": {
+    "date": "Date",
+    "aircraft": "Appareil",
+    "owner": "Propriétaire",
+    "kind": "Type",
+    "category": "Catégorie",
+    "description": "Description",
+    "amount": "Montant",
+    "currency": "Devise",
+    "reversal": "Contrepassation",
+    "yes": "oui",
+    "number": "Numéro",
+    "issuedOn": "Émise le",
+    "dueOn": "Échéance",
+    "status": "Statut",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "from": "De",
+    "to": "À",
+    "blockHours": "Heures bloc",
+    "hours": "Heures",
+    "kinds": {
+      "cost": "Coût",
+      "revenue": "Revenu",
+      "payment": "Paiement"
+    },
+    "invoiceStatuses": {
+      "issued": "Émise",
+      "paid": "Payée",
+      "void": "Annulée"
+    },
+    "flightStatuses": {
+      "scheduled": "Prévu",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "hourKinds": {
+      "purchase": "Achat",
+      "flight": "Vol",
+      "adjustment": "Ajustement"
+    },
+    "statement": {
+      "title": "Relevé annuel {year}",
+      "generated": "Produit le {date}",
+      "footer": "Relevé produit par le portail des propriétaires. Les montants suivent votre registre en date de production.",
+      "summary": "Sommaire",
+      "planned": "Prévu",
+      "spent": "Dépensé",
+      "remaining": "Reste",
+      "revenue": "Revenus",
+      "payments": "Paiements reçus",
+      "notPublished": "Budget non publié",
+      "hoursOpening": "Heures au 1er janvier",
+      "hoursPurchased": "Heures achetées",
+      "hoursFlown": "Heures volées",
+      "hoursAdjusted": "Ajustements d'heures",
+      "hoursClosing": "Heures restantes",
+      "byCategory": "Budget par catégorie",
+      "total": "Total",
+      "entries": "Écritures",
+      "hours": "Heures",
+      "invoices": "Factures",
+      "none": "Aucune pour cette année."
     }
   }
 }

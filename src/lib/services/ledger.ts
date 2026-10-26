@@ -7,7 +7,7 @@ import "server-only";
 import { and, asc, desc, eq, gte, isNotNull, lt, sql, sum, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { Db } from "@/lib/db";
-import { budgetCategories, hourLedger, shares, transactions, user } from "@/lib/db/schema";
+import { aircraft, budgetCategories, hourLedger, owners, shares, transactions, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { hoursInput, transactionInput, type HoursInput, type TransactionInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
@@ -34,6 +34,8 @@ export async function listTransactions(
     .select({
       id: transactions.id,
       shareId: transactions.shareId,
+      registration: aircraft.registration,
+      ownerName: owners.legalName,
       occurredOn: transactions.occurredOn,
       kind: transactions.kind,
       amountCents: transactions.amountCents,
@@ -47,6 +49,9 @@ export async function listTransactions(
       createdByName: user.name,
     })
     .from(transactions)
+    .innerJoin(shares, eq(shares.id, transactions.shareId))
+    .innerJoin(aircraft, eq(aircraft.id, shares.aircraftId))
+    .innerJoin(owners, eq(owners.id, shares.ownerId))
     .leftJoin(budgetCategories, eq(budgetCategories.id, transactions.categoryId))
     .leftJoin(user, eq(user.id, transactions.createdByUserId))
     .leftJoin(reversal, eq(reversal.reversesId, transactions.id))

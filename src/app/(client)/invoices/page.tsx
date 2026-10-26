@@ -4,6 +4,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -30,7 +31,11 @@ export default async function OwnerInvoicesPage() {
 
   return (
     <>
-      <PageHeader title={t("title")} description={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={rows.length ? <DownloadLink href="/invoices/export">{t("exportCsv")}</DownloadLink> : null}
+      />
       {rows.length === 0 ? (
         <EmptyState icon={FileText} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (

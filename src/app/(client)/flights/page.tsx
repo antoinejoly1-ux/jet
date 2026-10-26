@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -51,7 +52,13 @@ export default async function OwnerFlightsPage() {
 
   return (
     <>
-      <PageHeader title={t("title")} description={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          upcoming.length || past.length ? <DownloadLink href="/flights/export">{t("exportCsv")}</DownloadLink> : null
+        }
+      />
       <div className="flex flex-col gap-8">
         <section aria-labelledby="upcoming">
           <h2 id="upcoming" className="text-muted mb-2 text-sm font-semibold">

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { can } from "@/lib/auth/policy";
@@ -143,7 +144,8 @@ async function SelectedShare({
           <Badge tone={view.budget ? TONE[view.budget.status] : "neutral"}>
             {t(`statuses.${view.budget?.status ?? "none"}`, { year })}
           </Badge>
-          <span className="text-muted text-sm">{label}</span>
+          <span className="text-muted min-w-0 flex-1 text-sm">{label}</span>
+          <DownloadLink href={`/admin/statements?share=${shareId}&year=${year}`}>{t("statementPdf")}</DownloadLink>
         </div>
         <div className="mb-4 grid grid-cols-3 gap-3">
           {[
