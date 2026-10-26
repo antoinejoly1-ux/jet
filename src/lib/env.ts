@@ -19,6 +19,8 @@ const schema = z.object({
   LOCAL_STORAGE_DIR: z.string().default("tmp/storage"),
   /** "off" only for end-to-end test runs, which sign in many times a minute. */
   AUTH_RATE_LIMIT: z.enum(["on", "off"]).default("on"),
+  /** Shown to owners as a "call to book" button. Optional until the operator's number is settled. */
+  OPERATOR_PHONE: z.string().optional().default(""),
   REQUIRE_STAFF_2FA: z
     .enum(["true", "false"])
     .default("true")

@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
+import { OPERATOR_TIME_ZONE } from "@/lib/time";
 
 export const LOCALES = ["fr", "en"] as const;
 export type AppLocale = (typeof LOCALES)[number];
@@ -11,7 +12,7 @@ export default getRequestConfig(async () => {
   const locale: AppLocale = chosen === "en" ? "en" : "fr";
   return {
     locale,
-    timeZone: "America/Montreal",
+    timeZone: OPERATOR_TIME_ZONE,
     messages: (await import(`../../messages/${locale}.json`)).default,
   };
 });

@@ -6,7 +6,9 @@ import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formError, formValues, type FormState } from "@/lib/forms";
 import { addShare, createAircraft, endShare, updateAircraft } from "@/lib/services/aircraft";
+import { addBlock, removeBlock } from "@/lib/services/availability";
 import type { AircraftInput, ShareInput } from "@/lib/validation/admin";
+import type { BlockInput } from "@/lib/validation/operations";
 
 export async function createAircraftAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await requireStaff();
@@ -57,6 +59,28 @@ export async function endShareAction(
     await endShare(db, viewer, shareId, { endsOn: String(formData.get("endsOn") ?? "") });
   } catch (err) {
     return formError(err, formValues(formData));
+  }
+  revalidatePath(`/admin/aircraft/${aircraftId}`);
+  return { status: "success" };
+}
+
+export async function addBlockAction(aircraftId: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const viewer = await requireStaff();
+  try {
+    await addBlock(db, viewer, aircraftId, formValues(formData) as unknown as BlockInput);
+  } catch (err) {
+    return formError(err, formValues(formData));
+  }
+  revalidatePath(`/admin/aircraft/${aircraftId}`);
+  return { status: "success" };
+}
+
+export async function removeBlockAction(aircraftId: string, blockId: string, _prev: FormState): Promise<FormState> {
+  const viewer = await requireStaff();
+  try {
+    await removeBlock(db, viewer, blockId);
+  } catch (err) {
+    return formError(err);
   }
   revalidatePath(`/admin/aircraft/${aircraftId}`);
   return { status: "success" };

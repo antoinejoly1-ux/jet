@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, inArray, isNull, sql, sum } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNull, lt, ne, sql, sum } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import {
   aircraft,
@@ -78,9 +78,8 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
         db
           .select({ fromAirport: flights.fromAirport, toAirport: flights.toAirport, departsAt: flights.departsAt })
           .from(flights)
-          .where(
-            and(eq(flights.aircraftId, r.aircraftId), eq(flights.status, "scheduled"), gte(flights.departsAt, now)),
-          )
+          // The owner's own flights only; co-owners' trips are theirs to know.
+          .where(and(eq(flights.shareId, r.shareId), eq(flights.status, "scheduled"), gte(flights.departsAt, now)))
           .orderBy(asc(flights.departsAt))
           .limit(1),
         db
@@ -155,9 +154,19 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
   );
 }
 
-export async function getAdminStats(db: Db, actor: Actor) {
+/**
+ * Back-office counts. "Today" and "this week" are the operator's local days:
+ * `todayStart` is local midnight, the week runs seven days from it.
+ */
+export async function getAdminStats(db: Db, actor: Actor, todayStart: Date) {
   authorize(actor, "admin:access");
-  const [[o], [a], [inv], [waiting]] = await Promise.all([
+  const day = 86_400_000;
+  const scheduledBetween = (from: Date, to: Date) =>
+    db
+      .select({ n: count() })
+      .from(flights)
+      .where(and(ne(flights.status, "cancelled"), gte(flights.departsAt, from), lt(flights.departsAt, to)));
+  const [[o], [a], [inv], [waiting], [today], [week], [inMaintenance]] = await Promise.all([
     db.select({ n: count() }).from(owners).where(isNull(owners.deletedAt)),
     db.select({ n: count() }).from(aircraft).where(isNull(aircraft.deletedAt)),
     db
@@ -171,6 +180,20 @@ export async function getAdminStats(db: Db, actor: Actor) {
       .select({ n: count() })
       .from(user)
       .where(and(isNull(user.staffRole), sql`not exists (select 1 from owner_members m where m.user_id = ${user.id})`)),
+    scheduledBetween(todayStart, new Date(todayStart.getTime() + day)),
+    scheduledBetween(todayStart, new Date(todayStart.getTime() + 7 * day)),
+    db
+      .select({ n: count() })
+      .from(aircraft)
+      .where(and(eq(aircraft.status, "maintenance"), isNull(aircraft.deletedAt))),
   ]);
-  return { owners: o.n, aircraft: a.n, pendingInvitations: inv.n, accountsWaiting: waiting.n };
+  return {
+    owners: o.n,
+    aircraft: a.n,
+    pendingInvitations: inv.n,
+    accountsWaiting: waiting.n,
+    flightsToday: today.n,
+    flightsThisWeek: week.n,
+    inMaintenance: inMaintenance.n,
+  };
 }

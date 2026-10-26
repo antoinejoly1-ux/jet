@@ -1,0 +1,3 @@
+CREATE UNIQUE INDEX "availability_external_id_uq" ON "availability_blocks" USING btree ("external_id") WHERE "availability_blocks"."external_id" is not null;--> statement-breakpoint
+CREATE UNIQUE INDEX "flights_external_id_uq" ON "flights" USING btree ("external_id") WHERE "flights"."external_id" is not null;--> statement-breakpoint
+CREATE UNIQUE INDEX "maintenance_external_id_uq" ON "maintenance_events" USING btree ("external_id") WHERE "maintenance_events"."external_id" is not null;

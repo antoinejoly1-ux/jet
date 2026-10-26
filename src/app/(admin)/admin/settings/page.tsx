@@ -12,6 +12,7 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { listStaff } from "@/lib/services/team";
+import { IntegrationsCard } from "./integrations-card";
 import { setStaffRoleAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -81,16 +82,19 @@ export default async function SettingsPage() {
             ))}
           </ul>
         </Card>
-        <Link href="/admin/settings/audit" className="group self-start">
-          <Card className="group-hover:bg-surface-muted flex items-center gap-4 transition-colors">
-            <ScrollText className="text-muted size-5" aria-hidden />
-            <div className="flex-1">
-              <p className="font-semibold">{t("auditTitle")}</p>
-              <p className="text-muted text-sm">{t("auditBody")}</p>
-            </div>
-            <ChevronRight className="text-muted size-4" aria-hidden />
-          </Card>
-        </Link>
+        <div className="flex flex-col gap-4">
+          <Link href="/admin/settings/audit" className="group">
+            <Card className="group-hover:bg-surface-muted flex items-center gap-4 transition-colors">
+              <ScrollText className="text-muted size-5" aria-hidden />
+              <div className="flex-1">
+                <p className="font-semibold">{t("auditTitle")}</p>
+                <p className="text-muted text-sm">{t("auditBody")}</p>
+              </div>
+              <ChevronRight className="text-muted size-4" aria-hidden />
+            </Card>
+          </Link>
+          <IntegrationsCard viewer={viewer} />
+        </div>
       </div>
     </>
   );
