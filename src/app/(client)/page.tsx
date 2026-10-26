@@ -1,14 +1,20 @@
 import { CalendarClock, FileText, Plane, PlaneTakeoff, Wallet, Wrench } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { daysFrom, dayStart, type DayStatus } from "@/lib/availability-days";
+import type { Actor } from "@/lib/auth/policy";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours, formatMoney } from "@/lib/format";
+import { getAvailability } from "@/lib/services/availability";
 import { getOwnerHome, type ShareSummary } from "@/lib/services/dashboard";
+import { zonedDay } from "@/lib/time";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("home") };
@@ -32,7 +38,7 @@ export default async function HomePage() {
       ) : (
         <div className="flex flex-col gap-10">
           {summaries.map((s) => (
-            <ShareSection key={s.shareId} summary={s} showOwner={summaries.length > 1} />
+            <ShareSection key={s.shareId} summary={s} showOwner={summaries.length > 1} viewer={viewer} />
           ))}
         </div>
       )}
@@ -42,8 +48,36 @@ export default async function HomePage() {
 
 const STATUS_TONE = { available: "success", flying: "accent", maintenance: "warning", inactive: "neutral" } as const;
 
-async function ShareSection({ summary: s, showOwner }: { summary: ShareSummary; showOwner: boolean }) {
+const AHEAD = 14;
+const DOT: Record<DayStatus, string> = {
+  free: "bg-success/70",
+  mine: "bg-accent",
+  booked: "bg-muted/45",
+  maintenance: "bg-warning",
+};
+
+async function ShareSection({
+  summary: s,
+  showOwner,
+  viewer,
+}: {
+  summary: ShareSummary;
+  showOwner: boolean;
+  viewer: Actor;
+}) {
   const t = await getTranslations("home");
+  const first = zonedDay(new Date());
+  const from = dayStart(first);
+  const { periods } = await getAvailability(
+    db,
+    viewer,
+    s.aircraft.id,
+    from,
+    new Date(from.getTime() + (AHEAD + 1) * 86_400_000),
+    { ownerView: true },
+  );
+  const ahead = daysFrom(first, AHEAD, periods);
+  const freeDays = ahead.filter((d) => d.status === "free").length;
   const locale = await getLocale();
   const format = await getFormatter();
   const remaining = s.annualMinutes ? Math.min(1, Math.max(0, s.minutesRemaining / s.annualMinutes)) : null;
@@ -141,7 +175,24 @@ async function ShareSection({ summary: s, showOwner }: { summary: ShareSummary; 
           ) : null}
         </InfoCard>
 
-        <InfoCard icon={CalendarClock} title={t("availability")} empty={t("availabilitySoon")} />
+        <Card>
+          <div className="mb-2 flex items-center gap-2">
+            <CalendarClock className="text-muted size-4" aria-hidden />
+            <CardTitle>{t("availability")}</CardTitle>
+          </div>
+          <p className="text-lg font-semibold">{t("freeDays", { count: freeDays, days: AHEAD })}</p>
+          <ol className="mt-3 grid grid-cols-14 gap-1" aria-hidden>
+            {ahead.map((d) => (
+              <li key={d.day} className={cn("h-6 rounded-sm", DOT[d.status])} title={d.day} />
+            ))}
+          </ol>
+          <Link
+            href={`/availability?aircraft=${s.aircraft.id}`}
+            className="text-accent mt-3 inline-block text-sm font-medium hover:underline"
+          >
+            {t("seeCalendar")}
+          </Link>
+        </Card>
       </div>
     </section>
   );

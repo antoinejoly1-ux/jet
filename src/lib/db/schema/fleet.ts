@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, integer, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { check, date, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { dataSource, deletedAt, id, timestamps } from "./_shared";
 import { owners } from "./owners";
 
@@ -68,6 +68,10 @@ export const flights = pgTable(
   (t) => [
     index("flights_aircraft_departs_idx").on(t.aircraftId, t.departsAt),
     index("flights_share_id_idx").on(t.shareId),
+    // A record synced from an outside system exists once, however often the sync runs.
+    uniqueIndex("flights_external_id_uq")
+      .on(t.externalId)
+      .where(sql`${t.externalId} is not null`),
   ],
 );
 
@@ -87,6 +91,9 @@ export const availabilityBlocks = pgTable(
   },
   (t) => [
     index("availability_aircraft_starts_idx").on(t.aircraftId, t.startsAt),
+    uniqueIndex("availability_external_id_uq")
+      .on(t.externalId)
+      .where(sql`${t.externalId} is not null`),
     check("availability_valid_range", sql`${t.endsAt} > ${t.startsAt}`),
   ],
 );
@@ -110,5 +117,10 @@ export const maintenanceEvents = pgTable(
     externalId: text("external_id"),
     ...timestamps(),
   },
-  (t) => [index("maintenance_aircraft_idx").on(t.aircraftId)],
+  (t) => [
+    index("maintenance_aircraft_idx").on(t.aircraftId),
+    uniqueIndex("maintenance_external_id_uq")
+      .on(t.externalId)
+      .where(sql`${t.externalId} is not null`),
+  ],
 );

@@ -1,0 +1,140 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { getFormatter, getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
+import { monthDays, shiftMonth, type DayStatus, type Period } from "@/lib/availability-days";
+import { zonedDay } from "@/lib/time";
+import { cn } from "@/lib/utils";
+
+const CELL: Record<DayStatus, string> = {
+  free: "bg-success/12 text-success",
+  mine: "bg-accent text-primary-foreground",
+  booked: "bg-muted/35 text-text",
+  maintenance: "bg-warning/25 text-warning",
+};
+
+/**
+ * A month of the aircraft's days, coloured free / yours / booked /
+ * maintenance, with the taken periods listed underneath (the list is what a
+ * screen reader and a narrow phone rely on; the grid is the glance).
+ */
+export async function AvailabilityCalendar({
+  month,
+  periods,
+  hrefFor,
+  periodAction,
+}: {
+  month: string;
+  periods: Period[];
+  hrefFor: (month: string) => string;
+  /** Extra control per period, e.g. removing a manual block. */
+  periodAction?: (p: Period) => ReactNode;
+}) {
+  const t = await getTranslations("availability");
+  const format = await getFormatter();
+  const days = monthDays(month, periods);
+  const [y, m] = month.split("-").map(Number) as [number, number];
+  const title = format.dateTime(new Date(Date.UTC(y, m - 1, 15)), { month: "long", year: "numeric", timeZone: "UTC" });
+  // Monday-first grid: blank cells before the 1st.
+  const lead = (new Date(Date.UTC(y, m - 1, 1)).getUTCDay() + 6) % 7;
+  const weekdays = Array.from({ length: 7 }, (_, i) =>
+    format.dateTime(new Date(Date.UTC(2024, 0, 1 + i)), { weekday: "narrow", timeZone: "UTC" }),
+  );
+  const today = zonedDay(new Date());
+  const range = (p: Period) =>
+    `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+  const describe = (p: Period) => {
+    if (p.kind === "maintenance") return p.label ? `${t("legend.maintenance")} · ${p.label}` : t("legend.maintenance");
+    if (p.kind === "booked") return t("legend.booked");
+    return [p.mine ? t("yourFlight") : null, p.label, p.ownerName].filter(Boolean).join(" · ");
+  };
+
+  return (
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="flex max-w-xl flex-col gap-4">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-lg font-bold tracking-tight first-letter:uppercase">{title}</h2>
+          <div className="flex gap-1">
+            <Link
+              href={hrefFor(shiftMonth(month, -1)) as Route}
+              className="hover:bg-surface-muted inline-flex size-9 items-center justify-center rounded-md"
+              aria-label={t("previousMonth")}
+            >
+              <ChevronLeft className="size-4" aria-hidden />
+            </Link>
+            <Link
+              href={hrefFor(shiftMonth(month, 1)) as Route}
+              className="hover:bg-surface-muted inline-flex size-9 items-center justify-center rounded-md"
+              aria-label={t("nextMonth")}
+            >
+              <ChevronRight className="size-4" aria-hidden />
+            </Link>
+          </div>
+        </div>
+
+        <div aria-hidden className="grid grid-cols-7 gap-1 sm:gap-1.5">
+          {weekdays.map((w, i) => (
+            <span key={i} className="text-muted pb-1 text-center text-xs font-semibold uppercase">
+              {w}
+            </span>
+          ))}
+          {Array.from({ length: lead }, (_, i) => (
+            <span key={`lead-${i}`} />
+          ))}
+          {days.map((d) => (
+            <span
+              key={d.day}
+              data-status={d.status}
+              className={cn(
+                "tabular flex aspect-square items-start justify-end rounded-md p-1 text-xs font-semibold sm:p-2 sm:text-sm",
+                CELL[d.status],
+                d.day === today && "ring-text ring-2 ring-offset-1 ring-offset-[var(--surface)]",
+                d.day < today && "opacity-50",
+              )}
+            >
+              {Number(d.day.slice(8))}
+            </span>
+          ))}
+        </div>
+
+        <ul className="text-muted flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={t("legendLabel")}>
+          {(["free", "mine", "booked", "maintenance"] as const).map((s) => (
+            <li key={s} className="inline-flex items-center gap-1.5">
+              <span className={cn("size-3 rounded-sm", CELL[s])} aria-hidden />
+              {t(`legend.${s}`)}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <section aria-labelledby="taken-periods">
+        <h3 id="taken-periods" className="mb-2 text-sm font-semibold">
+          {t("takenTitle")}
+        </h3>
+        {periods.length === 0 ? (
+          <p className="text-muted text-sm">{t("allFree")}</p>
+        ) : (
+          <ul className="border-border divide-border divide-y rounded-lg border">
+            {periods.map((p, i) => (
+              <li key={i} className="flex items-start gap-3 px-3 py-2 text-sm">
+                <span
+                  className={cn(
+                    "mt-1.5 size-2.5 shrink-0 rounded-full",
+                    CELL[p.kind === "maintenance" ? "maintenance" : p.mine ? "mine" : "booked"],
+                  )}
+                  aria-hidden
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="tabular font-medium">{range(p)}</p>
+                  <p className="text-muted">{describe(p)}</p>
+                </div>
+                {periodAction?.(p)}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  );
+}

@@ -4,19 +4,24 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { History } from "@/components/admin/history";
+import { AddBlockForm, RemoveBlockButton } from "@/components/admin/block-forms";
 import { AddShareForm, EndShareForm } from "@/components/admin/share-forms";
+import { AvailabilityCalendar } from "@/components/operations/availability-calendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/ui/page-header";
+import { isMonth, monthRange } from "@/lib/availability-days";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours } from "@/lib/format";
 import { getAircraft } from "@/lib/services/aircraft";
+import { getAvailability } from "@/lib/services/availability";
 import { NotFoundError } from "@/lib/services/errors";
 import { listOwners } from "@/lib/services/owners";
-import { addShareAction, endShareAction } from "../actions";
+import { zonedDay } from "@/lib/time";
+import { addBlockAction, addShareAction, endShareAction, removeBlockAction } from "../actions";
 
 export async function generateMetadata({ params }: PageProps<"/admin/aircraft/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -27,9 +32,12 @@ export async function generateMetadata({ params }: PageProps<"/admin/aircraft/[i
 
 const STATUS_TONE = { available: "success", flying: "accent", maintenance: "warning", inactive: "neutral" } as const;
 
-export default async function AircraftDetailPage({ params }: PageProps<"/admin/aircraft/[id]">) {
+export default async function AircraftDetailPage({ params, searchParams }: PageProps<"/admin/aircraft/[id]">) {
   const viewer = await requireStaff();
   const { id } = await params;
+  const sp = await searchParams;
+  const month = typeof sp.month === "string" && isMonth(sp.month) ? sp.month : zonedDay(new Date()).slice(0, 7);
+  const ta = await getTranslations("availability");
   const t = await getTranslations("aircraft");
   const format = await getFormatter();
   const {
@@ -39,6 +47,9 @@ export default async function AircraftDetailPage({ params }: PageProps<"/admin/a
     history,
   } = await getAircraft(db, viewer, id).catch((e) => (e instanceof NotFoundError ? notFound() : Promise.reject(e)));
   const canWrite = can(viewer, "fleet:write");
+  const canOperate = can(viewer, "operations:write");
+  const { from, to } = monthRange(month);
+  const { periods } = await getAvailability(db, viewer, id, from, to);
   const owners = canWrite ? await listOwners(db, viewer) : [];
   const today = new Date().toISOString().slice(0, 10);
   const active = shares.filter((s) => !s.endsOn || s.endsOn > today);
@@ -130,7 +141,29 @@ export default async function AircraftDetailPage({ params }: PageProps<"/admin/a
           </Card>
         ) : null}
 
-        <Card className={canWrite ? "lg:col-span-3" : ""}>
+        <Card className={canOperate ? "lg:col-span-2" : "lg:col-span-3"} id="availability">
+          <CardTitle className="mb-3">{ta("title")}</CardTitle>
+          <AvailabilityCalendar
+            month={month}
+            periods={periods}
+            hrefFor={(m) => `/admin/aircraft/${plane.id}?month=${m}#availability`}
+            periodAction={(p) =>
+              canOperate && p.blockId ? (
+                <RemoveBlockButton action={removeBlockAction.bind(null, plane.id, p.blockId)} />
+              ) : null
+            }
+          />
+        </Card>
+
+        {canOperate ? (
+          <Card>
+            <CardTitle className="mb-1">{ta("blockTitle")}</CardTitle>
+            <p className="text-muted mb-4 text-sm">{ta("blockBody")}</p>
+            <AddBlockForm action={addBlockAction.bind(null, plane.id)} />
+          </Card>
+        ) : null}
+
+        <Card className="lg:col-span-3">
           <CardTitle className="mb-3">{t("history")}</CardTitle>
           <History entries={history} />
         </Card>
