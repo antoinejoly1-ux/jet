@@ -94,6 +94,15 @@
 @layer base {
   html {
     color-scheme: light dark;
+    /* Whatever the browser scrolls to (a focused field, an anchor) stays clear of the sticky top bar
+       and, below 1024px, of the bottom tab bar: focus is never hidden under them (WCAG 2.4.11). */
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: 6rem;
+  }
+  @media (min-width: 1024px) {
+    html {
+      scroll-padding-bottom: 1rem;
+    }
   }
   body {
     background: var(--background);
