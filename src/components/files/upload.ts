@@ -20,7 +20,7 @@ function contentTypeOf(file: File): string {
  * Uploads a file straight to storage: ask the server for a signed URL, PUT
  * the bytes there, then confirm. The file never passes through the app server.
  */
-export async function uploadFile(file: File, purpose: "invoice" | "import"): Promise<UploadResult> {
+export async function uploadFile(file: File, purpose: "invoice" | "import" | "message"): Promise<UploadResult> {
   const request = {
     purpose,
     filename: file.name,

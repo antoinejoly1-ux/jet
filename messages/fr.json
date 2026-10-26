@@ -27,7 +27,8 @@
     },
     "tabs": {
       "dashboard": "Tableau"
-    }
+    },
+    "unread": "{count, plural, one {# non lu} other {# non lus}}"
   },
   "toggle": {
     "label": "Changer de vue",
@@ -281,7 +282,8 @@
     "archiveTitle": "Archiver ce propriétaire",
     "archiveBody": "Le propriétaire disparaît des listes et ses accès sont retirés. Son historique est conservé.",
     "archive": "Archiver",
-    "archiveConfirm": "Archiver ce propriétaire?"
+    "archiveConfirm": "Archiver ce propriétaire?",
+    "write": "Écrire"
   },
   "invitations": {
     "title": "Invitations",
@@ -375,7 +377,8 @@
       "blockTime": "Entrez un temps comme 2:15 ou 2,25.",
       "title": "Décrivez les travaux (2 caractères minimum).",
       "startsAt": "Date et heure invalides.",
-      "endsAt": "La fin doit suivre le début."
+      "endsAt": "La fin doit suivre le début.",
+      "body": "Message trop long (4 000 caractères maximum)."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -405,7 +408,9 @@
     "invalid_transition": "Ce changement de statut n'est pas possible.",
     "block_is_synced": "Ce blocage vient du logiciel de planification; modifiez-le là-bas.",
     "integration_not_connected": "Aucun logiciel de planification n'est connecté.",
-    "flight_not_departed": "Ce vol n'est pas encore parti. Terminez-le après l'atterrissage."
+    "flight_not_departed": "Ce vol n'est pas encore parti. Terminez-le après l'atterrissage.",
+    "message_empty": "Écrivez un message ou joignez un fichier.",
+    "assignee_cannot_reply": "Cette personne ne peut pas répondre aux propriétaires."
   },
   "aircraft": {
     "title": "Appareils",
@@ -881,5 +886,55 @@
     "runSummary": "{created} ajoutés, {updated} mis à jour, {failed} en erreur",
     "syncNow": "Synchroniser maintenant",
     "syncing": "Synchronisation…"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Écrivez à notre équipe de répartition. Une vraie personne vous répond.",
+    "callUs": "Nous appeler",
+    "conversationLabel": "Conversation",
+    "threadLabel": "Messages de la conversation",
+    "ownerEmpty": "Posez votre question ou demandez un vol : notre équipe vous répond ici.",
+    "staffEmpty": "Aucun message pour l'instant. Écrivez le premier.",
+    "ownerPlaceholder": "Écrivez votre message…",
+    "staffPlaceholder": "Répondre…",
+    "viewAsReadOnly": "Vous consultez le portail comme ce propriétaire : l'envoi est désactivé.",
+    "responseHint": "Nous répondons pendant les heures d'ouverture, habituellement en moins d'une heure.",
+    "noOwner": "Les messages seront disponibles dès que votre compte sera relié à un propriétaire.",
+    "today": "Aujourd'hui",
+    "dispatchName": "Répartition · {name}",
+    "team": "Équipe",
+    "read": "Lu",
+    "attachment": "Pièce jointe",
+    "attach": "Joindre un fichier",
+    "removeAttachment": "Retirer la pièce jointe",
+    "message": "Message",
+    "send": "Envoyer",
+    "uploading": "Envoi…",
+    "enterHint": "Entrée pour envoyer, Maj+Entrée pour aller à la ligne.",
+    "inboxTitle": "Messages",
+    "inboxSubtitle": "Les conversations avec les propriétaires.",
+    "filters": "Filtrer les conversations",
+    "filterNames": {
+      "open": "Ouvertes",
+      "mine": "Les miennes",
+      "resolved": "Résolues"
+    },
+    "emptyFilter": {
+      "open": "Aucune conversation ouverte.",
+      "mine": "Aucune conversation ne vous est assignée.",
+      "resolved": "Aucune conversation résolue."
+    },
+    "unassigned": "Non assignée",
+    "unreadSuffix": "non lus",
+    "pickTitle": "Choisissez une conversation",
+    "pickBody": "Les nouveaux messages des propriétaires apparaissent à gauche.",
+    "noAccessTitle": "Messages réservés à la répartition",
+    "noAccessBody": "Demandez à un administrateur si vous devez répondre aux propriétaires.",
+    "conversationWith": "Conversation avec {name}",
+    "backToInbox": "Retour aux messages",
+    "assignTo": "Assigner à",
+    "me": "{name} (moi)",
+    "resolve": "Résolue",
+    "reopen": "Rouvrir"
   }
 }

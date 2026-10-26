@@ -15,6 +15,13 @@
       "when": 1792984050200,
       "tag": "0001_sync_unique_external_ids",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792985893809,
+      "tag": "0002_support_and_privacy",
+      "breakpoints": true
     }
   ]
 }

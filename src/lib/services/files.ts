@@ -3,8 +3,8 @@ import { and, eq, ne } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 import type { Db } from "@/lib/db";
-import { files, imports, invoices, shares } from "@/lib/db/schema";
-import { authorize, type Actor } from "@/lib/auth/policy";
+import { conversations, files, imports, invoices, messages, shares } from "@/lib/db/schema";
+import { authorize, can, type Actor } from "@/lib/auth/policy";
 import { storage } from "@/lib/storage";
 import { recordAudit } from "./audit";
 import { ConflictError, NotFoundError } from "./errors";
@@ -15,6 +15,7 @@ const MB = 1024 * 1024;
 export const UPLOAD_RULES = {
   invoice: { types: ["application/pdf", "image/png", "image/jpeg"], maxBytes: 25 * MB },
   import: { types: ["text/csv", "application/vnd.ms-excel", "text/plain"], maxBytes: 10 * MB },
+  message: { types: ["application/pdf", "image/png", "image/jpeg"], maxBytes: 10 * MB },
 } as const;
 export type UploadPurpose = keyof typeof UPLOAD_RULES;
 
@@ -28,7 +29,7 @@ const EXTENSIONS: Record<string, string> = {
 };
 
 const uploadRequest = z.object({
-  purpose: z.enum(["invoice", "import"]),
+  purpose: z.enum(["invoice", "import", "message"]),
   filename: z.string().trim().min(1).max(255),
   contentType: z.string(),
   sizeBytes: z.number().int().positive(),
@@ -40,9 +41,16 @@ export type UploadRequest = z.input<typeof uploadRequest>;
  * Step 1 of an upload: checks the declared file and returns a short-lived URL
  * the browser PUTs it to. Keys are random and never contain names or emails.
  */
+/** Finance uploads invoices and imports; anyone in a chat (staff or the owner) can attach to a message. */
+function authorizeUpload(actor: Actor, purpose: UploadPurpose) {
+  if (purpose !== "message") return authorize(actor, "finance:write");
+  if (can(actor, "messages:reply")) return;
+  authorize(actor, "messages:send", { ownerIds: actor.ownerIds });
+}
+
 export async function requestUpload(actor: Actor, raw: UploadRequest) {
-  authorize(actor, "finance:write");
   const input = uploadRequest.parse(raw);
+  authorizeUpload(actor, input.purpose);
   const rules = UPLOAD_RULES[input.purpose];
   if (!(rules.types as readonly string[]).includes(input.contentType)) throw new ConflictError("file_type_not_allowed");
   if (input.sizeBytes > rules.maxBytes) throw new ConflictError("file_too_large");
@@ -62,8 +70,8 @@ export async function requestUpload(actor: Actor, raw: UploadRequest) {
  * about duplicates (the same invoice uploaded twice).
  */
 export async function completeUpload(db: Db, actor: Actor, raw: UploadRequest & { key: string }) {
-  authorize(actor, "finance:write");
   const input = uploadRequest.extend({ key: z.string() }).parse(raw);
+  authorizeUpload(actor, input.purpose);
   if (!input.key.startsWith(`${input.purpose}s/`)) throw new ConflictError("invalid_key");
   const stored = await storage().head(input.key);
   if (!stored) throw new ConflictError("upload_missing");
@@ -110,8 +118,20 @@ export async function fileDownloadUrl(db: Db, actor: Actor, fileId: string, opts
     .innerJoin(shares, eq(shares.id, invoices.shareId))
     .where(eq(invoices.fileId, fileId))
     .limit(1);
+  const [attachment] = invoice
+    ? []
+    : await db
+        .select({ ownerId: conversations.ownerId })
+        .from(messages)
+        .innerJoin(conversations, eq(conversations.id, messages.conversationId))
+        .where(eq(messages.attachmentFileId, fileId))
+        .limit(1);
   if (invoice) authorize(actor, "finance:read", { ownerIds: [invoice.ownerId] });
-  else {
+  else if (attachment) {
+    if (!can(actor, "messages:reply")) authorize(actor, "messages:send", { ownerIds: [attachment.ownerId] });
+  } else if (file.uploadedByUserId === actor.id && file.storageKey.startsWith("messages/")) {
+    // The sender previewing their own attachment before it's sent.
+  } else {
     const [imp] = await db.select({ id: imports.id }).from(imports).where(eq(imports.fileId, fileId)).limit(1);
     authorize(actor, imp ? "finance:write" : "finance:read");
   }

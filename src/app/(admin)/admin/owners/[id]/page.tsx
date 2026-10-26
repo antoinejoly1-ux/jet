@@ -1,4 +1,4 @@
-import { Eye, MailPlus, Pencil, Trash2 } from "lucide-react";
+import { Eye, MailPlus, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { formatHours } from "@/lib/format";
 import { NotFoundError } from "@/lib/services/errors";
 import { getOwner } from "@/lib/services/owners";
+import { openOwnerConversationAction } from "../../messages/actions";
 import { archiveOwnerAction, removeMemberAction } from "../actions";
 
 export async function generateMetadata({ params }: PageProps<"/admin/owners/[id]">): Promise<Metadata> {
@@ -44,6 +45,14 @@ export default async function OwnerDetailPage({ params }: PageProps<"/admin/owne
         description={`${t(`types.${owner.type}`)}${owner.email ? ` · ${owner.email}` : ""}`}
         actions={
           <>
+            {can(viewer, "messages:reply") ? (
+              <form action={openOwnerConversationAction.bind(null, owner.id)}>
+                <Button type="submit" variant="secondary" size="sm">
+                  <MessageSquare aria-hidden />
+                  {t("write")}
+                </Button>
+              </form>
+            ) : null}
             <form action={startViewAsAction.bind(null, owner.id)}>
               <Button type="submit" variant="secondary" size="sm">
                 <Eye aria-hidden />

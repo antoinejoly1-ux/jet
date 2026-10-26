@@ -27,7 +27,8 @@
     },
     "tabs": {
       "dashboard": "Dashboard"
-    }
+    },
+    "unread": "{count} unread"
   },
   "toggle": {
     "label": "Switch view",
@@ -281,7 +282,8 @@
     "archiveTitle": "Archive this owner",
     "archiveBody": "The owner disappears from lists and their access is removed. Their history is kept.",
     "archive": "Archive",
-    "archiveConfirm": "Archive this owner?"
+    "archiveConfirm": "Archive this owner?",
+    "write": "Message"
   },
   "invitations": {
     "title": "Invitations",
@@ -375,7 +377,8 @@
       "blockTime": "Enter a time like 2:15 or 2.25.",
       "title": "Describe the work (at least 2 characters).",
       "startsAt": "Invalid date and time.",
-      "endsAt": "End must be after start."
+      "endsAt": "End must be after start.",
+      "body": "Message too long (4,000 characters at most)."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -405,7 +408,9 @@
     "invalid_transition": "That status change isn't possible.",
     "block_is_synced": "This block comes from the scheduling software; change it there.",
     "integration_not_connected": "No scheduling software is connected.",
-    "flight_not_departed": "This flight hasn't departed yet. Complete it after landing."
+    "flight_not_departed": "This flight hasn't departed yet. Complete it after landing.",
+    "message_empty": "Write a message or attach a file.",
+    "assignee_cannot_reply": "This person can't answer owners."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -881,5 +886,55 @@
     "runSummary": "{created} added, {updated} updated, {failed} failed",
     "syncNow": "Sync now",
     "syncing": "Syncing…"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Write to our dispatch team. A real person answers.",
+    "callUs": "Call us",
+    "conversationLabel": "Conversation",
+    "threadLabel": "Messages in the conversation",
+    "ownerEmpty": "Ask a question or request a flight: our team answers here.",
+    "staffEmpty": "No messages yet. Write the first one.",
+    "ownerPlaceholder": "Write your message…",
+    "staffPlaceholder": "Reply…",
+    "viewAsReadOnly": "You're viewing the portal as this owner: sending is turned off.",
+    "responseHint": "We answer during business hours, usually within an hour.",
+    "noOwner": "Messages will be available once your account is linked to an owner.",
+    "today": "Today",
+    "dispatchName": "Dispatch · {name}",
+    "team": "Team",
+    "read": "Read",
+    "attachment": "Attachment",
+    "attach": "Attach a file",
+    "removeAttachment": "Remove the attachment",
+    "message": "Message",
+    "send": "Send",
+    "uploading": "Uploading…",
+    "enterHint": "Enter to send, Shift+Enter for a new line.",
+    "inboxTitle": "Messages",
+    "inboxSubtitle": "Conversations with owners.",
+    "filters": "Filter conversations",
+    "filterNames": {
+      "open": "Open",
+      "mine": "Mine",
+      "resolved": "Resolved"
+    },
+    "emptyFilter": {
+      "open": "No open conversations.",
+      "mine": "No conversations are assigned to you.",
+      "resolved": "No resolved conversations."
+    },
+    "unassigned": "Unassigned",
+    "unreadSuffix": "unread",
+    "pickTitle": "Pick a conversation",
+    "pickBody": "New messages from owners appear on the left.",
+    "noAccessTitle": "Messages are for dispatch",
+    "noAccessBody": "Ask an admin if you should answer owners.",
+    "conversationWith": "Conversation with {name}",
+    "backToInbox": "Back to messages",
+    "assignTo": "Assign to",
+    "me": "{name} (me)",
+    "resolve": "Resolved",
+    "reopen": "Reopen"
   }
 }

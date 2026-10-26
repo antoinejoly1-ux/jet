@@ -1,5 +1,6 @@
 import {
   bigint,
+  date,
   index,
   inet,
   integer,
@@ -61,7 +62,8 @@ export const conversations = pgTable(
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
     ...timestamps(),
   },
-  (t) => [index("conversations_owner_idx").on(t.ownerId)],
+  // One running thread per owner with dispatch; resolving it doesn't close it for good.
+  (t) => [uniqueIndex("conversations_owner_uq").on(t.ownerId)],
 );
 
 export const messages = pgTable(
@@ -79,6 +81,15 @@ export const messages = pgTable(
   },
   (t) => [index("messages_conversation_created_idx").on(t.conversationId, t.createdAt)],
 );
+
+/** Emails a person has turned off, by notification type. Security emails can't be turned off. */
+export const notificationPreferences = pgTable("notification_preferences", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  emailOff: text("email_off").array().notNull().default([]),
+  ...timestamps(),
+});
 
 export const notifications = pgTable(
   "notifications",
@@ -209,4 +220,46 @@ export const auditLog = pgTable(
     index("audit_log_entity_idx").on(t.entityType, t.entityId),
     index("audit_log_actor_idx").on(t.actorUserId, t.createdAt),
   ],
+);
+
+export const incidentSeverity = pgEnum("incident_severity", ["low", "serious"]);
+
+/**
+ * Law 25 register of confidentiality incidents. Every incident is recorded;
+ * serious ones are reported to the Commission d'accès à l'information and to
+ * the people concerned, and the dates say when.
+ */
+export const confidentialityIncidents = pgTable("confidentiality_incidents", {
+  id: id(),
+  occurredOn: date("occurred_on").notNull(),
+  discoveredOn: date("discovered_on").notNull(),
+  description: text("description").notNull(),
+  dataConcerned: text("data_concerned").notNull(),
+  peopleConcerned: text("people_concerned").notNull(),
+  severity: incidentSeverity("severity").notNull(),
+  measures: text("measures").notNull(),
+  reportedToCaiOn: date("reported_to_cai_on"),
+  peopleNotifiedOn: date("people_notified_on"),
+  createdByUserId: uuid("created_by_user_id").references(() => user.id, { onDelete: "set null" }),
+  ...timestamps(),
+});
+
+export const privacyRequestKind = pgEnum("privacy_request_kind", ["access", "correction", "deletion", "portability"]);
+export const privacyRequestStatus = pgEnum("privacy_request_status", ["open", "done", "refused"]);
+
+/** Law 25 requests from a person about their own information; answered within 30 days. */
+export const privacyRequests = pgTable(
+  "privacy_requests",
+  {
+    id: id(),
+    userId: uuid("user_id").references(() => user.id, { onDelete: "set null" }),
+    email: text("email").notNull(),
+    kind: privacyRequestKind("kind").notNull(),
+    details: text("details"),
+    status: privacyRequestStatus("status").notNull().default("open"),
+    response: text("response"),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    ...timestamps(),
+  },
+  (t) => [index("privacy_requests_status_idx").on(t.status, t.createdAt)],
 );
