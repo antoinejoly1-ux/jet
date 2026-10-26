@@ -6,7 +6,8 @@
  *
  * Refuses to run when NODE_ENV=production.
  */
-import { hashPassword } from "better-auth/crypto";
+import { createOTP } from "@better-auth/utils/otp";
+import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -22,6 +23,9 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 const db = drizzle(pool, { schema: s, casing: "snake_case" });
 
 const DEMO_PASSWORD = "demo-password-2026";
+/** Shared 2FA secret for the demo staff logins (also in tests/e2e/support.ts). Never use outside demos. */
+const DEMO_TOTP_SECRET = "JetDemoTotpSecretForLocalUse2026";
+const DEMO_BACKUP_CODES = ["demo1-aaaaa", "demo2-bbbbb", "demo3-ccccc", "demo4-ddddd", "demo5-eeeee"];
 const year = new Date().getFullYear();
 
 // Deterministic pseudo-random numbers, so every seed produces the same fleet.
@@ -30,14 +34,27 @@ const rand = () => (state = (state * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
 const pick = <T>(xs: readonly T[]) => xs[Math.floor(rand() * xs.length)]!;
 const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
-async function createLogin(email: string, name: string, staffRole: s.StaffRole | null) {
-  const [u] = await db.insert(s.user).values({ name, email, emailVerified: true, staffRole }).returning();
+async function createLogin(email: string, name: string, staffRole: s.StaffRole | null, withTwoFactor = false) {
+  const [u] = await db
+    .insert(s.user)
+    .values({ name, email, emailVerified: true, staffRole, twoFactorEnabled: withTwoFactor })
+    .returning();
   await db.insert(s.account).values({
     userId: u.id,
     accountId: u.id,
     providerId: "credential",
     password: await hashPassword(DEMO_PASSWORD),
   });
+  if (withTwoFactor) {
+    // Stored exactly as Better Auth stores it: encrypted with BETTER_AUTH_SECRET.
+    const key = process.env.BETTER_AUTH_SECRET!;
+    await db.insert(s.twoFactor).values({
+      userId: u.id,
+      secret: await symmetricEncrypt({ key, data: DEMO_TOTP_SECRET }),
+      backupCodes: await symmetricEncrypt({ key, data: JSON.stringify(DEMO_BACKUP_CODES) }),
+      verified: true,
+    });
+  }
   return u;
 }
 
@@ -281,17 +298,23 @@ async function main() {
   }
 
   console.log("Demo logins…");
-  await createLogin("admin@jet.test", "Alex Admin", "admin");
-  await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher");
+  await createLogin("admin@jet.test", "Alex Admin", "admin", true);
+  await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", true);
+  await createLogin("finance@jet.test", "Fred Finance", "finance", false);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
   await db
     .insert(s.ownerMembers)
     .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "primary" });
 
+  const otpauth = createOTP(DEMO_TOTP_SECRET).url("Jet (demo)", "staff@jet.test");
   console.log(`\nSeeded. Sign in with any of these (password: ${DEMO_PASSWORD}):`);
-  console.log("  admin@jet.test     admin");
-  console.log("  dispatch@jet.test  dispatcher");
-  console.log("  owner@jet.test     owner of 25% of C-GJTA\n");
+  console.log("  admin@jet.test     admin       2FA on");
+  console.log("  dispatch@jet.test  dispatcher  2FA on");
+  console.log("  finance@jet.test   finance     2FA not set up yet: shows the setup flow");
+  console.log("  owner@jet.test     owner of 25% of C-GJTA");
+  console.log(`\nDemo 2FA key for admin and dispatch (add it to an authenticator app):`);
+  console.log(`  ${new URL(otpauth).searchParams.get("secret")}`);
+  console.log(`  backup codes: ${DEMO_BACKUP_CODES.join(", ")}\n`);
 }
 
 main()

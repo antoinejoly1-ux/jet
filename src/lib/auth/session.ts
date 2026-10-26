@@ -61,6 +61,6 @@ export async function requireAccess(): Promise<Viewer> {
 export async function requireStaff(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (!viewer.staffRole) redirect("/");
-  if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/account/security?required=1");
+  if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/admin");
   return viewer;
 }
