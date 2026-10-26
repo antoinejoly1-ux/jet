@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { can } from "@/lib/auth/policy";
@@ -52,14 +53,21 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
         title={t("title")}
         description={t("subtitle")}
         actions={
-          canWrite ? (
-            <Button asChild size="sm">
-              <Link href="/admin/invoices/new">
-                <Plus aria-hidden />
-                {t("new")}
-              </Link>
-            </Button>
-          ) : null
+          <>
+            <DownloadLink
+              href={`/admin/invoices/export?${new URLSearchParams({ status, q, ...(year ? { year: String(year) } : {}) })}`}
+            >
+              {t("exportCsv")}
+            </DownloadLink>
+            {canWrite ? (
+              <Button asChild size="sm">
+                <Link href="/admin/invoices/new">
+                  <Plus aria-hidden />
+                  {t("new")}
+                </Link>
+              </Button>
+            ) : null}
+          </>
         }
       />
       {str("created") ? (

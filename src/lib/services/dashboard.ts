@@ -166,7 +166,7 @@ export async function getAdminStats(db: Db, actor: Actor, todayStart: Date) {
       .select({ n: count() })
       .from(flights)
       .where(and(ne(flights.status, "cancelled"), gte(flights.departsAt, from), lt(flights.departsAt, to)));
-  const [[o], [a], [inv], [waiting], [today], [week], [inMaintenance]] = await Promise.all([
+  const [[o], [a], [inv], [waiting], [today], [week], [inMaintenance], [noAccess]] = await Promise.all([
     db.select({ n: count() }).from(owners).where(isNull(owners.deletedAt)),
     db.select({ n: count() }).from(aircraft).where(isNull(aircraft.deletedAt)),
     db
@@ -186,6 +186,17 @@ export async function getAdminStats(db: Db, actor: Actor, todayStart: Date) {
       .select({ n: count() })
       .from(aircraft)
       .where(and(eq(aircraft.status, "maintenance"), isNull(aircraft.deletedAt))),
+    db
+      .select({ n: count() })
+      .from(owners)
+      .where(
+        and(
+          isNull(owners.deletedAt),
+          sql`not exists (select 1 from owner_members m where m.owner_id = ${owners.id})`,
+          sql`not exists (select 1 from invitations i where i.owner_id = ${owners.id}
+            and i.accepted_at is null and i.revoked_at is null and i.expires_at > now())`,
+        ),
+      ),
   ]);
   return {
     owners: o.n,
@@ -195,5 +206,6 @@ export async function getAdminStats(db: Db, actor: Actor, todayStart: Date) {
     flightsToday: today.n,
     flightsThisWeek: week.n,
     inMaintenance: inMaintenance.n,
+    ownersWithoutAccess: noAccess.n,
   };
 }

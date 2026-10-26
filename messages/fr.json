@@ -27,7 +27,8 @@
     },
     "tabs": {
       "dashboard": "Tableau"
-    }
+    },
+    "unread": "{count, plural, one {# non lu} other {# non lus}}"
   },
   "toggle": {
     "label": "Changer de vue",
@@ -214,7 +215,62 @@
     },
     "security": "Sécurité",
     "twoFactorOn": "Vérification en deux étapes activée",
-    "twoFactorOff": "Vérification en deux étapes désactivée"
+    "twoFactorOff": "Vérification en deux étapes désactivée",
+    "emailsTitle": "Courriels",
+    "emailsBody": "Choisissez ce que nous vous envoyons par courriel. Tout reste visible dans le portail.",
+    "emailsAlwaysOn": "Les courriels de sécurité (liens de connexion, changement de mot de passe) sont toujours envoyés.",
+    "saveEmails": "Enregistrer",
+    "emailsSaved": "Préférences enregistrées.",
+    "emailTypes": {
+      "invoice": {
+        "issued": {
+          "label": "Nouvelles factures",
+          "hint": "Quand une facture est émise."
+        }
+      },
+      "budget": {
+        "published": {
+          "label": "Budget publié",
+          "hint": "Quand votre budget annuel est prêt."
+        }
+      },
+      "hours": {
+        "low": {
+          "label": "Heures basses",
+          "hint": "Quand il reste moins de 10 % de vos heures."
+        }
+      },
+      "maintenance": {
+        "planned": {
+          "label": "Maintenance prévue",
+          "hint": "Quand votre appareil sera immobilisé."
+        }
+      },
+      "message": {
+        "from_dispatch": {
+          "label": "Messages de l'équipe",
+          "hint": "Si vous ne les avez pas lus dans le portail après 5 minutes."
+        }
+      }
+    },
+    "privacyTitle": "Vos renseignements personnels",
+    "privacyBody": "Téléchargez tout ce que le portail conserve sur vous, ou faites une demande : nous répondons en {days} jours au plus. Voir la <policy>politique de confidentialité</policy>.",
+    "downloadData": "Télécharger mes données (JSON)",
+    "privacyKind": "Demande",
+    "privacyDetails": "Précisions (facultatif)",
+    "privacySend": "Envoyer la demande",
+    "privacySent": "Demande envoyée. Nous vous répondrons ici et par courriel.",
+    "privacyKinds": {
+      "correction": "Corriger un renseignement",
+      "access": "Savoir ce que vous détenez",
+      "deletion": "Supprimer des renseignements",
+      "portability": "Recevoir mes données"
+    },
+    "privacyStatuses": {
+      "open": "en cours",
+      "done": "traitée",
+      "refused": "refusée"
+    }
   },
   "adminDashboard": {
     "title": "Tableau de bord",
@@ -225,7 +281,8 @@
     "accountsWaiting": "Comptes sans accès",
     "flightsToday": "Vols aujourd'hui",
     "flightsThisWeek": "Vols cette semaine",
-    "inMaintenance": "Appareils en maintenance"
+    "inMaintenance": "Appareils en maintenance",
+    "ownersWithoutAccess": "Propriétaires sans accès"
   },
   "owners": {
     "title": "Propriétaires",
@@ -281,7 +338,8 @@
     "archiveTitle": "Archiver ce propriétaire",
     "archiveBody": "Le propriétaire disparaît des listes et ses accès sont retirés. Son historique est conservé.",
     "archive": "Archiver",
-    "archiveConfirm": "Archiver ce propriétaire?"
+    "archiveConfirm": "Archiver ce propriétaire?",
+    "write": "Écrire"
   },
   "invitations": {
     "title": "Invitations",
@@ -314,7 +372,13 @@
       "revoked": "Annulée",
       "not_found": "Introuvable"
     },
-    "revoke": "Annuler"
+    "revoke": "Annuler",
+    "withoutAccessTitle": "{count, plural, one {# propriétaire sans accès} other {# propriétaires sans accès}}",
+    "withoutAccessBody": "Aucune connexion liée et aucune invitation en cours. L'ouverture est complète quand cette liste est vide.",
+    "noEmail": "sans courriel",
+    "bulkInvite": "{count, plural, one {Inviter # propriétaire} other {Inviter les # propriétaires}} avec courriel",
+    "bulkSent": "{count, plural, =0 {Aucune invitation envoyée.} one {# invitation envoyée.} other {# invitations envoyées.}}",
+    "bulkMissing": "{count, plural, one {# propriétaire n'a pas de courriel : ajoutez-le sur sa fiche.} other {# propriétaires n'ont pas de courriel : ajoutez-le sur leur fiche.}}"
   },
   "common": {
     "confirm": "Confirmer",
@@ -375,7 +439,14 @@
       "blockTime": "Entrez un temps comme 2:15 ou 2,25.",
       "title": "Décrivez les travaux (2 caractères minimum).",
       "startsAt": "Date et heure invalides.",
-      "endsAt": "La fin doit suivre le début."
+      "endsAt": "La fin doit suivre le début.",
+      "body": "Message trop long (4 000 caractères maximum).",
+      "discoveredOn": "La date doit suivre celle de l'incident.",
+      "dataConcerned": "Indiquez les renseignements touchés.",
+      "peopleConcerned": "Indiquez qui est touché.",
+      "measures": "Indiquez les mesures prises.",
+      "severity": "Choisissez un niveau.",
+      "response": "Écrivez une réponse."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -405,7 +476,11 @@
     "invalid_transition": "Ce changement de statut n'est pas possible.",
     "block_is_synced": "Ce blocage vient du logiciel de planification; modifiez-le là-bas.",
     "integration_not_connected": "Aucun logiciel de planification n'est connecté.",
-    "flight_not_departed": "Ce vol n'est pas encore parti. Terminez-le après l'atterrissage."
+    "flight_not_departed": "Ce vol n'est pas encore parti. Terminez-le après l'atterrissage.",
+    "message_empty": "Écrivez un message ou joignez un fichier.",
+    "assignee_cannot_reply": "Cette personne ne peut pas répondre aux propriétaires.",
+    "privacy_request_open": "Une demande de ce type est déjà en cours.",
+    "privacy_request_closed": "Cette demande est déjà fermée."
   },
   "aircraft": {
     "title": "Appareils",
@@ -479,7 +554,9 @@
       "dispatcher": "Répartiteur"
     },
     "removeFromTeam": "Retirer de l'équipe",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "privacyTitle": "Renseignements personnels (Loi 25)",
+    "privacyBody": "Demandes des propriétaires et registre des incidents."
   },
   "audit": {
     "empty": "Rien à afficher pour l'instant.",
@@ -575,7 +652,8 @@
     "pdfHint": "PDF, PNG ou JPG, 25 Mo maximum",
     "saving": "Émission…",
     "issue": "Émettre la facture",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "exportCsv": "Exporter (CSV)"
   },
   "ownerInvoices": {
     "title": "Factures",
@@ -586,7 +664,8 @@
     "view": "Voir",
     "download": "Télécharger",
     "viewNumber": "Voir la facture {number}",
-    "downloadNumber": "Télécharger la facture {number}"
+    "downloadNumber": "Télécharger la facture {number}",
+    "exportCsv": "Exporter (CSV)"
   },
   "transactions": {
     "title": "Transactions",
@@ -621,7 +700,8 @@
     "description": "Description",
     "add": "Ajouter",
     "added": "Entrée ajoutée.",
-    "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne."
+    "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne.",
+    "exportCsv": "Exporter (CSV)"
   },
   "budgets": {
     "title": "Budgets et heures",
@@ -659,7 +739,8 @@
     "hours": "Heures",
     "hoursHint": "Négatif pour retirer",
     "note": "Note",
-    "addHours": "Ajouter"
+    "addHours": "Ajouter",
+    "statementPdf": "Relevé PDF"
   },
   "imports": {
     "title": "Importations",
@@ -716,7 +797,9 @@
     "remaining": "Restant",
     "byCategory": "Par catégorie",
     "byMonth": "Dépenses par mois",
-    "peak": "Mois le plus élevé : {amount}"
+    "peak": "Mois le plus élevé : {amount}",
+    "exportCsv": "Exporter (CSV)",
+    "statementPdf": "Relevé {year} (PDF)"
   },
   "flights": {
     "title": "Vols",
@@ -764,7 +847,8 @@
     "cancelReason": "Raison (facultatif)",
     "cancelFlight": "Annuler le vol",
     "cancelCompleted": "Annuler et rendre les heures",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "exportCsv": "Exporter (CSV)"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -852,7 +936,8 @@
     "noUpcomingTitle": "Aucun vol à venir",
     "noUpcomingBody": "Vos prochains vols apparaîtront ici dès qu'ils seront planifiés.",
     "noPastTitle": "Aucun vol passé",
-    "noPastBody": "L'historique de vos vols apparaîtra ici."
+    "noPastBody": "L'historique de vos vols apparaîtra ici.",
+    "exportCsv": "Exporter (CSV)"
   },
   "ownerAircraft": {
     "title": "Votre appareil",
@@ -881,5 +966,261 @@
     "runSummary": "{created} ajoutés, {updated} mis à jour, {failed} en erreur",
     "syncNow": "Synchroniser maintenant",
     "syncing": "Synchronisation…"
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Écrivez à notre équipe de répartition. Une vraie personne vous répond.",
+    "callUs": "Nous appeler",
+    "conversationLabel": "Conversation",
+    "threadLabel": "Messages de la conversation",
+    "ownerEmpty": "Posez votre question ou demandez un vol : notre équipe vous répond ici.",
+    "staffEmpty": "Aucun message pour l'instant. Écrivez le premier.",
+    "ownerPlaceholder": "Écrivez votre message…",
+    "staffPlaceholder": "Répondre…",
+    "viewAsReadOnly": "Vous consultez le portail comme ce propriétaire : l'envoi est désactivé.",
+    "responseHint": "Nous répondons pendant les heures d'ouverture, habituellement en moins d'une heure.",
+    "noOwner": "Les messages seront disponibles dès que votre compte sera relié à un propriétaire.",
+    "today": "Aujourd'hui",
+    "dispatchName": "Répartition · {name}",
+    "team": "Équipe",
+    "read": "Lu",
+    "attachment": "Pièce jointe",
+    "attach": "Joindre un fichier",
+    "removeAttachment": "Retirer la pièce jointe",
+    "message": "Message",
+    "send": "Envoyer",
+    "uploading": "Envoi…",
+    "enterHint": "Entrée pour envoyer, Maj+Entrée pour aller à la ligne.",
+    "inboxTitle": "Messages",
+    "inboxSubtitle": "Les conversations avec les propriétaires.",
+    "filters": "Filtrer les conversations",
+    "filterNames": {
+      "open": "Ouvertes",
+      "mine": "Les miennes",
+      "resolved": "Résolues"
+    },
+    "emptyFilter": {
+      "open": "Aucune conversation ouverte.",
+      "mine": "Aucune conversation ne vous est assignée.",
+      "resolved": "Aucune conversation résolue."
+    },
+    "unassigned": "Non assignée",
+    "unreadSuffix": "non lus",
+    "pickTitle": "Choisissez une conversation",
+    "pickBody": "Les nouveaux messages des propriétaires apparaissent à gauche.",
+    "noAccessTitle": "Messages réservés à la répartition",
+    "noAccessBody": "Demandez à un administrateur si vous devez répondre aux propriétaires.",
+    "conversationWith": "Conversation avec {name}",
+    "backToInbox": "Retour aux messages",
+    "assignTo": "Assigner à",
+    "me": "{name} (moi)",
+    "resolve": "Résolue",
+    "reopen": "Rouvrir"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Ce qui s'est passé récemment sur votre compte.",
+    "emptyTitle": "Rien de nouveau",
+    "emptyBody": "Les factures, budgets, messages et alertes apparaîtront ici.",
+    "unread": "non lue",
+    "bellUnread": "{count, plural, one {Notifications, # non lue} other {Notifications, # non lues}}",
+    "types": {
+      "invoice": {
+        "issued": "Nouvelle facture {number} de {amount} pour {aircraft}"
+      },
+      "budget": {
+        "published": "Votre budget {year} de {aircraft} est publié"
+      },
+      "hours": {
+        "low": "Il vous reste {hours} sur {aircraft}",
+        "low_staff": "{ownerName} n'a plus que {hours} sur {aircraft}"
+      },
+      "maintenance": {
+        "planned": "{title} prévue sur {aircraft} le {when}"
+      },
+      "message": {
+        "from_dispatch": "Nouveau message de l'équipe : « {preview} »",
+        "from_owner": "{ownerName} : « {preview} »"
+      },
+      "access": {
+        "uninvited_sign_up": "{email} s'est inscrit sans invitation"
+      },
+      "sync": {
+        "failed": "La synchronisation du logiciel de planification a {failed} erreur(s)"
+      },
+      "privacy": {
+        "request": "Demande Loi 25 de {email} ({kind})"
+      }
+    }
+  },
+  "exports": {
+    "date": "Date",
+    "aircraft": "Appareil",
+    "owner": "Propriétaire",
+    "kind": "Type",
+    "category": "Catégorie",
+    "description": "Description",
+    "amount": "Montant",
+    "currency": "Devise",
+    "reversal": "Contrepassation",
+    "yes": "oui",
+    "number": "Numéro",
+    "issuedOn": "Émise le",
+    "dueOn": "Échéance",
+    "status": "Statut",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "from": "De",
+    "to": "À",
+    "blockHours": "Heures bloc",
+    "hours": "Heures",
+    "kinds": {
+      "cost": "Coût",
+      "revenue": "Revenu",
+      "payment": "Paiement"
+    },
+    "invoiceStatuses": {
+      "issued": "Émise",
+      "paid": "Payée",
+      "void": "Annulée"
+    },
+    "flightStatuses": {
+      "scheduled": "Prévu",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "hourKinds": {
+      "purchase": "Achat",
+      "flight": "Vol",
+      "adjustment": "Ajustement"
+    },
+    "statement": {
+      "title": "Relevé annuel {year}",
+      "generated": "Produit le {date}",
+      "footer": "Relevé produit par le portail des propriétaires. Les montants suivent votre registre en date de production.",
+      "summary": "Sommaire",
+      "planned": "Prévu",
+      "spent": "Dépensé",
+      "remaining": "Reste",
+      "revenue": "Revenus",
+      "payments": "Paiements reçus",
+      "notPublished": "Budget non publié",
+      "hoursOpening": "Heures au 1er janvier",
+      "hoursPurchased": "Heures achetées",
+      "hoursFlown": "Heures volées",
+      "hoursAdjusted": "Ajustements d'heures",
+      "hoursClosing": "Heures restantes",
+      "byCategory": "Budget par catégorie",
+      "total": "Total",
+      "entries": "Écritures",
+      "hours": "Heures",
+      "invoices": "Factures",
+      "none": "Aucune pour cette année."
+    }
+  },
+  "privacyPolicy": {
+    "title": "Politique de confidentialité",
+    "updated": "Dernière mise à jour : {date}",
+    "intro": "{operator} gère des avions pour leurs propriétaires. Ce portail leur donne accès à leurs vols, leurs heures, leurs finances et leurs factures. Cette politique explique quels renseignements personnels nous recueillons, pourquoi, où ils sont conservés et comment exercer vos droits, conformément à la Loi sur la protection des renseignements personnels dans le secteur privé du Québec.",
+    "officerTitle": "Responsable de la protection des renseignements personnels",
+    "officerBody": "Pour toute question ou demande : {officer}, <mail>{email}</mail>.",
+    "officerMissing": "Les coordonnées de notre responsable seront publiées ici avant l'ouverture du portail.",
+    "sections": [
+      {
+        "title": "Ce que nous recueillons",
+        "items": [
+          "Votre identité et vos coordonnées : nom, courriel, téléphone, langue.",
+          "Votre part d'appareil : pourcentage, heures allouées, vols effectués et leurs trajets.",
+          "Vos finances liées à l'appareil : budgets, coûts, paiements et factures.",
+          "Vos messages avec notre équipe et les fichiers que vous y joignez.",
+          "Des données techniques de sécurité : adresse IP et navigateur lors des connexions, journal des actions faites dans le portail."
+        ]
+      },
+      {
+        "title": "Pourquoi",
+        "items": [
+          "Gérer votre part d'appareil, planifier vos vols et tenir vos comptes.",
+          "Vous facturer et vous transmettre budgets, relevés et avis.",
+          "Protéger votre compte : double authentification pour notre équipe, limites de tentatives, journal d'audit.",
+          "Respecter nos obligations légales et fiscales.",
+          "Nous n'utilisons pas vos renseignements à des fins publicitaires et nous ne les vendons pas."
+        ]
+      },
+      {
+        "title": "Où ils sont conservés",
+        "items": [
+          "La base de données et les fichiers (factures, pièces jointes) sont hébergés au Canada, dans la région de Montréal d'Amazon Web Services, chiffrés au repos.",
+          "Le portail lui-même est servi par Vercel; les pages sont générées sur des serveurs situés aux États-Unis, qui traitent vos renseignements le temps d'afficher une page sans les conserver.",
+          "Les courriels (avis, liens de connexion) sont envoyés par Resend, aux États-Unis, qui reçoit votre adresse courriel et le contenu du message.",
+          "Avant de communiquer des renseignements hors du Québec, nous évaluons les facteurs relatifs à la vie privée et nous encadrons ces fournisseurs par contrat."
+        ]
+      },
+      {
+        "title": "Qui y a accès",
+        "items": [
+          "Vous, et les autres personnes autorisées pour votre compte propriétaire.",
+          "Notre équipe, selon son rôle (répartition, finances, administration). Chaque consultation « vue propriétaire » et chaque modification est journalisée.",
+          "Les copropriétaires d'un même appareil ne voient jamais vos vols ni vos finances : seulement que l'appareil est réservé."
+        ]
+      },
+      {
+        "title": "Combien de temps",
+        "items": [
+          "Les dossiers financiers (écritures, factures, budgets) sont conservés au moins six ans après la fin de l'année fiscale, comme l'exigent les lois fiscales.",
+          "Les sessions expirées et les liens de connexion sont supprimés automatiquement; les invitations non utilisées après 90 jours; les avis lus après un an.",
+          "À la fin de votre relation avec nous, les autres renseignements sont supprimés ou anonymisés une fois les délais légaux écoulés."
+        ]
+      },
+      {
+        "title": "Vos droits",
+        "items": [
+          "Accéder à vos renseignements et en obtenir une copie dans un format structuré : téléchargez-la en tout temps depuis Mon compte.",
+          "Faire corriger des renseignements inexacts.",
+          "Demander la suppression de renseignements qui ne sont plus nécessaires, sous réserve de nos obligations légales.",
+          "Retirer votre consentement aux courriels facultatifs depuis Mon compte.",
+          "Déposer une plainte auprès de la Commission d'accès à l'information du Québec.",
+          "Nous répondons à toute demande dans un délai de 30 jours."
+        ]
+      },
+      {
+        "title": "Incidents de confidentialité",
+        "items": [
+          "Nous tenons un registre des incidents de confidentialité. Si un incident présente un risque de préjudice sérieux, nous avisons la Commission d'accès à l'information et les personnes concernées sans délai."
+        ]
+      }
+    ],
+    "requestCta": "Faire une demande depuis Mon compte"
+  },
+  "privacyAdmin": {
+    "title": "Renseignements personnels",
+    "subtitle": "Les demandes à traiter en 30 jours et le registre des incidents de confidentialité exigé par la Loi 25.",
+    "requestsTitle": "Demandes ouvertes",
+    "noOpenRequests": "Aucune demande ouverte.",
+    "daysLeft": "{count, plural, =0 {Échéance aujourd'hui} one {# jour restant} other {# jours restants}}",
+    "closedRequests": "{count, plural, one {# demande fermée} other {# demandes fermées}}",
+    "response": "Réponse à la personne",
+    "markDone": "Marquer traitée",
+    "refuse": "Refuser",
+    "newIncident": "Consigner un incident",
+    "newIncidentBody": "Tout accès, utilisation, communication ou perte de renseignements personnels non autorisé doit être consigné, même mineur.",
+    "incidentSaved": "Incident consigné.",
+    "occurredOn": "Survenu le",
+    "discoveredOn": "Constaté le",
+    "description": "Ce qui s'est passé",
+    "dataConcerned": "Renseignements touchés",
+    "peopleConcerned": "Personnes touchées",
+    "severity": "Risque de préjudice",
+    "severities": {
+      "low": "Faible",
+      "serious": "Sérieux"
+    },
+    "measures": "Mesures prises",
+    "recordIncident": "Consigner",
+    "registerTitle": "Registre des incidents",
+    "noIncidents": "Aucun incident consigné.",
+    "mustReport": "À déclarer à la CAI",
+    "reportedToCaiOn": "Déclaré à la CAI le",
+    "peopleNotifiedOn": "Personnes avisées le",
+    "saveReporting": "Enregistrer"
   }
 }

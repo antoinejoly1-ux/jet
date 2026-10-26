@@ -9,9 +9,11 @@ import { PageHeader } from "@/components/ui/page-header";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { listInvitations } from "@/lib/services/invitations";
+import Link from "next/link";
+import { InviteAllButton } from "@/components/admin/invite-all-button";
+import { listInvitations, listOwnersWithoutAccess } from "@/lib/services/invitations";
 import { listOwners } from "@/lib/services/owners";
-import { revokeInvitationAction } from "./actions";
+import { inviteAllAction, revokeInvitationAction } from "./actions";
 import { InviteForm } from "./invite-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -41,11 +43,36 @@ export default async function InvitationsPage({ searchParams }: PageProps<"/admi
   }
 
   const { owner: preselected } = await searchParams;
-  const [owners, rows] = await Promise.all([listOwners(db, viewer), listInvitations(db, viewer)]);
+  const [owners, rows, withoutAccess] = await Promise.all([
+    listOwners(db, viewer),
+    listInvitations(db, viewer),
+    listOwnersWithoutAccess(db, viewer),
+  ]);
+  const withEmail = withoutAccess.filter((o) => o.email);
 
   return (
     <>
       <PageHeader title={t("title")} description={t("subtitle")} />
+      {withoutAccess.length ? (
+        <Card className="mb-6">
+          <CardTitle>{t("withoutAccessTitle", { count: withoutAccess.length })}</CardTitle>
+          <p className="text-muted mt-1 mb-3 text-sm">{t("withoutAccessBody")}</p>
+          <ul className="mb-4 flex flex-wrap gap-2">
+            {withoutAccess.map((o) => (
+              <li key={o.id}>
+                <Link
+                  href={o.email ? `/admin/owners/${o.id}` : `/admin/owners/${o.id}/edit`}
+                  className="bg-surface-muted hover:bg-border inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm"
+                >
+                  {o.legalName}
+                  {!o.email ? <span className="text-warning text-xs font-semibold">{t("noEmail")}</span> : null}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <InviteAllButton action={inviteAllAction} count={withEmail.length} />
+        </Card>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
         <Card className="self-start">
           <CardTitle className="mb-4">{t("newInvitation")}</CardTitle>

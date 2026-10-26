@@ -23,6 +23,7 @@ export type Permission =
   | "operations:write"
   | "finance:read"
   | "finance:write"
+  | "messages:send"
   | "messages:reply"
   | "team:manage"
   | "integrations:manage"
@@ -59,8 +60,8 @@ const STAFF: Record<StaffRole, ReadonlySet<Permission>> = {
   admin: new Set(admin),
 };
 
-/** Permissions an owner can hold, and only for their own data. */
-const OWNER_READABLE: ReadonlySet<Permission> = new Set(["owners:read", "fleet:read", "finance:read"]);
+/** Permissions an owner can hold, and only for their own data. Writing to dispatch is the one write. */
+const OWNER_READABLE: ReadonlySet<Permission> = new Set(["owners:read", "fleet:read", "finance:read", "messages:send"]);
 
 export function can(actor: Actor | null, permission: Permission, scope?: Scope): boolean {
   if (!actor) return false;

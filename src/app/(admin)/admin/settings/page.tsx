@@ -93,6 +93,16 @@ export default async function SettingsPage() {
               <ChevronRight className="text-muted size-4" aria-hidden />
             </Card>
           </Link>
+          <Link href="/admin/settings/privacy" className="group">
+            <Card className="group-hover:bg-surface-muted flex items-center gap-4 transition-colors">
+              <ShieldCheck className="text-muted size-5" aria-hidden />
+              <div className="flex-1">
+                <p className="font-semibold">{t("privacyTitle")}</p>
+                <p className="text-muted text-sm">{t("privacyBody")}</p>
+              </div>
+              <ChevronRight className="text-muted size-4" aria-hidden />
+            </Card>
+          </Link>
           <IntegrationsCard viewer={viewer} />
         </div>
       </div>

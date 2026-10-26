@@ -1,4 +1,4 @@
-import { CalendarRange, MailPlus, Plane, PlaneTakeoff, UserRoundX, Users, Wrench } from "lucide-react";
+import { CalendarRange, KeyRound, MailPlus, Plane, PlaneTakeoff, UserRoundX, Users, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -26,6 +26,7 @@ export default async function AdminDashboardPage() {
     { key: "aircraft", value: stats.aircraft, icon: Plane, href: "/admin/aircraft" },
     { key: "pendingInvitations", value: stats.pendingInvitations, icon: MailPlus, href: "/admin/invitations" },
     { key: "accountsWaiting", value: stats.accountsWaiting, icon: UserRoundX, href: "/admin/invitations" },
+    { key: "ownersWithoutAccess", value: stats.ownersWithoutAccess, icon: KeyRound, href: "/admin/invitations" },
   ] as const;
 
   return (

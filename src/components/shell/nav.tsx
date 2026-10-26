@@ -29,6 +29,24 @@ import type { Route } from "next";
 import { cn } from "@/lib/utils";
 
 export type Side = "client" | "admin";
+/** Unread counts shown next to destinations, by item key. */
+export type Badges = Partial<Record<string, number>>;
+
+function Count({ n, className }: { n: number | undefined; className?: string }) {
+  const t = useTranslations("nav");
+  if (!n) return null;
+  return (
+    <span
+      className={cn(
+        "bg-accent text-primary-foreground tabular inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] leading-5 font-semibold",
+        className,
+      )}
+    >
+      <span aria-hidden>{n > 99 ? "99+" : n}</span>
+      <span className="sr-only">{t("unread", { count: n })}</span>
+    </span>
+  );
+}
 
 type Item = { href: Route; key: string; icon: LucideIcon; mobile?: boolean };
 type Group = { key: string | null; items: Item[] };
@@ -86,7 +104,7 @@ function useIsActive() {
 }
 
 /** Desktop sidebar (1024px and up). */
-export function Sidebar({ side }: { side: Side }) {
+export function Sidebar({ side, badges = {} }: { side: Side; badges?: Badges }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
   return (
@@ -110,7 +128,8 @@ export function Sidebar({ side }: { side: Side }) {
                   )}
                 >
                   <Icon className="size-4" aria-hidden />
-                  {t(`items.${key}`)}
+                  <span className="flex-1">{t(`items.${key}`)}</span>
+                  <Count n={badges[key]} />
                 </Link>
               </li>
             ))}
@@ -125,7 +144,7 @@ export function Sidebar({ side }: { side: Side }) {
  * Phone and tablet bottom tab bar: the four most used destinations of the
  * current side, plus "More", which opens every destination in a sheet.
  */
-export function BottomTabs({ side }: { side: Side }) {
+export function BottomTabs({ side, badges = {} }: { side: Side; badges?: Badges }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -147,7 +166,7 @@ export function BottomTabs({ side }: { side: Side }) {
           onClick={(e) => (e.target as HTMLElement).closest("a") && setMoreOpen(false)}
           className="bg-surface fixed inset-0 z-40 overflow-y-auto px-3 pt-6 pb-28 lg:hidden"
         >
-          <Sidebar side={side} />
+          <Sidebar side={side} badges={badges} />
         </div>
       ) : null}
       <nav
@@ -157,8 +176,13 @@ export function BottomTabs({ side }: { side: Side }) {
         <ul className="grid grid-cols-5">
           {items.map(({ href, key, icon: Icon }) => (
             <li key={href}>
-              <Link href={href} aria-current={isActive(href) && !moreOpen ? "page" : undefined} className={tab}>
+              <Link
+                href={href}
+                aria-current={isActive(href) && !moreOpen ? "page" : undefined}
+                className={cn(tab, "relative")}
+              >
                 <Icon className="size-5" aria-hidden />
+                <Count n={badges[key]} className="absolute top-2 left-1/2 ml-1" />
                 <span className="max-w-full truncate px-1">
                   {t.has(`tabs.${key}`) ? t(`tabs.${key}`) : t(`items.${key}`)}
                 </span>

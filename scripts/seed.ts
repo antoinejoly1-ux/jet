@@ -359,12 +359,37 @@ async function main() {
 
   console.log("Demo logins…");
   await createLogin("admin@jet.test", "Alex Admin", "admin", true);
-  await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", true);
+  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", true);
   await createLogin("finance@jet.test", "Fred Finance", "finance", false);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
   await db
     .insert(s.ownerMembers)
     .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "primary" });
+
+  // A short conversation with dispatch, already read on both sides.
+  const [conversation] = await db
+    .insert(s.conversations)
+    .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, assignedToUserId: dispatch.id })
+    .returning();
+  const at = (hoursAgo: number) => new Date(now - hoursAgo * 3_600_000);
+  await db.insert(s.messages).values([
+    {
+      id: uuidv7(),
+      conversationId: conversation!.id,
+      senderUserId: owner.id,
+      body: "Bonjour, est-ce que l'appareil est libre la fin de semaine prochaine pour un aller-retour à Québec?",
+      createdAt: at(30),
+      readAt: at(29),
+    },
+    {
+      id: uuidv7(),
+      conversationId: conversation!.id,
+      senderUserId: dispatch.id,
+      body: "Bonjour Jean! Oui, samedi et dimanche sont libres. Je vous le réserve pour samedi 9 h?",
+      createdAt: at(29),
+      readAt: at(28),
+    },
+  ]);
 
   const otpauth = createOTP(DEMO_TOTP_SECRET).url("Jet (demo)", "staff@jet.test");
   console.log(`\nSeeded. Sign in with any of these (password: ${DEMO_PASSWORD}):`);

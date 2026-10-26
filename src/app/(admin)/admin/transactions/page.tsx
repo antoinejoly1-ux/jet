@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { can } from "@/lib/auth/policy";
@@ -51,7 +52,17 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
 
   return (
     <>
-      <PageHeader title={t("title")} description={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <DownloadLink
+            href={`/admin/transactions/export?${new URLSearchParams({ year: String(year), ...(shareId ? { share: shareId } : {}), ...(kind ? { kind } : {}) })}`}
+          >
+            {t("exportCsv")}
+          </DownloadLink>
+        }
+      />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
           <form className="mb-4 flex flex-wrap gap-2">

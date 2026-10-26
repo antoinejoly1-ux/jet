@@ -7,6 +7,7 @@ import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { Select } from "@/components/ui/select";
 import { dayStart } from "@/lib/availability-days";
@@ -77,14 +78,21 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
         title={t("title")}
         description={t("subtitle")}
         actions={
-          canWrite ? (
-            <Button asChild size="sm">
-              <Link href="/admin/flights/new">
-                <Plus aria-hidden />
-                {t("new")}
-              </Link>
-            </Button>
-          ) : null
+          <>
+            <DownloadLink
+              href={`/admin/flights/export?${new URLSearchParams({ view, ...(aircraftId ? { aircraft: aircraftId } : {}) })}`}
+            >
+              {t("exportCsv")}
+            </DownloadLink>
+            {canWrite ? (
+              <Button asChild size="sm">
+                <Link href="/admin/flights/new">
+                  <Plus aria-hidden />
+                  {t("new")}
+                </Link>
+              </Button>
+            ) : null}
+          </>
         }
       />
       {str("saved") ? (

@@ -4,6 +4,10 @@ import { getTranslations } from "next-intl/server";
 import { exitViewAsAction } from "@/app/actions/view-as";
 import type { ReactNode } from "react";
 import type { Viewer } from "@/lib/auth/session";
+import { db } from "@/lib/db";
+import { unreadMessageCount } from "@/lib/services/messages";
+import { unreadNotificationCount } from "@/lib/services/notification-center";
+import { NotificationBell } from "./bell";
 import { BottomTabs, Sidebar, type Side } from "./nav";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
@@ -22,6 +26,11 @@ function Wordmark() {
  */
 export async function AppShell({ side, viewer, children }: { side: Side; viewer: Viewer; children: ReactNode }) {
   const t = await getTranslations("viewAs");
+  const [messages, notifications] = await Promise.all([
+    unreadMessageCount(db, viewer, side),
+    unreadNotificationCount(db, viewer),
+  ]);
+  const badges = { messages };
   return (
     <>
       {viewer.viewingAs ? (
@@ -45,7 +54,7 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
           <div className="px-3">
             <Wordmark />
           </div>
-          <Sidebar side={side} />
+          <Sidebar side={side} badges={badges} />
         </aside>
         <div className="flex min-w-0 flex-col">
           <header className="border-border bg-background/90 sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b px-4 backdrop-blur sm:px-6 lg:px-10">
@@ -54,6 +63,7 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
             </div>
             <div className="ml-auto flex items-center gap-3">
               {viewer.staffRole ? <SideToggle current={side} /> : null}
+              <NotificationBell side={side} unread={notifications} />
               <UserMenu name={viewer.name} email={viewer.email} />
             </div>
           </header>
@@ -64,7 +74,7 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
             {children}
           </main>
         </div>
-        <BottomTabs side={side} />
+        <BottomTabs side={side} badges={badges} />
       </div>
     </>
   );

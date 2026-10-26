@@ -87,6 +87,29 @@ set (redirect URI: `{BETTER_AUTH_URL}/api/auth/callback/google`).
   rows are imported in one transaction and the original file is kept.
 - **Amounts** are typed as people write them: `1 234,56`, `1,234.56` and `1234.56` all work.
 
+## Support, notifications and exports
+
+- **Messages:** each owner has one running thread with dispatch. Owners write from Messages (a PDF or photo can ride
+  along); dispatch answers from an inbox with Open / Mine / Resolved, assigns threads and resolves them. Pages refresh
+  themselves every few seconds while open.
+- **Notifications:** the bell lists a person's own notices. Owners choose on Account which ones also come by email; a
+  reply from dispatch is emailed only if still unread after five minutes. Security emails can't be turned off. The full
+  list of types is in `src/lib/notification-types.ts`.
+- **Exports:** owners download a yearly statement PDF per share and CSV of their transactions, invoices and flights; the
+  team exports the ledger, invoices and flights as filtered on screen. French CSV uses `;` and decimal commas for
+  Excel.
+- **Scheduled jobs:** `/api/cron/notifications` (every 5 minutes) and `/api/cron/retention` (daily) need
+  `Authorization: Bearer $CRON_SECRET`. `.github/workflows/scheduled-jobs.yml` calls them once the repository has the
+  `APP_URL` variable and `CRON_SECRET` secret, which works on any Vercel plan.
+
+## Privacy and security
+
+- [Law 25 compliance](docs/privacy/law-25.md): privacy officer, public policy at `/privacy`, data download and requests
+  on Account, incident register and requests under Admin → Settings → Personal information, retention schedule, and
+  the privacy impact assessment draft.
+- [Security review](docs/security-review.md), [backup and restore runbook](docs/runbooks/backup-restore.md),
+  [launch checklist](docs/launch-checklist.md).
+
 ## Project layout
 
 ```
@@ -95,7 +118,9 @@ src/
     (auth)/        sign-in, sign-up, forgot/reset password, two-factor, invitation
     (client)/      owner screens (Home, Flights, Finances, Invoices, …, Account)
     (admin)/admin/ back office (Dashboard, Owners, Invitations, …)
+    (public)/      pages anyone can read (privacy policy)
     api/auth/      Better Auth endpoint
+    api/cron/      scheduled jobs (delayed emails, retention)
     start/         post-sign-in landing: picks the side, or /pending
   components/      ui/ (design system), shell/ (sidebar, tabs, toggle), auth/
   lib/
@@ -103,10 +128,13 @@ src/
     db/            Drizzle client and schema (one file per domain)
     services/      business logic: every read and write goes through here
     email/         sender and templates
+    integrations/  adapters for outside systems (scheduling software)
+    pdf/           PDF rendering (yearly statement)
   i18n/            locale resolution
   proxy.ts         redirects visitors without a session cookie to sign-in
 drizzle/           SQL migrations (generated, committed)
-scripts/           migrate.ts, seed.ts
+scripts/           migrate.ts, seed.ts, restore-rehearsal.sh
+docs/              privacy (Law 25), security review, runbooks, launch checklist
 tests/             unit/, integration/, e2e/
 ```
 
@@ -115,16 +143,17 @@ checks permissions, validates input, writes in a transaction and records the aud
 
 ## Commands
 
-| Command                | What it does                                                                  |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| `pnpm dev`             | Development server                                                            |
-| `pnpm check`           | Typecheck, lint, format check and tests: run before every push                |
-| `pnpm test`            | Unit and integration tests (needs the `jet_test` database)                    |
-| `scripts/e2e-local.sh` | End-to-end tests on desktop and phone, as CI runs them (reseeds the database) |
-| `pnpm db:generate`     | Create a migration after changing `src/lib/db/schema/*`                       |
-| `pnpm db:migrate`      | Apply migrations                                                              |
-| `pnpm db:seed`         | Reset and reseed demo data (refuses to run in production)                     |
-| `pnpm db:studio`       | Browse the database                                                           |
+| Command                        | What it does                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------- |
+| `pnpm dev`                     | Development server                                                            |
+| `pnpm check`                   | Typecheck, lint, format check and tests: run before every push                |
+| `pnpm test`                    | Unit and integration tests (needs the `jet_test` database)                    |
+| `scripts/e2e-local.sh`         | End-to-end tests on desktop and phone, as CI runs them (reseeds the database) |
+| `pnpm db:generate`             | Create a migration after changing `src/lib/db/schema/*`                       |
+| `pnpm db:migrate`              | Apply migrations                                                              |
+| `pnpm db:seed`                 | Reset and reseed demo data (refuses to run in production)                     |
+| `pnpm db:studio`               | Browse the database                                                           |
+| `scripts/restore-rehearsal.sh` | Dump, restore into a scratch database and compare (read-only on the source)   |
 
 ## House rules
 
@@ -154,6 +183,5 @@ The business is Canadian, so client data stays in Canada:
 
 ## What's next
 
-Phase 3 (operations): flights, availability and maintenance, entered by hand first, then synced from the scheduling
-software once its API access is granted; the owner's Flights, Availability and Aircraft screens; flights deducting
-hours automatically.
+Launch: work through the [launch checklist](docs/launch-checklist.md). Then Phase 5 (integrations): accounting sync,
+live flight tracking, the public API and outgoing webhooks, and the smart summary on Home.

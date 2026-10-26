@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, randomBytes } from "node:crypto";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
 import type { Db } from "@/lib/db";
 import { invitations, ownerMembers, owners, user } from "@/lib/db/schema";
@@ -187,4 +187,41 @@ export async function listInvitations(db: Db, actor: Actor) {
     .orderBy(desc(invitations.createdAt))
     .limit(100);
   return rows.map((r) => ({ ...r, state: stateOf(r) }));
+}
+
+/**
+ * Owners nobody can sign in for yet: no login linked and no invitation still
+ * open. Launch is done when this list is empty.
+ */
+export async function listOwnersWithoutAccess(db: Db, actor: Actor) {
+  authorize(actor, "owners:read");
+  return db
+    .select({ id: owners.id, legalName: owners.legalName, email: owners.email })
+    .from(owners)
+    .where(
+      and(
+        isNull(owners.deletedAt),
+        sql`not exists (select 1 from ${ownerMembers} m where m.owner_id = ${owners.id})`,
+        sql`not exists (select 1 from ${invitations} i where i.owner_id = ${owners.id}
+          and i.accepted_at is null and i.revoked_at is null and i.expires_at > now())`,
+      ),
+    )
+    .orderBy(asc(owners.legalName));
+}
+
+/** Invites, at their address on file, every owner without access. Owners with no email are returned to fix by hand. */
+export async function inviteOwnersWithoutAccess(db: Db, actor: Actor, baseUrl: string) {
+  authorize(actor, "owners:invite");
+  const pending = await listOwnersWithoutAccess(db, actor);
+  const invited: string[] = [];
+  const missingEmail: string[] = [];
+  for (const o of pending) {
+    if (!o.email) {
+      missingEmail.push(o.legalName);
+      continue;
+    }
+    await createInvitation(db, actor, { kind: "owner", email: o.email, ownerId: o.id }, baseUrl);
+    invited.push(o.legalName);
+  }
+  return { invited, missingEmail };
 }

@@ -5,6 +5,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Alert } from "@/components/ui/alert";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -34,21 +35,24 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
         title={t("title")}
         description={t("subtitle")}
         actions={
-          <nav aria-label={t("year")} className="border-border bg-surface-muted inline-flex rounded-md border p-0.5">
-            {[thisYear - 2, thisYear - 1, thisYear].map((y) => (
-              <Link
-                key={y}
-                href={`/finances?year=${y}`}
-                aria-current={y === year ? "page" : undefined}
-                className={cn(
-                  "text-muted flex h-8 items-center rounded-[5px] px-3 text-sm font-semibold",
-                  y === year && "bg-surface text-text shadow-sm",
-                )}
-              >
-                {y}
-              </Link>
-            ))}
-          </nav>
+          <>
+            <DownloadLink href={`/finances/export?year=${year}`}>{t("exportCsv")}</DownloadLink>
+            <nav aria-label={t("year")} className="border-border bg-surface-muted inline-flex rounded-md border p-0.5">
+              {[thisYear - 2, thisYear - 1, thisYear].map((y) => (
+                <Link
+                  key={y}
+                  href={`/finances?year=${y}`}
+                  aria-current={y === year ? "page" : undefined}
+                  className={cn(
+                    "text-muted flex h-8 items-center rounded-[5px] px-3 text-sm font-semibold",
+                    y === year && "bg-surface text-text shadow-sm",
+                  )}
+                >
+                  {y}
+                </Link>
+              ))}
+            </nav>
+          </>
         }
       />
       {shares.length === 0 ? (
@@ -60,9 +64,14 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
             const remaining = s.totals.plannedCents - s.totals.spentCents;
             return (
               <section key={s.shareId} aria-labelledby={`fin-${s.shareId}`} className="flex flex-col gap-4">
-                <h2 id={`fin-${s.shareId}`} className="text-lg font-bold tracking-tight">
-                  {s.registration} <span className="text-muted font-medium">· {s.model}</span>
-                </h2>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h2 id={`fin-${s.shareId}`} className="text-lg font-bold tracking-tight">
+                    {s.registration} <span className="text-muted font-medium">· {s.model}</span>
+                  </h2>
+                  <DownloadLink href={`/finances/statement?share=${s.shareId}&year=${year}`}>
+                    {t("statementPdf", { year })}
+                  </DownloadLink>
+                </div>
                 {!s.published ? <Alert>{t("notPublished", { year })}</Alert> : null}
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Card>

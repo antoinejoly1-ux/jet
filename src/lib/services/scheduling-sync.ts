@@ -7,7 +7,7 @@
  * is reported without blocking the rest.
  */
 import "server-only";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
 import {
   aircraft,
@@ -17,8 +17,10 @@ import {
   hourLedger,
   integrations,
   maintenanceEvents,
+  notifications,
   shares,
   syncRuns,
+  user,
 } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import type {
@@ -30,7 +32,9 @@ import type {
 import { recordAudit } from "./audit";
 import { ConflictError } from "./errors";
 import { applyCancellation, applyCompletion } from "./flights";
+import { alertIfHoursLow } from "./hour-alerts";
 import { syncAircraftStatus } from "./maintenance";
+import { sendPendingEmails, type PendingEmail } from "./owner-notifications";
 
 type Outcome = "created" | "updated" | "unchanged";
 export type SyncCounts = Record<"created" | "updated" | "unchanged" | "failed", number>;
@@ -59,6 +63,21 @@ export async function syncScheduling(db: Db, actor: Actor | null, adapter: Sched
   const errors: SyncError[] = [];
   const finish = async (status: "connected" | "error") => {
     await db.update(syncRuns).set({ finishedAt: new Date(), counts, errors }).where(eq(syncRuns.id, run!.id));
+    if (errors.length) {
+      // Admins and finance hear about records that couldn't be placed, or a vendor that didn't answer.
+      const people = await db
+        .select({ id: user.id })
+        .from(user)
+        .where(inArray(user.staffRole, ["admin", "finance"]));
+      if (people.length)
+        await db.insert(notifications).values(
+          people.map((p) => ({
+            userId: p.id,
+            type: "sync.failed",
+            data: { provider, failed: String(errors.length) },
+          })),
+        );
+    }
     await db
       .update(integrations)
       .set({ status, ...(status === "connected" ? { lastSyncedAt: startedAt } : {}) })
@@ -85,7 +104,7 @@ export async function syncScheduling(db: Db, actor: Actor | null, adapter: Sched
     if (!id) throw new SkipRecord("unknown_aircraft");
     return id;
   };
-  const ctx: Ctx = { provider, actorUserId: actor?.id ?? null, aircraftId };
+  const ctx: Ctx = { provider, actorUserId: actor?.id ?? null, aircraftId, emails: [] };
 
   const each = async <T extends { id: string }>(
     entity: SyncError["entity"],
@@ -93,9 +112,11 @@ export async function syncScheduling(db: Db, actor: Actor | null, adapter: Sched
     apply: (tx: Tx, record: T) => Promise<Outcome>,
   ) => {
     for (const record of records) {
+      const queued = ctx.emails.length;
       try {
         counts[await db.transaction((tx) => apply(tx, record))]++;
       } catch (err) {
+        ctx.emails.length = queued; // the record rolled back, so its emails don't go out
         if (!(err instanceof SkipRecord || err instanceof ConflictError)) throw err;
         counts.failed++;
         errors.push({ entity, externalId: record.id, code: err.code });
@@ -105,10 +126,17 @@ export async function syncScheduling(db: Db, actor: Actor | null, adapter: Sched
   await each("flight", changes.flights, (tx, f) => upsertFlight(tx, f, ctx));
   await each("maintenance", changes.maintenance, (tx, m) => upsertMaintenance(tx, m, ctx));
   await each("block", changes.blocks, (tx, b) => upsertBlock(tx, b, ctx));
+  await sendPendingEmails(db, ctx.emails);
   return finish("connected");
 }
 
-type Ctx = { provider: string; actorUserId: string | null; aircraftId: (registration: string) => string };
+type Ctx = {
+  provider: string;
+  actorUserId: string | null;
+  aircraftId: (registration: string) => string;
+  /** Emails to send once records have committed. */
+  emails: PendingEmail[];
+};
 
 /** Vendor ids are namespaced so two providers can never collide. */
 const key = (ctx: Ctx, id: string) => `${ctx.provider}:${id}`;
@@ -179,6 +207,7 @@ async function upsertFlight(tx: Tx, f: ExternalFlight, ctx: Ctx): Promise<Outcom
 
   if (local.status === "scheduled" && f.status === "completed") {
     local = await applyCompletion(tx, local, f.blockMinutes!, f.arrivesAt, ctx.actorUserId);
+    if (local.shareId) ctx.emails.push(...(await alertIfHoursLow(tx, local.shareId, f.blockMinutes!)));
     outcome = outcome === "created" ? "created" : "updated";
   } else if (local.status === "completed" && f.status === "completed" && local.blockMinutes !== f.blockMinutes) {
     await correctBlockTime(tx, local, f.blockMinutes!, ctx.actorUserId);

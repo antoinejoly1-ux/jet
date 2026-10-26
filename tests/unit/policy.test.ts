@@ -21,6 +21,7 @@ const ALL: Permission[] = [
   "operations:write",
   "finance:read",
   "finance:write",
+  "messages:send",
   "messages:reply",
   "team:manage",
   "integrations:manage",
@@ -29,7 +30,8 @@ const ALL: Permission[] = [
 
 // The full matrix, written out so a change to any role is a visible diff here.
 const EXPECTED: Record<"admin" | "finance" | "dispatcher", Permission[]> = {
-  admin: ALL,
+  // Staff write to owners with messages:reply; messages:send is the owner's side of the chat.
+  admin: ALL.filter((p) => p !== "messages:send"),
   finance: [
     "admin:access",
     "owners:read",
@@ -78,8 +80,14 @@ describe("owners", () => {
     expect(can(ownerA, "finance:read")).toBe(false);
   });
 
-  it("never gets write permissions, even on their own data", () => {
-    for (const permission of ALL.filter((p) => !["owners:read", "fleet:read", "finance:read"].includes(p))) {
+  it("writes to dispatch about their own account only", () => {
+    expect(can(ownerA, "messages:send", { ownerIds: [OWNER_A] })).toBe(true);
+    expect(can(ownerA, "messages:send", { ownerIds: [OWNER_B] })).toBe(false);
+  });
+
+  it("never gets other write permissions, even on their own data", () => {
+    const ownerPermissions = ["owners:read", "fleet:read", "finance:read", "messages:send"];
+    for (const permission of ALL.filter((p) => !ownerPermissions.includes(p))) {
       expect(can(ownerA, permission, { ownerIds: [OWNER_A] })).toBe(false);
     }
   });
