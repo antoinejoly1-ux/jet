@@ -195,7 +195,14 @@
     "latestInvoiceEmpty": "Votre première facture apparaîtra ici après votre premier vol.",
     "availability": "Disponibilité",
     "freeDays": "{count, plural, =0 {Aucun jour libre} one {# jour libre} other {# jours libres}} sur {days}",
-    "seeCalendar": "Voir le calendrier"
+    "seeCalendar": "Voir le calendrier",
+    "insights": {
+      "label": "En bref",
+      "hoursPace": "Au rythme de cette année, vos heures restantes dureront environ {months} mois, soit jusqu'en {until}.",
+      "hoursUnused": "Vous n'avez pas encore volé cette année : toutes vos heures sont disponibles.",
+      "budgetOnTrack": "Vous avez dépensé {spent} du budget, à {year} de l'année : c'est dans le rythme prévu.",
+      "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu."
+    }
   },
   "account": {
     "title": "Mon compte",
@@ -488,7 +495,8 @@
     "api_key_revoked": "Cette clé est déjà révoquée.",
     "webhook_disabled": "Ce webhook est désactivé.",
     "webhook_private_address": "Cette adresse mène à un réseau privé; utilisez une adresse publique.",
-    "webhook_test_failed": "Le test n'a pas été reçu."
+    "webhook_test_failed": "Le test n'a pas été reçu.",
+    "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard."
   },
   "aircraft": {
     "title": "Appareils",

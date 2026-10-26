@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, ne } from "drizzle-orm";
+import { and, count, eq, gt, ne } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 import type { Db } from "@/lib/db";
@@ -48,9 +48,17 @@ function authorizeUpload(actor: Actor, purpose: UploadPurpose) {
   authorize(actor, "messages:send", { ownerIds: actor.ownerIds });
 }
 
-export async function requestUpload(actor: Actor, raw: UploadRequest) {
+/** Uploads one person may start per hour: generous for real work, a ceiling for a runaway script. */
+export const UPLOADS_PER_HOUR = 60;
+
+export async function requestUpload(db: Db, actor: Actor, raw: UploadRequest) {
   const input = uploadRequest.parse(raw);
   authorizeUpload(actor, input.purpose);
+  const [recent] = await db
+    .select({ n: count() })
+    .from(files)
+    .where(and(eq(files.uploadedByUserId, actor.id), gt(files.createdAt, new Date(Date.now() - 3_600_000))));
+  if ((recent?.n ?? 0) >= UPLOADS_PER_HOUR) throw new ConflictError("too_many_uploads");
   const rules = UPLOAD_RULES[input.purpose];
   if (!(rules.types as readonly string[]).includes(input.contentType)) throw new ConflictError("file_type_not_allowed");
   if (input.sizeBytes > rules.maxBytes) throw new ConflictError("file_too_large");

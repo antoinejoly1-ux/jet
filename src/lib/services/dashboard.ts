@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, inArray, isNull, lt, ne, sql, sum } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, ne, sql, sum } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import {
   aircraft,
@@ -23,6 +23,8 @@ export type ShareSummary = {
   percentageBp: number;
   aircraft: { id: string; registration: string; model: string; status: string };
   minutesRemaining: number;
+  /** Hours flown since January 1, net of cancelled flights. */
+  usedThisYearMinutes: number;
   annualMinutes: number | null;
   budget: { year: number; plannedCents: number; spentCents: number; currency: "CAD" | "USD" } | null;
   nextFlight: { fromAirport: string; toAirport: string; departsAt: Date } | null;
@@ -66,11 +68,21 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
 
   return Promise.all(
     rows.map(async (r): Promise<ShareSummary> => {
-      const [[hours], [budget], [nextFlight], [nextMaintenance], [latestInvoice]] = await Promise.all([
+      const [[hours], [used], [budget], [nextFlight], [nextMaintenance], [latestInvoice]] = await Promise.all([
         db
           .select({ minutes: sum(hourLedger.minutes).mapWith(Number) })
           .from(hourLedger)
           .where(eq(hourLedger.shareId, r.shareId)),
+        db
+          .select({ minutes: sum(hourLedger.minutes).mapWith(Number) })
+          .from(hourLedger)
+          .where(
+            and(
+              eq(hourLedger.shareId, r.shareId),
+              isNotNull(hourLedger.flightId),
+              gte(hourLedger.createdAt, new Date(Date.UTC(year, 0, 1))),
+            ),
+          ),
         db
           .select({ id: budgets.id, currency: budgets.currency })
           .from(budgets)
@@ -144,6 +156,7 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
         percentageBp: r.percentageBp,
         aircraft: { id: r.aircraftId, registration: r.registration, model: r.model, status: r.status },
         minutesRemaining: hours?.minutes ?? 0,
+        usedThisYearMinutes: -(used?.minutes ?? 0),
         annualMinutes: r.annualMinutes,
         budget: budgetSummary,
         nextFlight: nextFlight ?? null,

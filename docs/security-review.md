@@ -34,7 +34,7 @@ unless marked otherwise.
 | 3   | Status badge text below 4.5:1 contrast                                                           | Low      | **Fixed**: darker light-mode tokens; axe now runs on every screen in CI                                                             |
 | 4   | No automated dependency updates                                                                  | Low      | **Fixed**: Dependabot, weekly, grouped                                                                                              |
 | 5   | `pnpm audit`: one moderate advisory in `esbuild` ≤ 0.24 (GHSA-67mh-4wv8-2f99), via `drizzle-kit` | Low      | **Accepted**: development-server issue in a dev-only tool, never shipped or run in production                                       |
-| 6   | Uploads have no per-user rate limit                                                              | Low      | **Open**: only signed-in owners and staff can upload, 10–25 MB each; add a limit if abuse appears                                   |
+| 6   | Uploads have no per-user rate limit                                                              | Low      | **Fixed**: 60 uploads per person per hour (`UPLOADS_PER_HOUR`)                                                                      |
 | 7   | Vercel functions run in the United States                                                        | Info     | **Documented** in the [privacy impact assessment](privacy/law-25.md)                                                                |
 
 ## Before launch

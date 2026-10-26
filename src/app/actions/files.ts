@@ -15,7 +15,7 @@ const uploader = (input: UploadRequest) => (input.purpose === "message" ? requir
 export async function requestUploadAction(input: UploadRequest): Promise<UploadStep1> {
   const viewer = await uploader(input);
   try {
-    const { key, ticket } = await requestUpload(viewer, input);
+    const { key, ticket } = await requestUpload(db, viewer, input);
     return { ok: true, key, url: ticket.url, headers: ticket.headers };
   } catch (err) {
     return { ok: false, state: formError(err) };

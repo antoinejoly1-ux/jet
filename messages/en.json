@@ -195,7 +195,14 @@
     "latestInvoiceEmpty": "Your first invoice will appear here after your first flight.",
     "availability": "Availability",
     "freeDays": "{count, plural, =0 {No free days} one {# free day} other {# free days}} in the next {days}",
-    "seeCalendar": "See the calendar"
+    "seeCalendar": "See the calendar",
+    "insights": {
+      "label": "At a glance",
+      "hoursPace": "At this year's pace, your remaining hours will last about {months} months, until {until}.",
+      "hoursUnused": "You haven't flown yet this year: all your hours are available.",
+      "budgetOnTrack": "You've spent {spent} of the budget with {year} of the year gone: on track.",
+      "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned."
+    }
   },
   "account": {
     "title": "My account",
@@ -488,7 +495,8 @@
     "api_key_revoked": "This key is already revoked.",
     "webhook_disabled": "This webhook is disabled.",
     "webhook_private_address": "This address leads to a private network; use a public one.",
-    "webhook_test_failed": "The test wasn't received."
+    "webhook_test_failed": "The test wasn't received.",
+    "too_many_uploads": "Too many uploads in an hour. Try again later."
   },
   "aircraft": {
     "title": "Aircraft",
