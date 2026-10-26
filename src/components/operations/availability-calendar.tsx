@@ -88,9 +88,9 @@ export async function AvailabilityCalendar({
               data-status={d.status}
               className={cn(
                 "tabular flex aspect-square items-start justify-end rounded-md p-1 text-xs font-semibold sm:p-2 sm:text-sm",
-                CELL[d.status],
+                // Past days go neutral but stay readable; their details remain in the list below.
+                d.day < today ? "bg-surface-muted text-muted" : CELL[d.status],
                 d.day === today && "ring-text ring-2 ring-offset-1 ring-offset-[var(--surface)]",
-                d.day < today && "opacity-50",
               )}
             >
               {Number(d.day.slice(8))}

@@ -6,7 +6,9 @@ import { ForbiddenError } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { env } from "@/lib/env";
-import { createInvitation, revokeInvitation } from "@/lib/services/invitations";
+import { getTranslations } from "next-intl/server";
+import { formError, type FormState } from "@/lib/forms";
+import { createInvitation, inviteOwnersWithoutAccess, revokeInvitation } from "@/lib/services/invitations";
 
 export type InviteState =
   | { status: "idle" }
@@ -35,4 +37,21 @@ export async function revokeInvitationAction(invitationId: string) {
   const viewer = await requireStaff();
   await revokeInvitation(db, viewer, z.string().uuid().parse(invitationId));
   revalidatePath("/admin/invitations");
+}
+
+export async function inviteAllAction(_prev: FormState): Promise<FormState> {
+  const viewer = await requireStaff();
+  try {
+    const { invited, missingEmail } = await inviteOwnersWithoutAccess(db, viewer, env.BETTER_AUTH_URL);
+    revalidatePath("/admin", "layout");
+    const t = await getTranslations("invitations");
+    return {
+      status: "success",
+      message:
+        t("bulkSent", { count: invited.length }) +
+        (missingEmail.length ? ` ${t("bulkMissing", { count: missingEmail.length })}` : ""),
+    };
+  } catch (err) {
+    return formError(err);
+  }
 }

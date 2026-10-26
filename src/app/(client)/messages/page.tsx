@@ -56,7 +56,11 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
         aria-label={t("conversationLabel")}
         className="border-border bg-surface flex min-h-[50dvh] flex-col rounded-lg border"
       >
-        <div className="flex max-h-[50dvh] flex-1 flex-col overflow-y-auto sm:max-h-[60dvh]">
+        {/* Focusable so keyboard users can scroll the thread. */}
+        <div
+          tabIndex={0}
+          className="focus-visible:ring-ring flex max-h-[50dvh] flex-1 flex-col overflow-y-auto outline-none focus-visible:ring-2 sm:max-h-[60dvh]"
+        >
           <Thread messages={thread.messages} perspective="owner" empty={t("ownerEmpty")} />
         </div>
         <div className="border-border border-t p-3 sm:p-4">

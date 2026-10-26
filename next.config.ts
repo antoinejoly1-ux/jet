@@ -6,7 +6,30 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 // Cache Components stays off: almost every page in the portal is per-user and
 // reads the session, so request-time rendering is the predictable default.
 // Revisit once there are public or shared pages worth prerendering.
+const dev = process.env.NODE_ENV !== "production";
+
+/**
+ * Content Security Policy. Scripts and styles come only from this origin
+ * (inline is needed by Next.js's hydration and Tailwind's runtime styles;
+ * a nonce-based policy would turn every page dynamic). Uploads PUT straight
+ * to the private S3 bucket, so that host is allowed for fetch.
+ */
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "connect-src 'self' https://*.amazonaws.com",
+  "frame-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://accounts.google.com",
+  "frame-ancestors 'none'",
+].join("; ");
+
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

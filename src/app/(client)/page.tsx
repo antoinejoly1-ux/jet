@@ -129,7 +129,7 @@ async function ShareSection({
               <p className="tabular text-muted text-sm">
                 {t("ofPlanned", { amount: formatMoney(s.budget.plannedCents, s.budget.currency, locale) })}
               </p>
-              <Meter value={budgetUsed} />
+              <Meter value={budgetUsed} label={t("budget", { year: new Date().getFullYear() })} />
             </>
           ) : (
             <p className="text-muted mt-2 text-sm">{t("budgetEmpty")}</p>
@@ -249,7 +249,7 @@ function ProgressRing({ value, label }: { value: number | null; label: string })
   );
 }
 
-function Meter({ value }: { value: number | null }) {
+function Meter({ value, label }: { value: number | null; label: string }) {
   if (value === null) return null;
   const pct = Math.min(100, Math.round(value * 100));
   const tone = value >= 1 ? "bg-danger" : value >= 0.9 ? "bg-warning" : "bg-accent";
@@ -257,6 +257,7 @@ function Meter({ value }: { value: number | null }) {
     <div
       className="bg-surface-muted mt-3 h-2 overflow-hidden rounded-full"
       role="meter"
+      aria-label={label}
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={pct}

@@ -13,11 +13,12 @@
   --border: #e2e5ea;
   --primary: #0b1220;
   --primary-foreground: #ffffff;
-  --accent: #2563eb;
-  --success: #15803d;
-  --warning: #b45309;
+  /* Light-mode status colours are dark enough for 4.5:1 text on their own 12% tints (WCAG AA). */
+  --accent: #1d4ed8;
+  --success: #166534;
+  --warning: #92400e;
   --danger: #b91c1c;
-  --ring: #2563eb;
+  --ring: #1d4ed8;
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 14px;

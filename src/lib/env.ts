@@ -25,6 +25,11 @@ const schema = z.object({
     .min(16)
     .optional()
     .or(z.literal("").transform(() => undefined)),
+  /** Law 25: the person in charge of protecting personal information, published on /privacy. */
+  PRIVACY_OFFICER_NAME: z.string().optional().default(""),
+  PRIVACY_OFFICER_EMAIL: z.string().optional().default(""),
+  /** The operator's legal name, as it should appear in the privacy policy. */
+  OPERATOR_LEGAL_NAME: z.string().optional().default(""),
   /** Shown to owners as a "call to book" button. Optional until the operator's number is settled. */
   OPERATOR_PHONE: z.string().optional().default(""),
   REQUIRE_STAFF_2FA: z

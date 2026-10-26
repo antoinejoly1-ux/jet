@@ -1,7 +1,7 @@
 import { ChevronRight, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,10 @@ import { db } from "@/lib/db";
 import { EmailPreferencesForm } from "@/components/account/email-preferences-form";
 import { listSignInMethods } from "@/lib/services/account";
 import { getEmailPreferences } from "@/lib/services/notification-center";
-import { saveEmailPreferencesAction, setLocaleAction } from "./actions";
+import { PrivacyRequestForm } from "@/components/account/privacy-request-form";
+import { DownloadLink } from "@/components/ui/download-link";
+import { listMyPrivacyRequests, RESPONSE_DAYS } from "@/lib/services/privacy";
+import { privacyRequestAction, saveEmailPreferencesAction, setLocaleAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("account"))("title") };
@@ -21,9 +24,11 @@ export default async function AccountPage() {
   const viewer = await requireViewer();
   const t = await getTranslations("account");
   const locale = await getLocale();
-  const [methods, emails] = await Promise.all([
+  const format = await getFormatter();
+  const [methods, emails, requests] = await Promise.all([
     listSignInMethods(db, viewer.id),
     viewer.ownerIds.length && !viewer.viewingAs ? getEmailPreferences(db, viewer) : Promise.resolve(null),
+    listMyPrivacyRequests(db, viewer),
   ]);
 
   return (
@@ -75,6 +80,41 @@ export default async function AccountPage() {
               preferences={emails}
               disabled={!!viewer.viewingAs}
             />
+          </Card>
+        ) : null}
+
+        {!viewer.viewingAs ? (
+          <Card id="privacy">
+            <CardTitle>{t("privacyTitle")}</CardTitle>
+            <p className="text-muted mt-1 text-sm">
+              {t.rich("privacyBody", {
+                days: RESPONSE_DAYS,
+                policy: (chunks) => (
+                  <Link href="/privacy" className="text-accent font-medium underline">
+                    {chunks}
+                  </Link>
+                ),
+              })}
+            </p>
+            <div className="mt-3">
+              <DownloadLink href="/account/data-export">{t("downloadData")}</DownloadLink>
+            </div>
+            <div className="border-border mt-5 border-t pt-4">
+              <PrivacyRequestForm action={privacyRequestAction} />
+            </div>
+            {requests.length ? (
+              <ul className="mt-4 flex flex-col gap-2 text-sm">
+                {requests.map((r) => (
+                  <li key={r.id} className="bg-surface-muted rounded-md px-3 py-2">
+                    <p className="font-medium">
+                      {t(`privacyKinds.${r.kind}`)} · {t(`privacyStatuses.${r.status}`)}
+                    </p>
+                    <p className="text-muted text-xs">{format.dateTime(r.createdAt, { dateStyle: "medium" })}</p>
+                    {r.response ? <p className="mt-1">{r.response}</p> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </Card>
         ) : null}
 

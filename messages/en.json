@@ -252,6 +252,24 @@
           "hint": "If you haven't read them in the portal after 5 minutes."
         }
       }
+    },
+    "privacyTitle": "Your personal information",
+    "privacyBody": "Download everything the portal keeps about you, or make a request: we answer within {days} days. See the <policy>privacy policy</policy>.",
+    "downloadData": "Download my data (JSON)",
+    "privacyKind": "Request",
+    "privacyDetails": "Details (optional)",
+    "privacySend": "Send the request",
+    "privacySent": "Request sent. We'll answer here and by email.",
+    "privacyKinds": {
+      "correction": "Correct some information",
+      "access": "Know what you hold",
+      "deletion": "Delete information",
+      "portability": "Receive my data"
+    },
+    "privacyStatuses": {
+      "open": "open",
+      "done": "handled",
+      "refused": "refused"
     }
   },
   "adminDashboard": {
@@ -263,7 +281,8 @@
     "accountsWaiting": "Accounts without access",
     "flightsToday": "Flights today",
     "flightsThisWeek": "Flights this week",
-    "inMaintenance": "Aircraft in maintenance"
+    "inMaintenance": "Aircraft in maintenance",
+    "ownersWithoutAccess": "Owners without access"
   },
   "owners": {
     "title": "Owners",
@@ -353,7 +372,13 @@
       "revoked": "Cancelled",
       "not_found": "Not found"
     },
-    "revoke": "Cancel"
+    "revoke": "Cancel",
+    "withoutAccessTitle": "{count, plural, one {# owner without access} other {# owners without access}}",
+    "withoutAccessBody": "No login linked and no open invitation. Launch is complete when this list is empty.",
+    "noEmail": "no email",
+    "bulkInvite": "Invite {count, plural, one {# owner} other {the # owners}} with an email",
+    "bulkSent": "{count, plural, =0 {No invitations sent.} one {# invitation sent.} other {# invitations sent.}}",
+    "bulkMissing": "{count, plural, one {# owner has no email: add it on their page.} other {# owners have no email: add it on their page.}}"
   },
   "common": {
     "confirm": "Confirm",
@@ -415,7 +440,13 @@
       "title": "Describe the work (at least 2 characters).",
       "startsAt": "Invalid date and time.",
       "endsAt": "End must be after start.",
-      "body": "Message too long (4,000 characters at most)."
+      "body": "Message too long (4,000 characters at most).",
+      "discoveredOn": "Must be on or after the incident date.",
+      "dataConcerned": "Say which information was affected.",
+      "peopleConcerned": "Say who is affected.",
+      "measures": "Say what was done.",
+      "severity": "Choose a level.",
+      "response": "Write an answer."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -447,7 +478,9 @@
     "integration_not_connected": "No scheduling software is connected.",
     "flight_not_departed": "This flight hasn't departed yet. Complete it after landing.",
     "message_empty": "Write a message or attach a file.",
-    "assignee_cannot_reply": "This person can't answer owners."
+    "assignee_cannot_reply": "This person can't answer owners.",
+    "privacy_request_open": "A request of this kind is already open.",
+    "privacy_request_closed": "This request is already closed."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -521,7 +554,9 @@
       "dispatcher": "Dispatcher"
     },
     "removeFromTeam": "Remove from team",
-    "save": "Save"
+    "save": "Save",
+    "privacyTitle": "Personal information (Law 25)",
+    "privacyBody": "Owners' requests and the incident register."
   },
   "audit": {
     "empty": "Nothing to show yet.",
@@ -1012,6 +1047,9 @@
       },
       "sync": {
         "failed": "The scheduling software sync had {failed} error(s)"
+      },
+      "privacy": {
+        "request": "Privacy request from {email} ({kind})"
       }
     }
   },
@@ -1079,5 +1117,110 @@
       "invoices": "Invoices",
       "none": "None this year."
     }
+  },
+  "privacyPolicy": {
+    "title": "Privacy policy",
+    "updated": "Last updated: {date}",
+    "intro": "{operator} manages aircraft for their owners. This portal gives owners access to their flights, hours, finances and invoices. This policy explains what personal information we collect, why, where it is kept and how to exercise your rights, under Quebec's Act respecting the protection of personal information in the private sector.",
+    "officerTitle": "Person in charge of protecting personal information",
+    "officerBody": "For any question or request: {officer}, <mail>{email}</mail>.",
+    "officerMissing": "Our privacy officer's contact details will be published here before the portal opens.",
+    "sections": [
+      {
+        "title": "What we collect",
+        "items": [
+          "Your identity and contact details: name, email, phone, language.",
+          "Your aircraft share: percentage, allotted hours, flights taken and their routes.",
+          "Your aircraft-related finances: budgets, costs, payments and invoices.",
+          "Your messages with our team and the files you attach.",
+          "Security data: IP address and browser when you sign in, and a log of actions taken in the portal."
+        ]
+      },
+      {
+        "title": "Why",
+        "items": [
+          "To manage your aircraft share, schedule your flights and keep your accounts.",
+          "To invoice you and send you budgets, statements and notices.",
+          "To protect your account: two-factor authentication for our team, attempt limits, an audit log.",
+          "To meet our legal and tax obligations.",
+          "We don't use your information for advertising and we don't sell it."
+        ]
+      },
+      {
+        "title": "Where it is kept",
+        "items": [
+          "The database and files (invoices, attachments) are hosted in Canada, in Amazon Web Services' Montreal region, encrypted at rest.",
+          "The portal itself is served by Vercel; pages are built on servers in the United States, which process your information while showing a page without keeping it.",
+          "Emails (notices, sign-in links) are sent by Resend, in the United States, which receives your email address and the message content.",
+          "Before communicating information outside Quebec, we assess the privacy factors and bind these providers by contract."
+        ]
+      },
+      {
+        "title": "Who can see it",
+        "items": [
+          "You, and the other people authorised on your owner account.",
+          "Our team, according to their role (dispatch, finance, administration). Every “view as owner” session and every change is logged.",
+          "Co-owners of the same aircraft never see your flights or finances: only that the aircraft is booked."
+        ]
+      },
+      {
+        "title": "How long",
+        "items": [
+          "Financial records (entries, invoices, budgets) are kept at least six years after the end of the tax year, as tax law requires.",
+          "Expired sessions and sign-in links are deleted automatically; unused invitations after 90 days; read notices after a year.",
+          "When our relationship ends, other information is deleted or anonymised once legal periods have passed."
+        ]
+      },
+      {
+        "title": "Your rights",
+        "items": [
+          "Access your information and get a copy in a structured format: download it any time from My account.",
+          "Have inaccurate information corrected.",
+          "Ask us to delete information that is no longer needed, subject to our legal obligations.",
+          "Withdraw consent to optional emails from My account.",
+          "File a complaint with Quebec's Commission d'accès à l'information.",
+          "We answer every request within 30 days."
+        ]
+      },
+      {
+        "title": "Confidentiality incidents",
+        "items": [
+          "We keep a register of confidentiality incidents. If an incident presents a risk of serious injury, we notify the Commission d'accès à l'information and the people concerned promptly."
+        ]
+      }
+    ],
+    "requestCta": "Make a request from My account"
+  },
+  "privacyAdmin": {
+    "title": "Personal information",
+    "subtitle": "Requests to answer within 30 days and the confidentiality incident register Law 25 requires.",
+    "requestsTitle": "Open requests",
+    "noOpenRequests": "No open requests.",
+    "daysLeft": "{count, plural, =0 {Due today} one {# day left} other {# days left}}",
+    "closedRequests": "{count, plural, one {# closed request} other {# closed requests}}",
+    "response": "Answer to the person",
+    "markDone": "Mark handled",
+    "refuse": "Refuse",
+    "newIncident": "Record an incident",
+    "newIncidentBody": "Any unauthorised access, use, disclosure or loss of personal information must be recorded, even a minor one.",
+    "incidentSaved": "Incident recorded.",
+    "occurredOn": "Occurred on",
+    "discoveredOn": "Discovered on",
+    "description": "What happened",
+    "dataConcerned": "Information affected",
+    "peopleConcerned": "People affected",
+    "severity": "Risk of injury",
+    "severities": {
+      "low": "Low",
+      "serious": "Serious"
+    },
+    "measures": "Measures taken",
+    "recordIncident": "Record",
+    "registerTitle": "Incident register",
+    "noIncidents": "No incidents recorded.",
+    "mustReport": "Report to the CAI",
+    "reportedToCaiOn": "Reported to the CAI on",
+    "peopleNotifiedOn": "People notified on",
+    "saveReporting": "Save"
   }
 }

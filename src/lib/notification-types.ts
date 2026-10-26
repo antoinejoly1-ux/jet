@@ -17,6 +17,7 @@ export const NOTIFICATION_TYPES = {
   "hours.low_staff": { audience: "staff", optionalEmail: false, href: () => "/admin/budgets" },
   "access.uninvited_sign_up": { audience: "staff", optionalEmail: false, href: () => "/admin/invitations" },
   "sync.failed": { audience: "staff", optionalEmail: false, href: () => "/admin/settings" },
+  "privacy.request": { audience: "staff", optionalEmail: false, href: () => "/admin/settings/privacy" },
 } as const satisfies Record<
   string,
   { audience: "owner" | "staff"; optionalEmail: boolean; href: (d: Record<string, string>) => string }

@@ -73,7 +73,10 @@ export default async function ConversationPage({ params, searchParams }: PagePro
               </Button>
             </form>
           </header>
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div
+            tabIndex={0}
+            className="focus-visible:ring-ring min-h-0 flex-1 overflow-y-auto outline-none focus-visible:ring-2 focus-visible:ring-inset"
+          >
             <Thread messages={messages} perspective="staff" empty={t("staffEmpty")} />
           </div>
           <div className="border-border border-t p-3 sm:p-4">

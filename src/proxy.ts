@@ -10,6 +10,7 @@ const PUBLIC_PREFIXES = [
   "/verify-email",
   "/two-factor",
   "/invite",
+  "/privacy",
 ];
 
 /**

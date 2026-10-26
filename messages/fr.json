@@ -252,6 +252,24 @@
           "hint": "Si vous ne les avez pas lus dans le portail après 5 minutes."
         }
       }
+    },
+    "privacyTitle": "Vos renseignements personnels",
+    "privacyBody": "Téléchargez tout ce que le portail conserve sur vous, ou faites une demande : nous répondons en {days} jours au plus. Voir la <policy>politique de confidentialité</policy>.",
+    "downloadData": "Télécharger mes données (JSON)",
+    "privacyKind": "Demande",
+    "privacyDetails": "Précisions (facultatif)",
+    "privacySend": "Envoyer la demande",
+    "privacySent": "Demande envoyée. Nous vous répondrons ici et par courriel.",
+    "privacyKinds": {
+      "correction": "Corriger un renseignement",
+      "access": "Savoir ce que vous détenez",
+      "deletion": "Supprimer des renseignements",
+      "portability": "Recevoir mes données"
+    },
+    "privacyStatuses": {
+      "open": "en cours",
+      "done": "traitée",
+      "refused": "refusée"
     }
   },
   "adminDashboard": {
@@ -263,7 +281,8 @@
     "accountsWaiting": "Comptes sans accès",
     "flightsToday": "Vols aujourd'hui",
     "flightsThisWeek": "Vols cette semaine",
-    "inMaintenance": "Appareils en maintenance"
+    "inMaintenance": "Appareils en maintenance",
+    "ownersWithoutAccess": "Propriétaires sans accès"
   },
   "owners": {
     "title": "Propriétaires",
@@ -353,7 +372,13 @@
       "revoked": "Annulée",
       "not_found": "Introuvable"
     },
-    "revoke": "Annuler"
+    "revoke": "Annuler",
+    "withoutAccessTitle": "{count, plural, one {# propriétaire sans accès} other {# propriétaires sans accès}}",
+    "withoutAccessBody": "Aucune connexion liée et aucune invitation en cours. L'ouverture est complète quand cette liste est vide.",
+    "noEmail": "sans courriel",
+    "bulkInvite": "{count, plural, one {Inviter # propriétaire} other {Inviter les # propriétaires}} avec courriel",
+    "bulkSent": "{count, plural, =0 {Aucune invitation envoyée.} one {# invitation envoyée.} other {# invitations envoyées.}}",
+    "bulkMissing": "{count, plural, one {# propriétaire n'a pas de courriel : ajoutez-le sur sa fiche.} other {# propriétaires n'ont pas de courriel : ajoutez-le sur leur fiche.}}"
   },
   "common": {
     "confirm": "Confirmer",
@@ -415,7 +440,13 @@
       "title": "Décrivez les travaux (2 caractères minimum).",
       "startsAt": "Date et heure invalides.",
       "endsAt": "La fin doit suivre le début.",
-      "body": "Message trop long (4 000 caractères maximum)."
+      "body": "Message trop long (4 000 caractères maximum).",
+      "discoveredOn": "La date doit suivre celle de l'incident.",
+      "dataConcerned": "Indiquez les renseignements touchés.",
+      "peopleConcerned": "Indiquez qui est touché.",
+      "measures": "Indiquez les mesures prises.",
+      "severity": "Choisissez un niveau.",
+      "response": "Écrivez une réponse."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -447,7 +478,9 @@
     "integration_not_connected": "Aucun logiciel de planification n'est connecté.",
     "flight_not_departed": "Ce vol n'est pas encore parti. Terminez-le après l'atterrissage.",
     "message_empty": "Écrivez un message ou joignez un fichier.",
-    "assignee_cannot_reply": "Cette personne ne peut pas répondre aux propriétaires."
+    "assignee_cannot_reply": "Cette personne ne peut pas répondre aux propriétaires.",
+    "privacy_request_open": "Une demande de ce type est déjà en cours.",
+    "privacy_request_closed": "Cette demande est déjà fermée."
   },
   "aircraft": {
     "title": "Appareils",
@@ -521,7 +554,9 @@
       "dispatcher": "Répartiteur"
     },
     "removeFromTeam": "Retirer de l'équipe",
-    "save": "Enregistrer"
+    "save": "Enregistrer",
+    "privacyTitle": "Renseignements personnels (Loi 25)",
+    "privacyBody": "Demandes des propriétaires et registre des incidents."
   },
   "audit": {
     "empty": "Rien à afficher pour l'instant.",
@@ -1012,6 +1047,9 @@
       },
       "sync": {
         "failed": "La synchronisation du logiciel de planification a {failed} erreur(s)"
+      },
+      "privacy": {
+        "request": "Demande Loi 25 de {email} ({kind})"
       }
     }
   },
@@ -1079,5 +1117,110 @@
       "invoices": "Factures",
       "none": "Aucune pour cette année."
     }
+  },
+  "privacyPolicy": {
+    "title": "Politique de confidentialité",
+    "updated": "Dernière mise à jour : {date}",
+    "intro": "{operator} gère des avions pour leurs propriétaires. Ce portail leur donne accès à leurs vols, leurs heures, leurs finances et leurs factures. Cette politique explique quels renseignements personnels nous recueillons, pourquoi, où ils sont conservés et comment exercer vos droits, conformément à la Loi sur la protection des renseignements personnels dans le secteur privé du Québec.",
+    "officerTitle": "Responsable de la protection des renseignements personnels",
+    "officerBody": "Pour toute question ou demande : {officer}, <mail>{email}</mail>.",
+    "officerMissing": "Les coordonnées de notre responsable seront publiées ici avant l'ouverture du portail.",
+    "sections": [
+      {
+        "title": "Ce que nous recueillons",
+        "items": [
+          "Votre identité et vos coordonnées : nom, courriel, téléphone, langue.",
+          "Votre part d'appareil : pourcentage, heures allouées, vols effectués et leurs trajets.",
+          "Vos finances liées à l'appareil : budgets, coûts, paiements et factures.",
+          "Vos messages avec notre équipe et les fichiers que vous y joignez.",
+          "Des données techniques de sécurité : adresse IP et navigateur lors des connexions, journal des actions faites dans le portail."
+        ]
+      },
+      {
+        "title": "Pourquoi",
+        "items": [
+          "Gérer votre part d'appareil, planifier vos vols et tenir vos comptes.",
+          "Vous facturer et vous transmettre budgets, relevés et avis.",
+          "Protéger votre compte : double authentification pour notre équipe, limites de tentatives, journal d'audit.",
+          "Respecter nos obligations légales et fiscales.",
+          "Nous n'utilisons pas vos renseignements à des fins publicitaires et nous ne les vendons pas."
+        ]
+      },
+      {
+        "title": "Où ils sont conservés",
+        "items": [
+          "La base de données et les fichiers (factures, pièces jointes) sont hébergés au Canada, dans la région de Montréal d'Amazon Web Services, chiffrés au repos.",
+          "Le portail lui-même est servi par Vercel; les pages sont générées sur des serveurs situés aux États-Unis, qui traitent vos renseignements le temps d'afficher une page sans les conserver.",
+          "Les courriels (avis, liens de connexion) sont envoyés par Resend, aux États-Unis, qui reçoit votre adresse courriel et le contenu du message.",
+          "Avant de communiquer des renseignements hors du Québec, nous évaluons les facteurs relatifs à la vie privée et nous encadrons ces fournisseurs par contrat."
+        ]
+      },
+      {
+        "title": "Qui y a accès",
+        "items": [
+          "Vous, et les autres personnes autorisées pour votre compte propriétaire.",
+          "Notre équipe, selon son rôle (répartition, finances, administration). Chaque consultation « vue propriétaire » et chaque modification est journalisée.",
+          "Les copropriétaires d'un même appareil ne voient jamais vos vols ni vos finances : seulement que l'appareil est réservé."
+        ]
+      },
+      {
+        "title": "Combien de temps",
+        "items": [
+          "Les dossiers financiers (écritures, factures, budgets) sont conservés au moins six ans après la fin de l'année fiscale, comme l'exigent les lois fiscales.",
+          "Les sessions expirées et les liens de connexion sont supprimés automatiquement; les invitations non utilisées après 90 jours; les avis lus après un an.",
+          "À la fin de votre relation avec nous, les autres renseignements sont supprimés ou anonymisés une fois les délais légaux écoulés."
+        ]
+      },
+      {
+        "title": "Vos droits",
+        "items": [
+          "Accéder à vos renseignements et en obtenir une copie dans un format structuré : téléchargez-la en tout temps depuis Mon compte.",
+          "Faire corriger des renseignements inexacts.",
+          "Demander la suppression de renseignements qui ne sont plus nécessaires, sous réserve de nos obligations légales.",
+          "Retirer votre consentement aux courriels facultatifs depuis Mon compte.",
+          "Déposer une plainte auprès de la Commission d'accès à l'information du Québec.",
+          "Nous répondons à toute demande dans un délai de 30 jours."
+        ]
+      },
+      {
+        "title": "Incidents de confidentialité",
+        "items": [
+          "Nous tenons un registre des incidents de confidentialité. Si un incident présente un risque de préjudice sérieux, nous avisons la Commission d'accès à l'information et les personnes concernées sans délai."
+        ]
+      }
+    ],
+    "requestCta": "Faire une demande depuis Mon compte"
+  },
+  "privacyAdmin": {
+    "title": "Renseignements personnels",
+    "subtitle": "Les demandes à traiter en 30 jours et le registre des incidents de confidentialité exigé par la Loi 25.",
+    "requestsTitle": "Demandes ouvertes",
+    "noOpenRequests": "Aucune demande ouverte.",
+    "daysLeft": "{count, plural, =0 {Échéance aujourd'hui} one {# jour restant} other {# jours restants}}",
+    "closedRequests": "{count, plural, one {# demande fermée} other {# demandes fermées}}",
+    "response": "Réponse à la personne",
+    "markDone": "Marquer traitée",
+    "refuse": "Refuser",
+    "newIncident": "Consigner un incident",
+    "newIncidentBody": "Tout accès, utilisation, communication ou perte de renseignements personnels non autorisé doit être consigné, même mineur.",
+    "incidentSaved": "Incident consigné.",
+    "occurredOn": "Survenu le",
+    "discoveredOn": "Constaté le",
+    "description": "Ce qui s'est passé",
+    "dataConcerned": "Renseignements touchés",
+    "peopleConcerned": "Personnes touchées",
+    "severity": "Risque de préjudice",
+    "severities": {
+      "low": "Faible",
+      "serious": "Sérieux"
+    },
+    "measures": "Mesures prises",
+    "recordIncident": "Consigner",
+    "registerTitle": "Registre des incidents",
+    "noIncidents": "Aucun incident consigné.",
+    "mustReport": "À déclarer à la CAI",
+    "reportedToCaiOn": "Déclaré à la CAI le",
+    "peopleNotifiedOn": "Personnes avisées le",
+    "saveReporting": "Enregistrer"
   }
 }
