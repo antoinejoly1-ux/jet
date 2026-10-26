@@ -38,14 +38,13 @@ export async function Thread({
   if (messages.length === 0)
     return <p className="text-muted flex flex-1 items-center justify-center px-6 py-16 text-center text-sm">{empty}</p>;
 
-  let previousDay = "";
+  const days = messages.map((m) => zonedDay(m.createdAt));
   return (
     <ol className="flex flex-col gap-2 px-4 py-4 sm:px-6" aria-label={t("threadLabel")}>
-      {messages.map((m) => {
+      {messages.map((m, i) => {
         const mine = (perspective === "staff") === m.fromStaff;
-        const day = zonedDay(m.createdAt);
-        const separator = day !== previousDay;
-        previousDay = day;
+        const day = days[i]!;
+        const separator = i === 0 || day !== days[i - 1];
         return (
           <li key={m.id} className="flex flex-col">
             {separator ? (

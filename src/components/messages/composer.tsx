@@ -2,7 +2,7 @@
 
 import { Paperclip, SendHorizontal, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { uploadFile } from "@/components/files/upload";
 import { Button } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/form-alert";
@@ -18,16 +18,16 @@ export function Composer({
 }) {
   const t = useTranslations("messages");
   const tf = useTranslations("formErrors");
-  const [state, formAction, pending] = useActionState(action, idle);
   const [file, setFile] = useState<{ id: string; name: string } | null>(null);
+  const [state, formAction, pending] = useActionState(async (prev: FormState, data: FormData) => {
+    const next = await action(prev, data);
+    if (next.status === "success") setFile(null);
+    return next;
+  }, idle);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (state.status === "success") setFile(null);
-  }, [state]);
 
   async function onPick(picked: File | undefined) {
     if (!picked) return;
