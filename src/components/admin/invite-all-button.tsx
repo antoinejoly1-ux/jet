@@ -15,7 +15,12 @@ export function InviteAllButton({ action, count }: { action: (s: FormState) => P
       <FormAlert state={state} />
       {count > 0 ? (
         <div>
-          <Button type="submit" size="sm" disabled={pending}>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={pending}
+            className="h-auto min-h-9 py-2 text-left whitespace-normal"
+          >
             <Send aria-hidden />
             {t("bulkInvite", { count })}
           </Button>
