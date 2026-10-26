@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Components use only these semantic names, never raw colors,
+ * so a rebrand or a new theme is a change here and nowhere else.
+ */
+:root {
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --surface-muted: #eef0f3;
+  --text: #0b1220;
+  --text-muted: #5b6475;
+  --border: #e2e5ea;
+  --primary: #0b1220;
+  --primary-foreground: #ffffff;
+  --accent: #2563eb;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --ring: #2563eb;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --background: #070b14;
+    --surface: #0e1422;
+    --surface-muted: #161e30;
+    --text: #e8ecf3;
+    --text-muted: #94a0b8;
+    --border: #222c40;
+    --primary: #e8ecf3;
+    --primary-foreground: #070b14;
+    --accent: #60a5fa;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --ring: #60a5fa;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #070b14;
+  --surface: #0e1422;
+  --surface-muted: #161e30;
+  --text: #e8ecf3;
+  --text-muted: #94a0b8;
+  --border: #222c40;
+  --primary: #e8ecf3;
+  --primary-foreground: #070b14;
+  --accent: #60a5fa;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --ring: #60a5fa;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-ring: var(--ring);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    background: var(--background);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Numbers line up in columns of amounts and hours. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}

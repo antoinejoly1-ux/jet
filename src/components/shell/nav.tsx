@@ -1,0 +1,184 @@
+"use client";
+
+import {
+  BarChart3,
+  CalendarDays,
+  ClipboardList,
+  FileText,
+  Gauge,
+  Home,
+  Inbox,
+  Menu,
+  MailPlus,
+  MessageSquare,
+  Plane,
+  PlaneTakeoff,
+  Settings,
+  Upload,
+  Users,
+  Wallet,
+  Wrench,
+  X,
+  type LucideIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import type { Route } from "next";
+import { cn } from "@/lib/utils";
+
+export type Side = "client" | "admin";
+
+type Item = { href: Route; key: string; icon: LucideIcon; mobile?: boolean };
+type Group = { key: string | null; items: Item[] };
+
+const CLIENT: Group[] = [
+  {
+    key: null,
+    items: [
+      { href: "/", key: "home", icon: Home, mobile: true },
+      { href: "/flights", key: "flights", icon: PlaneTakeoff, mobile: true },
+      { href: "/availability", key: "availability", icon: CalendarDays },
+      { href: "/finances", key: "finances", icon: Wallet, mobile: true },
+      { href: "/invoices", key: "invoices", icon: FileText, mobile: true },
+      { href: "/aircraft", key: "aircraft", icon: Plane },
+      { href: "/messages", key: "messages", icon: MessageSquare, mobile: true },
+    ],
+  },
+];
+
+const ADMIN: Group[] = [
+  {
+    key: "operations",
+    items: [
+      { href: "/admin", key: "dashboard", icon: Gauge, mobile: true },
+      { href: "/admin/aircraft", key: "aircraft", icon: Plane },
+      { href: "/admin/flights", key: "flights", icon: PlaneTakeoff, mobile: true },
+      { href: "/admin/maintenance", key: "maintenance", icon: Wrench },
+      { href: "/admin/messages", key: "messages", icon: Inbox, mobile: true },
+    ],
+  },
+  {
+    key: "clients",
+    items: [
+      { href: "/admin/owners", key: "owners", icon: Users, mobile: true },
+      { href: "/admin/invitations", key: "invitations", icon: MailPlus },
+    ],
+  },
+  {
+    key: "finance",
+    items: [
+      { href: "/admin/budgets", key: "budgets", icon: BarChart3 },
+      { href: "/admin/transactions", key: "transactions", icon: ClipboardList },
+      { href: "/admin/invoices", key: "invoices", icon: FileText },
+      { href: "/admin/imports", key: "imports", icon: Upload },
+    ],
+  },
+  { key: "settings", items: [{ href: "/admin/settings", key: "settings", icon: Settings }] },
+];
+
+const groupsFor = (side: Side) => (side === "admin" ? ADMIN : CLIENT);
+
+function useIsActive() {
+  const pathname = usePathname();
+  return (href: string) => (href === "/" || href === "/admin" ? pathname === href : pathname.startsWith(href));
+}
+
+/** Desktop sidebar (1024px and up). */
+export function Sidebar({ side }: { side: Side }) {
+  const t = useTranslations("nav");
+  const isActive = useIsActive();
+  return (
+    <nav aria-label={t("label")} className="flex flex-col gap-6">
+      {groupsFor(side).map((group) => (
+        <div key={group.key ?? "main"}>
+          {group.key ? (
+            <p className="text-muted mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
+              {t(`groups.${group.key}`)}
+            </p>
+          ) : null}
+          <ul className="flex flex-col gap-0.5">
+            {group.items.map(({ href, key, icon: Icon }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  aria-current={isActive(href) ? "page" : undefined}
+                  className={cn(
+                    "text-muted hover:bg-surface-muted hover:text-text flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors",
+                    "aria-[current=page]:bg-surface-muted aria-[current=page]:text-text",
+                  )}
+                >
+                  <Icon className="size-4" aria-hidden />
+                  {t(`items.${key}`)}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/**
+ * Phone and tablet bottom tab bar: the four most used destinations of the
+ * current side, plus "More", which opens every destination in a sheet.
+ */
+export function BottomTabs({ side }: { side: Side }) {
+  const t = useTranslations("nav");
+  const isActive = useIsActive();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const items = groupsFor(side)
+    .flatMap((g) => g.items)
+    .filter((i) => i.mobile)
+    .slice(0, 4);
+
+  const tab =
+    "flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted aria-[current=page]:text-text";
+  return (
+    <>
+      {moreOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("more")}
+          // Close the sheet once a destination is picked.
+          onClick={(e) => (e.target as HTMLElement).closest("a") && setMoreOpen(false)}
+          className="bg-surface fixed inset-0 z-40 overflow-y-auto px-3 pt-6 pb-28 lg:hidden"
+        >
+          <Sidebar side={side} />
+        </div>
+      ) : null}
+      <nav
+        aria-label={t("label")}
+        className="border-border bg-surface/95 fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      >
+        <ul className="grid grid-cols-5">
+          {items.map(({ href, key, icon: Icon }) => (
+            <li key={href}>
+              <Link href={href} aria-current={isActive(href) && !moreOpen ? "page" : undefined} className={tab}>
+                <Icon className="size-5" aria-hidden />
+                <span className="max-w-full truncate px-1">
+                  {t.has(`tabs.${key}`) ? t(`tabs.${key}`) : t(`items.${key}`)}
+                </span>
+              </Link>
+            </li>
+          ))}
+          <li>
+            <button
+              type="button"
+              aria-expanded={moreOpen}
+              onClick={() => setMoreOpen((o) => !o)}
+              className={tab}
+              aria-current={moreOpen ? "page" : undefined}
+            >
+              {moreOpen ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
+              <span>{t("more")}</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </>
+  );
+}

@@ -1,0 +1,246 @@
+{
+  "nav": {
+    "label": "Navigation principale",
+    "more": "Plus",
+    "groups": {
+      "operations": "Opérations",
+      "clients": "Clients",
+      "finance": "Finances",
+      "settings": "Réglages"
+    },
+    "items": {
+      "home": "Accueil",
+      "flights": "Vols",
+      "availability": "Disponibilité",
+      "finances": "Finances",
+      "invoices": "Factures",
+      "aircraft": "Appareils",
+      "messages": "Messages",
+      "dashboard": "Tableau de bord",
+      "maintenance": "Maintenance",
+      "owners": "Propriétaires",
+      "invitations": "Invitations",
+      "budgets": "Budgets",
+      "transactions": "Transactions",
+      "imports": "Importations",
+      "settings": "Réglages"
+    },
+    "tabs": {
+      "dashboard": "Tableau"
+    }
+  },
+  "toggle": {
+    "label": "Changer de vue",
+    "client": "Client",
+    "admin": "Admin"
+  },
+  "userMenu": {
+    "open": "Ouvrir le menu du compte",
+    "account": "Mon compte",
+    "signOut": "Se déconnecter"
+  },
+  "comingSoon": {
+    "title": "Cet écran arrive bientôt",
+    "body": "Il sera livré à la phase {phase} du projet."
+  },
+  "auth": {
+    "signInTitle": "Connexion",
+    "signInSubtitle": "Accédez à votre portail de propriétaire.",
+    "or": "ou",
+    "email": "Courriel",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "signingIn": "Connexion…",
+    "signIn": "Se connecter",
+    "sending": "Envoi…",
+    "emailMeALink": "M'envoyer un lien de connexion",
+    "noAccount": "Pas encore de compte?",
+    "createAccount": "Créer un compte",
+    "magicLinkSent": "Un lien de connexion a été envoyé à {email}.",
+    "continueWithGoogle": "Continuer avec Google",
+    "signUpTitle": "Créer un compte",
+    "signUpSubtitle": "Votre accès sera activé dès que votre invitation est liée au compte.",
+    "name": "Nom complet",
+    "passwordHint": "Au moins 10 caractères.",
+    "creating": "Création…",
+    "haveAccount": "Déjà un compte?",
+    "checkInboxTitle": "Vérifiez vos courriels",
+    "checkInboxBody": "Nous avons envoyé un lien de confirmation à {email}. Ouvrez-le pour activer votre compte.",
+    "forgotTitle": "Mot de passe oublié",
+    "forgotSubtitle": "Entrez votre courriel et nous vous enverrons un lien pour en choisir un nouveau.",
+    "resetSent": "Si un compte existe pour cette adresse, un lien vient d'être envoyé.",
+    "sendResetLink": "Envoyer le lien",
+    "backToSignIn": "Retour à la connexion",
+    "resetTitle": "Nouveau mot de passe",
+    "resetDone": "Votre mot de passe a été changé. Vous pouvez vous connecter.",
+    "newPassword": "Nouveau mot de passe",
+    "saving": "Enregistrement…",
+    "savePassword": "Enregistrer",
+    "errors": {
+      "unverified": "Confirmez d'abord votre adresse courriel : un nouveau lien vous a été envoyé.",
+      "invalidCredentials": "Courriel ou mot de passe incorrect.",
+      "emailRequired": "Entrez votre courriel.",
+      "generic": "Une erreur est survenue. Réessayez.",
+      "passwordTooShort": "Le mot de passe doit contenir au moins 10 caractères.",
+      "emailTaken": "Un compte existe déjà pour ce courriel. Connectez-vous plutôt.",
+      "invalidLink": "Ce lien est invalide ou expiré. Demandez-en un nouveau."
+    }
+  },
+  "twoFactor": {
+    "invalidCode": "Code invalide. Réessayez.",
+    "verifyTitle": "Vérification en deux étapes",
+    "verifyBody": "Entrez le code à 6 chiffres affiché dans votre application d'authentification.",
+    "code": "Code",
+    "trustDevice": "Faire confiance à cet appareil pendant 30 jours",
+    "verify": "Vérifier",
+    "enableFailed": "Impossible d'activer la vérification. Vérifiez votre mot de passe.",
+    "confirmPassword": "Confirmez votre mot de passe",
+    "start": "Configurer l'application",
+    "step1": "Ajoutez le compte dans votre application d'authentification avec cette clé.",
+    "openInApp": "Ouvrir dans l'application",
+    "step2": "Conservez ces codes de secours en lieu sûr. Chacun ne sert qu'une fois.",
+    "step3": "Entrez le code affiché par l'application pour terminer.",
+    "finish": "Activer",
+    "title": "Sécurité",
+    "description": "Protégez votre compte avec une vérification en deux étapes.",
+    "requiredForStaff": "La vérification en deux étapes est obligatoire pour accéder au côté Admin.",
+    "authenticatorApp": "Application d'authentification",
+    "on": "Activée",
+    "off": "Désactivée",
+    "enabledBody": "Un code vous sera demandé à chaque connexion sur un nouvel appareil."
+  },
+  "invite": {
+    "unavailableTitle": "Invitation non disponible",
+    "states": {
+      "expired": "Cette invitation a expiré. Demandez-en une nouvelle à votre gestionnaire.",
+      "accepted": "Cette invitation a déjà été utilisée. Connectez-vous pour accéder au portail.",
+      "revoked": "Cette invitation a été annulée.",
+      "not_found": "Ce lien d'invitation est invalide."
+    },
+    "goToSignIn": "Aller à la connexion",
+    "staffRoles": {
+      "admin": "l'équipe (administrateur)",
+      "finance": "l'équipe (finances)",
+      "dispatcher": "l'équipe (répartition)"
+    },
+    "title": "Vous êtes invité",
+    "body": "Cette invitation donne accès à {target} pour {email}.",
+    "errors": {
+      "email_mismatch": "Cette invitation est liée à une autre adresse courriel.",
+      "generic": "Cette invitation ne peut plus être acceptée."
+    },
+    "createAccount": "Créer mon compte",
+    "signIn": "J'ai déjà un compte",
+    "accept": "Accepter l'invitation",
+    "wrongAccount": "Cette invitation est pour {email}, mais vous êtes connecté en tant que {current}. Déconnectez-vous et reconnectez-vous avec la bonne adresse."
+  },
+  "pending": {
+    "title": "Votre accès est en préparation",
+    "body": "Votre compte ({email}) est créé, mais il n'est pas encore lié à un appareil. Notre équipe a été avisée et activera votre accès sous peu."
+  },
+  "home": {
+    "greeting": "Bonjour, {name}",
+    "subtitle": "Voici l'état de votre appareil aujourd'hui.",
+    "noShareTitle": "Aucune part d'appareil",
+    "noShareBody": "Vos données apparaîtront ici dès que votre part sera enregistrée.",
+    "noShareStaffBody": "Vous ne détenez pas de part. Passez au côté Admin pour gérer les propriétaires.",
+    "status": {
+      "available": "Disponible",
+      "flying": "En vol",
+      "maintenance": "En maintenance",
+      "inactive": "Inactif"
+    },
+    "shareOf": "Part de {percent}",
+    "hoursRemaining": "Heures restantes",
+    "ofAnnual": "sur {hours} par année",
+    "budget": "Budget {year}",
+    "ofPlanned": "dépensé sur {amount} prévus",
+    "budgetEmpty": "Le budget de l'année sera publié par notre équipe.",
+    "nextFlight": "Prochain vol",
+    "nextFlightEmpty": "Aucun vol à venir.",
+    "nextMaintenance": "Prochaine maintenance",
+    "nextMaintenanceEmpty": "Aucune maintenance prévue.",
+    "dueOn": "Prévue le {date}",
+    "latestInvoice": "Dernière facture",
+    "latestInvoiceEmpty": "Votre première facture apparaîtra ici après votre premier vol.",
+    "availability": "Disponibilité",
+    "availabilitySoon": "Le calendrier de disponibilité arrive à la phase 3."
+  },
+  "account": {
+    "title": "Mon compte",
+    "profile": "Profil",
+    "name": "Nom",
+    "email": "Courriel",
+    "signInMethods": "Connexion",
+    "methods": {
+      "google": "Google",
+      "credential": "Mot de passe",
+      "magicLink": "Lien par courriel"
+    },
+    "language": "Langue",
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "security": "Sécurité",
+    "twoFactorOn": "Vérification en deux étapes activée",
+    "twoFactorOff": "Vérification en deux étapes désactivée"
+  },
+  "adminDashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "La flotte et les clients en un coup d'œil.",
+    "owners": "Propriétaires",
+    "aircraft": "Appareils",
+    "pendingInvitations": "Invitations en attente",
+    "accountsWaiting": "Comptes sans accès"
+  },
+  "owners": {
+    "title": "Propriétaires",
+    "subtitle": "Toutes les personnes et compagnies qui détiennent une part.",
+    "emptyTitle": "Aucun propriétaire",
+    "emptyBody": "La création des propriétaires arrive à la phase 1.",
+    "noAircraft": "Aucun appareil",
+    "name": "Nom",
+    "type": "Type",
+    "email": "Courriel",
+    "aircraft": "Appareils",
+    "logins": "Accès",
+    "types": {
+      "person": "Personne",
+      "company": "Compagnie"
+    }
+  },
+  "invitations": {
+    "title": "Invitations",
+    "subtitle": "Donnez accès au portail à un propriétaire ou à un membre de l'équipe.",
+    "errors": {
+      "invalid": "Vérifiez le courriel et l'accès choisi.",
+      "forbidden": "Vous n'avez pas la permission d'envoyer cette invitation."
+    },
+    "sent": "Invitation envoyée à {email}. Lien à usage unique :",
+    "email": "Courriel",
+    "access": "Accès",
+    "ownersGroup": "Propriétaire",
+    "staffGroup": "Équipe",
+    "staffRoles": {
+      "admin": "Administrateur",
+      "finance": "Finances",
+      "dispatcher": "Répartiteur"
+    },
+    "sending": "Envoi…",
+    "send": "Envoyer l'invitation",
+    "noPermissionTitle": "Accès réservé",
+    "noPermissionBody": "Seules les finances et les administrateurs peuvent inviter.",
+    "newInvitation": "Nouvelle invitation",
+    "emptyTitle": "Aucune invitation",
+    "emptyBody": "Les invitations envoyées apparaîtront ici avec leur statut.",
+    "states": {
+      "valid": "En attente",
+      "accepted": "Acceptée",
+      "expired": "Expirée",
+      "revoked": "Annulée",
+      "not_found": "Introuvable"
+    },
+    "revoke": "Annuler"
+  }
+}

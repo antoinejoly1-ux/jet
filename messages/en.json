@@ -1,0 +1,246 @@
+{
+  "nav": {
+    "label": "Main navigation",
+    "more": "More",
+    "groups": {
+      "operations": "Operations",
+      "clients": "Clients",
+      "finance": "Finance",
+      "settings": "Settings"
+    },
+    "items": {
+      "home": "Home",
+      "flights": "Flights",
+      "availability": "Availability",
+      "finances": "Finances",
+      "invoices": "Invoices",
+      "aircraft": "Aircraft",
+      "messages": "Messages",
+      "dashboard": "Dashboard",
+      "maintenance": "Maintenance",
+      "owners": "Owners",
+      "invitations": "Invitations",
+      "budgets": "Budgets",
+      "transactions": "Transactions",
+      "imports": "Imports",
+      "settings": "Settings"
+    },
+    "tabs": {
+      "dashboard": "Dashboard"
+    }
+  },
+  "toggle": {
+    "label": "Switch view",
+    "client": "Client",
+    "admin": "Admin"
+  },
+  "userMenu": {
+    "open": "Open account menu",
+    "account": "My account",
+    "signOut": "Sign out"
+  },
+  "comingSoon": {
+    "title": "This screen is coming soon",
+    "body": "It ships in phase {phase} of the project."
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "signInSubtitle": "Access your owner portal.",
+    "or": "or",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "signingIn": "Signing in…",
+    "signIn": "Sign in",
+    "sending": "Sending…",
+    "emailMeALink": "Email me a sign-in link",
+    "noAccount": "No account yet?",
+    "createAccount": "Create an account",
+    "magicLinkSent": "A sign-in link was sent to {email}.",
+    "continueWithGoogle": "Continue with Google",
+    "signUpTitle": "Create an account",
+    "signUpSubtitle": "Your access turns on once your invitation is linked to the account.",
+    "name": "Full name",
+    "passwordHint": "At least 10 characters.",
+    "creating": "Creating…",
+    "haveAccount": "Already have an account?",
+    "checkInboxTitle": "Check your email",
+    "checkInboxBody": "We sent a confirmation link to {email}. Open it to activate your account.",
+    "forgotTitle": "Forgot password",
+    "forgotSubtitle": "Enter your email and we'll send you a link to choose a new one.",
+    "resetSent": "If an account exists for that address, a link is on its way.",
+    "sendResetLink": "Send the link",
+    "backToSignIn": "Back to sign in",
+    "resetTitle": "New password",
+    "resetDone": "Your password was changed. You can sign in now.",
+    "newPassword": "New password",
+    "saving": "Saving…",
+    "savePassword": "Save",
+    "errors": {
+      "unverified": "Confirm your email address first: we just sent you a new link.",
+      "invalidCredentials": "Wrong email or password.",
+      "emailRequired": "Enter your email.",
+      "generic": "Something went wrong. Try again.",
+      "passwordTooShort": "Your password needs at least 10 characters.",
+      "emailTaken": "An account already exists for this email. Sign in instead.",
+      "invalidLink": "This link is invalid or expired. Ask for a new one."
+    }
+  },
+  "twoFactor": {
+    "invalidCode": "Invalid code. Try again.",
+    "verifyTitle": "Two-step verification",
+    "verifyBody": "Enter the 6-digit code shown in your authenticator app.",
+    "code": "Code",
+    "trustDevice": "Trust this device for 30 days",
+    "verify": "Verify",
+    "enableFailed": "Couldn't turn on verification. Check your password.",
+    "confirmPassword": "Confirm your password",
+    "start": "Set up the app",
+    "step1": "Add the account in your authenticator app with this key.",
+    "openInApp": "Open in the app",
+    "step2": "Keep these backup codes somewhere safe. Each works once.",
+    "step3": "Enter the code the app shows to finish.",
+    "finish": "Turn on",
+    "title": "Security",
+    "description": "Protect your account with two-step verification.",
+    "requiredForStaff": "Two-step verification is required to use the Admin side.",
+    "authenticatorApp": "Authenticator app",
+    "on": "On",
+    "off": "Off",
+    "enabledBody": "You'll be asked for a code whenever you sign in on a new device."
+  },
+  "invite": {
+    "unavailableTitle": "Invitation unavailable",
+    "states": {
+      "expired": "This invitation has expired. Ask your account manager for a new one.",
+      "accepted": "This invitation was already used. Sign in to reach the portal.",
+      "revoked": "This invitation was cancelled.",
+      "not_found": "This invitation link is invalid."
+    },
+    "goToSignIn": "Go to sign in",
+    "staffRoles": {
+      "admin": "the team (admin)",
+      "finance": "the team (finance)",
+      "dispatcher": "the team (dispatch)"
+    },
+    "title": "You're invited",
+    "body": "This invitation gives {email} access to {target}.",
+    "errors": {
+      "email_mismatch": "This invitation belongs to a different email address.",
+      "generic": "This invitation can no longer be accepted."
+    },
+    "createAccount": "Create my account",
+    "signIn": "I already have an account",
+    "accept": "Accept the invitation",
+    "wrongAccount": "This invitation is for {email}, but you're signed in as {current}. Sign out and sign back in with the right address."
+  },
+  "pending": {
+    "title": "Your access is being set up",
+    "body": "Your account ({email}) exists but isn't linked to an aircraft yet. Our team has been notified and will turn on your access shortly."
+  },
+  "home": {
+    "greeting": "Hello, {name}",
+    "subtitle": "Here's where your aircraft stands today.",
+    "noShareTitle": "No aircraft share yet",
+    "noShareBody": "Your data will show here as soon as your share is recorded.",
+    "noShareStaffBody": "You don't hold a share. Switch to Admin to manage owners.",
+    "status": {
+      "available": "Available",
+      "flying": "Flying",
+      "maintenance": "In maintenance",
+      "inactive": "Inactive"
+    },
+    "shareOf": "{percent} share",
+    "hoursRemaining": "Hours remaining",
+    "ofAnnual": "of {hours} per year",
+    "budget": "{year} budget",
+    "ofPlanned": "spent of {amount} planned",
+    "budgetEmpty": "This year's budget will be published by our team.",
+    "nextFlight": "Next flight",
+    "nextFlightEmpty": "No upcoming flights.",
+    "nextMaintenance": "Next maintenance",
+    "nextMaintenanceEmpty": "No maintenance planned.",
+    "dueOn": "Due {date}",
+    "latestInvoice": "Latest invoice",
+    "latestInvoiceEmpty": "Your first invoice will appear here after your first flight.",
+    "availability": "Availability",
+    "availabilitySoon": "The availability calendar arrives in phase 3."
+  },
+  "account": {
+    "title": "My account",
+    "profile": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "signInMethods": "Sign-in",
+    "methods": {
+      "google": "Google",
+      "credential": "Password",
+      "magicLink": "Email link"
+    },
+    "language": "Language",
+    "languages": {
+      "fr": "Français",
+      "en": "English"
+    },
+    "security": "Security",
+    "twoFactorOn": "Two-step verification is on",
+    "twoFactorOff": "Two-step verification is off"
+  },
+  "adminDashboard": {
+    "title": "Dashboard",
+    "subtitle": "The fleet and clients at a glance.",
+    "owners": "Owners",
+    "aircraft": "Aircraft",
+    "pendingInvitations": "Pending invitations",
+    "accountsWaiting": "Accounts without access"
+  },
+  "owners": {
+    "title": "Owners",
+    "subtitle": "Every person and company holding a share.",
+    "emptyTitle": "No owners yet",
+    "emptyBody": "Creating owners arrives in phase 1.",
+    "noAircraft": "No aircraft",
+    "name": "Name",
+    "type": "Type",
+    "email": "Email",
+    "aircraft": "Aircraft",
+    "logins": "Logins",
+    "types": {
+      "person": "Person",
+      "company": "Company"
+    }
+  },
+  "invitations": {
+    "title": "Invitations",
+    "subtitle": "Give an owner or a team member access to the portal.",
+    "errors": {
+      "invalid": "Check the email and the access you chose.",
+      "forbidden": "You don't have permission to send this invitation."
+    },
+    "sent": "Invitation sent to {email}. Single-use link:",
+    "email": "Email",
+    "access": "Access",
+    "ownersGroup": "Owner",
+    "staffGroup": "Team",
+    "staffRoles": {
+      "admin": "Admin",
+      "finance": "Finance",
+      "dispatcher": "Dispatcher"
+    },
+    "sending": "Sending…",
+    "send": "Send invitation",
+    "noPermissionTitle": "Restricted",
+    "noPermissionBody": "Only finance and admins can send invitations.",
+    "newInvitation": "New invitation",
+    "emptyTitle": "No invitations yet",
+    "emptyBody": "Invitations you send show here with their status.",
+    "states": {
+      "valid": "Pending",
+      "accepted": "Accepted",
+      "expired": "Expired",
+      "revoked": "Cancelled",
+      "not_found": "Not found"
+    },
+    "revoke": "Cancel"
+  }
+}
