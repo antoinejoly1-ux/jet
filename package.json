@@ -19,6 +19,8 @@
     "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1156.0",
+    "@aws-sdk/s3-request-presigner": "^3.1156.0",
     "@better-auth/utils": "0.5.1",
     "@radix-ui/react-slot": "^1.5.0",
     "better-auth": "^1.7.13",
@@ -28,6 +30,7 @@
     "lucide-react": "^1.61.0",
     "next": "16.4.3",
     "next-intl": "^4.14.9",
+    "papaparse": "^5.7.0",
     "pg": "^8.23.1",
     "qrcode": "^1.5.4",
     "react": "19.3.0",
@@ -42,6 +45,7 @@
     "@playwright/test": "1.63.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/papaparse": "^5.5.2",
     "@types/pg": "^8.23.1",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",

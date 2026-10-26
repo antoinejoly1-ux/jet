@@ -17,6 +17,10 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   typedRoutes: true,
+  experimental: {
+    // Spreadsheet imports send their parsed rows to a server action. Kept under Vercel's 4.5 MB request cap.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

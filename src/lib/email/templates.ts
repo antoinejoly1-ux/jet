@@ -51,6 +51,30 @@ const copy = {
       cta: "Accept the invitation",
     },
   },
+  invoiceIssued: {
+    fr: {
+      subject: "Nouvelle facture {number}",
+      body: "Une nouvelle facture de {amount} pour {aircraft} est disponible dans votre portail.",
+      cta: "Voir la facture",
+    },
+    en: {
+      subject: "New invoice {number}",
+      body: "A new invoice of {amount} for {aircraft} is available in your portal.",
+      cta: "View the invoice",
+    },
+  },
+  budgetPublished: {
+    fr: {
+      subject: "Votre budget {year} est disponible",
+      body: "Le budget {year} de {aircraft} a été publié. Vous pouvez le consulter dans votre portail.",
+      cta: "Voir mes finances",
+    },
+    en: {
+      subject: "Your {year} budget is ready",
+      body: "The {year} budget for {aircraft} has been published. You can review it in your portal.",
+      cta: "View my finances",
+    },
+  },
 } as const;
 
 export type TemplateName = keyof typeof copy;
@@ -59,8 +83,16 @@ const escape = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 /** Builds a one-action email (a sentence and a button) in the recipient's language. */
-export function actionEmail(name: TemplateName, to: string, url: string, locale: Locale = "fr"): Email {
-  const t = copy[name][locale];
+export function actionEmail(
+  name: TemplateName,
+  to: string,
+  url: string,
+  locale: Locale = "fr",
+  vars: Record<string, string> = {},
+): Email {
+  const fill = (text: string) => text.replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? `{${k}}`);
+  const raw = copy[name][locale];
+  const t = { subject: fill(raw.subject), body: fill(raw.body), cta: raw.cta };
   const html = `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f4f5f7;font-family:Inter,Arial,sans-serif;color:#0b1220">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:12px;padding:32px">

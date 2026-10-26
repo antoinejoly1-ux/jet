@@ -8,6 +8,9 @@
  */
 import { createOTP } from "@better-auth/utils/otp";
 import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
+import { createHash } from "node:crypto";
+import { mkdir, rm, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { config } from "dotenv";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -21,6 +24,49 @@ if (process.env.NODE_ENV === "production") throw new Error("Refusing to seed a p
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 const db = drizzle(pool, { schema: s, casing: "snake_case" });
+
+/** A small, valid one-page PDF with a few lines of text, standing in for real invoices. */
+function demoPdf(lines: string[]): Buffer {
+  const text = lines
+    .map((l, i) => `BT /F1 ${i === 0 ? 18 : 11} Tf 56 ${770 - i * 22} Td (${l.replace(/[()\\]/g, "")}) Tj ET`)
+    .join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+    `<< /Length ${Buffer.byteLength(text)} >>\nstream\n${text}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  let body = "%PDF-1.4\n";
+  const offsets: number[] = [];
+  objects.forEach((o, i) => {
+    offsets.push(Buffer.byteLength(body));
+    body += `${i + 1} 0 obj\n${o}\nendobj\n`;
+  });
+  const xref = Buffer.byteLength(body);
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((n) => `${String(n).padStart(10, "0")} 00000 n \n`).join("")}`;
+  body += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
+}
+
+const storageDir = path.resolve(process.env.LOCAL_STORAGE_DIR ?? "tmp/storage");
+
+async function storeDemoFile(name: string, bytes: Buffer) {
+  const key = `invoices/${uuidv7()}.pdf`;
+  await mkdir(path.join(storageDir, "invoices"), { recursive: true });
+  await writeFile(path.join(storageDir, key), bytes);
+  const [file] = await db
+    .insert(s.files)
+    .values({
+      storageKey: key,
+      contentType: "application/pdf",
+      sizeBytes: bytes.length,
+      sha256: createHash("sha256").update(bytes).digest("hex"),
+      originalName: name,
+    })
+    .returning();
+  return file!.id;
+}
 
 const DEMO_PASSWORD = "demo-password-2026";
 /** Shared 2FA secret for the demo staff logins (also in tests/e2e/support.ts). Never use outside demos. */
@@ -64,6 +110,7 @@ async function main() {
     "SELECT tablename FROM pg_tables WHERE schemaname = 'public'",
   );
   await pool.query(`TRUNCATE ${rows.map((r) => `"${r.tablename}"`).join(", ")} RESTART IDENTITY CASCADE`);
+  await rm(path.join(storageDir, "invoices"), { recursive: true, force: true });
 
   const categories = await db
     .insert(s.budgetCategories)
@@ -203,12 +250,25 @@ async function main() {
         const crew = Math.round(block * 10) * 100;
         const fees = Math.round(400 + rand() * 900) * 100;
         const total = fuel + crew + fees;
+        const number = `INV-${year}-${String(invoiceSeq++).padStart(4, "0")}`;
+        const fileId = await storeDemoFile(
+          `${number}.pdf`,
+          demoPdf([
+            `Facture ${number}`,
+            `Vol ${from} - ${to}, ${isoDay(departs)}`,
+            `Carburant: ${(fuel / 100).toFixed(2)} $`,
+            `Equipage: ${(crew / 100).toFixed(2)} $`,
+            `Frais d'aeroport: ${(fees / 100).toFixed(2)} $`,
+            `Total: ${(total / 100).toFixed(2)} $ CAD`,
+          ]),
+        );
         const [invoice] = await db
           .insert(s.invoices)
           .values({
             shareId: share.id,
             flightId: flight!.id,
-            number: `INV-${year}-${String(invoiceSeq++).padStart(4, "0")}`,
+            number,
+            fileId,
             issuedOn: isoDay(new Date(departs.getTime() + 2 * 86_400_000)),
             dueOn: isoDay(new Date(departs.getTime() + 32 * 86_400_000)),
             totalCents: total,

@@ -5,7 +5,8 @@ the operator's team runs the business from the same app behind a **Client | Admi
 
 **Built so far:** Phase 0 (foundation: accounts, roles, permissions, the full schema, both app shells, French and
 English, tests and CI), staff two-factor authentication, and Phase 1 (admin core: owners, aircraft and shares, View as
-owner, team and roles, audit log).
+owner, team and roles, audit log), and Phase 2 (finance and invoices: invoices with PDFs, the money and hours ledgers,
+budgets, spreadsheet import, and the owner's Finances and Invoices screens).
 
 ## Stack
 
@@ -70,6 +71,22 @@ set (redirect URI: `{BETTER_AUTH_URL}/api/auth/callback/google`).
 - **Rate limits** on sign-in, sign-up, magic links, password reset and 2FA are stored in Postgres so they hold across
   serverless instances.
 
+## Money, files and imports
+
+- **Ledgers:** transactions and hours are append-only. A mistake is corrected by **reversing** the entry (an exact
+  opposite pointing at it), never by editing or deleting, so every balance can be traced.
+- **Budgets** are drafted per share and year, compared live with actual costs by category, and **published** to the
+  owner, who sees nothing until then. "Start from last year" copies the previous plan.
+- **Invoices** are issued with their PDF. The owner gets an in-app notification and an email, and an
+  `invoice.issued` event is queued for connected systems. Invoices are marked paid or voided with a reason, never deleted.
+- **Files** go straight from the browser to storage with a 5-minute signed URL (S3 checks the declared size, type and
+  SHA-256), so large PDFs never hit the app server's request limit. `/files/[id]` checks who is asking before handing
+  out a 5-minute download link; owners can open only their own invoices. Duplicate uploads are flagged.
+- **Spreadsheet import** (Admin → Imports): CSV parsed in the browser, columns matched once (remembered for next
+  time, guessed from French or English headers), every row checked on the server with a per-row report, then the valid
+  rows are imported in one transaction and the original file is kept.
+- **Amounts** are typed as people write them: `1 234,56`, `1,234.56` and `1234.56` all work.
+
 ## Project layout
 
 ```
@@ -129,11 +146,14 @@ checks permissions, validates input, writes in a transaction and records the aud
 The business is Canadian, so client data stays in Canada:
 
 - **Database:** PostgreSQL in AWS `ca-central-1` (Montreal), through AWS RDS or Supabase. Set `DATABASE_URL`.
-- **Files** (invoices, imports): a private S3 bucket in `ca-central-1`, arriving with Phase 2.
+- **Files** (invoices, imports): a private S3 bucket in `ca-central-1` with default encryption and CORS allowing `PUT`
+  and `GET` from the app's origin. Set `STORAGE_DRIVER=s3`, `S3_BUCKET`, and AWS credentials. Locally, files live in
+  `tmp/storage` behind the same signed-URL flow.
 - **App:** Vercel. Its servers process requests but don't store client data; run the functions in the region closest
   to Montreal (`iad1`) and note it in the Law 25 privacy assessment.
 
 ## What's next
 
-Phase 2 (finance and invoices): budgets, transactions, hours ledger, invoice upload, spreadsheet import, and the owner's
-Finances and Invoices screens.
+Phase 3 (operations): flights, availability and maintenance, entered by hand first, then synced from the scheduling
+software once its API access is granted; the owner's Flights, Availability and Aircraft screens; flights deducting
+hours automatically.

@@ -16,7 +16,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("team"))("auditTitle") };
 }
 
-const FILTERS = ["", "auth.", "owner.", "aircraft.", "share.", "invitation.", "team."] as const;
+const FILTERS = [
+  "",
+  "auth.",
+  "owner.",
+  "aircraft.",
+  "share.",
+  "invoice.",
+  "transaction.",
+  "budget.",
+  "invitation.",
+  "team.",
+] as const;
 
 export default async function AuditPage({ searchParams }: PageProps<"/admin/settings/audit">) {
   const viewer = await requireStaff();
