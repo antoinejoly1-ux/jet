@@ -8,7 +8,8 @@ import { latestLink, PASSWORD, signIn, unique } from "./support";
 test("an owner sees their own aircraft on Home", async ({ page }) => {
   await signIn(page, "owner@jet.test");
   await expect(page).toHaveURL("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Jean");
+  await expect(page.getByText(/(Bonjour|Bon après-midi|Bonsoir), Jean/)).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Votre appareil");
   await expect(page.getByRole("heading", { name: /C-GJTA/ })).toBeVisible();
   // Another owner's aircraft never appears.
   await expect(page.getByText("C-FJTB")).toHaveCount(0);
@@ -31,7 +32,7 @@ test("staff switch between Client and Admin with the toggle", async ({ page }) =
   await expect(page).toHaveURL("/");
   await toggle.getByRole("link", { name: "Admin" }).click();
   await expect(page).toHaveURL("/admin");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Tableau de bord|Dashboard/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Les opérations|Operations/);
 });
 
 test("an invited owner signs up, verifies their email and lands on their dashboard", async ({ browser, page }) => {

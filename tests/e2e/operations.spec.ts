@@ -12,7 +12,7 @@ const local = (days: number, time: string) =>
 
 async function schedule(page: Page, to: string, departsAt: string) {
   await page.goto("/admin/flights/new");
-  await page.getByLabel("Appareil").selectOption({ label: "C-GJTA · Pilatus PC-24" });
+  await page.getByLabel("Appareil").selectOption({ label: "C-GJTA · Pilatus PC-12 NGX" });
   await page.getByLabel("Heures de").selectOption({ label: "Jean Tremblay (25 %)" });
   await page.getByLabel("Départ", { exact: true }).fill("cyul");
   await page.getByLabel("Arrivée", { exact: true }).fill(to);

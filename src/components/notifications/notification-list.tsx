@@ -14,7 +14,7 @@ export async function NotificationList({ items }: { items: Item[] }) {
   const format = await getFormatter();
   if (items.length === 0) return <EmptyState icon={Bell} title={t("emptyTitle")} body={t("emptyBody")} />;
   return (
-    <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+    <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
       {items.map((n) => (
         <li key={n.id}>
           <Link

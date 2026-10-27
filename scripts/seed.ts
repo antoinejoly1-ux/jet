@@ -130,8 +130,10 @@ async function main() {
     .insert(s.holdingCompanies)
     .values([
       { legalName: "Gestion Aviation JTA inc.", registrationNumber: "1171234567", email: "jta@example.com" },
-      { legalName: "Phenom Partenaires inc.", registrationNumber: "1172345678" },
+      { legalName: "Altitude PC-12 S.E.C.", registrationNumber: "3372345678" },
       { legalName: "Citation Québec S.E.C.", registrationNumber: "3373456789" },
+      { legalName: "King Air Laurentien inc.", registrationNumber: "1174567890" },
+      { legalName: "Saint-Laurent Jet Partners inc.", registrationNumber: "1175678901" },
     ])
     .returning();
 
@@ -141,18 +143,18 @@ async function main() {
       {
         holdingCompanyId: companies[0]!.id,
         registration: "C-GJTA",
-        model: "Pilatus PC-24",
-        serialNumber: "PC24-112",
-        homeBase: "CYUL",
+        model: "Pilatus PC-12 NGX",
+        serialNumber: "2112",
+        homeBase: "CYHU",
         status: "available",
         icaoHex: "c05a1b",
       },
       {
         holdingCompanyId: companies[1]!.id,
         registration: "C-FJTB",
-        model: "Embraer Phenom 300E",
-        serialNumber: "50500611",
-        homeBase: "CYUL",
+        model: "Pilatus PC-12 NGX",
+        serialNumber: "2087",
+        homeBase: "CYHU",
         status: "maintenance",
         icaoHex: "c03b7e",
       },
@@ -164,6 +166,24 @@ async function main() {
         homeBase: "CYQB",
         status: "available",
         icaoHex: "c06d22",
+      },
+      {
+        holdingCompanyId: companies[3]!.id,
+        registration: "C-GUVR",
+        model: "Beechcraft King Air 350i",
+        serialNumber: "FL-1187",
+        homeBase: "CYHU",
+        status: "available",
+        icaoHex: "c07b44",
+      },
+      {
+        holdingCompanyId: companies[4]!.id,
+        registration: "C-FUNV",
+        model: "Bombardier Challenger 350",
+        serialNumber: "20812",
+        homeBase: "CYUL",
+        status: "available",
+        icaoHex: "c02e91",
       },
     ])
     .returning();
@@ -179,10 +199,16 @@ async function main() {
       { legalName: "Luc Bergeron", type: "person", email: "luc.bergeron@example.com" },
       { legalName: "Nadia Pelletier", type: "person", email: "nadia.pelletier@example.com" },
       { legalName: "Atlantique Capital", type: "company", email: "ops@atlantique.example.com", locale: "en" },
+      { legalName: "Hélène Fortin", type: "person", email: "helene.fortin@example.com" },
+      { legalName: "Philippe Lavoie", type: "person", email: "philippe.lavoie@example.com" },
+      { legalName: "Groupe Boréal inc.", type: "company", email: "direction@boreal.example.com" },
+      { legalName: "Isabelle Martel", type: "person", email: "isabelle.martel@example.com" },
+      { legalName: "Mathieu Gendron", type: "person", email: "mathieu.gendron@example.com", locale: "en" },
     ])
     .returning();
 
-  // Four quarter shares on the PC-24, two halves on the Phenom, two halves on the CJ4.
+  // Thirteen owners across the five aircraft: quarters on C-GJTA, halves on the other PC-12 and
+  // the CJ4, thirds on the King Air, 60/40 on the Challenger.
   const plan: [number, number, number][] = [
     [0, 0, 2500],
     [1, 0, 2500],
@@ -192,6 +218,11 @@ async function main() {
     [5, 1, 5000],
     [6, 2, 5000],
     [7, 2, 5000],
+    [8, 3, 3400],
+    [9, 3, 3300],
+    [10, 3, 3300],
+    [11, 4, 6000],
+    [12, 4, 4000],
   ];
   const shareRows = await db
     .insert(s.shares)
@@ -354,19 +385,19 @@ async function main() {
       await db.insert(s.flights).values({
         aircraftId: plane.id,
         shareId: holders[k % holders.length]!.id,
-        fromAirport: "CYUL",
+        fromAirport: plane.homeBase ?? "CYHU",
         toAirport: pick(["KPBI", "KTEB", "TNCM", "CYVR"]),
         departsAt: departs,
         status: "scheduled",
       });
     }
-    // A charter: Univers sells the aircraft's time when owners aren't flying it.
+    // A charter: Univair sells the aircraft's time when owners aren't flying it.
     const charter = new Date(now + (9 + i) * 86_400_000);
     charter.setUTCHours(15, 0, 0, 0);
     await db.insert(s.flights).values({
       aircraftId: plane.id,
       shareId: null,
-      fromAirport: "CYUL",
+      fromAirport: plane.homeBase ?? "CYHU",
       toAirport: "CYYZ",
       departsAt: charter,
       status: "scheduled",
@@ -380,6 +411,30 @@ async function main() {
       status: i === 1 ? "in_progress" : "planned",
     });
   }
+
+  // In the air right now, so the live map has something to show: Jean's PC-12 to Palm Beach,
+  // and a charter on the Challenger. Re-seed before a demo; they land after a few hours.
+  const jeanShare = shareRows.find((sh) => sh.ownerId === ownerRows[0]!.id)!;
+  await db.insert(s.flights).values([
+    {
+      aircraftId: fleet[0]!.id,
+      shareId: jeanShare.id,
+      fromAirport: "CYHU",
+      toAirport: "KPBI",
+      departsAt: new Date(now - 70 * 60_000),
+      arrivesAt: new Date(now + 3 * 3_600_000 + 50 * 60_000),
+      status: "scheduled",
+    },
+    {
+      aircraftId: fleet[4]!.id,
+      shareId: null,
+      fromAirport: "CYUL",
+      toAirport: "KTEB",
+      departsAt: new Date(now - 25 * 60_000),
+      arrivesAt: new Date(now + 55 * 60_000),
+      status: "scheduled",
+    },
+  ]);
 
   console.log("Demo logins…");
   await createLogin("admin@jet.test", "Alex Admin", "admin", true);
@@ -423,7 +478,7 @@ async function main() {
   console.log("  admin@jet.test     admin       2FA on");
   console.log("  dispatch@jet.test  dispatcher  2FA on");
   console.log("  finance@jet.test   finance     2FA not set up yet: shows the setup flow");
-  console.log("  owner@jet.test     owner of 25% of C-GJTA");
+  console.log("  owner@jet.test     owner of 25% of C-GJTA (in the air now)");
   console.log("  assistant@jet.test the owner's assistant: schedule, no finances");
   console.log(`\nDemo 2FA key for admin and dispatch (add it to an authenticator app):`);
   console.log(`  ${new URL(otpauth).searchParams.get("secret")}`);

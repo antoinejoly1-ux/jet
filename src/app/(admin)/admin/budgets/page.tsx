@@ -73,7 +73,7 @@ export default async function BudgetsPage({ searchParams }: PageProps<"/admin/bu
       </form>
 
       {!selected ? (
-        <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+        <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
           {shares.map((s) => {
             const status = statuses.get(s.id);
             return (

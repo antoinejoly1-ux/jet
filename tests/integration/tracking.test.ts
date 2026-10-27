@@ -18,7 +18,6 @@ let bruno: Actor;
 let outsider: Actor;
 let planeId: string;
 let anneShare: string;
-let brunoShare: string;
 
 const NOW = new Date("2026-10-27T14:00:00Z");
 
@@ -85,7 +84,7 @@ beforeEach(async () => {
   const anneOwner = await createOwner(db, admin, { type: "person", legalName: "Anne", locale: "fr" });
   const brunoOwner = await createOwner(db, admin, { type: "person", legalName: "Bruno", locale: "fr" });
   anneShare = (await addShare(db, admin, planeId, { ownerId: anneOwner.id, percent: 50, startsOn: "2025-01-01" })).id;
-  brunoShare = (await addShare(db, admin, planeId, { ownerId: brunoOwner.id, percent: 50, startsOn: "2025-01-01" })).id;
+  await addShare(db, admin, planeId, { ownerId: brunoOwner.id, percent: 50, startsOn: "2025-01-01" });
   anne = await ownerLogin("Anne", anneOwner.id);
   bruno = await ownerLogin("Bruno", brunoOwner.id);
   const other = await createOwner(db, admin, { type: "person", legalName: "Other", locale: "fr" });

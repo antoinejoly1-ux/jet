@@ -33,7 +33,7 @@ export const aircraft = pgTable(
     status: aircraftStatus("status").notNull().default("available"),
     /** ICAO 24-bit address (hex), used by flight-tracking providers. */
     icaoHex: text("icao_hex"),
-    /** The company that owns it; null while unknown or for an aircraft Univers only operates. */
+    /** The company that owns it; null while unknown or for an aircraft Univair only operates. */
     holdingCompanyId: uuid("holding_company_id").references(() => holdingCompanies.id, { onDelete: "restrict" }),
     ...timestamps(),
     deletedAt: deletedAt(),

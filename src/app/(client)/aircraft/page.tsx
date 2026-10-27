@@ -1,5 +1,6 @@
 import { CalendarDays, Plane, Wrench } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours } from "@/lib/format";
 import { listOwnerAircraft } from "@/lib/services/availability";
+import { aircraftPhoto } from "@/lib/aircraft-photos";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("aircraft") };
@@ -44,6 +46,27 @@ export default async function OwnerAircraftPage() {
       <div className="flex flex-col gap-8">
         {fleet.map((a) => (
           <section key={a.shareId} aria-labelledby={`plane-${a.shareId}`} className="grid gap-4 lg:grid-cols-3">
+            <div className="bg-primary shadow-card relative h-64 overflow-hidden rounded-lg sm:h-80 lg:col-span-3">
+              <Image
+                src={aircraftPhoto(a.model)}
+                alt=""
+                fill
+                priority
+                sizes="(min-width: 1280px) 1200px, 100vw"
+                placeholder="blur"
+                className="object-cover"
+              />
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"
+                aria-hidden
+              />
+              <div className="absolute inset-x-6 bottom-6 text-white sm:inset-x-8 sm:bottom-8">
+                <p className="text-[11px] font-semibold tracking-[0.2em] text-white/75 uppercase">{a.model}</p>
+                <p className="mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl" aria-hidden>
+                  {a.registration}
+                </p>
+              </div>
+            </div>
             <Card>
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <h2 id={`plane-${a.shareId}`} className="text-lg font-bold tracking-tight">

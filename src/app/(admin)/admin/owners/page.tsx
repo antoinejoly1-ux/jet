@@ -67,7 +67,7 @@ export default async function OwnersPage({ searchParams }: PageProps<"/admin/own
               <li key={o.id}>
                 <Link
                   href={`/admin/owners/${o.id}`}
-                  className="border-border bg-surface flex items-center gap-3 rounded-lg border p-4"
+                  className="bg-surface shadow-card flex items-center gap-3 rounded-lg border border-(--card-border) p-4"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">{o.legalName}</p>
@@ -79,7 +79,7 @@ export default async function OwnersPage({ searchParams }: PageProps<"/admin/own
               </li>
             ))}
           </ul>
-          <div className="border-border bg-surface hidden overflow-hidden rounded-lg border md:block">
+          <div className="bg-surface shadow-card hidden overflow-hidden rounded-lg border border-(--card-border) md:block">
             <table className="w-full text-left text-sm">
               <thead className="border-border bg-surface-muted text-muted border-b text-xs font-semibold">
                 <tr>

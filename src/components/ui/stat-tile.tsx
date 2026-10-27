@@ -32,7 +32,7 @@ export function StatTile({
         </span>
       ) : null}
       <div className="min-w-0">
-        <p className="tabular truncate text-3xl font-bold tracking-tight">{value}</p>
+        <p className="tabular text-2xl font-bold tracking-tight break-words sm:text-3xl">{value}</p>
         <p className="text-muted mt-1 text-sm leading-snug">{label}</p>
       </div>
       {footer}

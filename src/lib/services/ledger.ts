@@ -19,6 +19,9 @@ const yearRange = (year: number): SQL[] => [
   lt(transactions.occurredOn, `${year + 1}-01-01`),
 ];
 
+/** The most entries one list shows; the page says so when there are more and suggests a filter. */
+export const TRANSACTIONS_SHOWN = 500;
+
 export async function listTransactions(
   db: Db,
   actor: Actor,
@@ -58,7 +61,7 @@ export async function listTransactions(
     .leftJoin(reversal, eq(reversal.reversesId, transactions.id))
     .where(filters.length ? and(...filters) : undefined)
     .orderBy(desc(transactions.occurredOn), desc(transactions.createdAt))
-    .limit(500);
+    .limit(TRANSACTIONS_SHOWN);
 }
 
 export async function addTransaction(

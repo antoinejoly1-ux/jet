@@ -30,9 +30,16 @@ const prefersDark = () =>
   (document.documentElement.dataset.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-/** Warm the base map to the brand: paper land, soft water, quiet labels. */
-function tint(map: MapLibreMap, dark: boolean) {
+/** Warm the base map to the brand: paper land, soft water, quiet labels in the viewer's language. */
+function tint(map: MapLibreMap, dark: boolean, locale: string) {
   for (const layer of map.getStyle().layers ?? []) {
+    if (layer.type === "symbol" && layer.layout?.["text-field"] && !layer.id.startsWith("route-"))
+      map.setLayoutProperty(layer.id, "text-field", [
+        "coalesce",
+        ["get", `name:${locale}`],
+        ["get", "name:latin"],
+        ["get", "name"],
+      ]);
     if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", dark ? "#151413" : "#f3f1ed");
     else if (layer.type === "fill" && layer.id.includes("water"))
       map.setPaintProperty(layer.id, "fill-color", dark ? "#0c0b0a" : "#dfe2e0");
@@ -108,9 +115,12 @@ export default function MapCanvas({
   aircraft,
   focusId,
   label,
+  locale = "fr",
   onSelect,
 }: {
   aircraft: AircraftLive[];
+  /** Language of the place names. */
+  locale?: string;
   focusId?: string;
   /** Text equivalent of the map, for screen readers. */
   label: string;
@@ -146,7 +156,7 @@ export default function MapCanvas({
 
     const bronze = css("--bronze") || "#9c7247";
     map.on("load", () => {
-      tint(map, dark);
+      tint(map, dark, locale);
       map.addSource("route", { type: "geojson", data: routeData(data.current, Date.now()) });
       map.addLayer({
         id: "route-ahead",
@@ -251,5 +261,5 @@ export default function MapCanvas({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div ref={box} role="img" aria-label={label} className="um-map size-full" />;
+  return <div ref={box} role="region" aria-label={label} className="um-map size-full" />;
 }

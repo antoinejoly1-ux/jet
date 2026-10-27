@@ -6,6 +6,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { signIn } from "./support";
 
+// Each test audits a dozen pages or more, some with a live map loading tiles.
+test.describe.configure({ timeout: 120_000 });
+
 async function audit(page: Page, path: string) {
   await page.goto(path);
   await page.waitForLoadState("networkidle");

@@ -31,7 +31,7 @@ function RailStar({ side }: { side: Side }) {
     <Link
       href={side === "admin" ? "/admin" : "/"}
       aria-label="Univair Management"
-      className="bg-surface text-text shadow-card flex size-12 items-center justify-center rounded-full"
+      className="bg-surface text-text shadow-card flex size-10 items-center justify-center rounded-full lg:size-12"
     >
       <Star className="h-3 w-auto" />
     </Link>
@@ -97,9 +97,15 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
         </aside>
         <div className="flex min-w-0 flex-col">
           <header className="bg-background/80 sticky top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 backdrop-blur-xl sm:px-6 lg:h-20 lg:px-10">
-            <div className="lg:hidden">
+            {/* Staff also have the Client | Admin switch up here: on narrow phones the star alone fits. */}
+            <div className={viewer.staffRole ? "hidden sm:block lg:hidden" : "lg:hidden"}>
               <Wordmark side={side} />
             </div>
+            {viewer.staffRole ? (
+              <div className="sm:hidden">
+                <RailStar side={side} />
+              </div>
+            ) : null}
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
               {viewer.staffRole ? <SideToggle current={side} /> : null}
               <NotificationBell side={side} unread={notifications} />

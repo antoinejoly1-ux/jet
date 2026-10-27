@@ -30,7 +30,7 @@ export default async function AdminMessagesPage({ searchParams }: PageProps<"/ad
     <>
       <PageHeader title={t("inboxTitle")} description={t("inboxSubtitle")} />
       <AutoRefresh />
-      <div className="border-border bg-surface grid overflow-hidden rounded-lg border lg:h-[70dvh] lg:grid-cols-[320px_1fr]">
+      <div className="bg-surface shadow-card grid overflow-hidden rounded-lg border border-(--card-border) lg:h-[70dvh] lg:grid-cols-[320px_1fr]">
         <div className="lg:border-border lg:border-r">
           <InboxList rows={rows} filter={filter} />
         </div>

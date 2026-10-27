@@ -45,7 +45,7 @@ export default async function OwnerInvoicesPage() {
               <h2 id={`y-${year}`} className="text-muted mb-2 text-sm font-semibold">
                 {year}
               </h2>
-              <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+              <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
                 {rows
                   .filter((r) => r.issuedOn.startsWith(year))
                   .map((r) => (

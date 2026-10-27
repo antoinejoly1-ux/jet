@@ -463,3 +463,12 @@
   white-space: nowrap;
   box-shadow: var(--shadow-float);
 }
+/* Parked aircraft crowd one airport: their names show on hover only. */
+.um-plane:not([data-state="in_flight"]) .um-plane-tag {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.um-plane:is(:hover, :focus-visible) .um-plane-tag {
+  opacity: 1;
+  z-index: 2;
+}

@@ -207,7 +207,29 @@
       "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu."
     },
     "maintenanceStarts": "Dès le {date}",
-    "maintenanceEnds": "Jusqu'au {date}"
+    "maintenanceEnds": "Jusqu'au {date}",
+    "greetings": {
+      "morning": "Bonjour, {name}",
+      "afternoon": "Bon après-midi, {name}",
+      "evening": "Bonsoir, {name}"
+    },
+    "heroOne": "Votre appareil,",
+    "heroMany": "Vos appareils,",
+    "heroNow": "en ce moment",
+    "flownThisYear": "Heures volées en {year}",
+    "spentThisYear": "Dépensé en {year}",
+    "freeDaysShort": "{count, plural, one {# jour} other {# jours}}",
+    "freeDaysLabel": "libres sur les {days} prochains",
+    "seeInvoices": "Voir les factures",
+    "activityTitle": "En direct",
+    "activityAll": "Tout voir",
+    "activityEmpty": "Les vols, factures et nouvelles de l'équipe apparaîtront ici.",
+    "flightCompleted": "Vol complété",
+    "flightLength": "{hours} h {minutes}",
+    "teamEyebrow": "Votre équipe Univair",
+    "teamTitle": "On s'occupe de tout.",
+    "teamBody": "Un vol à planifier, un hôtel, une question? Appelez ou textez, nous vous répondons.",
+    "ofPlannedShort": "sur {amount} prévus"
   },
   "account": {
     "title": "Mon compte",
@@ -294,7 +316,16 @@
     "flightsToday": "Vols aujourd'hui",
     "flightsThisWeek": "Vols cette semaine",
     "inMaintenance": "Appareils en maintenance",
-    "ownersWithoutAccess": "Propriétaires sans accès"
+    "ownersWithoutAccess": "Propriétaires sans accès",
+    "hello": "Bonjour, {name}",
+    "heroLight": "Les opérations,",
+    "heroNow": "en ce moment",
+    "inTheAir": "Appareils en vol",
+    "todayTitle": "Les vols d'aujourd'hui",
+    "todayEmpty": "Aucun vol aujourd'hui.",
+    "newFlight": "Nouveau vol",
+    "charter": "Nolisé",
+    "clientsTitle": "Clients et accès"
   },
   "owners": {
     "title": "Propriétaires",
@@ -746,7 +777,8 @@
     "add": "Ajouter",
     "added": "Entrée ajoutée.",
     "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne.",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Exporter (CSV)",
+    "truncated": "Les {count} entrées les plus récentes sont affichées. Choisissez une part pour voir les autres."
   },
   "budgets": {
     "title": "Budgets et heures",
@@ -982,7 +1014,8 @@
     "noUpcomingBody": "Vos prochains vols apparaîtront ici dès qu'ils seront planifiés.",
     "noPastTitle": "Aucun vol passé",
     "noPastBody": "L'historique de vos vols apparaîtra ici.",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Exporter (CSV)",
+    "inFlight": "En vol"
   },
   "ownerAircraft": {
     "title": "Votre appareil",
@@ -1395,6 +1428,8 @@
     "mapLabel": "Carte en direct",
     "fleetTitle": "La flotte en direct",
     "fleetSubtitle": "Chaque appareil, là où il est maintenant.",
-    "whereIs": "Où est {registration}"
+    "whereIs": "Où est {registration}",
+    "inDuration": "{hours, plural, =0 {dans {minutes} min} other {dans # h {minutes} min}}",
+    "airborneCount": "{count, plural, =0 {Aucun appareil en vol} one {# en vol} other {# en vol}} sur {total}"
   }
 }

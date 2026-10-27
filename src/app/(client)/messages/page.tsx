@@ -40,7 +40,7 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
       <AutoRefresh />
       <section
         aria-label={t("conversationLabel")}
-        className="border-border bg-surface flex min-h-[50dvh] flex-col rounded-lg border"
+        className="bg-surface shadow-card flex min-h-[50dvh] flex-col rounded-lg border border-(--card-border)"
       >
         {/* Focusable so keyboard users can scroll the thread. */}
         <div

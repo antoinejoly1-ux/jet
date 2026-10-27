@@ -13,7 +13,7 @@ export const memberRole = pgEnum("member_role", ["owner", "assistant", "read_onl
 
 /**
  * The company that legally owns an aircraft and invoices its owners, who are
- * its shareholders. Univers manages it; the money goes through it.
+ * its shareholders. Univair manages it; the money goes through it.
  */
 export const holdingCompanies = pgTable(
   "holding_companies",

@@ -16,6 +16,7 @@ import {
   user,
 } from "@/lib/db/schema";
 import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
+import { listNotifications } from "./notification-center";
 
 export type ShareSummary = {
   shareId: string;
@@ -28,7 +29,7 @@ export type ShareSummary = {
   annualMinutes: number | null;
   budget: { year: number; plannedCents: number; spentCents: number; currency: "CAD" | "USD" } | null;
   nextFlight: { fromAirport: string; toAirport: string; departsAt: Date } | null;
-  /** Owners see maintenance only as a window: the details stay with Univers and the shop. */
+  /** Owners see maintenance only as a window: the details stay with Univair and the shop. */
   /** False for members who don't see this owner's finances: no budget or invoice cards. */
   showFinances: boolean;
   nextMaintenance: { startsAt: Date; endsAt: Date | null } | null;
@@ -228,4 +229,49 @@ export async function getAdminStats(db: Db, actor: Actor, todayStart: Date) {
     inMaintenance: inMaintenance.n,
     ownersWithoutAccess: noAccess.n,
   };
+}
+
+export type ActivityItem =
+  | { kind: "flight"; id: string; at: Date; registration: string; from: string; to: string; minutes: number | null }
+  | { kind: "notice"; id: string; at: Date; type: string; data: Record<string, string>; href: string; unread: boolean };
+
+/**
+ * The owner Home's "live" feed: the viewer's own notifications (already
+ * limited to what their role may see) and the flights completed on their
+ * shares, newest first.
+ */
+export async function getOwnerActivity(db: Db, actor: Actor, { limit = 8 } = {}): Promise<ActivityItem[]> {
+  if (actor.ownerIds.length === 0) return [];
+  authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
+  const [notices, flown] = await Promise.all([
+    listNotifications(db, actor, { limit }),
+    db
+      .select({
+        id: flights.id,
+        registration: aircraft.registration,
+        from: flights.fromAirport,
+        to: flights.toAirport,
+        minutes: flights.flightMinutes,
+        at: sql<Date>`coalesce(${flights.arrivesAt}, ${flights.departsAt})`.mapWith((v) => new Date(v)),
+      })
+      .from(flights)
+      .innerJoin(shares, eq(shares.id, flights.shareId))
+      .innerJoin(aircraft, eq(aircraft.id, flights.aircraftId))
+      .where(and(inArray(shares.ownerId, [...actor.ownerIds]), eq(flights.status, "completed")))
+      .orderBy(desc(flights.departsAt))
+      .limit(limit),
+  ]);
+  const items: ActivityItem[] = [
+    ...notices.map((n) => ({
+      kind: "notice" as const,
+      id: n.id,
+      at: n.createdAt,
+      type: n.type,
+      data: n.data,
+      href: n.href,
+      unread: !n.readAt,
+    })),
+    ...flown.map((f) => ({ kind: "flight" as const, ...f })),
+  ];
+  return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
 }

@@ -207,7 +207,29 @@
       "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned."
     },
     "maintenanceStarts": "From {date}",
-    "maintenanceEnds": "Until {date}"
+    "maintenanceEnds": "Until {date}",
+    "greetings": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}"
+    },
+    "heroOne": "Your aircraft,",
+    "heroMany": "Your aircraft,",
+    "heroNow": "right now",
+    "flownThisYear": "Hours flown in {year}",
+    "spentThisYear": "Spent in {year}",
+    "freeDaysShort": "{count, plural, one {# day} other {# days}}",
+    "freeDaysLabel": "free in the next {days}",
+    "seeInvoices": "See invoices",
+    "activityTitle": "Live",
+    "activityAll": "See all",
+    "activityEmpty": "Flights, invoices and news from the team will show up here.",
+    "flightCompleted": "Flight completed",
+    "flightLength": "{hours} h {minutes}",
+    "teamEyebrow": "Your Univair team",
+    "teamTitle": "We take care of everything.",
+    "teamBody": "A flight to plan, a hotel, a question? Call or text and we'll answer.",
+    "ofPlannedShort": "of {amount} planned"
   },
   "account": {
     "title": "My account",
@@ -294,7 +316,16 @@
     "flightsToday": "Flights today",
     "flightsThisWeek": "Flights this week",
     "inMaintenance": "Aircraft in maintenance",
-    "ownersWithoutAccess": "Owners without access"
+    "ownersWithoutAccess": "Owners without access",
+    "hello": "Hello, {name}",
+    "heroLight": "Operations,",
+    "heroNow": "right now",
+    "inTheAir": "Aircraft in the air",
+    "todayTitle": "Today's flights",
+    "todayEmpty": "No flights today.",
+    "newFlight": "New flight",
+    "charter": "Charter",
+    "clientsTitle": "Clients and access"
   },
   "owners": {
     "title": "Owners",
@@ -746,7 +777,8 @@
     "add": "Add",
     "added": "Entry added.",
     "ledgerRule": "Entries are never edited: to correct one, reverse it and enter the right one.",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "truncated": "Showing the {count} most recent entries. Choose a share to see the others."
   },
   "budgets": {
     "title": "Budgets and hours",
@@ -982,7 +1014,8 @@
     "noUpcomingBody": "Your next flights will appear here once they're scheduled.",
     "noPastTitle": "No past flights",
     "noPastBody": "Your flight history will appear here.",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "inFlight": "In flight"
   },
   "ownerAircraft": {
     "title": "Your aircraft",
@@ -1395,6 +1428,8 @@
     "mapLabel": "Live map",
     "fleetTitle": "The fleet, live",
     "fleetSubtitle": "Every aircraft, where it is now.",
-    "whereIs": "Where is {registration}"
+    "whereIs": "Where is {registration}",
+    "inDuration": "{hours, plural, =0 {in {minutes} min} other {in # h {minutes} min}}",
+    "airborneCount": "{count, plural, =0 {Nothing in the air} one {# in the air} other {# in the air}} of {total}"
   }
 }

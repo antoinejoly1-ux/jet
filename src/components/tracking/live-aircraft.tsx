@@ -3,7 +3,7 @@
 import { Gauge, MapPin, Mountain, Navigation, PlaneLanding, PlaneTakeoff, Wrench } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image, { type StaticImageData } from "next/image";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
 import { LiveDot } from "@/components/ui/live-dot";
@@ -18,7 +18,8 @@ const MapCanvas = dynamic(() => import("./map-canvas"), { ssr: false });
 /** Polls /api/live while the tab is visible, and ticks a clock for "seen 12 s ago" and the ETA. */
 function useLive(initial: AircraftLive, side: "client" | "admin") {
   const [live, setLive] = useState(initial);
-  const [now, setNow] = useState(() => Date.now());
+  // Starts at the server's clock so the first render matches the HTML; ticks from there.
+  const [now, setNow] = useState(() => Date.parse(initial.generatedAt));
   useEffect(() => {
     let stopped = false;
     const poll = async () => {
@@ -46,14 +47,17 @@ function useLive(initial: AircraftLive, side: "client" | "admin") {
   return { live, now };
 }
 
-function Metric({ icon, label, value }: { icon: typeof Gauge; label: string; value: string }) {
+function Metric({ icon, label, value, hint }: { icon: typeof Gauge; label: string; value: string; hint?: string }) {
   return (
     <div className="group min-w-0">
       <dt className="text-muted flex items-center gap-1.5 text-xs font-medium">
         <Icon icon={icon} anim="bounce" className="size-3.5" />
         {label}
       </dt>
-      <dd className="tabular mt-1 truncate text-lg font-semibold">{value}</dd>
+      <dd className="tabular mt-1 truncate text-lg font-semibold">
+        {value}
+        {hint ? <span className="text-muted block text-xs font-medium">{hint}</span> : null}
+      </dd>
     </div>
   );
 }
@@ -75,6 +79,7 @@ export function LiveAircraft({
 }) {
   const t = useTranslations("live");
   const format = useFormatter();
+  const locale = useLocale();
   const { live, now } = useLive(initial, side);
   const flying = live.state === "in_flight";
   const seenAgo = live.position ? Math.max(0, Math.round((now - Date.parse(live.position.seenAt)) / 1000)) : null;
@@ -115,7 +120,12 @@ export function LiveAircraft({
           className="object-cover opacity-90"
         />
         <div className="absolute inset-0">
-          <MapCanvas aircraft={[live]} focusId={live.aircraftId} label={`${live.registration} · ${headline}`} />
+          <MapCanvas
+            aircraft={[live]}
+            focusId={live.aircraftId}
+            locale={locale}
+            label={`${live.registration} · ${headline}`}
+          />
         </div>
       </div>
 
@@ -182,7 +192,12 @@ export function LiveAircraft({
             <Metric
               icon={PlaneLanding}
               label={t("arrival")}
-              value={eta ? `${time(eta)} · ${t("inMinutes", { minutes: inMinutes ?? 0 })}` : "—"}
+              value={eta ? time(eta) : "—"}
+              hint={
+                inMinutes != null
+                  ? t("inDuration", { hours: Math.floor(inMinutes / 60), minutes: inMinutes % 60 })
+                  : undefined
+              }
             />
           </dl>
         ) : live.nextFlight ? (

@@ -5,7 +5,7 @@
  * entry, so the hour ledger stays append-only.
  */
 import "server-only";
-import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
 import { aircraft, flights, hourLedger, owners, shares } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
@@ -76,12 +76,15 @@ export async function listOwnerFlights(db: Db, actor: Actor) {
   authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
   const mine = and(inArray(shares.ownerId, [...actor.ownerIds]), isNull(aircraft.deletedAt));
   const now = new Date();
+  // A flight in the air is still "upcoming" for its owner until it lands.
+  const inProgress = sql`${flights.status} = 'scheduled' and ${flights.departsAt} < ${now}
+    and coalesce(${flights.arrivesAt}, ${flights.departsAt} + interval '2 hours') > ${now}`;
   const [upcoming, past] = await Promise.all([
     base(db)
-      .where(and(mine, gte(flights.departsAt, now)))
+      .where(and(mine, or(gte(flights.departsAt, now), inProgress)))
       .orderBy(asc(flights.departsAt)),
     base(db)
-      .where(and(mine, lt(flights.departsAt, now)))
+      .where(and(mine, lt(flights.departsAt, now), sql`not (${inProgress})`))
       .orderBy(desc(flights.departsAt))
       .limit(200),
   ]);

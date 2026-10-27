@@ -127,5 +127,10 @@ test("a spreadsheet is checked row by row, then imported", async ({ page }) => {
   await expect(page.getByText("2 transactions importées, 1 ligne ignorée.")).toBeVisible();
 
   await page.goto(`/admin/transactions?year=2026`);
+  await page
+    .getByRole("combobox", { name: "Part", exact: true })
+    .first()
+    .selectOption({ label: "C-GJTA · Jean Tremblay (25 %)" });
+  await page.getByRole("button", { name: "Filtrer" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: `Import ${tag} A` })).toContainText("Importée");
 });

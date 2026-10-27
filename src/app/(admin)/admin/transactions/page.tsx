@@ -14,7 +14,7 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
-import { listCategories, listTransactions } from "@/lib/services/ledger";
+import { listCategories, listTransactions, TRANSACTIONS_SHOWN } from "@/lib/services/ledger";
 import { addTransactionAction, reverseTransactionAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -93,10 +93,13 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
               {t("filter")}
             </Button>
           </form>
+          {rows.length >= TRANSACTIONS_SHOWN ? (
+            <p className="text-muted mb-3 text-sm">{t("truncated", { count: TRANSACTIONS_SHOWN })}</p>
+          ) : null}
           {rows.length === 0 ? (
             <EmptyState icon={ClipboardList} title={t("emptyTitle")} body={t("emptyBody")} />
           ) : (
-            <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+            <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
               {rows.map((r) => (
                 <li key={r.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
                   <div className="min-w-0 flex-1">

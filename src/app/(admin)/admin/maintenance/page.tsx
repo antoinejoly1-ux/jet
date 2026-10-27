@@ -45,7 +45,7 @@ export default async function AdminMaintenancePage({ searchParams }: PageProps<"
         : t("notScheduled");
 
   const list = (rows: Row[], actions: boolean) => (
-    <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+    <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
       {rows.map((r) => (
         <li key={r.id} className="flex flex-col gap-2 px-4 py-3 md:flex-row md:items-center md:gap-4">
           <div className="min-w-0 flex-1">

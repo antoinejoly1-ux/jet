@@ -143,7 +143,7 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
               <h2 id={`day-${key}`} className="text-muted mb-2 text-sm font-semibold first-letter:uppercase">
                 {dayLabel(key)}
               </h2>
-              <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+              <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
                 {flights.map((f) => (
                   <li key={f.id} className="flex flex-col gap-2 px-4 py-3 md:flex-row md:items-center md:gap-4">
                     <span className="tabular w-14 shrink-0 font-semibold">{time(f.departsAt)}</span>

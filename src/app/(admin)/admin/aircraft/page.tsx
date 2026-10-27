@@ -49,7 +49,7 @@ export default async function AircraftListPage() {
               <li key={a.id}>
                 <Link
                   href={`/admin/aircraft/${a.id}`}
-                  className="border-border bg-surface hover:bg-surface-muted block rounded-lg border p-5 transition-colors"
+                  className="group bg-surface shadow-card block rounded-lg border border-(--card-border) p-5 transition-transform duration-300 hover:-translate-y-0.5"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>

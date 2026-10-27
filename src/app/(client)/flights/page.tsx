@@ -2,6 +2,7 @@ import { PlaneLanding, PlaneTakeoff } from "lucide-react";
 import type { Metadata } from "next";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
+import { LiveDot } from "@/components/ui/live-dot";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
@@ -23,12 +24,13 @@ export default async function OwnerFlightsPage() {
   const format = await getFormatter();
   const locale = await getLocale();
   const { upcoming, past } = await listOwnerFlights(db, viewer);
+  const now = new Date();
   const when = (d: Date) =>
     format.dateTime(d, { weekday: "short", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
 
   type Row = (typeof upcoming)[number];
   const list = (rows: Row[]) => (
-    <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+    <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
       {rows.map((f) => (
         <li key={f.id} className="flex items-start justify-between gap-3 px-4 py-3">
           <div className="min-w-0">
@@ -40,7 +42,14 @@ export default async function OwnerFlightsPage() {
             </p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
-            <Badge tone={TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
+            {f.status === "scheduled" && f.departsAt <= now ? (
+              <Badge tone="success" className="gap-1.5">
+                <LiveDot className="size-2" />
+                {t("inFlight")}
+              </Badge>
+            ) : (
+              <Badge tone={TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
+            )}
             {f.flightMinutes && f.status === "completed" ? (
               <span className="tabular text-muted text-sm">{formatHours(f.flightMinutes, locale)}</span>
             ) : null}

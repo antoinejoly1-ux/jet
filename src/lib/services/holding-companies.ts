@@ -1,6 +1,6 @@
 /**
  * Holding companies: each aircraft is owned by one, and its owners are the
- * company's shareholders. Univers manages them; invoices and the yearly P&L
+ * company's shareholders. Univair manages them; invoices and the yearly P&L
  * belong to them. Staff manage them like owners.
  */
 import "server-only";

@@ -45,7 +45,7 @@ Demo logins created by the seed (password `demo-password-2026`):
 | `owner@jet.test`     | Owner of 25% of C-GJTA                        | Not required for owners                 |
 | `assistant@jet.test` | The owner's executive assistant (no finances) | Not required for owners                 |
 
-Who gets which role at Univers:
+Who gets which role at Univair:
 
 - **Staff.** Directors are `admin`. `finance` handles invoices, budgets and owners; `dispatcher` handles flights and
   maintenance and answers owners. Only directors get access at first.

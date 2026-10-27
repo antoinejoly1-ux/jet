@@ -66,6 +66,8 @@ export type AircraftLive = {
     departsAt: string;
   } | null;
   source: string | null;
+  /** When this answer was made, so a page can start its clock from the server's. */
+  generatedAt: string;
 };
 
 const ref = (a: Airport | null): AirportRef | null =>
@@ -319,6 +321,7 @@ async function buildViews(
           }
         : null,
       source: pos?.source ?? null,
+      generatedAt: now.toISOString(),
     };
   });
 }
