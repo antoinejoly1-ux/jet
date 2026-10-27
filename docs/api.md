@@ -9,13 +9,13 @@ and write the same data as the screens, under the same rules. The full descripti
 An admin creates keys in **Admin → Settings → Developers**. A key is shown once, stored only as a hash, and can be
 revoked at any time. Each key carries scopes:
 
-| Scope              | Allows                                                    |
-| ------------------ | --------------------------------------------------------- |
-| `owners:read`      | `GET /owners`                                             |
-| `fleet:read`       | `GET /aircraft`, `GET /shares`, `GET /flights`            |
-| `finance:read`     | `GET /invoices`, `GET /transactions`                      |
-| `finance:write`    | `POST /transactions`                                      |
-| `operations:write` | `POST /flights`, `POST /flights/{id}/complete`, `/cancel` |
+| Scope              | Allows                                                                        |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `owners:read`      | `GET /owners`                                                                 |
+| `fleet:read`       | `GET /aircraft`, `GET /aircraft/{id}/position`, `GET /shares`, `GET /flights` |
+| `finance:read`     | `GET /invoices`, `GET /transactions`                                          |
+| `finance:write`    | `POST /transactions`                                                          |
+| `operations:write` | `POST /flights`, `POST /flights/{id}/complete`, `/cancel`                     |
 
 Every change made with a key goes through the same services, validation and audit log as the screens; the audit log
 records the admin who created the key. Limit: 120 requests per minute per key (HTTP 429 beyond).

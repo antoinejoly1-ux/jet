@@ -21,6 +21,7 @@ import * as aircraftRoute from "@/app/api/v1/aircraft/route";
 import * as completeRoute from "@/app/api/v1/flights/[id]/complete/route";
 import * as flightsRoute from "@/app/api/v1/flights/route";
 import * as openapiRoute from "@/app/api/v1/openapi.json/route";
+import * as positionRoute from "@/app/api/v1/aircraft/[id]/position/route";
 import * as transactionsRoute from "@/app/api/v1/transactions/route";
 import { createTestDb } from "../support/db";
 
@@ -169,6 +170,12 @@ describe("/api/v1", () => {
       currency: "USD",
     });
     expect(usd).toMatchObject({ status: 400, json: { error: { code: "invalid" } } });
+  });
+
+  it("says where an aircraft is", async () => {
+    const { key } = await createApiKey(db, admin, { name: "Suivi", scopes: ["fleet:read"] });
+    const res = await call(positionRoute, "GET", `/aircraft/${planeId}/position`, key, undefined, { id: planeId });
+    expect(res).toMatchObject({ status: 200, json: { data: { registration: "C-GJTA", state: "unknown" } } });
   });
 
   it("publishes an OpenAPI document built from the same schemas", async () => {

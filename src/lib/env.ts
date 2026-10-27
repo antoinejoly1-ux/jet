@@ -34,6 +34,14 @@ const schema = z.object({
   OPERATOR_LEGAL_NAME: z.string().optional().default(""),
   /** Shown to owners as a "call to book" button. Optional until the operator's number is settled. */
   OPERATOR_PHONE: z.string().optional().default(""),
+  /**
+   * Where live positions come from: `demo` simulates scheduled flights (development, demos),
+   * `opensky` is free live ADS-B, `flightaware` needs FLIGHTAWARE_API_KEY.
+   */
+  TRACKING_PROVIDER: z.enum(["demo", "opensky", "flightaware"]).default("demo"),
+  FLIGHTAWARE_API_KEY: z.string().optional().default(""),
+  OPENSKY_CLIENT_ID: z.string().optional().default(""),
+  OPENSKY_CLIENT_SECRET: z.string().optional().default(""),
   REQUIRE_STAFF_2FA: z
     .enum(["true", "false"])
     .default("true")

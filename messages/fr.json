@@ -1359,5 +1359,42 @@
     "eyebrow": "Gestion d'appareils · Univair",
     "taglineLight": "Votre appareil,",
     "taglineBold": "où qu'il soit."
+  },
+  "live": {
+    "states": {
+      "in_flight": "En vol",
+      "on_ground": "Au sol",
+      "maintenance": "En maintenance",
+      "unknown": "Position inconnue"
+    },
+    "inFlight": "En vol",
+    "coOwnerFlight": "Vol de {name}",
+    "inMaintenance": "En maintenance",
+    "onGroundAt": "Au sol à {city}",
+    "unknown": "Position inconnue",
+    "signalLost": "Signal perdu",
+    "progress": "Vol complété à {percent} %",
+    "altitude": "Altitude",
+    "speed": "Vitesse",
+    "heading": "Cap",
+    "arrival": "Arrivée prévue",
+    "feet": "{value} pi",
+    "knots": "{value} nœuds",
+    "inMinutes": "{minutes, plural, =0 {maintenant} one {dans # min} other {dans # min}}",
+    "nextFlight": "Prochain vol",
+    "maintenanceBody": "L'appareil est en maintenance. Nous vous aviserons dès son retour en service.",
+    "parkedBody": "L'appareil est stationné et prêt pour votre prochain vol.",
+    "seenSeconds": "Vu il y a {seconds} s",
+    "seenMinutes": "Vu il y a {minutes} min",
+    "noSignal": "Aucun signal reçu pour l'instant",
+    "sources": {
+      "demo": "Simulation",
+      "opensky": "Données ADS-B · OpenSky",
+      "flightaware": "Données FlightAware"
+    },
+    "mapLabel": "Carte en direct",
+    "fleetTitle": "La flotte en direct",
+    "fleetSubtitle": "Chaque appareil, là où il est maintenant.",
+    "whereIs": "Où est {registration}"
   }
 }

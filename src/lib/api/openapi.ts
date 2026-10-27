@@ -59,6 +59,15 @@ export function openApiDocument(baseUrl: string) {
       "/aircraft": {
         get: { summary: "List aircraft", ...scope("fleet:read"), responses: { "200": ok("Aircraft"), ...errors } },
       },
+      "/aircraft/{id}/position": {
+        get: {
+          summary:
+            "Where an aircraft is now: position, state (in_flight, on_ground, maintenance, unknown) and current leg",
+          ...scope("fleet:read"),
+          parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+          responses: { "200": ok("Live position"), ...errors },
+        },
+      },
       "/shares": {
         get: { summary: "List active shares", ...scope("fleet:read"), responses: { "200": ok("Shares"), ...errors } },
       },

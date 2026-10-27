@@ -1,5 +1,18 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  doublePrecision,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { dataSource, deletedAt, id, timestamps } from "./_shared";
 import { holdingCompanies, owners } from "./owners";
 
@@ -51,6 +64,31 @@ export const shares = pgTable(
     check("shares_percentage_range", sql`${t.percentageBp} > 0 AND ${t.percentageBp} <= 10000`),
   ],
 );
+
+/**
+ * The latest known position of each aircraft, from the tracking provider.
+ * Kept when the transponder goes quiet, so a parked aircraft still shows
+ * where it was last seen. `fetchedAt` paces calls to the provider. This is
+ * telemetry, refreshed every few seconds, so it isn't audited.
+ */
+export const aircraftPositions = pgTable("aircraft_positions", {
+  aircraftId: uuid("aircraft_id")
+    .primaryKey()
+    .references(() => aircraft.id, { onDelete: "cascade" }),
+  lat: doublePrecision("lat"),
+  lon: doublePrecision("lon"),
+  altitudeFt: integer("altitude_ft"),
+  groundSpeedKt: integer("ground_speed_kt"),
+  headingDeg: integer("heading_deg"),
+  onGround: boolean("on_ground"),
+  callsign: text("callsign"),
+  origin: text("origin"),
+  destination: text("destination"),
+  eta: timestamp("eta", { withTimezone: true }),
+  source: text("source"),
+  seenAt: timestamp("seen_at", { withTimezone: true }),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull(),
+});
 
 export const flights = pgTable(
   "flights",

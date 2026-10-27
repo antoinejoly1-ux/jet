@@ -411,3 +411,55 @@
 .group:is(:hover, :focus-visible) [data-anim="pulse"] {
   animation-name: ic-pulse;
 }
+
+/* ---------- Live map ---------- */
+.um-map .maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
+.um-plane {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+:root .um-plane {
+  color: #7a5530;
+}
+.um-plane-icon {
+  position: relative;
+  display: block;
+  transition: transform 1s var(--ease-out);
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.25));
+}
+.um-plane-halo {
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: rgb(156 114 71 / 0.25);
+}
+.um-plane[data-state="in_flight"] .um-plane-halo {
+  animation: live-ping 2.2s ease-out infinite;
+}
+.um-plane:not([data-state="in_flight"]) .um-plane-halo {
+  background: rgb(156 114 71 / 0.15);
+}
+.um-plane-tag {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 600 10px/1.4 var(--font-sans);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-float);
+}
