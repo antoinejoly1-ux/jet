@@ -6,14 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
-    .join("");
+import { Avatar } from "@/components/ui/avatar";
 
 export function UserMenu({ name, email, image }: { name: string; email: string; image?: string | null }) {
   const t = useTranslations("userMenu");
@@ -48,15 +41,9 @@ export function UserMenu({ name, email, image }: { name: string; email: string; 
         aria-expanded={open}
         aria-label={t("open")}
         onClick={() => setOpen((o) => !o)}
-        className="bg-surface-muted text-text border-border flex size-10 items-center justify-center overflow-hidden rounded-full border text-xs font-medium tracking-wide"
+        className="rounded-full"
       >
-        {image ? (
-          // A small, already-sized avatar from our own route: next/image adds nothing here.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={image} alt="" className="size-full object-cover" />
-        ) : (
-          initials(name) || "?"
-        )}
+        <Avatar name={name} image={image} />
       </button>
       {open ? (
         <div

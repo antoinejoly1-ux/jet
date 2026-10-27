@@ -10,6 +10,7 @@ import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import { listOwnerInvoices } from "@/lib/services/invoices";
+import { scenes } from "@/lib/imagery";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("invoices") };
@@ -37,7 +38,7 @@ export default async function OwnerInvoicesPage() {
         actions={rows.length ? <DownloadLink href="/invoices/export">{t("exportCsv")}</DownloadLink> : null}
       />
       {rows.length === 0 ? (
-        <EmptyState icon={FileText} title={t("emptyTitle")} body={t("emptyBody")} />
+        <EmptyState icon={FileText} image={scenes.terminal} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
         <div className="flex flex-col gap-8">
           {years.map((year) => (

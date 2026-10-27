@@ -12,6 +12,7 @@ import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { getOwnerFinances } from "@/lib/services/budgets";
+import { scenes } from "@/lib/imagery";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("finances") };
@@ -56,7 +57,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
         }
       />
       {shares.length === 0 ? (
-        <EmptyState icon={Wallet} title={t("emptyTitle")} body={t("emptyBody")} />
+        <EmptyState icon={Wallet} image={scenes.cabinLifestyle} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
         <div className="flex flex-col gap-10">
           {shares.map((s) => {
@@ -65,7 +66,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
             return (
               <section key={s.shareId} aria-labelledby={`fin-${s.shareId}`} className="flex flex-col gap-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h2 id={`fin-${s.shareId}`} className="text-lg font-bold tracking-tight">
+                  <h2 id={`fin-${s.shareId}`} className="text-xl font-light tracking-tight">
                     {s.registration} <span className="text-muted font-medium">· {s.model}</span>
                   </h2>
                   <DownloadLink href={`/finances/statement?share=${s.shareId}&year=${year}`}>
@@ -76,13 +77,13 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Card>
                     <CardTitle>{t("planned")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-bold tracking-tight">
+                    <p className="tabular mt-1 text-3xl font-light tracking-tight">
                       {s.published ? money(s.totals.plannedCents, s.currency) : "—"}
                     </p>
                   </Card>
                   <Card>
                     <CardTitle>{t("spent")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-bold tracking-tight">
+                    <p className="tabular mt-1 text-3xl font-light tracking-tight">
                       {money(s.totals.spentCents, s.currency)}
                     </p>
                   </Card>
@@ -90,7 +91,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                     <CardTitle>{t("remaining")}</CardTitle>
                     <p
                       className={cn(
-                        "tabular mt-1 text-2xl font-bold tracking-tight",
+                        "tabular mt-1 text-3xl font-light tracking-tight",
                         s.published && remaining < 0 && "text-danger",
                       )}
                     >

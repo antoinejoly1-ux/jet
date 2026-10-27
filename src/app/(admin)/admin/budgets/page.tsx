@@ -187,7 +187,7 @@ async function SelectedShare({
 
       <Card className="self-start">
         <CardTitle className="mb-1">{t("hoursTitle")}</CardTitle>
-        <p className="tabular mb-4 text-2xl font-bold tracking-tight">{formatHours(hours.balanceMinutes, locale)}</p>
+        <p className="tabular mb-4 text-3xl font-light tracking-tight">{formatHours(hours.balanceMinutes, locale)}</p>
         {canWrite ? <AddHoursForm action={addHoursAction.bind(null, shareId)} /> : null}
         <ol className="divide-border mt-4 divide-y text-sm">
           {hours.entries.slice(0, 12).map((e) => (

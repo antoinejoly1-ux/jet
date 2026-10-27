@@ -15,6 +15,7 @@ export async function listStaff(db: Db, actor: Actor) {
       id: user.id,
       name: user.name,
       email: user.email,
+      image: user.image,
       staffRole: user.staffRole,
       twoFactorEnabled: user.twoFactorEnabled,
       lastSignInAt:

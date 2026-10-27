@@ -54,7 +54,7 @@ export async function AvailabilityCalendar({
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex max-w-xl flex-col gap-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold tracking-tight first-letter:uppercase">{title}</h2>
+          <h2 className="text-xl font-light tracking-tight first-letter:uppercase">{title}</h2>
           <div className="flex gap-1">
             <Link
               href={hrefFor(shiftMonth(month, -1)) as Route}

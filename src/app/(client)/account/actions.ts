@@ -11,12 +11,21 @@ import { setLocale } from "@/lib/services/account";
 import { saveEmailPreferences } from "@/lib/services/notification-center";
 import { createPrivacyRequest, type PrivacyRequestInput } from "@/lib/services/privacy";
 import { LOCALE_COOKIE } from "@/i18n/request";
+import { THEME_COOKIE, THEMES } from "@/lib/theme";
 
 export async function setLocaleAction(formData: FormData) {
   const viewer = await requireViewer();
   const locale = z.enum(["fr", "en"]).parse(formData.get("locale"));
   await setLocale(db, viewer.id, locale);
   (await cookies()).set(LOCALE_COOKIE, locale, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  revalidatePath("/", "layout");
+}
+
+/** The look is a per-browser choice, kept in a cookie the root layout reads, so the first paint is right. */
+export async function setThemeAction(formData: FormData) {
+  await requireViewer();
+  const theme = z.enum(THEMES).parse(formData.get("theme"));
+  (await cookies()).set(THEME_COOKIE, theme, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
   revalidatePath("/", "layout");
 }
 

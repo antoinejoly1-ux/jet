@@ -54,7 +54,7 @@ export async function InboxList({ rows, filter, activeId }: { rows: Row[]; filte
                 className="hover:bg-surface-muted aria-[current=true]:bg-surface-muted flex flex-col gap-0.5 px-4 py-3"
               >
                 <span className="flex items-center gap-2">
-                  <span className={cn("min-w-0 flex-1 truncate", r.unread ? "font-bold" : "font-semibold")}>
+                  <span className={cn("min-w-0 flex-1 truncate", r.unread ? "font-semibold" : "font-medium")}>
                     {r.ownerName}
                   </span>
                   {r.lastMessageAt ? (

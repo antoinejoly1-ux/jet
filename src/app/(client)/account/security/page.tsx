@@ -15,10 +15,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SecurityPage() {
   const viewer = await requireViewer();
   const t = await getTranslations("twoFactor");
+  const ta = await getTranslations("account");
 
   return (
     <>
-      <PageHeader title={t("title")} description={t("description")} />
+      <PageHeader
+        eyebrow={
+          <Link href="/account#security" className="hover:text-text transition-colors">
+            {ta("settingsTitle")} · {ta("sections.security")}
+          </Link>
+        }
+        title={t("title")}
+        description={t("description")}
+      />
       <Card className="max-w-2xl">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">

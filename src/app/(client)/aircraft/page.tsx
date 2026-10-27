@@ -13,6 +13,7 @@ import { db } from "@/lib/db";
 import { formatHours } from "@/lib/format";
 import { listOwnerAircraft } from "@/lib/services/availability";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
+import { scenes } from "@/lib/imagery";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("aircraft") };
@@ -36,7 +37,7 @@ export default async function OwnerAircraftPage() {
     return (
       <>
         <PageHeader title={t("title")} />
-        <EmptyState icon={Plane} title={th("noShareTitle")} body={th("noShareBody")} />
+        <EmptyState icon={Plane} image={scenes.hangarBright} title={th("noShareTitle")} body={th("noShareBody")} />
       </>
     );
 
@@ -62,14 +63,14 @@ export default async function OwnerAircraftPage() {
               />
               <div className="absolute inset-x-6 bottom-6 text-white sm:inset-x-8 sm:bottom-8">
                 <p className="text-[11px] font-semibold tracking-[0.2em] text-white/75 uppercase">{a.model}</p>
-                <p className="mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl" aria-hidden>
+                <p className="mt-1 text-5xl font-light tracking-[-0.03em] sm:text-6xl" aria-hidden>
                   {a.registration}
                 </p>
               </div>
             </div>
             <Card>
               <div className="mb-3 flex flex-wrap items-center gap-2">
-                <h2 id={`plane-${a.shareId}`} className="text-lg font-bold tracking-tight">
+                <h2 id={`plane-${a.shareId}`} className="text-xl font-light tracking-tight">
                   {a.registration}
                 </h2>
                 <Badge tone={STATUS_TONE[a.status]}>{th(`status.${a.status}`)}</Badge>

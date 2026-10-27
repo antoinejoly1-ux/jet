@@ -1,23 +1,86 @@
-import { ChevronRight, ShieldCheck } from "lucide-react";
+import { ChevronRight, KeyRound, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
+import { AvatarPicker } from "@/components/account/avatar-picker";
+import { EmailPreferencesForm } from "@/components/account/email-preferences-form";
+import { PrivacyRequestForm } from "@/components/account/privacy-request-form";
+import { ProfileForm } from "@/components/account/profile-form";
+import { SettingsNav } from "@/components/account/settings-nav";
+import { ThemePicker } from "@/components/account/theme-picker";
+import { TeamFaces } from "@/components/brand/team";
+import { ContactButtons } from "@/components/common/contact-buttons";
+import { initials } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireViewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { EmailPreferencesForm } from "@/components/account/email-preferences-form";
+import { scenes } from "@/lib/imagery";
 import { listSignInMethods } from "@/lib/services/account";
 import { getEmailPreferences } from "@/lib/services/notification-center";
-import { PrivacyRequestForm } from "@/components/account/privacy-request-form";
-import { DownloadLink } from "@/components/ui/download-link";
 import { listMyPrivacyRequests, RESPONSE_DAYS } from "@/lib/services/privacy";
-import { privacyRequestAction, saveEmailPreferencesAction, setLocaleAction } from "./actions";
+import { parseTheme, THEME_COOKIE } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import { privacyRequestAction, saveEmailPreferencesAction, setLocaleAction, setThemeAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getTranslations("account"))("title") };
+  return { title: (await getTranslations("account"))("settingsTitle") };
+}
+
+/** One settings section: a light title and a line of context, then its content on a hairline panel. */
+function Section({
+  id,
+  title,
+  body,
+  children,
+  bare = false,
+}: {
+  id: string;
+  title: string;
+  body?: ReactNode;
+  children: ReactNode;
+  bare?: boolean;
+}) {
+  return (
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-28">
+      <h2 id={`${id}-title`} className="text-2xl font-light tracking-tight">
+        {title}
+      </h2>
+      {body ? <p className="text-muted mt-1.5 max-w-xl text-sm leading-relaxed">{body}</p> : null}
+      <div className={cn("mt-5", !bare && "border-border bg-surface rounded-lg border")}>{children}</div>
+    </section>
+  );
+}
+
+/** A hairline row: what it is on the left, its state or control on the right. */
+function Row({
+  icon,
+  label,
+  hint,
+  children,
+}: {
+  icon?: ReactNode;
+  label: string;
+  hint?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <div className="border-border flex flex-col gap-3 border-b px-6 py-5 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+      <div className="flex min-w-0 items-start gap-3">
+        {icon ? <span className="text-muted mt-0.5">{icon}</span> : null}
+        <div className="min-w-0">
+          <p className="text-sm font-medium">{label}</p>
+          {hint ? <div className="text-muted mt-0.5 text-sm">{hint}</div> : null}
+        </div>
+      </div>
+      <div className="shrink-0">{children}</div>
+    </div>
+  );
 }
 
 export default async function AccountPage() {
@@ -25,109 +88,188 @@ export default async function AccountPage() {
   const t = await getTranslations("account");
   const locale = await getLocale();
   const format = await getFormatter();
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+  const readOnly = Boolean(viewer.viewingAs);
   const [methods, emails, requests] = await Promise.all([
     listSignInMethods(db, viewer.id),
-    viewer.ownerIds.length && !viewer.viewingAs ? getEmailPreferences(db, viewer) : Promise.resolve(null),
+    viewer.ownerIds.length && !readOnly ? getEmailPreferences(db, viewer) : Promise.resolve(null),
     listMyPrivacyRequests(db, viewer),
   ]);
+  const [first = "", ...rest] = viewer.name.trim().split(/\s+/);
+
+  const sections = [
+    { id: "profile", title: t("sections.profile") },
+    { id: "appearance", title: t("sections.appearance") },
+    { id: "security", title: t("sections.security") },
+    ...(emails ? [{ id: "notifications", title: t("sections.notifications") }] : []),
+    ...(!readOnly ? [{ id: "privacy", title: t("sections.privacy") }] : []),
+    { id: "team", title: t("sections.team") },
+  ];
 
   return (
     <>
-      <PageHeader title={t("title")} />
-      <div className="grid max-w-2xl gap-4">
-        <Card>
-          <CardTitle>{t("profile")}</CardTitle>
-          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-[140px_1fr]">
-            <dt className="text-muted">{t("name")}</dt>
-            <dd className="font-medium">{viewer.name}</dd>
-            <dt className="text-muted">{t("email")}</dt>
-            <dd className="font-medium break-all">{viewer.email}</dd>
-            <dt className="text-muted">{t("signInMethods")}</dt>
-            <dd className="flex flex-wrap gap-2">
-              {methods.map((m) => (
-                <Badge key={m}>{t(`methods.${m === "google" ? "google" : "credential"}`)}</Badge>
-              ))}
-              <Badge>{t("methods.magicLink")}</Badge>
-            </dd>
-          </dl>
-        </Card>
+      <PageHeader eyebrow={t("title")} title={t("settingsTitle")} description={t("settingsBody")} />
+      <div className="grid gap-8 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-14">
+        <SettingsNav label={t("sectionsLabel")} sections={sections} />
 
-        <Card>
-          <CardTitle>{t("language")}</CardTitle>
-          <form action={setLocaleAction} className="mt-3 flex flex-wrap gap-2">
-            {(["fr", "en"] as const).map((l) => (
-              <Button
-                key={l}
-                type="submit"
-                name="locale"
-                value={l}
-                variant={locale === l ? "primary" : "secondary"}
-                size="sm"
-                aria-pressed={locale === l}
-              >
-                {t(`languages.${l}`)}
+        <div className="flex max-w-3xl min-w-0 flex-col gap-14">
+          <Section id="profile" title={t("sections.profile")} body={t("profileBody")} bare>
+            <div className="border-border bg-surface overflow-hidden rounded-lg border">
+              <div className="relative h-32 sm:h-40">
+                <Image
+                  src={scenes.cabinWindow}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1024px) 768px, 100vw"
+                  placeholder="blur"
+                  className="object-cover opacity-80"
+                />
+                <div className="from-surface absolute inset-0 bg-gradient-to-t to-transparent" aria-hidden />
+              </div>
+              <div className="-mt-20 flex flex-col gap-8 px-6 pb-7 sm:-mt-24 sm:flex-row sm:items-start sm:px-7">
+                {/* The circle sits half over the cover photo: a solid backing keeps it crisp. */}
+                <div className="[&>div>button:first-child]:bg-surface [&>div>button:first-child]:ring-surface relative [&>div>button:first-child]:ring-4">
+                  {readOnly ? (
+                    <div className="border-border bg-surface-muted flex size-28 items-center justify-center rounded-full border text-3xl font-light">
+                      {initials(viewer.name)}
+                    </div>
+                  ) : (
+                    <AvatarPicker initialImage={viewer.image} initials={initials(viewer.name)} size="md" />
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-6 sm:pt-24">
+                  <ProfileForm firstName={first} lastName={rest.join(" ")} disabled={readOnly} />
+                  <dl className="border-border grid gap-x-6 gap-y-3 border-t pt-5 text-sm sm:grid-cols-[120px_1fr]">
+                    <dt className="text-muted">{t("email")}</dt>
+                    <dd className="font-medium break-all">{viewer.email}</dd>
+                    <dt className="text-muted">{t("signInMethods")}</dt>
+                    <dd className="flex flex-wrap gap-2">
+                      {methods.map((m) => (
+                        <Badge key={m}>{t(`methods.${m === "google" ? "google" : "credential"}`)}</Badge>
+                      ))}
+                      <Badge>{t("methods.magicLink")}</Badge>
+                    </dd>
+                  </dl>
+                  {readOnly ? <p className="text-muted text-xs">{t("readOnly")}</p> : null}
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          <Section id="appearance" title={t("sections.appearance")} body={t("appearanceBody")}>
+            <div className="border-border border-b px-6 py-6 sm:px-7">
+              <p className="mb-4 text-sm font-medium">{t("theme")}</p>
+              <ThemePicker current={theme} action={setThemeAction} />
+            </div>
+            <Row label={t("language")}>
+              <form action={setLocaleAction} className="border-border flex rounded-full border p-1">
+                {(["fr", "en"] as const).map((l) => (
+                  <button
+                    key={l}
+                    type="submit"
+                    name="locale"
+                    value={l}
+                    aria-pressed={locale === l}
+                    className={cn(
+                      "rounded-full px-4 py-1.5 text-sm transition-colors",
+                      locale === l ? "bg-text text-background font-medium" : "text-muted hover:text-text",
+                    )}
+                  >
+                    {t(`languages.${l}`)}
+                  </button>
+                ))}
+              </form>
+            </Row>
+          </Section>
+
+          <Section id="security" title={t("sections.security")} body={t("securityBody")}>
+            <Row
+              icon={<ShieldCheck className="size-4" strokeWidth={1.5} aria-hidden />}
+              label={t("twoFactor")}
+              hint={viewer.twoFactorEnabled ? t("twoFactorOn") : t("twoFactorOff")}
+            >
+              <Button asChild variant="secondary" size="sm">
+                <Link href="/account/security">
+                  {t("manage")}
+                  <ChevronRight aria-hidden />
+                </Link>
               </Button>
-            ))}
-          </form>
-        </Card>
+            </Row>
+            {methods.includes("credential") ? (
+              <Row
+                icon={<KeyRound className="size-4" strokeWidth={1.5} aria-hidden />}
+                label={t("password")}
+                hint={t("passwordHint")}
+              >
+                <Button asChild variant="secondary" size="sm">
+                  <Link href="/forgot-password">{t("changePassword")}</Link>
+                </Button>
+              </Row>
+            ) : null}
+          </Section>
 
-        {emails ? (
-          <Card>
-            <CardTitle>{t("emailsTitle")}</CardTitle>
-            <p className="text-muted mt-1 text-sm">{t("emailsBody")}</p>
-            <EmailPreferencesForm
-              action={saveEmailPreferencesAction}
-              preferences={emails}
-              disabled={!!viewer.viewingAs}
-            />
-          </Card>
-        ) : null}
+          {emails ? (
+            <Section id="notifications" title={t("sections.notifications")} body={t("emailsBody")}>
+              <div className="px-6 py-5 sm:px-7">
+                <EmailPreferencesForm action={saveEmailPreferencesAction} preferences={emails} disabled={readOnly} />
+              </div>
+            </Section>
+          ) : null}
 
-        {!viewer.viewingAs ? (
-          <Card id="privacy">
-            <CardTitle>{t("privacyTitle")}</CardTitle>
-            <p className="text-muted mt-1 text-sm">
-              {t.rich("privacyBody", {
+          {!readOnly ? (
+            <Section
+              id="privacy"
+              title={t("sections.privacy")}
+              body={t.rich("privacyBody", {
                 days: RESPONSE_DAYS,
                 policy: (chunks) => (
-                  <Link href="/privacy" className="text-accent font-medium underline">
+                  <Link href="/privacy" className="text-accent font-medium underline underline-offset-4">
                     {chunks}
                   </Link>
                 ),
               })}
-            </p>
-            <div className="mt-3">
-              <DownloadLink href="/account/data-export">{t("downloadData")}</DownloadLink>
-            </div>
-            <div className="border-border mt-5 border-t pt-4">
-              <PrivacyRequestForm action={privacyRequestAction} />
-            </div>
-            {requests.length ? (
-              <ul className="mt-4 flex flex-col gap-2 text-sm">
-                {requests.map((r) => (
-                  <li key={r.id} className="bg-surface-muted rounded-md px-3 py-2">
-                    <p className="font-medium">
-                      {t(`privacyKinds.${r.kind}`)} · {t(`privacyStatuses.${r.status}`)}
-                    </p>
-                    <p className="text-muted text-xs">{format.dateTime(r.createdAt, { dateStyle: "medium" })}</p>
-                    {r.response ? <p className="mt-1">{r.response}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-          </Card>
-        ) : null}
+            >
+              <Row label={t("privacyTitle")}>
+                <DownloadLink href="/account/data-export">{t("downloadData")}</DownloadLink>
+              </Row>
+              <div className="px-6 py-5 sm:px-7">
+                <PrivacyRequestForm action={privacyRequestAction} />
+                {requests.length ? (
+                  <ul className="border-border mt-5 flex flex-col border-t text-sm">
+                    {requests.map((r) => (
+                      <li key={r.id} className="border-border border-b py-3 last:border-b-0">
+                        <p className="font-medium">
+                          {t(`privacyKinds.${r.kind}`)} · {t(`privacyStatuses.${r.status}`)}
+                        </p>
+                        <p className="text-muted text-xs">{format.dateTime(r.createdAt, { dateStyle: "medium" })}</p>
+                        {r.response ? <p className="mt-1">{r.response}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+            </Section>
+          ) : null}
 
-        <Link href="/account/security" className="group">
-          <Card className="group-hover:bg-surface-muted flex items-center gap-4 transition-colors">
-            <ShieldCheck className="text-muted size-5" aria-hidden />
-            <div className="flex-1">
-              <p className="font-semibold">{t("security")}</p>
-              <p className="text-muted text-sm">{viewer.twoFactorEnabled ? t("twoFactorOn") : t("twoFactorOff")}</p>
+          <Section id="team" title={t("sections.team")} bare>
+            <div className="theme-dark relative overflow-hidden rounded-lg">
+              <Image
+                src={scenes.toast}
+                alt=""
+                fill
+                sizes="(min-width: 1024px) 768px, 100vw"
+                placeholder="blur"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/20" aria-hidden />
+              <div className="relative flex flex-col gap-6 p-7 text-white sm:p-10">
+                <TeamFaces />
+                <p className="max-w-md text-xl leading-snug font-light sm:text-2xl">{t("teamBody")}</p>
+                <ContactButtons />
+              </div>
             </div>
-            <ChevronRight className="text-muted size-4" aria-hidden />
-          </Card>
-        </Link>
+          </Section>
+        </div>
       </div>
     </>
   );

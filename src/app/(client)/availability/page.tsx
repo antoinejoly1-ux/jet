@@ -12,6 +12,7 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { getAvailability, listOwnerAircraft } from "@/lib/services/availability";
 import { zonedDay } from "@/lib/time";
+import { scenes } from "@/lib/imagery";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("availability") };
@@ -28,7 +29,7 @@ export default async function OwnerAvailabilityPage({ searchParams }: PageProps<
     return (
       <>
         <PageHeader title={t("title")} />
-        <EmptyState icon={CalendarDays} title={t("noAircraftTitle")} body={t("noAircraftBody")} />
+        <EmptyState icon={CalendarDays} image={scenes.hangar} title={t("noAircraftTitle")} body={t("noAircraftBody")} />
       </>
     );
 

@@ -119,7 +119,7 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
                       {s.endsOn ? ` · ${t("endsOnDate", { date: day(s.endsOn) })}` : ""}
                     </p>
                   </div>
-                  <span className="tabular text-lg font-bold">{pct(s.percentageBp)}</span>
+                  <span className="tabular text-xl font-light">{pct(s.percentageBp)}</span>
                   {canWrite && !s.endsOn ? (
                     <EndShareForm action={endShareAction.bind(null, plane.id, s.id)} ownerName={s.ownerName} />
                   ) : null}

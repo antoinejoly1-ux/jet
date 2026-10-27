@@ -10,6 +10,7 @@ import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours } from "@/lib/format";
 import { listOwnerFlights } from "@/lib/services/flights";
+import { scenes } from "@/lib/imagery";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("flights") };
@@ -74,7 +75,12 @@ export default async function OwnerFlightsPage() {
             {t("upcoming")}
           </h2>
           {upcoming.length === 0 ? (
-            <EmptyState icon={PlaneTakeoff} title={t("noUpcomingTitle")} body={t("noUpcomingBody")} />
+            <EmptyState
+              icon={PlaneTakeoff}
+              image={scenes.boarding}
+              title={t("noUpcomingTitle")}
+              body={t("noUpcomingBody")}
+            />
           ) : (
             list(upcoming)
           )}
@@ -84,7 +90,7 @@ export default async function OwnerFlightsPage() {
             {t("past")}
           </h2>
           {past.length === 0 ? (
-            <EmptyState icon={PlaneLanding} title={t("noPastTitle")} body={t("noPastBody")} />
+            <EmptyState icon={PlaneLanding} image={scenes.rampDusk} title={t("noPastTitle")} body={t("noPastBody")} />
           ) : (
             list(past)
           )}

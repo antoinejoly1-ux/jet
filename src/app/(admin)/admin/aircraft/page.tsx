@@ -53,7 +53,7 @@ export default async function AircraftListPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-lg font-bold tracking-tight">{a.registration}</p>
+                      <p className="text-xl font-light tracking-tight">{a.registration}</p>
                       <p className="text-muted text-sm">
                         {a.model}
                         {a.homeBase ? ` · ${a.homeBase}` : ""}
