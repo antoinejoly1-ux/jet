@@ -233,7 +233,7 @@ describe("files", () => {
       sizeBytes: pdf.length,
       sha256,
     };
-    const { key, ticket } = await requestUpload(finance, req);
+    const { key, ticket } = await requestUpload(db, finance, req);
     expect(ticket.url).toContain("/api/storage/local?op=put");
     // Stand-in for the browser's PUT to the signed URL.
     await mkdir(path.dirname(localPath(key)), { recursive: true });
@@ -243,7 +243,7 @@ describe("files", () => {
 
   it("refuses types and sizes outside the rules before signing anything", async () => {
     await expect(
-      requestUpload(finance, {
+      requestUpload(db, finance, {
         purpose: "invoice",
         filename: "x.exe",
         contentType: "application/x-msdownload",
@@ -252,7 +252,7 @@ describe("files", () => {
       }),
     ).rejects.toMatchObject({ code: "file_type_not_allowed" });
     await expect(
-      requestUpload(finance, {
+      requestUpload(db, finance, {
         purpose: "invoice",
         filename: "big.pdf",
         contentType: "application/pdf",
@@ -261,7 +261,7 @@ describe("files", () => {
       }),
     ).rejects.toMatchObject({ code: "file_too_large" });
     await expect(
-      requestUpload(dispatcher, {
+      requestUpload(db, dispatcher, {
         purpose: "invoice",
         filename: "a.pdf",
         contentType: "application/pdf",
@@ -272,7 +272,7 @@ describe("files", () => {
   });
 
   it("only records a file that really arrived, and flags duplicates", async () => {
-    const { key } = await requestUpload(finance, {
+    const { key } = await requestUpload(db, finance, {
       purpose: "invoice",
       filename: "a.pdf",
       contentType: "application/pdf",
@@ -372,7 +372,7 @@ describe("spreadsheet import", () => {
         sizeBytes: csv.length,
         sha256,
       };
-      const { key } = await requestUpload(finance, req);
+      const { key } = await requestUpload(db, finance, req);
       await mkdir(path.dirname(localPath(key)), { recursive: true });
       await writeFile(localPath(key), csv);
       return completeUpload(db, finance, { ...req, key });
@@ -385,5 +385,30 @@ describe("spreadsheet import", () => {
 
   it("requires the key columns to be mapped", async () => {
     await expect(validateImport(db, finance, { date: "Date" }, rows)).rejects.toThrow();
+  });
+});
+
+describe("upload limit", () => {
+  it("stops a person after an hour's worth of uploads", async () => {
+    const { files } = await import("@/lib/db/schema");
+    const { UPLOADS_PER_HOUR } = await import("@/lib/services/files");
+    await db.insert(files).values(
+      Array.from({ length: UPLOADS_PER_HOUR }, (_, i) => ({
+        storageKey: `invoices/limit-${i}.pdf`,
+        contentType: "application/pdf",
+        sizeBytes: 10,
+        sha256: "a".repeat(64),
+        uploadedByUserId: finance.id,
+      })),
+    );
+    await expect(
+      requestUpload(db, finance, {
+        purpose: "invoice",
+        filename: "x.pdf",
+        contentType: "application/pdf",
+        sizeBytes: 10,
+        sha256: "b".repeat(64),
+      }),
+    ).rejects.toMatchObject({ code: "too_many_uploads" });
   });
 });

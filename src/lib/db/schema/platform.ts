@@ -163,6 +163,7 @@ export const outboxEvents = pgTable(
 
 export const webhookEndpoints = pgTable("webhook_endpoints", {
   id: id(),
+  name: text("name").notNull().default(""),
   url: text("url").notNull(),
   events: text("events").array().notNull(),
   encryptedSecret: text("encrypted_secret").notNull(),
@@ -183,9 +184,15 @@ export const webhookDeliveries = pgTable(
     attempts: integer("attempts").notNull().default(0),
     responseStatus: integer("response_status"),
     deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+    /** When to try again; null once delivered or given up. */
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).defaultNow(),
+    lastError: text("last_error"),
     createdAt: createdAt(),
   },
-  (t) => [index("webhook_deliveries_endpoint_idx").on(t.endpointId)],
+  (t) => [
+    index("webhook_deliveries_endpoint_idx").on(t.endpointId),
+    index("webhook_deliveries_due_idx").on(t.nextAttemptAt),
+  ],
 );
 
 export const apiKeys = pgTable("api_keys", {

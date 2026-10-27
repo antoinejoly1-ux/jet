@@ -11,6 +11,8 @@ export type Actor = {
   staffRole: StaffRole | null;
   /** Owners this user acts for (via owner_members). */
   ownerIds: readonly string[];
+  /** Set when the request comes with an API key: exactly these permissions, organisation-wide. */
+  apiScopes?: readonly Permission[];
 };
 
 export type Permission =
@@ -54,6 +56,15 @@ const finance: readonly Permission[] = [
 
 const admin: readonly Permission[] = [...finance, "fleet:write", "team:manage", "integrations:manage", "audit:read"];
 
+/** What an API key can be granted. Never team, integration or audit administration. */
+export const API_SCOPES = [
+  "owners:read",
+  "fleet:read",
+  "finance:read",
+  "finance:write",
+  "operations:write",
+] as const satisfies readonly Permission[];
+
 const STAFF: Record<StaffRole, ReadonlySet<Permission>> = {
   dispatcher: new Set(dispatcher),
   finance: new Set(finance),
@@ -65,6 +76,7 @@ const OWNER_READABLE: ReadonlySet<Permission> = new Set(["owners:read", "fleet:r
 
 export function can(actor: Actor | null, permission: Permission, scope?: Scope): boolean {
   if (!actor) return false;
+  if (actor.apiScopes) return actor.apiScopes.includes(permission);
   if (actor.staffRole && STAFF[actor.staffRole].has(permission)) return true;
   if (!OWNER_READABLE.has(permission) || !scope) return false;
   return scope.ownerIds.some((ownerId) => actor.ownerIds.includes(ownerId));

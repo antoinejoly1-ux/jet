@@ -11,6 +11,7 @@ import { aircraft, budgetCategories, hourLedger, owners, shares, transactions, u
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { hoursInput, transactionInput, type HoursInput, type TransactionInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
+import { emit } from "./outbox";
 import { ConflictError, NotFoundError } from "./errors";
 
 const yearRange = (year: number): SQL[] => [
@@ -92,6 +93,16 @@ export async function addTransaction(
       entityId: row.id,
       after: { kind: row.kind, amountCents: row.amountCents, occurredOn: row.occurredOn },
     });
+    await emit(tx, "transaction.created", {
+      transactionId: row.id,
+      shareId: row.shareId,
+      occurredOn: row.occurredOn,
+      kind: row.kind,
+      amountCents: row.amountCents,
+      currency: row.currency,
+      categoryId: row.categoryId,
+      reversesId: null,
+    });
     return row;
   });
 }
@@ -131,6 +142,16 @@ export async function reverseTransaction(db: Db, actor: Actor, id: string, reaso
       entityType: "transaction",
       entityId: original.id,
       after: { reversalId: row.id, reason },
+    });
+    await emit(tx, "transaction.created", {
+      transactionId: row.id,
+      shareId: row.shareId,
+      occurredOn: row.occurredOn,
+      kind: row.kind,
+      amountCents: row.amountCents,
+      currency: row.currency,
+      categoryId: row.categoryId,
+      reversesId: original.id,
     });
     return row;
   });

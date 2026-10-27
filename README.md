@@ -102,6 +102,12 @@ set (redirect URI: `{BETTER_AUTH_URL}/api/auth/callback/google`).
   `Authorization: Bearer $CRON_SECRET`. `.github/workflows/scheduled-jobs.yml` calls them once the repository has the
   `APP_URL` variable and `CRON_SECRET` secret, which works on any Vercel plan.
 
+## API and webhooks
+
+A REST API at `/api/v1` with scoped, revocable keys, an OpenAPI document at `/api/v1/openapi.json`, and signed,
+retried webhooks for invoices, ledger entries, budgets, flights and maintenance. Managed by admins under Settings →
+Developers. See [docs/api.md](docs/api.md).
+
 ## Privacy and security
 
 - [Law 25 compliance](docs/privacy/law-25.md): privacy officer, public policy at `/privacy`, data download and requests
@@ -183,5 +189,6 @@ The business is Canadian, so client data stays in Canada:
 
 ## What's next
 
-Launch: work through the [launch checklist](docs/launch-checklist.md). Then Phase 5 (integrations): accounting sync,
-live flight tracking, the public API and outgoing webhooks, and the smart summary on Home.
+Launch: work through the [launch checklist](docs/launch-checklist.md). The rest of Phase 5 waits on vendor choices:
+accounting sync (QuickBooks Online or Xero, on top of the API and webhooks), live flight tracking, and the smart
+summary on Home.

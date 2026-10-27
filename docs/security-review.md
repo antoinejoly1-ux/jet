@@ -20,6 +20,9 @@ unless marked otherwise.
 | Attaching someone else's file to a chat | A message can only carry a file its sender uploaded                                                                                                           | `src/lib/services/messages.ts`                       |
 | Tampered or oversized uploads           | Signed URLs fix the size, type and SHA-256; the server re-checks size before recording the file                                                               | `src/lib/services/files.ts`                          |
 | Lost or altered records                 | Ledgers are append-only; every change is in the audit log with before and after values                                                                        | `src/lib/services/ledger.ts`, `audit_log`            |
+| Leaked or over-broad API access         | Keys are shown once, stored as SHA-256 hashes, scoped to listed permissions, revocable, rate limited (120/min)                                                | `src/lib/services/api-keys.ts`                       |
+| Webhooks used to reach internal systems | HTTPS only; hosts resolving to private, loopback or link-local addresses refused; redirects not followed; 10 s timeout                                        | `src/lib/services/webhooks.ts`                       |
+| Forged webhook deliveries               | HMAC-SHA256 signature with a per-endpoint secret (encrypted at rest with AES-256-GCM) and a timestamp against replays                                         | `src/lib/services/webhooks.ts`, `src/lib/crypto.ts`  |
 | Lost database or files                  | Point-in-time recovery, bucket versioning, rehearsed restores                                                                                                 | [backup-restore runbook](runbooks/backup-restore.md) |
 
 ## Findings
@@ -31,7 +34,7 @@ unless marked otherwise.
 | 3   | Status badge text below 4.5:1 contrast                                                           | Low      | **Fixed**: darker light-mode tokens; axe now runs on every screen in CI                                                             |
 | 4   | No automated dependency updates                                                                  | Low      | **Fixed**: Dependabot, weekly, grouped                                                                                              |
 | 5   | `pnpm audit`: one moderate advisory in `esbuild` ≤ 0.24 (GHSA-67mh-4wv8-2f99), via `drizzle-kit` | Low      | **Accepted**: development-server issue in a dev-only tool, never shipped or run in production                                       |
-| 6   | Uploads have no per-user rate limit                                                              | Low      | **Open**: only signed-in owners and staff can upload, 10–25 MB each; add a limit if abuse appears                                   |
+| 6   | Uploads have no per-user rate limit                                                              | Low      | **Fixed**: 60 uploads per person per hour (`UPLOADS_PER_HOUR`)                                                                      |
 | 7   | Vercel functions run in the United States                                                        | Info     | **Documented** in the [privacy impact assessment](privacy/law-25.md)                                                                |
 
 ## Before launch

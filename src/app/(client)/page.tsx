@@ -1,4 +1,4 @@
-import { CalendarClock, FileText, Plane, PlaneTakeoff, Wallet, Wrench } from "lucide-react";
+import { CalendarClock, FileText, Lightbulb, Plane, PlaneTakeoff, TriangleAlert, Wallet, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
@@ -11,6 +11,7 @@ import type { Actor } from "@/lib/auth/policy";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours, formatMoney } from "@/lib/format";
+import { insightsFor, type Insight } from "@/lib/insights";
 import { getAvailability } from "@/lib/services/availability";
 import { getOwnerHome, type ShareSummary } from "@/lib/services/dashboard";
 import { zonedDay } from "@/lib/time";
@@ -101,6 +102,15 @@ async function ShareSection({
           {showOwner ? ` · ${s.ownerName}` : ""}
         </span>
       </div>
+
+      <Insights
+        items={insightsFor({
+          now: new Date(),
+          minutesRemaining: s.minutesRemaining,
+          usedThisYearMinutes: s.usedThisYearMinutes,
+          budget: s.budget,
+        })}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <Card className="flex items-center gap-5 sm:col-span-2 xl:col-span-1">
@@ -264,5 +274,43 @@ function Meter({ value, label }: { value: number | null; label: string }) {
     >
       <div className={`h-full rounded-full ${tone}`} style={{ width: `${pct}%` }} />
     </div>
+  );
+}
+
+/** One or two plain sentences about pace, from the owner's own numbers. */
+async function Insights({ items }: { items: Insight[] }) {
+  const t = await getTranslations("home.insights");
+  const format = await getFormatter();
+  if (items.length === 0) return null;
+  const pct = (n: number) => format.number(n, { style: "percent", maximumFractionDigits: 0 });
+  const month = (ym: string) =>
+    format.dateTime(new Date(`${ym}-15T12:00:00Z`), { month: "long", year: "numeric", timeZone: "UTC" });
+  return (
+    <ul className="mb-4 flex flex-col gap-2" aria-label={t("label")}>
+      {items.map((i) => {
+        const Icon = i.tone === "warning" ? TriangleAlert : Lightbulb;
+        const text =
+          i.kind === "hoursPace"
+            ? t("hoursPace", { months: format.number(i.months, { maximumFractionDigits: 1 }), until: month(i.until) })
+            : i.kind === "hoursUnused"
+              ? t("hoursUnused")
+              : t(i.tone === "warning" ? "budgetAhead" : "budgetOnTrack", {
+                  spent: pct(i.spentShare),
+                  year: pct(i.yearShare),
+                });
+        return (
+          <li
+            key={i.kind}
+            className={cn(
+              "flex items-start gap-2.5 rounded-lg px-3.5 py-2.5 text-sm",
+              i.tone === "warning" ? "bg-warning/12 text-warning" : "bg-surface-muted",
+            )}
+          >
+            <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+            <span>{text}</span>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

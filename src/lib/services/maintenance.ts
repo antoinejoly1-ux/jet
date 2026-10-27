@@ -11,6 +11,7 @@ import { authorize, type Actor } from "@/lib/auth/policy";
 import { maintenanceInput, type MaintenanceInput } from "@/lib/validation/operations";
 import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { recordAudit } from "./audit";
+import { emit } from "./outbox";
 import { notifyOwnerMembers, sendPendingEmails, type PendingEmail } from "./owner-notifications";
 import { ConflictError, NotFoundError } from "./errors";
 
@@ -88,6 +89,15 @@ export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInpu
       entityType: "maintenance",
       entityId: row.id,
       after: input,
+    });
+    await emit(tx, "maintenance.planned", {
+      maintenanceId: row.id,
+      aircraftId: row.aircraftId,
+      type: row.type,
+      title: row.title,
+      startsAt: row.startsAt?.toISOString() ?? null,
+      endsAt: row.endsAt?.toISOString() ?? null,
+      dueOn: row.dueOn,
     });
     // Owners hear about work that will take their aircraft out of service.
     const emails: PendingEmail[] = [];
