@@ -221,7 +221,7 @@
     "freeDaysShort": "{count, plural, one {# jour} other {# jours}}",
     "freeDaysLabel": "libres sur les {days} prochains",
     "seeInvoices": "Voir les factures",
-    "activityTitle": "En direct",
+    "activityTitle": "Activité",
     "activityAll": "Tout voir",
     "activityEmpty": "Les vols, factures et nouvelles de l'équipe apparaîtront ici.",
     "flightCompleted": "Vol complété",
@@ -229,7 +229,26 @@
     "teamEyebrow": "Votre équipe Univair",
     "teamTitle": "On s'occupe de tout.",
     "teamBody": "Un vol à planifier, un hôtel, une question? Appelez ou textez, nous vous répondons.",
-    "ofPlannedShort": "sur {amount} prévus"
+    "ofPlannedShort": "sur {amount} prévus",
+    "hero": {
+      "flying": "Votre {model} est en vol",
+      "flyingTo": "vers {city} · arrivée prévue à {time}",
+      "maintenance": "Votre {model} est en maintenance",
+      "maintenanceUntil": "jusqu'au {date}",
+      "waiting": "Votre {model} vous attend",
+      "waitingAt": "à {city}, prêt pour votre prochain départ",
+      "follow": "Suivre en direct"
+    },
+    "flownCaption": "depuis le 1er janvier",
+    "legendFree": "Libre",
+    "legendMine": "Votre vol",
+    "legendBooked": "Réservé",
+    "legendMaintenance": "Maintenance",
+    "upcomingTitle": "Vos prochains vols",
+    "allFlights": "Tous vos vols",
+    "inTheAir": "En vol",
+    "planNext": "Un prochain départ en tête? Dites-nous où et quand, nous nous occupons du reste.",
+    "planNextCta": "Planifier un vol"
   },
   "account": {
     "title": "Mon compte",

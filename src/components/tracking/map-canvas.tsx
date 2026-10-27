@@ -25,9 +25,6 @@ const MAX_EXTRAPOLATE_S = 120;
 const PLANE_SVG = `<svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><path d="M16 2.5c1.1 0 1.9 1.3 1.9 3.1v7.1l10.6 6.4v2.6l-10.6-3.2v6.1l3.3 2.6v2.2L16 28.2l-5.2 1.2v-2.2l3.3-2.6v-6.1L3.5 21.7v-2.6l10.6-6.4V5.6c0-1.8.8-3.1 1.9-3.1z" fill="currentColor" stroke="white" stroke-width="1.2" stroke-linejoin="round"/></svg>`;
 
 const css = (name: string) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const prefersDark = () =>
-  document.documentElement.dataset.theme === "dark" ||
-  (document.documentElement.dataset.theme !== "light" && matchMedia("(prefers-color-scheme: dark)").matches);
 const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Warm the base map to the brand: paper land, soft water, quiet labels in the viewer's language. */
@@ -40,9 +37,9 @@ function tint(map: MapLibreMap, dark: boolean, locale: string) {
         ["get", "name:latin"],
         ["get", "name"],
       ]);
-    if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", dark ? "#151413" : "#f3f1ed");
+    if (layer.type === "background") map.setPaintProperty(layer.id, "background-color", dark ? "#11100e" : "#f3f1ed");
     else if (layer.type === "fill" && layer.id.includes("water"))
-      map.setPaintProperty(layer.id, "fill-color", dark ? "#0c0b0a" : "#dfe2e0");
+      map.setPaintProperty(layer.id, "fill-color", dark ? "#070706" : "#dfe2e0");
     else if (layer.type === "fill" && /park|wood|glacier|ice/.test(layer.id))
       map.setPaintProperty(layer.id, "fill-color", dark ? "#1a1917" : "#ebe8e1");
     else if (layer.type === "raster") map.setLayoutProperty(layer.id, "visibility", "none");
@@ -138,7 +135,8 @@ export default function MapCanvas({
 
   useEffect(() => {
     if (!box.current) return;
-    const dark = prefersDark();
+    // The map is always the night style: it reads as an instrument, and matches the cinematic panels.
+    const dark = true;
     const map = new maplibregl.Map({
       container: box.current,
       style: dark ? STYLE.dark : STYLE.light,

@@ -221,7 +221,7 @@
     "freeDaysShort": "{count, plural, one {# day} other {# days}}",
     "freeDaysLabel": "free in the next {days}",
     "seeInvoices": "See invoices",
-    "activityTitle": "Live",
+    "activityTitle": "Activity",
     "activityAll": "See all",
     "activityEmpty": "Flights, invoices and news from the team will show up here.",
     "flightCompleted": "Flight completed",
@@ -229,7 +229,26 @@
     "teamEyebrow": "Your Univair team",
     "teamTitle": "We take care of everything.",
     "teamBody": "A flight to plan, a hotel, a question? Call or text and we'll answer.",
-    "ofPlannedShort": "of {amount} planned"
+    "ofPlannedShort": "of {amount} planned",
+    "hero": {
+      "flying": "Your {model} is in the air",
+      "flyingTo": "to {city} · expected at {time}",
+      "maintenance": "Your {model} is in maintenance",
+      "maintenanceUntil": "until {date}",
+      "waiting": "Your {model} is waiting for you",
+      "waitingAt": "in {city}, ready for your next departure",
+      "follow": "Follow live"
+    },
+    "flownCaption": "since January 1",
+    "legendFree": "Free",
+    "legendMine": "Your flight",
+    "legendBooked": "Booked",
+    "legendMaintenance": "Maintenance",
+    "upcomingTitle": "Your next flights",
+    "allFlights": "All your flights",
+    "inTheAir": "In flight",
+    "planNext": "Thinking of your next trip? Tell us where and when; we take care of the rest.",
+    "planNextCta": "Plan a flight"
   },
   "account": {
     "title": "My account",

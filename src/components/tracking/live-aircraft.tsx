@@ -54,7 +54,7 @@ function Metric({ icon, label, value, hint }: { icon: typeof Gauge; label: strin
         <Icon icon={icon} anim="bounce" className="size-3.5" />
         {label}
       </dt>
-      <dd className="tabular mt-1 truncate text-lg font-semibold">
+      <dd className="tabular mt-1 truncate text-xl font-light">
         {value}
         {hint ? <span className="text-muted block text-xs font-medium">{hint}</span> : null}
       </dd>
@@ -103,22 +103,13 @@ export function LiveAircraft({
 
   return (
     <section
+      id="live"
       aria-labelledby={`live-${live.aircraftId}`}
-      className={cn(
-        "bg-surface shadow-card grid overflow-hidden rounded-lg border border-(--card-border) lg:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]",
-        className,
-      )}
+      className={cn("theme-dark border-border bg-background relative overflow-hidden rounded-[28px] border", className)}
     >
-      <div className="bg-surface-muted relative h-72 sm:h-96 lg:h-auto lg:min-h-[440px]">
+      <div className="relative h-80 sm:h-[26rem] lg:h-[580px]">
         {/* The photo shows while the map loads, and stays if WebGL isn't available. */}
-        <Image
-          src={photo}
-          alt=""
-          fill
-          sizes="(min-width: 1024px) 60vw, 100vw"
-          placeholder="blur"
-          className="object-cover opacity-90"
-        />
+        <Image src={photo} alt="" fill sizes="100vw" placeholder="blur" className="object-cover opacity-40" />
         <div className="absolute inset-0">
           <MapCanvas
             aircraft={[live]}
@@ -129,7 +120,7 @@ export function LiveAircraft({
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 p-6 sm:p-8">
+      <div className="lg:border-glass-line lg:bg-glass-strong flex flex-col gap-6 p-6 sm:p-8 lg:absolute lg:top-6 lg:left-6 lg:w-[380px] lg:rounded-[22px] lg:border lg:p-7 lg:backdrop-blur-xl">
         <div>
           <p className="eyebrow flex items-center gap-2">
             <LiveDot tone={flying && !live.stale ? "live" : "muted"} />
@@ -137,7 +128,10 @@ export function LiveAircraft({
             <span aria-hidden>·</span>
             <span>{live.registration}</span>
           </p>
-          <h2 id={`live-${live.aircraftId}`} className="mt-3 text-2xl leading-tight font-bold sm:text-3xl">
+          <h2
+            id={`live-${live.aircraftId}`}
+            className="mt-3 text-2xl leading-tight font-light tracking-tight sm:text-3xl"
+          >
             {headline}
           </h2>
           {live.leg ? (

@@ -514,3 +514,35 @@
 @utility animate-photo-in {
   animation: photo-in 1.2s var(--ease-out) both;
 }
+
+/* Always-dark islands (photo heroes, the live map) keep the cinematic look in the light theme too. */
+.theme-dark {
+  --background: #0c0b0a;
+  --surface: #141311;
+  --surface-muted: #1b1a17;
+  --surface-sunken: #080807;
+  --text: #f2ede4;
+  --text-muted: #a8a196;
+  --border: #2a2723;
+  --primary: #f2ede4;
+  --primary-foreground: #0c0b0a;
+  /* Champagne: readable as text on the dark surfaces and on its own tint. --bronze is for lines and marks. */
+  --accent: #d2b48c;
+  --accent-foreground: #0c0b0a;
+  --bronze: #b8895a;
+  --success: #7fcf9f;
+  --warning: #e6b866;
+  --danger: #f0918a;
+  --live: #7fcf9f;
+  --ring: #d2b48c;
+  --glass: rgb(16 15 13 / 0.55);
+  --glass-strong: rgb(16 15 13 / 0.78);
+  --glass-line: rgb(255 255 255 / 0.12);
+  --shadow-card: none;
+  --shadow-float: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+  --card-border: #2a2723;
+  --map-water: #0a0a09;
+  --map-land: #141311;
+  color-scheme: dark;
+  color: var(--text);
+}
