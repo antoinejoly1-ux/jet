@@ -30,7 +30,9 @@
       "dashboard": "Tableau",
       "availability": "Calendrier"
     },
-    "unread": "{count, plural, one {# non lu} other {# non lus}}"
+    "unread": "{count, plural, one {# non lu} other {# non lus}}",
+    "fabCall": "Appeler l'équipe",
+    "fabNewFlight": "Nouveau vol"
   },
   "toggle": {
     "label": "Changer de vue",
@@ -127,14 +129,14 @@
     "copyKey": "Copier la clé",
     "next": "Continuer",
     "confirmTitle": "Entrez le code affiché",
-    "confirmBody": "Tapez le code à 6 chiffres que l'application affiche maintenant pour Jet.",
+    "confirmBody": "Tapez le code à 6 chiffres que l'application affiche maintenant pour Univair.",
     "back": "Revenir au code QR",
     "codesTitle": "Gardez vos codes de secours",
     "codesBody": "Si vous perdez votre téléphone, chacun de ces codes permet de vous connecter une fois. Rangez-les dans un gestionnaire de mots de passe.",
     "copyCodes": "Copier",
     "downloadCodes": "Télécharger",
     "codesSaved": "J'ai mis mes codes de secours en lieu sûr",
-    "codesFileHeader": "Codes de secours Jet : chacun fonctionne une seule fois.",
+    "codesFileHeader": "Codes de secours Univair : chacun fonctionne une seule fois.",
     "disabledBody": "Ajoutez un code de votre téléphone à votre mot de passe pour protéger votre compte.",
     "setUp": "Activer",
     "openInApp": "Ouvrir dans l'application d'authentification",
@@ -1351,5 +1353,11 @@
     "archiveBody": "Possible seulement quand aucun appareil ne lui est rattaché.",
     "archive": "Archiver",
     "archiveConfirm": "Archiver cette société?"
+  },
+  "brand": {
+    "footer": "Univair · Saint-Hubert, Québec",
+    "eyebrow": "Gestion d'appareils · Univair",
+    "taglineLight": "Votre appareil,",
+    "taglineBold": "où qu'il soit."
   }
 }

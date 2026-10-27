@@ -26,7 +26,7 @@ export function openApiDocument(baseUrl: string) {
   return {
     openapi: "3.1.0",
     info: {
-      title: "Jet owner portal API",
+      title: "Univair Management API",
       version: "1.0.0",
       description:
         "Read and write the portal's fleet, flights and ledger. Authenticate with an API key created by an admin " +

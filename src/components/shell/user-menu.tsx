@@ -55,7 +55,7 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
       {open ? (
         <div
           role="menu"
-          className="border-border bg-surface absolute right-0 z-40 mt-2 w-64 rounded-lg border p-1.5 shadow-lg"
+          className="border-border bg-surface shadow-float absolute right-0 z-40 mt-2 w-64 rounded-[18px] border p-1.5"
         >
           <div className="px-3 py-2">
             <p className="truncate text-sm font-semibold">{name}</p>
@@ -65,7 +65,7 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
             role="menuitem"
             href="/account"
             onClick={() => setOpen(false)}
-            className="hover:bg-surface-muted flex h-10 items-center gap-2 rounded-md px-3 text-sm"
+            className="hover:bg-surface-muted flex h-10 items-center gap-2 rounded-full px-3 text-sm"
           >
             <UserRound className="size-4" aria-hidden />
             {t("account")}
@@ -74,7 +74,7 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
             role="menuitem"
             type="button"
             onClick={signOut}
-            className="hover:bg-surface-muted flex h-10 w-full items-center gap-2 rounded-md px-3 text-sm"
+            className="hover:bg-surface-muted flex h-10 w-full items-center gap-2 rounded-full px-3 text-sm"
           >
             <LogOut className="size-4" aria-hidden />
             {t("signOut")}

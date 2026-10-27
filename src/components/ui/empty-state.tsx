@@ -14,9 +14,9 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="border-border bg-surface flex flex-col items-center rounded-lg border border-dashed px-6 py-12 text-center">
-      <div className="bg-surface-muted text-muted mb-4 flex size-11 items-center justify-center rounded-full">
-        <Icon className="size-5" aria-hidden />
+    <div className="group bg-surface shadow-card flex flex-col items-center rounded-lg border border-(--card-border) px-6 py-14 text-center">
+      <div className="bg-accent/10 text-accent mb-4 flex size-14 items-center justify-center rounded-full">
+        <Icon className="size-6" aria-hidden data-anim="bounce" />
       </div>
       <h2 className="text-base font-semibold">{title}</h2>
       <p className="text-muted mt-1 max-w-sm text-sm">{body}</p>

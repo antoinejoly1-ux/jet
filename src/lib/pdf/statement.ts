@@ -95,14 +95,14 @@ class Writer {
 export async function renderStatementPdf(doc: StatementDocument): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
   pdf.setTitle(pdfSafe(doc.title));
-  pdf.setProducer("Jet");
+  pdf.setProducer("Univair Management");
   pdf.setCreationDate(new Date());
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const w = new Writer(pdf, font, bold, doc.footerNote);
   const contentWidth = PAGE.width - 2 * MARGIN;
 
-  w.text("Jet", { size: 12, bold: true });
+  w.text("Univair Management", { size: 12, bold: true });
   w.y -= 26;
   w.text(doc.title, { size: 20, bold: true });
   w.y -= 18;

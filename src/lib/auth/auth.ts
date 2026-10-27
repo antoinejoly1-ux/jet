@@ -16,7 +16,7 @@ import { notifyAdminsOfUninvitedSignUp } from "@/lib/services/notifications";
 const asLocale = (value: unknown) => (value === "en" ? "en" : "fr");
 
 export const auth = betterAuth({
-  appName: "Jet",
+  appName: "Univair Management",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
@@ -113,7 +113,7 @@ export const auth = betterAuth({
       },
     }),
     // Authenticator-app 2FA. Passwordless users (Google, magic link) can enable it too.
-    twoFactor({ issuer: "Jet", allowPasswordless: true }),
+    twoFactor({ issuer: "Univair", allowPasswordless: true }),
     // The plugin above only challenges password sign-ins; this covers magic links,
     // Google and email verification, so 2FA can't be skipped by changing method.
     secondFactorEverywhere(),

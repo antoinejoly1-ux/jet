@@ -129,13 +129,13 @@ export function actionEmail(
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? `{${k}}`);
   const raw = copy[name][locale];
   const t = { subject: fill(raw.subject), body: fill(raw.body), cta: raw.cta };
-  const html = `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f4f5f7;font-family:Inter,Arial,sans-serif;color:#0b1220">
+  const html = `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f3f1ed;font-family:Montserrat,Arial,sans-serif;color:#171615">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px">
-<table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:12px;padding:32px">
-<tr><td style="font-size:18px;font-weight:700;padding-bottom:16px">Jet</td></tr>
+<table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;padding:36px">
+<tr><td style="padding-bottom:20px"><div style="font-size:18px;font-weight:600;letter-spacing:0.28em">UNIVAIR</div><div style="font-size:9px;font-weight:600;letter-spacing:0.32em;color:#7a5530;padding-top:4px">MANAGEMENT</div></td></tr>
 <tr><td style="font-size:15px;line-height:22px;padding-bottom:24px">${escape(t.body)}</td></tr>
-<tr><td><a href="${escape(url)}" style="display:inline-block;background:#0b1220;color:#ffffff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:8px">${escape(t.cta)}</a></td></tr>
-<tr><td style="font-size:12px;line-height:18px;color:#5b6475;padding-top:24px">${escape(url)}</td></tr>
+<tr><td><a href="${escape(url)}" style="display:inline-block;background:#171615;color:#ffffff;text-decoration:none;font-weight:600;padding:13px 24px;border-radius:999px">${escape(t.cta)}</a></td></tr>
+<tr><td style="font-size:12px;line-height:18px;color:#5f5a53;padding-top:24px">${escape(url)}</td></tr>
 </table></td></tr></table></body></html>`;
   return { to, subject: t.subject, html, text: `${t.body}\n\n${t.cta}: ${url}` };
 }

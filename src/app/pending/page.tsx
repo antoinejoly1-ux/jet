@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import { ProductMark } from "@/components/brand/logo";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { UserMenu } from "@/components/shell/user-menu";
@@ -12,7 +13,7 @@ export default async function PendingPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="flex h-16 items-center justify-between px-4 sm:px-6">
-        <span className="text-lg font-extrabold tracking-tight">Jet</span>
+        <ProductMark />
         <UserMenu name={viewer.name} email={viewer.email} />
       </header>
       <main className="flex flex-1 flex-col items-center justify-center px-4 pb-16 text-center">

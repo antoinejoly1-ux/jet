@@ -16,7 +16,7 @@ export default async function PrivacyPage() {
   const t = await getTranslations("privacyPolicy");
   const format = await getFormatter();
   const sections = t.raw("sections") as Section[];
-  const operator = env.OPERATOR_LEGAL_NAME || "Jet";
+  const operator = env.OPERATOR_LEGAL_NAME || "Univair";
 
   return (
     <article className="flex flex-col gap-8">

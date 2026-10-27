@@ -30,7 +30,9 @@
       "dashboard": "Dashboard",
       "availability": "Calendar"
     },
-    "unread": "{count} unread"
+    "unread": "{count} unread",
+    "fabCall": "Call the team",
+    "fabNewFlight": "New flight"
   },
   "toggle": {
     "label": "Switch view",
@@ -127,14 +129,14 @@
     "copyKey": "Copy key",
     "next": "Continue",
     "confirmTitle": "Enter the code shown",
-    "confirmBody": "Type the 6-digit code the app is showing for Jet right now.",
+    "confirmBody": "Type the 6-digit code the app is showing for Univair right now.",
     "back": "Back to the QR code",
     "codesTitle": "Keep your backup codes",
     "codesBody": "If you lose your phone, each of these codes signs you in once. Store them in a password manager.",
     "copyCodes": "Copy",
     "downloadCodes": "Download",
     "codesSaved": "I've stored my backup codes somewhere safe",
-    "codesFileHeader": "Jet backup codes: each works only once.",
+    "codesFileHeader": "Univair backup codes: each works only once.",
     "disabledBody": "Add a code from your phone on top of your password to protect your account.",
     "setUp": "Turn on",
     "openInApp": "Open in authenticator app",
@@ -1351,5 +1353,11 @@
     "archiveBody": "Only possible when no aircraft is attached to it.",
     "archive": "Archive",
     "archiveConfirm": "Archive this company?"
+  },
+  "brand": {
+    "footer": "Univair · Saint-Hubert, Québec",
+    "eyebrow": "Aircraft management · Univair",
+    "taglineLight": "Your aircraft,",
+    "taglineBold": "wherever it is."
   }
 }

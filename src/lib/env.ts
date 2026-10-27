@@ -11,7 +11,7 @@ const schema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(""),
   RESEND_API_KEY: z.string().optional().default(""),
-  EMAIL_FROM: z.string().default("Jet <noreply@example.com>"),
+  EMAIL_FROM: z.string().default("Univair Management <noreply@example.com>"),
   /** "s3" in staging and production (private bucket in ca-central-1); "local" for development and tests. */
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
   S3_BUCKET: z.string().optional().default(""),

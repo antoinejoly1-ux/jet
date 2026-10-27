@@ -9,16 +9,31 @@ import { db } from "@/lib/db";
 import { unreadMessageCount } from "@/lib/services/messages";
 import { unreadNotificationCount } from "@/lib/services/notification-center";
 import { NotificationBell } from "./bell";
-import { BottomTabs, Sidebar, type Side } from "./nav";
+import { ProductMark, Star } from "@/components/brand/logo";
+import { env } from "@/lib/env";
+import { BottomTabs, FloatingAction, Sidebar, type Fab, type Side } from "./nav";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
 
 const FINANCE_PAGES = ["finances", "invoices"];
 
-function Wordmark() {
+function Wordmark({ side }: { side: Side }) {
   return (
-    <Link href="/" className="text-lg font-extrabold tracking-tight">
-      Jet
+    <Link href={side === "admin" ? "/admin" : "/"} className="text-text">
+      <ProductMark compact />
+    </Link>
+  );
+}
+
+/** The star alone, at the top of the narrow rail. */
+function RailStar({ side }: { side: Side }) {
+  return (
+    <Link
+      href={side === "admin" ? "/admin" : "/"}
+      aria-label="Univair Management"
+      className="bg-surface text-text shadow-card flex size-12 items-center justify-center rounded-full"
+    >
+      <Star className="h-3 w-auto" />
     </Link>
   );
 }
@@ -36,6 +51,15 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
   const badges = { messages };
   // Members who don't see any owner's finances don't get the finance pages.
   const hidden = side === "client" && !viewer.staffRole && financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : [];
+  const phone = env.OPERATOR_PHONE.replace(/[^\d+]/g, "");
+  const fab: Fab | null =
+    side === "admin"
+      ? viewer.staffRole === "dispatcher" || viewer.staffRole === "admin"
+        ? { kind: "newFlight", href: "/admin/flights/new" }
+        : null
+      : phone && !viewer.viewingAs
+        ? { kind: "call", href: `tel:${phone}` }
+        : null;
   return (
     <>
       {viewer.viewingAs ? (
@@ -54,28 +78,35 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
           </form>
         </div>
       ) : null}
-      <div className="min-h-dvh lg:grid lg:grid-cols-[248px_1fr]">
-        <aside className="border-border bg-surface sticky top-0 hidden h-dvh flex-col gap-8 border-r px-3 py-5 lg:flex">
-          <div className="px-3">
-            <Wordmark />
+      <div className="min-h-dvh lg:grid lg:grid-cols-[88px_1fr] xl:grid-cols-[256px_1fr]">
+        <aside className="border-border sticky top-0 hidden h-dvh flex-col items-stretch gap-6 overflow-y-auto border-r px-4 py-5 lg:flex xl:px-4">
+          <div className="flex justify-center xl:hidden">
+            <RailStar side={side} />
           </div>
-          <Sidebar side={side} badges={badges} hidden={hidden} />
+          <div className="hidden px-3 pt-2 xl:block">
+            <Wordmark side={side} />
+          </div>
+          <div className="flex-1">
+            <Sidebar side={side} badges={badges} hidden={hidden} />
+          </div>
+          {fab ? (
+            <div className="flex justify-center pb-2 xl:justify-stretch">
+              <FloatingAction fab={fab} />
+            </div>
+          ) : null}
         </aside>
         <div className="flex min-w-0 flex-col">
-          <header className="border-border bg-background/90 sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b px-4 backdrop-blur sm:px-6 lg:px-10">
+          <header className="bg-background/80 sticky top-0 z-20 flex h-16 items-center justify-between gap-3 px-4 backdrop-blur-xl sm:px-6 lg:h-20 lg:px-10">
             <div className="lg:hidden">
-              <Wordmark />
+              <Wordmark side={side} />
             </div>
-            <div className="ml-auto flex items-center gap-3">
+            <div className="ml-auto flex items-center gap-2 sm:gap-3">
               {viewer.staffRole ? <SideToggle current={side} /> : null}
               <NotificationBell side={side} unread={notifications} />
               <UserMenu name={viewer.name} email={viewer.email} />
             </div>
           </header>
-          <main
-            id="main"
-            className="mx-auto w-full max-w-6xl flex-1 px-4 pt-6 pb-28 sm:px-6 lg:px-10 lg:pt-10 lg:pb-12"
-          >
+          <main id="main" className="mx-auto w-full max-w-7xl flex-1 px-4 pt-4 pb-28 sm:px-6 lg:px-10 lg:pt-2 lg:pb-16">
             {children}
           </main>
         </div>

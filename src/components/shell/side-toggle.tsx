@@ -14,11 +14,7 @@ import type { Side } from "./nav";
 export function SideToggle({ current }: { current: Side }) {
   const t = useTranslations("toggle");
   return (
-    <div
-      role="group"
-      aria-label={t("label")}
-      className="border-border bg-surface-muted inline-flex rounded-md border p-0.5"
-    >
+    <div role="group" aria-label={t("label")} className="bg-surface-muted inline-flex rounded-full p-1">
       {(["client", "admin"] as const).map((side) => (
         <Link
           key={side}
@@ -26,8 +22,8 @@ export function SideToggle({ current }: { current: Side }) {
           onClick={() => rememberSide(side)}
           aria-current={current === side ? "page" : undefined}
           className={cn(
-            "text-muted flex h-8 items-center rounded-[5px] px-3 text-sm font-semibold transition-colors",
-            current === side && "bg-surface text-text shadow-sm",
+            "text-muted flex h-8 items-center rounded-full px-3.5 text-sm font-semibold transition-colors",
+            current === side && "bg-surface text-text shadow-card",
           )}
         >
           {t(side)}
