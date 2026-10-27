@@ -80,10 +80,23 @@ const rand = () => (state = (state * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
 const pick = <T>(xs: readonly T[]) => xs[Math.floor(rand() * xs.length)]!;
 const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
-async function createLogin(email: string, name: string, staffRole: s.StaffRole | null, withTwoFactor = false) {
+async function createLogin(
+  email: string,
+  name: string,
+  staffRole: s.StaffRole | null,
+  withTwoFactor = false,
+  { onboarded = true } = {},
+) {
   const [u] = await db
     .insert(s.user)
-    .values({ name, email, emailVerified: true, staffRole, twoFactorEnabled: withTwoFactor })
+    .values({
+      name,
+      email,
+      emailVerified: true,
+      staffRole,
+      twoFactorEnabled: withTwoFactor,
+      onboardedAt: onboarded ? new Date() : null,
+    })
     .returning();
   await db.insert(s.account).values({
     userId: u.id,
@@ -442,6 +455,11 @@ async function main() {
   await createLogin("finance@jet.test", "Fred Finance", "finance", false);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
   await db.insert(s.ownerMembers).values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "owner" });
+  // A brand-new owner (Hélène Fortin, King Air), to show the welcome tour on first sign-in.
+  const newcomer = await createLogin("nouveau@jet.test", "Hélène Fortin", null, false, { onboarded: false });
+  await db
+    .insert(s.ownerMembers)
+    .values({ id: uuidv7(), ownerId: ownerRows[8]!.id, userId: newcomer.id, role: "owner" });
   // Jean's executive assistant: sees the schedule, not the finances.
   const assistant = await createLogin("assistant@jet.test", "Julie Assistante", null);
   await db
@@ -480,6 +498,7 @@ async function main() {
   console.log("  finance@jet.test   finance     2FA not set up yet: shows the setup flow");
   console.log("  owner@jet.test     owner of 25% of C-GJTA (in the air now)");
   console.log("  assistant@jet.test the owner's assistant: schedule, no finances");
+  console.log("  nouveau@jet.test   a new owner: goes through the welcome tour");
   console.log(`\nDemo 2FA key for admin and dispatch (add it to an authenticator app):`);
   console.log(`  ${new URL(otpauth).searchParams.get("secret")}`);
   console.log(`  backup codes: ${DEMO_BACKUP_CODES.join(", ")}\n`);

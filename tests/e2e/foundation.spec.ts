@@ -3,14 +3,16 @@
  * (pnpm db:seed). Email links are read from the local outbox file.
  */
 import { expect, test } from "@playwright/test";
-import { latestLink, PASSWORD, signIn, unique } from "./support";
+import { completeWelcome, latestLink, PASSWORD, signIn, unique } from "./support";
 
 test("an owner sees their own aircraft on Home", async ({ page }) => {
   await signIn(page, "owner@jet.test");
   await expect(page).toHaveURL("/");
   await expect(page.getByText(/(Bonjour|Bon après-midi|Bonsoir), Jean/)).toBeVisible();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Votre appareil");
-  await expect(page.getByRole("heading", { name: /C-GJTA/ })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+    /^Votre .+ (est en vol|vous attend|est en maintenance)/,
+  );
+  await expect(page.getByText("C-GJTA").first()).toBeVisible();
   // Another owner's aircraft never appears.
   await expect(page.getByText("C-FJTB")).toHaveCount(0);
   // No toggle for owners.
@@ -35,7 +37,10 @@ test("staff switch between Client and Admin with the toggle", async ({ page }) =
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Les opérations|Operations/);
 });
 
-test("an invited owner signs up, verifies their email and lands on their dashboard", async ({ browser, page }) => {
+test("an invited owner signs up, verifies their email, takes the welcome tour and lands on their dashboard", async ({
+  browser,
+  page,
+}) => {
   const email = `invitee-${unique()}@example.com`;
 
   // Admin sends the invitation for Marie Gagnon's share.
@@ -61,8 +66,14 @@ test("an invited owner signs up, verifies their email and lands on their dashboa
   await invitee.goto(latestLink(email));
   await expect(invitee).toHaveURL(/\/invite\//);
   await invitee.getByRole("button", { name: /Accepter l'invitation|Accept the invitation/ }).click();
+
+  // First visit: the welcome tour, once, then Home with their photo in the top bar.
+  await completeWelcome(invitee, { firstName: "Marie" });
   await expect(invitee).toHaveURL("/");
-  await expect(invitee.getByRole("heading", { name: /C-GJTA/ })).toBeVisible();
+  await expect(invitee.getByText("C-GJTA").first()).toBeVisible();
+  await expect(invitee.locator('header img[src^="/avatars/"]')).toBeVisible();
+  await invitee.goto("/welcome");
+  await expect(invitee).toHaveURL("/");
 
   // The link is single-use.
   await invitee.goto(inviteUrl);

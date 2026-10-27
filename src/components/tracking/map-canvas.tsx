@@ -93,7 +93,7 @@ function routeData(list: AircraftLive[], nowMs: number): { type: "FeatureCollect
   return { type: "FeatureCollection", features };
 }
 
-function frame(map: MapLibreMap, list: AircraftLive[], focusId?: string) {
+function frame(map: MapLibreMap, list: AircraftLive[], focusId?: string, insetLeft = 0) {
   const focus = list.filter((a) => !focusId || a.aircraftId === focusId);
   const points: [number, number][] = [];
   for (const a of focus) {
@@ -104,8 +104,11 @@ function frame(map: MapLibreMap, list: AircraftLive[], focusId?: string) {
   if (points.length === 0) return;
   const bounds = points.reduce((b, p) => b.extend(p), new maplibregl.LngLatBounds(points[0], points[0]));
   const single = points.every((p) => p[0] === points[0]![0] && p[1] === points[0]![1]);
-  if (single) map.jumpTo({ center: points[0], zoom: 9 });
-  else map.fitBounds(bounds, { padding: { top: 60, bottom: 60, left: 60, right: 60 }, maxZoom: 9, duration: 0 });
+  // A panel floating over the map's left side on wide screens: keep the aircraft clear of it.
+  const left = 60 + (matchMedia("(min-width: 1024px)").matches ? insetLeft : 0);
+  const padding = { top: 60, bottom: 60, left, right: 60 };
+  if (single) map.jumpTo({ center: points[0], zoom: 9, padding });
+  else map.fitBounds(bounds, { padding, maxZoom: 9, duration: 0 });
 }
 
 export default function MapCanvas({
@@ -113,12 +116,15 @@ export default function MapCanvas({
   focusId,
   label,
   locale = "fr",
+  insetLeft = 0,
   onSelect,
 }: {
   aircraft: AircraftLive[];
   /** Language of the place names. */
   locale?: string;
   focusId?: string;
+  /** Width (px) of a panel covering the map's left side from 1024px up. */
+  insetLeft?: number;
   /** Text equivalent of the map, for screen readers. */
   label: string;
   onSelect?: (aircraftId: string) => void;
@@ -150,6 +156,10 @@ export default function MapCanvas({
     });
     mapRef.current = map;
     map.touchZoomRotate.disableRotation();
+    // The night style names a few POI icons its sprite lacks; a blank stands in rather than a console warning.
+    map.on("styleimagemissing", (e) => {
+      if (!map.hasImage(e.id)) map.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+    });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
 
     const bronze = css("--bronze") || "#9c7247";
@@ -201,7 +211,7 @@ export default function MapCanvas({
           "text-halo-width": 1.5,
         },
       });
-      frame(map, data.current, focusId);
+      frame(map, data.current, focusId, insetLeft);
       framed.current = true;
     });
 

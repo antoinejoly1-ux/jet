@@ -25,7 +25,7 @@ export function TeamFaces({ count = 4, size = 44, className }: { count?: number;
 
 /** "Always here": the faces, one warm line and the ways to reach them. */
 export async function TeamReach({ className }: { className?: string }) {
-  const t = await getTranslations("team");
+  const t = await getTranslations("teamReach");
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       <TeamFaces />

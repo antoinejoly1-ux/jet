@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAccess, requireStaff } from "@/lib/auth/session";
+import { requireAccess, requireStaff, requireViewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formError, type FormState } from "@/lib/forms";
 import { completeUpload, requestUpload, type UploadRequest } from "@/lib/services/files";
@@ -9,8 +9,12 @@ export type UploadStep1 =
   { ok: true; key: string; url: string; headers: Record<string, string> } | { ok: false; state: FormState };
 export type UploadStep2 = { ok: true; fileId: string; duplicateOf: string | null } | { ok: false; state: FormState };
 
-/** Owners may upload only chat attachments; everything else is back-office work. */
-const uploader = (input: UploadRequest) => (input.purpose === "message" ? requireAccess() : requireStaff());
+/**
+ * Owners may upload chat attachments; everyone may upload their own photo (even
+ * mid-welcome, before they have access); everything else is back-office work.
+ */
+const uploader = (input: UploadRequest) =>
+  input.purpose === "avatar" ? requireViewer() : input.purpose === "message" ? requireAccess() : requireStaff();
 
 export async function requestUploadAction(input: UploadRequest): Promise<UploadStep1> {
   const viewer = await uploader(input);

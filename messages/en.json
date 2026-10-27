@@ -323,7 +323,46 @@
       "open": "open",
       "done": "handled",
       "refused": "refused"
-    }
+    },
+    "settingsTitle": "Settings",
+    "settingsBody": "Your profile, how the portal looks, your security and your preferences.",
+    "sections": {
+      "profile": "Profile",
+      "appearance": "Appearance and language",
+      "security": "Security",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "team": "Your team"
+    },
+    "sectionsLabel": "Settings sections",
+    "profileBody": "Your name and photo, as the Univair team sees them.",
+    "photo": "Photo",
+    "saveProfile": "Save",
+    "profileSaved": "Profile saved.",
+    "appearanceBody": "The portal adapts to you, day or night.",
+    "theme": "Theme",
+    "themes": {
+      "dark": {
+        "label": "Dark",
+        "hint": "Univair's signature"
+      },
+      "light": {
+        "label": "Light",
+        "hint": "Bright, for daytime"
+      },
+      "system": {
+        "label": "System",
+        "hint": "Follows your device"
+      }
+    },
+    "securityBody": "Protect access to your aircraft and your finances.",
+    "password": "Password",
+    "passwordHint": "Get a link by email to choose a new one.",
+    "changePassword": "Change",
+    "twoFactor": "Two-step verification",
+    "manage": "Manage",
+    "teamBody": "A flight to plan, a question, something unexpected: call or text, 7 days a week.",
+    "readOnly": "Read-only while viewing as an owner."
   },
   "adminDashboard": {
     "title": "Dashboard",
@@ -344,7 +383,8 @@
     "todayEmpty": "No flights today.",
     "newFlight": "New flight",
     "charter": "Charter",
-    "clientsTitle": "Clients and access"
+    "clientsTitle": "Clients and access",
+    "ofFleet": "of {total} aircraft"
   },
   "owners": {
     "title": "Owners",
@@ -455,7 +495,8 @@
   },
   "common": {
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loading": "Loading…"
   },
   "viewAs": {
     "banner": "You're viewing the portal as {name} · read-only",
@@ -622,8 +663,33 @@
     "ownedBy": "Owned by"
   },
   "team": {
-    "title": "Always here for you",
-    "body": "A call or a text, 7 days a week. We take care of the rest."
+    "settingsTitle": "Settings",
+    "settingsSubtitle": "The team, their roles and the audit log.",
+    "adminOnlyTitle": "Admins only",
+    "adminOnlyBody": "Ask an admin to change the team.",
+    "title": "Team",
+    "invite": "Invite a member",
+    "you": "You",
+    "twoFactorOn": "2-step on",
+    "twoFactorOff": "2-step not set up",
+    "lastSignIn": "Last signed in {date}",
+    "neverSignedIn": "Never signed in",
+    "auditTitle": "Audit log",
+    "auditBody": "Who did what, and when.",
+    "roleFor": "Role for {name}",
+    "roles": {
+      "admin": "Admin",
+      "finance": "Finance",
+      "dispatcher": "Dispatcher"
+    },
+    "removeFromTeam": "Remove from team",
+    "save": "Save",
+    "privacyTitle": "Personal information (Law 25)",
+    "privacyBody": "Owners' requests and the incident register.",
+    "developersTitle": "Developers",
+    "developersBody": "API keys and webhooks to connect other software.",
+    "members": "{count, plural, one {# person} other {# people}} on the Univair team",
+    "profileBody": "Your name, photo, appearance and security."
   },
   "audit": {
     "empty": "Nothing to show yet.",
@@ -675,7 +741,11 @@
       "holding_company_create": "created the company",
       "holding_company_update": "edited the company",
       "holding_company_archive": "archived the company",
-      "owner_member_update": "changed an access"
+      "owner_member_update": "changed an access",
+      "profile_update": "updated their profile",
+      "profile_avatar_set": "changed their photo",
+      "profile_avatar_remove": "removed their photo",
+      "profile_onboarded": "finished the welcome tour"
     }
   },
   "files": {
@@ -1466,5 +1536,95 @@
       "light": "Your access",
       "strong": "is being prepared."
     }
+  },
+  "welcome": {
+    "metaTitle": "Welcome",
+    "progress": "Step {n} of {total}",
+    "continue": "Continue",
+    "next": "Next",
+    "back": "Back",
+    "welcome": {
+      "eyebrow": "Univair Management",
+      "title": "Welcome to Univair, {name}.",
+      "body": "Your aircraft, your hours, your flights and your team: everything is here, at hand, wherever you are.",
+      "time": "Two minutes to get acquainted.",
+      "start": "Begin"
+    },
+    "name": {
+      "eyebrow": "Let's get acquainted",
+      "title": "What should we call you?",
+      "body": "Your name appears in your conversations with the team and on your documents.",
+      "first": "First name",
+      "last": "Last name",
+      "language": "Language",
+      "required": "Enter your first name.",
+      "failed": "Couldn't save. Try again."
+    },
+    "photo": {
+      "eyebrow": "Your photo",
+      "title": "A face to the name.",
+      "body": "Your team will recognise you at a glance. You can change it whenever you like.",
+      "later": "Later"
+    },
+    "tour": {
+      "eyebrow": "What you'll find here",
+      "count": "{n} of {total}",
+      "live": {
+        "caption": "Always know where it is.",
+        "title": "Your aircraft, live",
+        "body": "Its position on the map, altitude, speed and arrival time, updated continuously.",
+        "a": "In the air or on the ground, you see it at a glance",
+        "b": "Every flight drawn on the map, from departure to arrival"
+      },
+      "hours": {
+        "caption": "Your hours, no maths.",
+        "title": "Your hours and availability",
+        "body": "The hours you have left, the ones flown, and the days the aircraft is free.",
+        "a": "The next 14 days at a glance",
+        "b": "A reminder when your hours run low"
+      },
+      "finances": {
+        "caption": "Every dollar in its place.",
+        "title": "Your finances, clear",
+        "body": "What's spent, what's planned and your invoices, always up to date.",
+        "a": "Your budget for the year and where you stand",
+        "b": "Invoices and statements as PDFs, in one click"
+      },
+      "flights": {
+        "caption": "Your departures, handled.",
+        "title": "Your flights",
+        "body": "Your next departures and your whole history, in one place.",
+        "a": "Every flight with its route and flight time",
+        "b": "Your history to export whenever you like"
+      }
+    },
+    "team": {
+      "eyebrow": "Always here for you",
+      "title": "A real team, one call away.",
+      "body": "A flight to plan, a hotel, a question about your aircraft? Call or text: these are the people who answer, 7 days a week.",
+      "inApp": "You can also write to us right in the app."
+    },
+    "ready": {
+      "eyebrow": "All set",
+      "title": "Welcome aboard, {name}.",
+      "body": "Your space is waiting.",
+      "bodyAircraft": "{registration} is waiting for you.",
+      "enter": "Enter my space"
+    }
+  },
+  "avatar": {
+    "choose": "Choose a photo",
+    "change": "Change",
+    "remove": "Remove",
+    "zoom": "Zoom",
+    "save": "Save photo",
+    "saving": "Saving…",
+    "hint": "Drop a photo here, or tap the circle.",
+    "notAnImage": "Choose an image (JPG, PNG or HEIC).",
+    "failed": "The photo couldn't be saved. Try again."
+  },
+  "teamReach": {
+    "title": "Always here for you",
+    "body": "A call or a text, 7 days a week. We take care of the rest."
   }
 }

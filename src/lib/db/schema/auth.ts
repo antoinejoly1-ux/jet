@@ -16,6 +16,10 @@ export const user = pgTable("users", {
   /** Null for owners. Set only for the operator's team. */
   staffRole: staffRole("staff_role"),
   locale: locale("locale").notNull().default("fr"),
+  /** When the person finished the welcome tour; until then they are sent to /welcome. */
+  onboardedAt: timestamp("onboarded_at", { withTimezone: true }),
+  /** Their profile photo in `files` (the avatar route serves it; `image` holds that route's URL). */
+  avatarFileId: uuid("avatar_file_id"),
   ...timestamps(),
 });
 

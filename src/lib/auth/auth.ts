@@ -30,6 +30,7 @@ export const auth = betterAuth({
     additionalFields: {
       staffRole: { type: "string", required: false, input: false },
       locale: { type: "string", required: false, defaultValue: "fr", input: false },
+      onboardedAt: { type: "date", required: false, input: false },
     },
   },
   session: {

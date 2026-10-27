@@ -323,7 +323,46 @@
       "open": "en cours",
       "done": "traitée",
       "refused": "refusée"
-    }
+    },
+    "settingsTitle": "Réglages",
+    "settingsBody": "Votre profil, l'apparence du portail, votre sécurité et vos préférences.",
+    "sections": {
+      "profile": "Profil",
+      "appearance": "Apparence et langue",
+      "security": "Sécurité",
+      "notifications": "Notifications",
+      "privacy": "Confidentialité",
+      "team": "Votre équipe"
+    },
+    "sectionsLabel": "Sections des réglages",
+    "profileBody": "Votre nom et votre photo, tels que l'équipe Univair les voit.",
+    "photo": "Photo",
+    "saveProfile": "Enregistrer",
+    "profileSaved": "Profil enregistré.",
+    "appearanceBody": "Le portail s'adapte à vous, le jour comme la nuit.",
+    "theme": "Thème",
+    "themes": {
+      "dark": {
+        "label": "Sombre",
+        "hint": "La signature Univair"
+      },
+      "light": {
+        "label": "Clair",
+        "hint": "Lumineux, pour le jour"
+      },
+      "system": {
+        "label": "Système",
+        "hint": "Suit votre appareil"
+      }
+    },
+    "securityBody": "Protégez l'accès à votre appareil et à vos finances.",
+    "password": "Mot de passe",
+    "passwordHint": "Recevez un lien par courriel pour en choisir un nouveau.",
+    "changePassword": "Changer",
+    "twoFactor": "Vérification en deux étapes",
+    "manage": "Gérer",
+    "teamBody": "Un vol à planifier, une question, un imprévu : appelez ou textez, 7 jours sur 7.",
+    "readOnly": "Lecture seule pendant l'affichage en tant que propriétaire."
   },
   "adminDashboard": {
     "title": "Tableau de bord",
@@ -344,7 +383,8 @@
     "todayEmpty": "Aucun vol aujourd'hui.",
     "newFlight": "Nouveau vol",
     "charter": "Nolisé",
-    "clientsTitle": "Clients et accès"
+    "clientsTitle": "Clients et accès",
+    "ofFleet": "sur {total} appareils"
   },
   "owners": {
     "title": "Propriétaires",
@@ -455,7 +495,8 @@
   },
   "common": {
     "confirm": "Confirmer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "loading": "Chargement…"
   },
   "viewAs": {
     "banner": "Vous voyez le portail comme {name} · lecture seule",
@@ -622,8 +663,33 @@
     "ownedBy": "Propriété de"
   },
   "team": {
-    "title": "Toujours là pour vous",
-    "body": "Un appel ou un texto, 7 jours sur 7. Nous nous occupons du reste."
+    "settingsTitle": "Réglages",
+    "settingsSubtitle": "L'équipe, ses rôles et le journal d'audit.",
+    "adminOnlyTitle": "Réservé aux administrateurs",
+    "adminOnlyBody": "Demandez à un administrateur de modifier l'équipe.",
+    "title": "Équipe",
+    "invite": "Inviter un membre",
+    "you": "Vous",
+    "twoFactorOn": "2 étapes activée",
+    "twoFactorOff": "2 étapes à configurer",
+    "lastSignIn": "Dernière connexion {date}",
+    "neverSignedIn": "Jamais connecté",
+    "auditTitle": "Journal d'audit",
+    "auditBody": "Qui a fait quoi, et quand.",
+    "roleFor": "Rôle de {name}",
+    "roles": {
+      "admin": "Administrateur",
+      "finance": "Finances",
+      "dispatcher": "Répartiteur"
+    },
+    "removeFromTeam": "Retirer de l'équipe",
+    "save": "Enregistrer",
+    "privacyTitle": "Renseignements personnels (Loi 25)",
+    "privacyBody": "Demandes des propriétaires et registre des incidents.",
+    "developersTitle": "Développeurs",
+    "developersBody": "Clés d'API et webhooks pour relier d'autres logiciels.",
+    "members": "{count, plural, one {# personne} other {# personnes}} dans l'équipe Univair",
+    "profileBody": "Votre nom, votre photo, l'apparence et la sécurité."
   },
   "audit": {
     "empty": "Rien à afficher pour l'instant.",
@@ -675,7 +741,11 @@
       "holding_company_create": "a créé la société",
       "holding_company_update": "a modifié la société",
       "holding_company_archive": "a archivé la société",
-      "owner_member_update": "a changé un accès"
+      "owner_member_update": "a changé un accès",
+      "profile_update": "a modifié son profil",
+      "profile_avatar_set": "a changé sa photo",
+      "profile_avatar_remove": "a retiré sa photo",
+      "profile_onboarded": "a terminé l'accueil"
     }
   },
   "files": {
@@ -1466,5 +1536,95 @@
       "light": "Votre accès",
       "strong": "est en préparation."
     }
+  },
+  "welcome": {
+    "metaTitle": "Bienvenue",
+    "progress": "Étape {n} sur {total}",
+    "continue": "Continuer",
+    "next": "Suivant",
+    "back": "Retour",
+    "welcome": {
+      "eyebrow": "Univair Management",
+      "title": "Bienvenue chez Univair, {name}.",
+      "body": "Votre appareil, vos heures, vos vols et votre équipe : tout se retrouve ici, à portée de main, où que vous soyez.",
+      "time": "Deux minutes pour faire connaissance.",
+      "start": "Commencer"
+    },
+    "name": {
+      "eyebrow": "Faisons connaissance",
+      "title": "Comment souhaitez-vous qu'on vous appelle?",
+      "body": "Votre nom apparaît dans vos échanges avec l'équipe et sur vos documents.",
+      "first": "Prénom",
+      "last": "Nom",
+      "language": "Langue de communication",
+      "required": "Entrez votre prénom.",
+      "failed": "Impossible d'enregistrer. Réessayez."
+    },
+    "photo": {
+      "eyebrow": "Votre photo",
+      "title": "Un visage sur le nom.",
+      "body": "Votre équipe vous reconnaîtra au premier coup d'œil. Vous pourrez la changer quand vous voudrez.",
+      "later": "Plus tard"
+    },
+    "tour": {
+      "eyebrow": "Ce que vous trouverez ici",
+      "count": "{n} sur {total}",
+      "live": {
+        "caption": "Toujours savoir où il est.",
+        "title": "Votre appareil, en direct",
+        "body": "Sa position sur la carte, son altitude, sa vitesse et l'heure d'arrivée, mises à jour en continu.",
+        "a": "En vol ou au sol, vous le voyez en un coup d'œil",
+        "b": "Chaque vol tracé sur la carte, du départ à l'arrivée"
+      },
+      "hours": {
+        "caption": "Vos heures, sans calcul.",
+        "title": "Vos heures et sa disponibilité",
+        "body": "Les heures qu'il vous reste, celles déjà volées, et les jours où l'appareil est libre.",
+        "a": "Le calendrier des 14 prochains jours d'un regard",
+        "b": "Un rappel quand vos heures baissent"
+      },
+      "finances": {
+        "caption": "Chaque dollar à sa place.",
+        "title": "Vos finances, claires",
+        "body": "Ce qui est dépensé, ce qui est prévu et vos factures, toujours à jour.",
+        "a": "Votre budget de l'année et où vous en êtes",
+        "b": "Vos factures et relevés en PDF, en un clic"
+      },
+      "flights": {
+        "caption": "Vos départs, réglés d'avance.",
+        "title": "Vos vols",
+        "body": "Vos prochains départs et tout votre historique, au même endroit.",
+        "a": "Chaque vol avec sa route et son temps de vol",
+        "b": "Votre historique à exporter quand vous le souhaitez"
+      }
+    },
+    "team": {
+      "eyebrow": "Toujours là pour vous",
+      "title": "Une vraie équipe, à un appel près.",
+      "body": "Un vol à planifier, un hôtel, une question sur votre appareil? Appelez ou textez : ce sont ces personnes qui vous répondent, 7 jours sur 7.",
+      "inApp": "Vous pouvez aussi nous écrire directement dans l'application."
+    },
+    "ready": {
+      "eyebrow": "Tout est prêt",
+      "title": "Bienvenue à bord, {name}.",
+      "body": "Votre espace vous attend.",
+      "bodyAircraft": "{registration} vous attend.",
+      "enter": "Entrer dans mon espace"
+    }
+  },
+  "avatar": {
+    "choose": "Choisir une photo",
+    "change": "Changer",
+    "remove": "Retirer",
+    "zoom": "Zoom",
+    "save": "Enregistrer la photo",
+    "saving": "Enregistrement…",
+    "hint": "Glissez une photo ici, ou touchez le cercle.",
+    "notAnImage": "Choisissez une image (JPG, PNG ou HEIC).",
+    "failed": "La photo n'a pas pu être enregistrée. Réessayez."
+  },
+  "teamReach": {
+    "title": "Toujours là pour vous",
+    "body": "Un appel ou un texto, 7 jours sur 7. Nous nous occupons du reste."
   }
 }

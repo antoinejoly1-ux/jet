@@ -115,6 +115,7 @@ export function LiveAircraft({
             aircraft={[live]}
             focusId={live.aircraftId}
             locale={locale}
+            insetLeft={410}
             label={`${live.registration} · ${headline}`}
           />
         </div>

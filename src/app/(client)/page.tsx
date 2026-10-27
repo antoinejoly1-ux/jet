@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon, type IconMotion } from "@/components/ui/icon";
+import { Instrument, InstrumentStrip } from "@/components/ui/instrument";
 import { LiveDot } from "@/components/ui/live-dot";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
 import { daysFrom, dayStart, type DayStatus } from "@/lib/availability-days";
@@ -151,7 +152,7 @@ async function ShareSection({
       />
 
       {/* The instrument strip: four readings, hairlines between, no boxes. */}
-      <dl className="stagger divide-border border-border grid grid-cols-2 border-y lg:grid-cols-4 lg:divide-x [&>div]:py-7 lg:[&>div]:px-8 lg:[&>div:first-child]:pl-0">
+      <InstrumentStrip>
         <Instrument
           label={t("hoursRemaining")}
           value={formatHours(s.minutesRemaining, locale)}
@@ -194,7 +195,7 @@ async function ShareSection({
               : t("nextMaintenanceEmpty")
           }
         />
-      </dl>
+      </InstrumentStrip>
 
       {insights.length ? <InsightLine items={insights} /> : null}
 
@@ -383,38 +384,6 @@ async function Hero({
   );
 }
 
-function Instrument({
-  label,
-  value,
-  caption,
-  meter,
-}: {
-  label: string;
-  value: string;
-  caption?: string;
-  meter?: number | null;
-}) {
-  return (
-    <div className="min-w-0 pr-4">
-      <dt className="eyebrow">{label}</dt>
-      <dd className="tabular mt-3 text-3xl font-light tracking-tight sm:text-[2.6rem]">{value}</dd>
-      {caption ? <dd className="text-muted mt-1 text-sm">{caption}</dd> : null}
-      {meter != null ? (
-        <dd
-          className="bg-border mt-4 h-px w-full max-w-48"
-          role="meter"
-          aria-label={label}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.min(100, Math.round(meter * 100))}
-        >
-          <div className="bg-accent h-px" style={{ width: `${Math.min(100, Math.round(meter * 100))}%` }} />
-        </dd>
-      ) : null}
-    </div>
-  );
-}
-
 function Legend({ className, label }: { className: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-2">
@@ -499,7 +468,7 @@ async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof
 /** The people behind the aircraft, over a photograph of a toast in the cabin. */
 async function TeamPanel() {
   const t = await getTranslations("home");
-  const tt = await getTranslations("team");
+  const tt = await getTranslations("teamReach");
   return (
     <section className="theme-dark relative isolate flex min-h-[420px] flex-col justify-end overflow-hidden rounded-[22px]">
       <Image

@@ -76,7 +76,7 @@ test("View as owner shows exactly what the owner sees, read-only, and is logged"
 
   await expect(page).toHaveURL("/");
   await expect(page.getByRole("status").filter({ hasText: "Sophie Roy" })).toContainText("lecture seule");
-  await expect(page.getByRole("heading", { name: /C-GJTA/ })).toBeVisible();
+  await expect(page.getByText("C-GJTA").first()).toBeVisible();
   await expect(page.getByText("C-FJTB")).toHaveCount(0);
 
   await page.getByRole("button", { name: "Quitter" }).click();

@@ -4,7 +4,17 @@
  * Runs with REQUIRE_STAFF_2FA=true against the seeded demo data.
  */
 import { expect, test } from "@playwright/test";
-import { DEMO_BACKUP_CODES, latestLink, PASSWORD, rawFromBase32, signIn, totp, typeCode, unique } from "./support";
+import {
+  completeWelcome,
+  DEMO_BACKUP_CODES,
+  latestLink,
+  PASSWORD,
+  rawFromBase32,
+  signIn,
+  totp,
+  typeCode,
+  unique,
+} from "./support";
 
 const CODE_SCREEN = /Vérification en deux étapes|Two-step verification/;
 
@@ -102,5 +112,7 @@ test("a newly invited staff member is guided through setup before reaching Admin
   await expect(done).toBeDisabled();
   await staff.getByRole("checkbox").check();
   await done.click();
+  // Then the welcome tour, once, like everyone; then Admin.
+  await completeWelcome(staff, { firstName: "Nouvelle" });
   await expect(staff).toHaveURL("/admin");
 });

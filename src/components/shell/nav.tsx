@@ -128,7 +128,6 @@ export function Rail({ side, badges = {}, hidden }: { side: Side; badges?: Badge
               key={href}
               href={href}
               aria-current={isActive(href) ? "page" : undefined}
-              aria-label={t(`items.${key}`)}
               className={cn(
                 "group text-muted hover:text-text hover:bg-surface-muted relative flex size-11 items-center justify-center rounded-full transition-colors duration-300",
                 "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground",
@@ -141,13 +140,11 @@ export function Rail({ side, badges = {}, hidden }: { side: Side; badges?: Badge
                   aria-hidden
                 />
               ) : null}
-              {badges[key] ? <span className="sr-only">{t("unread", { count: badges[key]! })}</span> : null}
-              <span
-                aria-hidden
-                className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-4 translate-x-1 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
-              >
+              {/* The tooltip doubles as the link's name, so the name is the visible label (and unread counts join it). */}
+              <span className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-4 translate-x-1 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
                 {t(`items.${key}`)}
               </span>
+              {badges[key] ? <span className="sr-only"> · {t("unread", { count: badges[key]! })}</span> : null}
             </Link>
           ))}
         </div>

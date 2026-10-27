@@ -16,6 +16,8 @@ export const UPLOAD_RULES = {
   invoice: { types: ["application/pdf", "image/png", "image/jpeg"], maxBytes: 25 * MB },
   import: { types: ["text/csv", "application/vnd.ms-excel", "text/plain"], maxBytes: 10 * MB },
   message: { types: ["application/pdf", "image/png", "image/jpeg"], maxBytes: 10 * MB },
+  /** Profile photos, resized to 512px in the browser before they are sent. */
+  avatar: { types: ["image/webp", "image/jpeg", "image/png"], maxBytes: 5 * MB },
 } as const;
 export type UploadPurpose = keyof typeof UPLOAD_RULES;
 
@@ -26,10 +28,11 @@ const EXTENSIONS: Record<string, string> = {
   "text/csv": "csv",
   "application/vnd.ms-excel": "csv",
   "text/plain": "csv",
+  "image/webp": "webp",
 };
 
 const uploadRequest = z.object({
-  purpose: z.enum(["invoice", "import", "message"]),
+  purpose: z.enum(["invoice", "import", "message", "avatar"]),
   filename: z.string().trim().min(1).max(255),
   contentType: z.string(),
   sizeBytes: z.number().int().positive(),
@@ -43,6 +46,8 @@ export type UploadRequest = z.input<typeof uploadRequest>;
  */
 /** Finance uploads invoices and imports; anyone in a chat (staff or the owner) can attach to a message. */
 function authorizeUpload(actor: Actor, purpose: UploadPurpose) {
+  // Anyone signed in may upload their own profile photo; it is attached to them only (profile.ts).
+  if (purpose === "avatar") return;
   if (purpose !== "message") return authorize(actor, "finance:write");
   if (can(actor, "messages:reply")) return;
   authorize(actor, "messages:send", { ownerIds: actingOwnerIds(actor) });

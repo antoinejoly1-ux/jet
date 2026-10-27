@@ -10,6 +10,7 @@ import { env } from "@/lib/env";
 import { auth } from "./auth";
 import { memberAccess, type Actor } from "./policy";
 import { decodeViewAs, VIEW_AS_COOKIE } from "./view-as";
+import { SIDE_COOKIE } from "@/lib/side";
 
 /** The signed-in person, narrowed to what screens and the policy need. */
 export type Viewer = Actor & {
@@ -18,6 +19,8 @@ export type Viewer = Actor & {
   image: string | null;
   locale: Locale;
   twoFactorEnabled: boolean;
+  /** Null until the person has been through the welcome tour. */
+  onboardedAt: Date | null;
   /** Set while a staff member is viewing the Client side as one owner (read-only). */
   viewingAs: { ownerId: string; ownerName: string } | null;
 };
@@ -30,6 +33,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     staffRole?: StaffRole | null;
     locale?: Locale;
     twoFactorEnabled?: boolean | null;
+    onboardedAt?: Date | string | null;
   };
   const staffRole = u.staffRole ?? null;
   const base = {
@@ -40,6 +44,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     staffRole,
     locale: u.locale ?? "fr",
     twoFactorEnabled: Boolean(u.twoFactorEnabled),
+    onboardedAt: u.onboardedAt ? new Date(u.onboardedAt) : null,
   };
 
   // Staff viewing as an owner see exactly that owner's data and nothing else.
@@ -77,6 +82,7 @@ export async function requireViewer(): Promise<Viewer> {
 /** Owners and staff only; an account with no access goes to the waiting screen. */
 export async function requireAccess(): Promise<Viewer> {
   const viewer = await requireViewer();
+  if (needsWelcome(viewer)) redirect("/welcome");
   if (!viewer.staffRole && viewer.ownerIds.length === 0) redirect("/pending");
   return viewer;
 }
@@ -86,10 +92,24 @@ export async function requireStaff(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (!viewer.staffRole) redirect("/");
   if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/admin");
+  if (needsWelcome(viewer)) redirect("/welcome");
   return viewer;
 }
 
 /** Owner-side writes are refused while a staff member is viewing as an owner. */
 export function assertNotViewingAs(viewer: Viewer) {
   if (viewer.viewingAs) throw new Error("Read-only: viewing as an owner");
+}
+
+/**
+ * Everyone with access goes through the welcome tour once. Someone still
+ * waiting for access takes it when access arrives; staff viewing as an owner never do.
+ */
+export const needsWelcome = (viewer: Viewer) =>
+  !viewer.onboardedAt && !viewer.viewingAs && (Boolean(viewer.staffRole) || viewer.ownerIds.length > 0);
+
+/** Where a signed-in person lands: the side staff used last, Home for owners, or the waiting screen. */
+export async function landingPath(viewer: Viewer): Promise<"/" | "/admin" | "/pending"> {
+  if (viewer.staffRole) return (await cookies()).get(SIDE_COOKIE)?.value === "client" ? "/" : "/admin";
+  return viewer.ownerIds.length === 0 ? "/pending" : "/";
 }

@@ -19,7 +19,7 @@ const contentSecurityPolicy = [
   `script-src 'self' 'unsafe-inline'${dev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   // Map tiles, glyphs and sprites come from OpenFreeMap; MapLibre runs its workers from blob: URLs.
-  "img-src 'self' data: blob: https://tiles.openfreemap.org",
+  "img-src 'self' data: blob: https://tiles.openfreemap.org https://*.amazonaws.com",
   "font-src 'self'",
   "connect-src 'self' https://*.amazonaws.com https://tiles.openfreemap.org",
   "worker-src 'self' blob:",

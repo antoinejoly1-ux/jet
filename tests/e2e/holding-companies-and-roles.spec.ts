@@ -35,7 +35,7 @@ test("an admin adds a holding company and gives it an aircraft", async ({ page }
 
 test("an executive assistant sees the schedule but not the finances", async ({ page }) => {
   await signIn(page, "assistant@jet.test");
-  await expect(page.getByRole("heading", { name: /C-GJTA/ })).toBeVisible();
+  await expect(page.getByText("C-GJTA").first()).toBeVisible();
   await expect(page.getByText("Heures restantes").first()).toBeVisible();
   await expect(page.getByText(/^Budget \d{4}$/)).toHaveCount(0);
   await expect(page.getByText("Dernière facture")).toHaveCount(0);
