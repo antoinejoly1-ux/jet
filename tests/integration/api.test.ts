@@ -134,16 +134,16 @@ describe("/api/v1", () => {
       "POST",
       `/flights/${flight.id}/complete`,
       key,
-      { blockMinutes: 95 },
+      { flightMinutes: 95 },
       { id: flight.id },
     );
-    expect(done).toMatchObject({ status: 200, json: { data: { status: "completed", blockMinutes: 95 } } });
+    expect(done).toMatchObject({ status: 200, json: { data: { status: "completed", flightMinutes: 95 } } });
     const again = await call(
       completeRoute,
       "POST",
       `/flights/${flight.id}/complete`,
       key,
-      { blockMinutes: 95 },
+      { flightMinutes: 95 },
       { id: flight.id },
     );
     expect(again).toMatchObject({ status: 409, json: { error: { code: "flight_not_scheduled" } } });
@@ -204,7 +204,7 @@ describe("webhooks", () => {
       departsAt: "2026-10-11T12:00:00Z",
     });
     const id = (created.json.data as { id: string }).id;
-    await call(completeRoute, "POST", "", key, { blockMinutes: 60 }, { id });
+    await call(completeRoute, "POST", "", key, { flightMinutes: 60 }, { id });
 
     const { sent, impl } = receiver([500, 200]);
     const now = new Date();
@@ -212,7 +212,7 @@ describe("webhooks", () => {
     // flight.scheduled was not subscribed to, so only one delivery exists.
     expect(sent).toHaveLength(1);
     const { body, headers } = sent[0]!;
-    expect(JSON.parse(body)).toMatchObject({ type: "flight.completed", data: { flightId: id, blockMinutes: 60 } });
+    expect(JSON.parse(body)).toMatchObject({ type: "flight.completed", data: { flightId: id, flightMinutes: 60 } });
     const [, ts, sig] = headers["Jet-Signature"]!.match(/^t=(\d+),v1=([a-f0-9]{64})$/)!;
     expect(sig).toBe(createHmac("sha256", secret).update(`${ts}.${body}`).digest("hex"));
 

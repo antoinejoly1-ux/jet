@@ -68,19 +68,19 @@ beforeEach(async () => {
 });
 
 describe("flights and hours", () => {
-  it("schedules in Montreal time, then completing deducts block time once", async () => {
+  it("schedules in Montreal time, then completing deducts flight time once", async () => {
     const f = await scheduleFlight(db, dispatcher, flight(ownerA.shareId));
     expect(f.departsAt.toISOString()).toBe("2026-10-10T12:30:00.000Z");
     expect(f.fromAirport).toBe("CYUL");
     expect(await balance(ownerA.shareId)).toBe(3000);
 
-    const done = await completeFlight(db, dispatcher, f.id, { blockTime: "2:15", arrivesAt: "" });
+    const done = await completeFlight(db, dispatcher, f.id, { flightTime: "2:15", arrivesAt: "" });
     expect(done.status).toBe("completed");
-    expect(done.blockMinutes).toBe(135);
+    expect(done.flightMinutes).toBe(135);
     expect(done.arrivesAt!.toISOString()).toBe("2026-10-10T14:45:00.000Z");
     expect(await balance(ownerA.shareId)).toBe(3000 - 135);
 
-    await expect(completeFlight(db, dispatcher, f.id, { blockTime: "1:00", arrivesAt: "" })).rejects.toMatchObject({
+    await expect(completeFlight(db, dispatcher, f.id, { flightTime: "1:00", arrivesAt: "" })).rejects.toMatchObject({
       code: "flight_not_scheduled",
     });
     await expect(updateFlight(db, dispatcher, f.id, flight(ownerA.shareId))).rejects.toMatchObject({
@@ -91,7 +91,7 @@ describe("flights and hours", () => {
 
   it("cancelling a completed flight gives the hours back with a reversing entry", async () => {
     const f = await scheduleFlight(db, dispatcher, flight(ownerA.shareId));
-    await completeFlight(db, dispatcher, f.id, { blockTime: "1.5", arrivesAt: "" });
+    await completeFlight(db, dispatcher, f.id, { flightTime: "1.5", arrivesAt: "" });
     await cancelFlight(db, dispatcher, f.id, "Saisie en double");
     expect(await balance(ownerA.shareId)).toBe(3000);
 
@@ -108,7 +108,7 @@ describe("flights and hours", () => {
     const f = await scheduleFlight(db, dispatcher, flight(ownerA.shareId));
     await cancelFlight(db, dispatcher, f.id, "");
     const positioning = await scheduleFlight(db, dispatcher, flight(null));
-    await completeFlight(db, dispatcher, positioning.id, { blockTime: "0:45", arrivesAt: "" });
+    await completeFlight(db, dispatcher, positioning.id, { flightTime: "0:45", arrivesAt: "" });
     expect(await balance(ownerA.shareId)).toBe(3000);
   });
 
@@ -121,19 +121,19 @@ describe("flights and hours", () => {
     await expect(scheduleFlight(db, dispatcher, flight(ownerB.shareId))).rejects.toMatchObject({ code: "share_ended" });
     await expect(scheduleFlight(db, dispatcher, flight(ownerA.shareId, "2026-13-01T08:00"))).rejects.toThrow();
     const f = await scheduleFlight(db, dispatcher, flight(ownerA.shareId));
-    await expect(completeFlight(db, dispatcher, f.id, { blockTime: "abc", arrivesAt: "" })).rejects.toThrow();
+    await expect(completeFlight(db, dispatcher, f.id, { flightTime: "abc", arrivesAt: "" })).rejects.toThrow();
   });
 
   it("won't complete a flight that hasn't departed", async () => {
     const f = await scheduleFlight(db, dispatcher, flight(ownerA.shareId, "2030-01-10T09:00"));
-    await expect(completeFlight(db, dispatcher, f.id, { blockTime: "1:00", arrivesAt: "" })).rejects.toMatchObject({
+    await expect(completeFlight(db, dispatcher, f.id, { flightTime: "1:00", arrivesAt: "" })).rejects.toMatchObject({
       code: "flight_not_departed",
     });
   });
 
   it("writes an audit entry with each change", async () => {
     const f = await scheduleFlight(db, dispatcher, flight(ownerA.shareId));
-    await completeFlight(db, dispatcher, f.id, { blockTime: "1:00", arrivesAt: "" });
+    await completeFlight(db, dispatcher, f.id, { flightTime: "1:00", arrivesAt: "" });
     const actions = (await db.select().from(auditLog).where(eq(auditLog.entityId, f.id))).map((a) => a.action);
     expect(actions.sort()).toEqual(["flight.complete", "flight.schedule"]);
   });
@@ -234,7 +234,7 @@ describe("scheduling sync", () => {
     toAirport: "KTEB",
     departsAt: new Date("2026-11-15T13:00:00Z"),
     arrivesAt: null,
-    blockMinutes: null,
+    flightMinutes: null,
     status: "scheduled" as const,
     ...over,
   });
@@ -245,7 +245,7 @@ describe("scheduling sync", () => {
 
   it("is idempotent: running twice creates once and deducts hours once", async () => {
     const adapter = new FakeSchedulingAdapter({
-      flights: [ext({ status: "completed", blockMinutes: 100, arrivesAt: new Date("2026-11-15T14:40:00Z") })],
+      flights: [ext({ status: "completed", flightMinutes: 100, arrivesAt: new Date("2026-11-15T14:40:00Z") })],
       maintenance: [
         {
           id: "M-1",
@@ -286,16 +286,16 @@ describe("scheduling sync", () => {
     await syncScheduling(db, null, adapter);
     expect(await balance(ownerA.shareId)).toBe(3000);
 
-    adapter.data.flights = [ext({ status: "completed", blockMinutes: 120 })];
+    adapter.data.flights = [ext({ status: "completed", flightMinutes: 120 })];
     expect((await syncScheduling(db, null, adapter)).counts.updated).toBe(1);
     expect(await balance(ownerA.shareId)).toBe(3000 - 120);
 
-    // The vendor corrects the block time: the difference is adjusted, nothing is edited.
-    adapter.data.flights = [ext({ status: "completed", blockMinutes: 90 })];
+    // The vendor corrects the flight time: the difference is adjusted, nothing is edited.
+    adapter.data.flights = [ext({ status: "completed", flightMinutes: 90 })];
     await syncScheduling(db, null, adapter);
     expect(await balance(ownerA.shareId)).toBe(3000 - 90);
 
-    adapter.data.flights = [ext({ status: "cancelled", blockMinutes: 90 })];
+    adapter.data.flights = [ext({ status: "cancelled", flightMinutes: 90 })];
     await syncScheduling(db, null, adapter);
     expect(await balance(ownerA.shareId)).toBe(3000);
     const kinds = (await listHours(db, finance, ownerA.shareId)).entries.map((e) => e.minutes).sort((a, b) => a - b);
@@ -315,7 +315,7 @@ describe("scheduling sync", () => {
     });
     const result = await syncScheduling(db, null, adapter);
     expect(result.counts).toEqual({ created: 1, updated: 0, unchanged: 0, failed: 3 });
-    expect(result.errors.map((e) => e.code)).toEqual(["unknown_aircraft", "unknown_share", "missing_block_time"]);
+    expect(result.errors.map((e) => e.code)).toEqual(["unknown_aircraft", "unknown_share", "missing_flight_time"]);
 
     const status = await getIntegrationStatus(db, admin);
     expect(status.integrations[0]).toMatchObject({ provider: "fake", status: "connected" });

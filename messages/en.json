@@ -443,7 +443,7 @@
       "toAirport": "3 or 4 character ICAO code, e.g. KPBI.",
       "departsAt": "Choose a date and time.",
       "arrivesAt": "Arrival must be after departure.",
-      "blockTime": "Enter a time like 2:15 or 2.25.",
+      "flightTime": "Enter a time like 2:15 or 2.25.",
       "title": "Describe the work (at least 2 characters).",
       "startsAt": "Invalid date and time.",
       "endsAt": "End must be after start.",
@@ -821,7 +821,7 @@
   },
   "flights": {
     "title": "Flights",
-    "subtitle": "Schedule flights, then complete them with block time to deduct hours.",
+    "subtitle": "Schedule flights, then complete them with flight time to deduct hours.",
     "new": "Schedule a flight",
     "newTitle": "Schedule a flight",
     "newSubtitle": "Hours are deducted from the chosen share when the flight is completed.",
@@ -848,7 +848,6 @@
     },
     "synced": "Synced",
     "noShare": "No owner (positioning)",
-    "block": "{hours} block",
     "share": "Hours from",
     "from": "From",
     "to": "To",
@@ -859,14 +858,15 @@
     "saving": "Saving…",
     "save": "Save",
     "cancel": "Cancel",
-    "blockTime": "Block time",
-    "blockTimePlaceholder": "e.g. 2:15",
+    "flightTime": "Flight time",
+    "flightTimePlaceholder": "e.g. 2:15",
     "complete": "Complete",
     "cancelReason": "Reason (optional)",
     "cancelFlight": "Cancel flight",
     "cancelCompleted": "Cancel and return hours",
     "edit": "Edit",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "flown": "{hours} de volk"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -948,7 +948,7 @@
   },
   "ownerFlights": {
     "title": "Your flights",
-    "subtitle": "Flights on your share. Block time is deducted from your hours.",
+    "subtitle": "Flights on your share. Flight time is deducted from your hours.",
     "upcoming": "Upcoming",
     "past": "Past",
     "noUpcomingTitle": "No upcoming flights",
@@ -1090,7 +1090,7 @@
     "arrival": "Arrival",
     "from": "From",
     "to": "To",
-    "blockHours": "Block hours",
+    "flightHours": "Flight hours",
     "hours": "Hours",
     "kinds": {
       "cost": "Cost",

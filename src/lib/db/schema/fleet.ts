@@ -59,7 +59,7 @@ export const flights = pgTable(
     toAirport: text("to_airport").notNull(),
     departsAt: timestamp("departs_at", { withTimezone: true }).notNull(),
     arrivesAt: timestamp("arrives_at", { withTimezone: true }),
-    blockMinutes: integer("block_minutes"),
+    flightMinutes: integer("flight_minutes"),
     status: flightStatus("status").notNull().default("scheduled"),
     source: dataSource("source").notNull().default("manual"),
     externalId: text("external_id"),

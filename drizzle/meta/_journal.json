@@ -29,6 +29,13 @@
       "when": 1792988671243,
       "tag": "0003_api_and_webhooks",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793129595490,
+      "tag": "0004_flight_time",
+      "breakpoints": true
     }
   ]
 }

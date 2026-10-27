@@ -111,7 +111,7 @@ type FlightRow = {
   ownerName?: string | null;
   fromAirport: string;
   toAirport: string;
-  blockMinutes: number | null;
+  flightMinutes: number | null;
   status: string;
 };
 
@@ -126,7 +126,7 @@ export async function flightsCsv(rows: FlightRow[], { withOwner = false } = {}) 
         ...(withOwner ? [t("owner")] : []),
         t("from"),
         t("to"),
-        t("blockHours"),
+        t("flightHours"),
         t("status"),
       ],
       ...rows.map((r) => [
@@ -136,7 +136,7 @@ export async function flightsCsv(rows: FlightRow[], { withOwner = false } = {}) 
         ...(withOwner ? [r.ownerName ?? ""] : []),
         r.fromAirport,
         r.toAirport,
-        r.blockMinutes ? minutesToHours(r.blockMinutes) : null,
+        r.flightMinutes ? minutesToHours(r.flightMinutes) : null,
         t(`flightStatuses.${r.status}`),
       ]),
     ],

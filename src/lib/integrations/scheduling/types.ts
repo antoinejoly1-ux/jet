@@ -14,7 +14,7 @@ export type ExternalFlight = {
   toAirport: string;
   departsAt: Date;
   arrivesAt: Date | null;
-  blockMinutes: number | null;
+  flightMinutes: number | null;
   status: "scheduled" | "completed" | "cancelled";
 };
 

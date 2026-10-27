@@ -54,7 +54,7 @@ Jet-Event: flight.completed
 Jet-Delivery: 0192…            (the same id on every retry: use it to ignore duplicates)
 Jet-Signature: t=1792990000,v1=5f2c…
 
-{"id":"0192…","type":"flight.completed","createdAt":"2026-10-26T14:02:11.000Z","data":{"flightId":"…","blockMinutes":95,…}}
+{"id":"0192…","type":"flight.completed","createdAt":"2026-10-26T14:02:11.000Z","data":{"flightId":"…","flightMinutes":95,…}}
 ```
 
 Verify the signature before trusting a delivery:

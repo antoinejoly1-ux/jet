@@ -88,7 +88,7 @@ export function openApiDocument(baseUrl: string) {
       },
       "/flights/{id}/complete": {
         post: {
-          summary: "Complete a flight (deducts its block time from the share's hours)",
+          summary: "Complete a flight (deducts its flight time from the share's hours)",
           ...scope("operations:write"),
           parameters: idParam,
           requestBody: { required: true, content: json(apiCompleteBody) },

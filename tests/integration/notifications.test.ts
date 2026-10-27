@@ -115,7 +115,7 @@ describe("low hours", () => {
         departsAt: "2026-09-01T08:00",
         arrivesAt: "",
       });
-      await completeFlight(db, dispatcher, f.id, { blockTime: block, arrivesAt: "" });
+      await completeFlight(db, dispatcher, f.id, { flightTime: block, arrivesAt: "" });
     };
     await fly("0:30"); // 150 left: still above
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(0);

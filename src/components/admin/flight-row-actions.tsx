@@ -9,7 +9,7 @@ import { idle, type FormState } from "@/lib/forms";
 
 type Action = (s: FormState, d: FormData) => Promise<FormState>;
 
-/** Complete (enter block time) or cancel a flight, inline in the list. */
+/** Complete (enter flight time) or cancel a flight, inline in the list. */
 export function FlightRowActions({
   id,
   status,
@@ -41,15 +41,15 @@ export function FlightRowActions({
       <form action={completeAction} className="flex flex-wrap items-center gap-2">
         <FormAlert state={completeState} />
         <label className="sr-only" htmlFor={`block-${id}`}>
-          {t("blockTime")}
+          {t("flightTime")}
         </label>
         <input
           id={`block-${id}`}
-          name="blockTime"
+          name="flightTime"
           autoFocus
           required
           inputMode="decimal"
-          placeholder={t("blockTimePlaceholder")}
+          placeholder={t("flightTimePlaceholder")}
           className="border-border bg-surface h-9 w-28 rounded-md border px-2 text-sm"
         />
         <input type="hidden" name="arrivesAt" value="" />

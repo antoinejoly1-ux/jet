@@ -85,7 +85,7 @@ export async function exportMyData(db: Db, actor: Actor) {
           toAirport: flights.toAirport,
           departsAt: flights.departsAt,
           arrivesAt: flights.arrivesAt,
-          blockMinutes: flights.blockMinutes,
+          flightMinutes: flights.flightMinutes,
           status: flights.status,
         })
         .from(flights)

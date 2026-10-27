@@ -443,7 +443,7 @@
       "toAirport": "Code OACI de 3 ou 4 caractères, ex. KPBI.",
       "departsAt": "Choisissez une date et une heure.",
       "arrivesAt": "L'arrivée doit suivre le départ.",
-      "blockTime": "Entrez un temps comme 2:15 ou 2,25.",
+      "flightTime": "Entrez un temps comme 2:15 ou 2,25.",
       "title": "Décrivez les travaux (2 caractères minimum).",
       "startsAt": "Date et heure invalides.",
       "endsAt": "La fin doit suivre le début.",
@@ -821,7 +821,7 @@
   },
   "flights": {
     "title": "Vols",
-    "subtitle": "Planifiez les vols, puis terminez-les avec le temps bloc pour déduire les heures.",
+    "subtitle": "Planifiez les vols, puis terminez-les avec le temps de vol pour déduire les heures.",
     "new": "Planifier un vol",
     "newTitle": "Planifier un vol",
     "newSubtitle": "Les heures sont déduites de la part choisie quand le vol est terminé.",
@@ -848,7 +848,6 @@
     },
     "synced": "Synchronisé",
     "noShare": "Sans propriétaire (convoyage)",
-    "block": "{hours} bloc",
     "share": "Heures de",
     "from": "Départ",
     "to": "Arrivée",
@@ -859,14 +858,15 @@
     "saving": "Enregistrement…",
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "blockTime": "Temps bloc",
-    "blockTimePlaceholder": "ex. 2:15",
+    "flightTime": "Temps de vol",
+    "flightTimePlaceholder": "ex. 2:15",
     "complete": "Terminer",
     "cancelReason": "Raison (facultatif)",
     "cancelFlight": "Annuler le vol",
     "cancelCompleted": "Annuler et rendre les heures",
     "edit": "Modifier",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Exporter (CSV)",
+    "flown": "{hours} de vol"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -948,7 +948,7 @@
   },
   "ownerFlights": {
     "title": "Vos vols",
-    "subtitle": "Les vols sur votre part. Le temps bloc est déduit de vos heures.",
+    "subtitle": "Les vols sur votre part. Le temps de vol est déduit de vos heures.",
     "upcoming": "À venir",
     "past": "Passés",
     "noUpcomingTitle": "Aucun vol à venir",
@@ -1090,7 +1090,7 @@
     "arrival": "Arrivée",
     "from": "De",
     "to": "À",
-    "blockHours": "Heures bloc",
+    "flightHours": "Heures de vol",
     "hours": "Heures",
     "kinds": {
       "cost": "Coût",

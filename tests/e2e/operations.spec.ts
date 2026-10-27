@@ -21,7 +21,7 @@ async function schedule(page: Page, to: string, departsAt: string) {
   await expect(page.getByText("Vol enregistré.")).toBeVisible();
 }
 
-test("dispatch completes a flight with its block time and the owner sees it", async ({ page, browser }, testInfo) => {
+test("dispatch completes a flight with its flight time and the owner sees it", async ({ page, browser }, testInfo) => {
   const to = testInfo.project.name === "phone" ? "KSUN" : "KASE";
   await signIn(page, "dispatch@jet.test");
   await schedule(page, to, local(-3, "09:00"));
@@ -33,14 +33,14 @@ test("dispatch completes a flight with its block time and the owner sees it", as
     .filter({ hasText: "Prévu" })
     .first();
   await row.getByRole("button", { name: "Terminer" }).click();
-  await row.getByLabel("Temps bloc").fill("1:30");
+  await row.getByLabel("Temps de vol").fill("1:30");
   await row.getByRole("button", { name: "Terminer" }).click();
   const done = page
     .getByRole("listitem")
     .filter({ hasText: `CYUL → ${to}` })
     .filter({ hasText: "Terminé" })
     .first();
-  await expect(done).toContainText("1,5 h bloc");
+  await expect(done).toContainText("1,5 h de vol");
 
   // A future flight can't be completed by mistake.
   await schedule(page, to, local(5, "10:00"));
@@ -50,7 +50,7 @@ test("dispatch completes a flight with its block time and the owner sees it", as
     .filter({ hasText: "Prévu" })
     .first();
   await future.getByRole("button", { name: "Terminer" }).click();
-  await future.getByLabel("Temps bloc").fill("1:00");
+  await future.getByLabel("Temps de vol").fill("1:00");
   await future.getByRole("button", { name: "Terminer" }).click();
   await expect(page.getByText("Ce vol n'est pas encore parti.")).toBeVisible();
 

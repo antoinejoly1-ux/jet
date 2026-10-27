@@ -56,7 +56,7 @@ export async function getAvailability(
         toAirport: flights.toAirport,
         departsAt: flights.departsAt,
         arrivesAt: flights.arrivesAt,
-        blockMinutes: flights.blockMinutes,
+        flightMinutes: flights.flightMinutes,
         ownerId: shares.ownerId,
         ownerName: owners.legalName,
       })
@@ -106,7 +106,7 @@ export async function getAvailability(
   const periods: Period[] = [];
   for (const f of flightRows) {
     const endsAt =
-      f.arrivesAt ?? new Date(f.departsAt.getTime() + (f.blockMinutes ? f.blockMinutes * 60_000 : DEFAULT_FLIGHT_MS));
+      f.arrivesAt ?? new Date(f.departsAt.getTime() + (f.flightMinutes ? f.flightMinutes * 60_000 : DEFAULT_FLIGHT_MS));
     if (endsAt <= from) continue;
     const mine = !!f.ownerId && actor.ownerIds.includes(f.ownerId);
     periods.push(

@@ -2,7 +2,7 @@
  * Pulls flights, maintenance and blocks from the scheduling software. Safe to
  * run any number of times: records are matched by the vendor's id, unchanged
  * ones are left alone, and hours follow the same rules as a manual change
- * (completing deducts, cancelling gives back, a corrected block time is a
+ * (completing deducts, cancelling gives back, a corrected flight time is a
  * reversing adjustment). Each record commits on its own, so one bad record
  * is reported without blocking the rest.
  */
@@ -172,7 +172,7 @@ async function upsertFlight(tx: Tx, f: ExternalFlight, ctx: Ctx): Promise<Outcom
     toAirport: f.toAirport.toUpperCase(),
     departsAt: f.departsAt,
   };
-  if (f.status === "completed" && !f.blockMinutes) throw new SkipRecord("missing_block_time");
+  if (f.status === "completed" && !f.flightMinutes) throw new SkipRecord("missing_flight_time");
 
   let [local] = await tx.select().from(flights).where(eq(flights.externalId, externalId)).for("update");
   let outcome: Outcome = "unchanged";
@@ -206,11 +206,11 @@ async function upsertFlight(tx: Tx, f: ExternalFlight, ctx: Ctx): Promise<Outcom
   local = local!;
 
   if (local.status === "scheduled" && f.status === "completed") {
-    local = await applyCompletion(tx, local, f.blockMinutes!, f.arrivesAt, ctx.actorUserId);
-    if (local.shareId) ctx.emails.push(...(await alertIfHoursLow(tx, local.shareId, f.blockMinutes!)));
+    local = await applyCompletion(tx, local, f.flightMinutes!, f.arrivesAt, ctx.actorUserId);
+    if (local.shareId) ctx.emails.push(...(await alertIfHoursLow(tx, local.shareId, f.flightMinutes!)));
     outcome = outcome === "created" ? "created" : "updated";
-  } else if (local.status === "completed" && f.status === "completed" && local.blockMinutes !== f.blockMinutes) {
-    await correctBlockTime(tx, local, f.blockMinutes!, ctx.actorUserId);
+  } else if (local.status === "completed" && f.status === "completed" && local.flightMinutes !== f.flightMinutes) {
+    await correctBlockTime(tx, local, f.flightMinutes!, ctx.actorUserId);
     outcome = "updated";
   } else if (local.status === "completed" && f.status === "scheduled") {
     throw new SkipRecord("flight_already_completed");
@@ -225,28 +225,28 @@ async function upsertFlight(tx: Tx, f: ExternalFlight, ctx: Ctx): Promise<Outcom
       action: `sync.flight.${outcome}`,
       entityType: "flight",
       entityId: local.id,
-      after: { provider: ctx.provider, externalId: f.id, status: f.status, blockMinutes: f.blockMinutes },
+      after: { provider: ctx.provider, externalId: f.id, status: f.status, flightMinutes: f.flightMinutes },
     });
   return outcome;
 }
 
-/** The vendor changed a completed flight's block time: adjust the hours by the difference. */
+/** The vendor changed a completed flight's flight time: adjust the hours by the difference. */
 async function correctBlockTime(
   tx: Tx,
   flight: typeof flights.$inferSelect,
-  blockMinutes: number,
+  flightMinutes: number,
   actorUserId: string | null,
 ) {
   if (flight.shareId)
     await tx.insert(hourLedger).values({
       shareId: flight.shareId,
       kind: "adjustment",
-      minutes: (flight.blockMinutes ?? 0) - blockMinutes,
+      minutes: (flight.flightMinutes ?? 0) - flightMinutes,
       flightId: flight.id,
       note: "block_time_corrected",
       createdByUserId: actorUserId,
     });
-  await tx.update(flights).set({ blockMinutes }).where(eq(flights.id, flight.id));
+  await tx.update(flights).set({ flightMinutes }).where(eq(flights.id, flight.id));
 }
 
 async function upsertMaintenance(tx: Tx, m: ExternalMaintenance, ctx: Ctx): Promise<Outcome> {

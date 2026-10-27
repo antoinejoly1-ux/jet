@@ -1,6 +1,6 @@
 /**
  * Flights. A flight is scheduled, then completed or cancelled. Completing it
- * deducts its block time from the share's hours in the same transaction;
+ * deducts its flight time from the share's hours in the same transaction;
  * cancelling a completed flight gives those hours back with a reversing
  * entry, so the hour ledger stays append-only.
  */
@@ -33,7 +33,7 @@ const columns = {
   toAirport: flights.toAirport,
   departsAt: flights.departsAt,
   arrivesAt: flights.arrivesAt,
-  blockMinutes: flights.blockMinutes,
+  flightMinutes: flights.flightMinutes,
   status: flights.status,
   source: flights.source,
 };
@@ -151,15 +151,15 @@ export async function completeFlight(db: Db, actor: Actor, id: string, raw: Comp
     const flight = await lockFlight(tx, id);
     // Guards against completing the wrong row; the scheduling sync trusts the vendor instead.
     if (flight.status === "scheduled" && flight.departsAt > new Date()) throw new ConflictError("flight_not_departed");
-    const row = await applyCompletion(tx, flight, input.blockTime, input.arrivesAt, actor.id);
+    const row = await applyCompletion(tx, flight, input.flightTime, input.arrivesAt, actor.id);
     await recordAudit(tx, {
       actorUserId: actor.id,
       action: "flight.complete",
       entityType: "flight",
       entityId: id,
-      after: { blockMinutes: input.blockTime },
+      after: { flightMinutes: input.flightTime },
     });
-    const emails = flight.shareId ? await alertIfHoursLow(tx, flight.shareId, input.blockTime) : [];
+    const emails = flight.shareId ? await alertIfHoursLow(tx, flight.shareId, input.flightTime) : [];
     return { row, emails };
   });
   await sendPendingEmails(db, emails);
@@ -176,7 +176,7 @@ export async function cancelFlight(db: Db, actor: Actor, id: string, reason: str
       action: "flight.cancel",
       entityType: "flight",
       entityId: id,
-      before: { status: flight.status, blockMinutes: flight.blockMinutes },
+      before: { status: flight.status, flightMinutes: flight.flightMinutes },
       after: { reason: reason.trim() || null },
     });
     return row;
@@ -191,7 +191,7 @@ const flightPayload = (f: Flight) => ({
   toAirport: f.toAirport,
   departsAt: f.departsAt.toISOString(),
   arrivesAt: f.arrivesAt?.toISOString() ?? null,
-  blockMinutes: f.blockMinutes,
+  flightMinutes: f.flightMinutes,
   status: f.status,
 });
 
@@ -202,22 +202,22 @@ export async function lockFlight(tx: Tx, id: string): Promise<Flight> {
 }
 
 /**
- * Marks a locked, scheduled flight completed and deducts its block time from
+ * Marks a locked, scheduled flight completed and deducts its flight time from
  * the share's hours. Shared by the dispatcher's form and the scheduling sync.
  */
 export async function applyCompletion(
   tx: Tx,
   flight: Flight,
-  blockMinutes: number,
+  flightMinutes: number,
   arrivesAt: Date | null,
   actorUserId: string | null,
 ): Promise<Flight> {
   if (flight.status !== "scheduled") throw new ConflictError("flight_not_scheduled");
-  const arrival = arrivesAt ?? flight.arrivesAt ?? new Date(flight.departsAt.getTime() + blockMinutes * 60_000);
+  const arrival = arrivesAt ?? flight.arrivesAt ?? new Date(flight.departsAt.getTime() + flightMinutes * 60_000);
   if (arrival <= flight.departsAt) throw new ConflictError("arrival_before_departure");
   const [row] = await tx
     .update(flights)
-    .set({ status: "completed", blockMinutes, arrivesAt: arrival })
+    .set({ status: "completed", flightMinutes, arrivesAt: arrival })
     .where(eq(flights.id, flight.id))
     .returning();
   await emit(tx, "flight.completed", flightPayload(row!));
@@ -225,7 +225,7 @@ export async function applyCompletion(
     await tx.insert(hourLedger).values({
       shareId: flight.shareId,
       kind: "flight",
-      minutes: -blockMinutes,
+      minutes: -flightMinutes,
       flightId: flight.id,
       createdByUserId: actorUserId,
     });

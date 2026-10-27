@@ -54,7 +54,7 @@ export const flightInput = z
   .refine((f) => !f.arrivesAt || f.arrivesAt > f.departsAt, { path: ["arrivesAt"], message: "before_departure" });
 export type FlightInput = z.input<typeof flightInput>;
 
-/** Block time is typed as "2:15" or "2.25" hours. */
+/** Flight time is typed as "2:15" or "2.25" hours. */
 export function parseDurationToMinutes(input: string): number | null {
   const s = input.trim().replace(",", ".");
   const hm = /^(\d{1,2}):([0-5]\d)$/.exec(s);
@@ -64,7 +64,7 @@ export function parseDurationToMinutes(input: string): number | null {
 }
 
 export const completeFlightInput = z.object({
-  blockTime: z.string().transform((v, ctx) => {
+  flightTime: z.string().transform((v, ctx) => {
     const minutes = parseDurationToMinutes(v);
     if (!minutes || minutes > 24 * 60) {
       ctx.addIssue({ code: "custom", message: "invalid_duration" });

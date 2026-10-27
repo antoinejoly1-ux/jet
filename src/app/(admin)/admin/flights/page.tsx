@@ -157,7 +157,7 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
                       </p>
                       <p className="text-muted truncate text-sm">
                         {f.registration} · {f.ownerName ?? t("noShare")}
-                        {f.blockMinutes ? ` · ${t("block", { hours: formatHours(f.blockMinutes, locale) })}` : ""}
+                        {f.flightMinutes ? ` · ${t("flown", { hours: formatHours(f.flightMinutes, locale) })}` : ""}
                       </p>
                     </div>
                     {canWrite ? (

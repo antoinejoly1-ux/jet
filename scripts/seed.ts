@@ -238,7 +238,7 @@ async function main() {
             toAirport: to,
             departsAt: departs,
             arrivesAt: new Date(departs.getTime() + block * 60_000),
-            blockMinutes: block,
+            flightMinutes: block,
             status: "completed",
           })
           .returning();

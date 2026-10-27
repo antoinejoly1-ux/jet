@@ -41,8 +41,8 @@ export default async function OwnerFlightsPage() {
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
             <Badge tone={TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
-            {f.blockMinutes && f.status === "completed" ? (
-              <span className="tabular text-muted text-sm">{formatHours(f.blockMinutes, locale)}</span>
+            {f.flightMinutes && f.status === "completed" ? (
+              <span className="tabular text-muted text-sm">{formatHours(f.flightMinutes, locale)}</span>
             ) : null}
           </div>
         </li>
