@@ -46,7 +46,7 @@ export async function AvailabilityCalendar({
     `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
   const describe = (p: Period) => {
     if (p.kind === "maintenance") return p.label ? `${t("legend.maintenance")} · ${p.label}` : t("legend.maintenance");
-    if (p.kind === "booked") return t("legend.booked");
+    if (p.kind === "booked") return [t("legend.booked"), p.ownerName].filter(Boolean).join(" · ");
     return [p.mine ? t("yourFlight") : null, p.label, p.ownerName].filter(Boolean).join(" · ");
   };
 

@@ -67,7 +67,7 @@ test("dispatch completes a flight with its flight time and the owner sees it", a
   await expect(owner.getByRole("region", { name: "À venir" })).toContainText(`CYUL → ${to}`);
 });
 
-test("a blocked period shows to the owner as booked, without co-owners' details", async ({
+test("a blocked period shows to the owner as booked, and co-owners' flights by name", async ({
   page,
   browser,
 }, testInfo) => {
@@ -92,10 +92,15 @@ test("a blocked period shows to the owner as booked, without co-owners' details"
   await expect(owner.getByRole("heading", { name: "Disponibilité" })).toBeVisible();
   const taken = owner.getByRole("region", { name: "Périodes occupées" });
   await expect(taken).toContainText("Réservé");
-  // Co-owners' flights on C-GJTA are only "booked": no routes or names that aren't the owner's.
-  await owner.goto(`/availability`);
-  await expect(owner.locator("main")).not.toContainText("Marie Gagnon");
-  await expect(owner.locator("main")).not.toContainText("Groupe Laurentides");
+  // Co-owners know each other: their flights on C-GJTA show as booked with their name.
+  // The seed's first co-owner flight is six days out, so it's in this month or the next.
+  const now = new Date();
+  let seen = "";
+  for (const d of [now, new Date(now.getFullYear(), now.getMonth() + 1, 1)]) {
+    await owner.goto(`/availability?month=${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    seen += await owner.getByRole("region", { name: "Périodes occupées" }).innerText();
+  }
+  expect(seen).toContain("Réservé · Marie Gagnon");
 
   await owner.goto("/aircraft");
   await expect(owner.getByRole("heading", { name: "C-GJTA" })).toBeVisible();

@@ -1,7 +1,8 @@
 /**
  * When an aircraft is free. Nothing is stored as "available": it's whatever
  * isn't taken by a flight, a maintenance window or a manual block. Owners see
- * their own flights in detail and everyone else's only as "booked".
+ * their own flights in detail, a co-owner's as "booked" with the co-owner's
+ * name (co-owners know each other), and charter flights only as "booked".
  */
 import "server-only";
 import { and, asc, eq, gt, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
@@ -119,7 +120,7 @@ export async function getAvailability(
             label: `${f.fromAirport} → ${f.toAirport}`,
             ownerName: staff ? f.ownerName : null,
           }
-        : { kind: "booked", startsAt: f.departsAt, endsAt, mine: false, label: null, ownerName: null },
+        : { kind: "booked", startsAt: f.departsAt, endsAt, mine: false, label: null, ownerName: f.ownerName },
     );
   }
   for (const j of jobs) {

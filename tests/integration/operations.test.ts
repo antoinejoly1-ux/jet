@@ -180,9 +180,10 @@ describe("availability", () => {
   const from = new Date("2026-11-01T04:00:00Z");
   const to = new Date("2026-12-01T05:00:00Z");
 
-  it("shows owners their own flights and only 'booked' for co-owners'", async () => {
+  it("shows owners their own flights, co-owners' as booked by name, and charters only as booked", async () => {
     await scheduleFlight(db, dispatcher, flight(ownerA.shareId, "2026-11-10T08:30"));
     await scheduleFlight(db, dispatcher, flight(ownerB.shareId, "2026-11-12T08:30"));
+    await scheduleFlight(db, dispatcher, flight(null, "2026-11-14T08:30"));
     await planMaintenance(db, dispatcher, {
       aircraftId: planeId,
       type: "inspection",
@@ -192,14 +193,15 @@ describe("availability", () => {
     });
 
     const forA = await getAvailability(db, ownerA.actor, planeId, from, to);
-    expect(forA.periods.map((p) => [p.kind, p.mine, p.label])).toEqual([
-      ["flight", true, "CYUL → KPBI"],
-      ["booked", false, null],
-      ["maintenance", false, null],
+    expect(forA.periods.map((p) => [p.kind, p.mine, p.label, p.ownerName])).toEqual([
+      ["flight", true, "CYUL → KPBI", null],
+      ["booked", false, null, "Bruno"],
+      ["booked", false, null, null],
+      ["maintenance", false, null, null],
     ]);
     const forStaff = await getAvailability(db, dispatcher, planeId, from, to);
-    expect(forStaff.periods.map((p) => p.ownerName)).toEqual(["Anne", "Bruno", null]);
-    expect(forStaff.periods[2]!.label).toBe("Inspection secrète");
+    expect(forStaff.periods.map((p) => p.ownerName)).toEqual(["Anne", "Bruno", null, null]);
+    expect(forStaff.periods[3]!.label).toBe("Inspection secrète");
   });
 
   it("refuses owners without a share in the aircraft", async () => {

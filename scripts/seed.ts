@@ -228,7 +228,7 @@ async function main() {
         const from = pick(airports);
         let to = pick(airports);
         while (to === from) to = pick(airports);
-        const block = 60 + Math.floor(rand() * 120);
+        const flown = 60 + Math.floor(rand() * 120);
         const [flight] = await db
           .insert(s.flights)
           .values({
@@ -237,17 +237,17 @@ async function main() {
             fromAirport: from,
             toAirport: to,
             departsAt: departs,
-            arrivesAt: new Date(departs.getTime() + block * 60_000),
-            flightMinutes: block,
+            arrivesAt: new Date(departs.getTime() + flown * 60_000),
+            flightMinutes: flown,
             status: "completed",
           })
           .returning();
         await db
           .insert(s.hourLedger)
-          .values({ shareId: share.id, kind: "flight", minutes: -block, flightId: flight!.id });
+          .values({ shareId: share.id, kind: "flight", minutes: -flown, flightId: flight!.id });
 
-        const fuel = Math.round(block * (28 + rand() * 8)) * 100;
-        const crew = Math.round(block * 10) * 100;
+        const fuel = Math.round(flown * (28 + rand() * 8)) * 100;
+        const crew = Math.round(flown * 10) * 100;
         const fees = Math.round(400 + rand() * 900) * 100;
         const total = fuel + crew + fees;
         const number = `INV-${year}-${String(invoiceSeq++).padStart(4, "0")}`;
@@ -347,6 +347,17 @@ async function main() {
         status: "scheduled",
       });
     }
+    // A charter: Univers sells the aircraft's time when owners aren't flying it.
+    const charter = new Date(now + (9 + i) * 86_400_000);
+    charter.setUTCHours(15, 0, 0, 0);
+    await db.insert(s.flights).values({
+      aircraftId: plane.id,
+      shareId: null,
+      fromAirport: "CYUL",
+      toAirport: "CYYZ",
+      departsAt: charter,
+      status: "scheduled",
+    });
     await db.insert(s.maintenanceEvents).values({
       aircraftId: plane.id,
       type: i === 1 ? "unscheduled" : "inspection",
