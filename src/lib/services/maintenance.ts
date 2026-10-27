@@ -99,7 +99,7 @@ export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInpu
       endsAt: row.endsAt?.toISOString() ?? null,
       dueOn: row.dueOn,
     });
-    // Owners hear about work that will take their aircraft out of service.
+    // Owners hear when their aircraft will be out of service, not what the work is.
     const emails: PendingEmail[] = [];
     if (input.startsAt) {
       const holders = await tx
@@ -116,7 +116,7 @@ export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInpu
             tx,
             h.ownerId,
             "maintenance.planned",
-            { aircraft: plane.registration, title: input.title, when },
+            { aircraft: plane.registration, when },
             { template: "maintenancePlanned", path: "/aircraft" },
           )),
         );

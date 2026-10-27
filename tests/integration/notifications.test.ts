@@ -95,7 +95,8 @@ describe("email preferences", () => {
       endsAt: "",
     });
     expect(sent.map((e) => e.subject)).toEqual(["Maintenance prévue sur C-GJTA"]);
-    expect(sent[0]!.text).toContain("Inspection de phase");
+    expect(sent[0]!.text).toContain("C-GJTA sera en maintenance à partir du 10 janvier 2027");
+    expect(sent[0]!.text).not.toContain("Inspection de phase");
   });
 
   it("refuses types that can't be turned off", async () => {
@@ -106,7 +107,7 @@ describe("email preferences", () => {
 describe("low hours", () => {
   it("warns once when the balance crosses 10% of the annual hours", async () => {
     await addHours(db, finance, anne.shareId, { kind: "purchase", hours: "3" }); // 180 min; the line is 120
-    const fly = async (block: string) => {
+    const fly = async (flown: string) => {
       const f = await scheduleFlight(db, dispatcher, {
         aircraftId: planeId,
         shareId: anne.shareId,
@@ -115,7 +116,7 @@ describe("low hours", () => {
         departsAt: "2026-09-01T08:00",
         arrivesAt: "",
       });
-      await completeFlight(db, dispatcher, f.id, { flightTime: block, arrivesAt: "" });
+      await completeFlight(db, dispatcher, f.id, { flightTime: flown, arrivesAt: "" });
     };
     await fly("0:30"); // 150 left: still above
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(0);

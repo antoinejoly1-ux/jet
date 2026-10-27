@@ -1058,7 +1058,7 @@
         "low_staff": "{ownerName} has only {hours} left on {aircraft}"
       },
       "maintenance": {
-        "planned": "{title} planned on {aircraft} on {when}"
+        "planned": "Maintenance planned on {aircraft} from {when}"
       },
       "message": {
         "from_dispatch": "New message from the team: “{preview}”",

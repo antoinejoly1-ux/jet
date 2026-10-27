@@ -102,12 +102,12 @@ const copy = {
   maintenancePlanned: {
     fr: {
       subject: "Maintenance prévue sur {aircraft}",
-      body: "{title} est prévue sur {aircraft} ({when}). L'appareil ne sera pas disponible pendant ce temps.",
+      body: "{aircraft} sera en maintenance à partir du {when}. L'appareil ne sera pas disponible pendant ce temps.",
       cta: "Voir l'appareil",
     },
     en: {
       subject: "Maintenance planned on {aircraft}",
-      body: "{title} is planned on {aircraft} ({when}). The aircraft won't be available during that time.",
+      body: "{aircraft} will be in maintenance from {when}. The aircraft won't be available during that time.",
       cta: "View the aircraft",
     },
   },
