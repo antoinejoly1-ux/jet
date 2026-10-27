@@ -47,7 +47,7 @@ export const apiTransactionBody = z.object({
     .number()
     .int()
     .refine((n) => n !== 0, "must_not_be_zero"),
-  currency: z.enum(["CAD", "USD"]),
+  currency: z.literal("CAD").default("CAD"),
   categoryId: z.uuid().nullable().optional(),
   description: z.string().max(300).nullable().optional(),
 });

@@ -24,7 +24,7 @@ records the admin who created the key. Limit: 120 requests per minute per key (H
 
 - `Authorization: Bearer jet_xxxxxxxx_…`
 - Responses: `{ "data": … }`. Errors: `{ "error": { "code", "message", "fields"? } }` with 400, 401, 403, 404, 409 or 429.
-- Money is integer **cents** with a `currency`; durations are **minutes**; times are ISO 8601 (responses in UTC).
+- Money is integer **cents** with a `currency`, always `CAD` (it may be left out when writing); durations are **minutes**; times are ISO 8601 (responses in UTC).
 - Ledger entries are never edited through the API: a correction is a reversal, made in the portal.
 
 ```sh

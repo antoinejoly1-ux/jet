@@ -151,7 +151,7 @@ describe("/api/v1", () => {
     expect(ledger.reduce((n, e) => n + e.minutes, 0)).toBe(600 - 95);
   });
 
-  it("adds ledger entries from integer cents", async () => {
+  it("adds ledger entries from integer cents, in Canadian dollars only", async () => {
     const { key } = await createApiKey(db, admin, { name: "Compta", scopes: ["finance:read", "finance:write"] });
     const res = await call(transactionsRoute, "POST", "/transactions", key, {
       shareId,
@@ -161,6 +161,14 @@ describe("/api/v1", () => {
       currency: "CAD",
     });
     expect(res).toMatchObject({ status: 200, json: { data: { amountCents: 123456, source: "import" } } });
+    const usd = await call(transactionsRoute, "POST", "/transactions", key, {
+      shareId,
+      occurredOn: "2026-10-01",
+      kind: "cost",
+      amountCents: 100,
+      currency: "USD",
+    });
+    expect(usd).toMatchObject({ status: 400, json: { error: { code: "invalid" } } });
   });
 
   it("publishes an OpenAPI document built from the same schemas", async () => {

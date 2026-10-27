@@ -112,15 +112,6 @@ export function InvoiceForm({
             defaultValue={submitted(state, "dueOn")}
             error={err("dueOn")}
           />
-          <SelectField
-            id="currency"
-            name="currency"
-            label={t("currency")}
-            defaultValue={submitted(state, "currency", "CAD")}
-          >
-            <option value="CAD">CAD</option>
-            <option value="USD">USD</option>
-          </SelectField>
         </div>
         <input type="hidden" name="fileId" value={fileId} />
         <div className="flex gap-2">
