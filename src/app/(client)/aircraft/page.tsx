@@ -93,18 +93,12 @@ export default async function OwnerAircraftPage() {
               ) : (
                 <ul className="divide-border divide-y">
                   {a.maintenance.map((m) => (
-                    <li key={m.id} className="flex items-start justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                      <div className="min-w-0">
-                        <p className="font-medium">{m.title}</p>
-                        <p className="text-muted text-sm">
-                          {tm.has(`types.${m.type}`) ? tm(`types.${m.type}`) : m.type}
-                          {m.startsAt
-                            ? ` · ${dt(m.startsAt)}${m.endsAt ? ` – ${dt(m.endsAt)}` : ""}`
-                            : m.dueOn
-                              ? ` · ${tm("dueOnDate", { date: day(m.dueOn) })}`
-                              : ""}
-                        </p>
-                      </div>
+                    <li key={m.id} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
+                      <p className="min-w-0 font-medium">
+                        {m.endsAt
+                          ? t("window", { from: dt(m.startsAt), to: dt(m.endsAt) })
+                          : t("windowOpen", { from: dt(m.startsAt) })}
+                      </p>
                       <Badge tone={JOB_TONE[m.status]}>{tm(`statuses.${m.status}`)}</Badge>
                     </li>
                   ))}

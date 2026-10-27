@@ -104,7 +104,9 @@ test("a blocked period shows to the owner as booked, and co-owners' flights by n
 
   await owner.goto("/aircraft");
   await expect(owner.getByRole("heading", { name: "C-GJTA" })).toBeVisible();
-  await expect(owner.getByText("Inspection de 600 heures")).toBeVisible();
+  // Owners see when the aircraft is in maintenance, not what the work is.
+  await expect(owner.getByText(/^Maintenance du /).first()).toBeVisible();
+  await expect(owner.locator("main")).not.toContainText("Inspection de 600 heures");
 });
 
 test("starting and finishing maintenance takes the aircraft out of service and back", async ({ page }, testInfo) => {

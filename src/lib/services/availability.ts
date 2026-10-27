@@ -5,7 +5,7 @@
  * name (co-owners know each other), and charter flights only as "booked".
  */
 import "server-only";
-import { and, asc, eq, gt, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, lt, ne, or } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { aircraft, availabilityBlocks, flights, maintenanceEvents, owners, shares } from "@/lib/db/schema";
 import { authorize, isStaff, type Actor } from "@/lib/auth/policy";
@@ -150,7 +150,11 @@ export async function getAvailability(
   return { aircraft: plane, periods };
 }
 
-/** The aircraft the signed-in owner holds a share in, with their share and open maintenance. */
+/**
+ * The aircraft the signed-in owner holds a share in, with their share and
+ * maintenance windows. Owners see only when the aircraft is in maintenance,
+ * never what the work is.
+ */
 export async function listOwnerAircraft(db: Db, actor: Actor) {
   if (actor.ownerIds.length === 0) return [];
   authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
@@ -186,9 +190,6 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
     .select({
       id: maintenanceEvents.id,
       aircraftId: maintenanceEvents.aircraftId,
-      type: maintenanceEvents.type,
-      title: maintenanceEvents.title,
-      dueOn: maintenanceEvents.dueOn,
       startsAt: maintenanceEvents.startsAt,
       endsAt: maintenanceEvents.endsAt,
       status: maintenanceEvents.status,
@@ -201,13 +202,17 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
           rows.map((r) => r.id),
         ),
         ne(maintenanceEvents.status, "cancelled"),
+        isNotNull(maintenanceEvents.startsAt),
       ),
     )
-    .orderBy(sql`coalesce(${maintenanceEvents.startsAt}, ${maintenanceEvents.dueOn}::timestamptz) desc nulls first`);
+    .orderBy(desc(maintenanceEvents.startsAt));
 
   return rows.map((r) => ({
     ...r,
-    maintenance: jobs.filter((j) => j.aircraftId === r.id).slice(0, 10),
+    maintenance: jobs
+      .filter((j) => j.aircraftId === r.id)
+      .slice(0, 10)
+      .map((j) => ({ ...j, startsAt: j.startsAt! })),
   }));
 }
 

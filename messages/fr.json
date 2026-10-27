@@ -190,7 +190,6 @@
     "nextFlightEmpty": "Aucun vol à venir.",
     "nextMaintenance": "Prochaine maintenance",
     "nextMaintenanceEmpty": "Aucune maintenance prévue.",
-    "dueOn": "Prévue le {date}",
     "latestInvoice": "Dernière facture",
     "latestInvoiceEmpty": "Votre première facture apparaîtra ici après votre premier vol.",
     "availability": "Disponibilité",
@@ -202,7 +201,9 @@
       "hoursUnused": "Vous n'avez pas encore volé cette année : toutes vos heures sont disponibles.",
       "budgetOnTrack": "Vous avez dépensé {spent} du budget, à {year} de l'année : c'est dans le rythme prévu.",
       "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu."
-    }
+    },
+    "maintenanceStarts": "Dès le {date}",
+    "maintenanceEnds": "Jusqu'au {date}"
   },
   "account": {
     "title": "Mon compte",
@@ -960,7 +961,7 @@
   },
   "ownerAircraft": {
     "title": "Votre appareil",
-    "subtitle": "Fiche de l'appareil et suivi de la maintenance.",
+    "subtitle": "Fiche de l'appareil et périodes de maintenance.",
     "model": "Modèle",
     "serialNumber": "Numéro de série",
     "homeBase": "Base",
@@ -969,7 +970,9 @@
     "since": "Depuis le",
     "seeAvailability": "Voir la disponibilité",
     "maintenance": "Maintenance",
-    "noMaintenance": "Aucune maintenance enregistrée."
+    "noMaintenance": "Aucune maintenance enregistrée.",
+    "window": "Maintenance du {from} au {to}",
+    "windowOpen": "Maintenance à partir du {from}"
   },
   "integrations": {
     "title": "Intégrations",

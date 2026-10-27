@@ -160,14 +160,14 @@ async function ShareSection({
         <InfoCard icon={Wrench} title={t("nextMaintenance")} empty={t("nextMaintenanceEmpty")}>
           {s.nextMaintenance ? (
             <>
-              <p className="text-lg font-semibold">{s.nextMaintenance.title}</p>
-              <p className="text-muted text-sm">
-                {s.nextMaintenance.startsAt
-                  ? dateTime(s.nextMaintenance.startsAt)
-                  : s.nextMaintenance.dueOn
-                    ? t("dueOn", { date: day(s.nextMaintenance.dueOn) })
-                    : null}
+              <p className="text-lg font-semibold">
+                {t("maintenanceStarts", { date: dateTime(s.nextMaintenance.startsAt) })}
               </p>
+              {s.nextMaintenance.endsAt ? (
+                <p className="text-muted text-sm">
+                  {t("maintenanceEnds", { date: dateTime(s.nextMaintenance.endsAt) })}
+                </p>
+              ) : null}
             </>
           ) : null}
         </InfoCard>

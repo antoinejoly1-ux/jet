@@ -28,7 +28,8 @@ export type ShareSummary = {
   annualMinutes: number | null;
   budget: { year: number; plannedCents: number; spentCents: number; currency: "CAD" | "USD" } | null;
   nextFlight: { fromAirport: string; toAirport: string; departsAt: Date } | null;
-  nextMaintenance: { title: string; startsAt: Date | null; dueOn: string | null } | null;
+  /** Owners see maintenance only as a window: the details stay with Univers and the shop. */
+  nextMaintenance: { startsAt: Date; endsAt: Date | null } | null;
   latestInvoice: {
     number: string;
     issuedOn: string;
@@ -95,19 +96,16 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
           .orderBy(asc(flights.departsAt))
           .limit(1),
         db
-          .select({
-            title: maintenanceEvents.title,
-            startsAt: maintenanceEvents.startsAt,
-            dueOn: maintenanceEvents.dueOn,
-          })
+          .select({ startsAt: maintenanceEvents.startsAt, endsAt: maintenanceEvents.endsAt })
           .from(maintenanceEvents)
           .where(
             and(
               eq(maintenanceEvents.aircraftId, r.aircraftId),
               inArray(maintenanceEvents.status, ["planned", "in_progress"]),
+              isNotNull(maintenanceEvents.startsAt),
             ),
           )
-          .orderBy(sql`coalesce(${maintenanceEvents.startsAt}, ${maintenanceEvents.dueOn}::timestamptz) asc nulls last`)
+          .orderBy(asc(maintenanceEvents.startsAt))
           .limit(1),
         db
           .select({
@@ -160,7 +158,9 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
         annualMinutes: r.annualMinutes,
         budget: budgetSummary,
         nextFlight: nextFlight ?? null,
-        nextMaintenance: nextMaintenance ?? null,
+        nextMaintenance: nextMaintenance
+          ? { startsAt: nextMaintenance.startsAt!, endsAt: nextMaintenance.endsAt }
+          : null,
         latestInvoice: latestInvoice ?? null,
       };
     }),

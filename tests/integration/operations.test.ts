@@ -210,6 +210,27 @@ describe("availability", () => {
     expect((await listOwnerAircraft(db, ownerA.actor)).map((a) => a.registration)).toEqual(["C-GJTA"]);
   });
 
+  it("shows owners maintenance only as a window, never the work", async () => {
+    await planMaintenance(db, dispatcher, {
+      aircraftId: planeId,
+      type: "inspection",
+      title: "Inspection secrète",
+      startsAt: "2026-11-20T08:00",
+      endsAt: "2026-11-21T17:00",
+    });
+    await planMaintenance(db, dispatcher, {
+      aircraftId: planeId,
+      type: "inspection",
+      title: "Échéance interne",
+      dueOn: "2026-12-15",
+    });
+    const [plane] = await listOwnerAircraft(db, ownerA.actor);
+    expect(plane!.maintenance).toEqual([
+      expect.objectContaining({ startsAt: new Date("2026-11-20T13:00:00Z"), status: "planned" }),
+    ]);
+    expect(JSON.stringify(plane)).not.toMatch(/secrète|Échéance|inspection/);
+  });
+
   it("adds and removes manual blocks", async () => {
     const block = await addBlock(db, dispatcher, planeId, {
       startsAt: "2026-11-05T00:00",

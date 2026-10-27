@@ -190,7 +190,6 @@
     "nextFlightEmpty": "No upcoming flights.",
     "nextMaintenance": "Next maintenance",
     "nextMaintenanceEmpty": "No maintenance planned.",
-    "dueOn": "Due {date}",
     "latestInvoice": "Latest invoice",
     "latestInvoiceEmpty": "Your first invoice will appear here after your first flight.",
     "availability": "Availability",
@@ -202,7 +201,9 @@
       "hoursUnused": "You haven't flown yet this year: all your hours are available.",
       "budgetOnTrack": "You've spent {spent} of the budget with {year} of the year gone: on track.",
       "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned."
-    }
+    },
+    "maintenanceStarts": "From {date}",
+    "maintenanceEnds": "Until {date}"
   },
   "account": {
     "title": "My account",
@@ -960,7 +961,7 @@
   },
   "ownerAircraft": {
     "title": "Your aircraft",
-    "subtitle": "Aircraft details and maintenance tracking.",
+    "subtitle": "Aircraft details and maintenance periods.",
     "model": "Model",
     "serialNumber": "Serial number",
     "homeBase": "Home base",
@@ -969,7 +970,9 @@
     "since": "Since",
     "seeAvailability": "See availability",
     "maintenance": "Maintenance",
-    "noMaintenance": "No maintenance recorded."
+    "noMaintenance": "No maintenance recorded.",
+    "window": "Maintenance from {from} to {to}",
+    "windowOpen": "Maintenance from {from}"
   },
   "integrations": {
     "title": "Integrations",
