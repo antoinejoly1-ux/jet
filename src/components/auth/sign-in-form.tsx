@@ -61,7 +61,7 @@ export function SignInForm({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("signInTitle")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("signInTitle")}</h1>
         <p className="text-muted mt-1 text-sm">{t("signInSubtitle")}</p>
       </div>
       {googleEnabled ? (

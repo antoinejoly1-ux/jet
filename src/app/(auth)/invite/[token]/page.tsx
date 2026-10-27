@@ -16,7 +16,7 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
   if (state !== "valid" || !invitation) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-bold tracking-tight">{t("unavailableTitle")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("unavailableTitle")}</h1>
         <p className="text-muted text-sm">{t(`states.${state}`)}</p>
         <Button asChild variant="secondary">
           <Link href="/sign-in">{t("goToSignIn")}</Link>
@@ -32,7 +32,7 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("title")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
         <p className="text-muted mt-1 text-sm">{t("body", { target, email: invitation.email })}</p>
       </div>
       {typeof error === "string" ? (

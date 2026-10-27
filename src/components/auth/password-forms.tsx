@@ -26,7 +26,7 @@ export function ForgotPasswordForm() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("forgotTitle")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("forgotTitle")}</h1>
         <p className="text-muted mt-1 text-sm">{t("forgotSubtitle")}</p>
       </div>
       {sent ? (
@@ -69,7 +69,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-xl font-bold tracking-tight">{t("resetTitle")}</h1>
+      <h1 className="text-3xl font-light tracking-tight">{t("resetTitle")}</h1>
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {done ? (
         <>

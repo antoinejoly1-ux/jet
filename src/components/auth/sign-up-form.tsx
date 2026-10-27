@@ -44,7 +44,7 @@ export function SignUpForm({
   if (sentTo) {
     return (
       <div className="flex flex-col gap-3">
-        <h1 className="text-xl font-bold tracking-tight">{t("checkInboxTitle")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("checkInboxTitle")}</h1>
         <p className="text-muted text-sm">{t("checkInboxBody", { email: sentTo })}</p>
       </div>
     );
@@ -53,7 +53,7 @@ export function SignUpForm({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("signUpTitle")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("signUpTitle")}</h1>
         <p className="text-muted mt-1 text-sm">{t("signUpSubtitle")}</p>
       </div>
       {googleEnabled ? <GoogleButton callbackURL={next} /> : null}

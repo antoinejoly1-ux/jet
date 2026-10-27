@@ -64,7 +64,7 @@ export function TwoFactorChallenge({ next }: { next: string }) {
         <ShieldCheck className="size-5" aria-hidden />
       </div>
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("verifyTitle")}</h1>
+        <h1 className="text-3xl font-light tracking-tight">{t("verifyTitle")}</h1>
         <p className="text-muted mt-1 text-sm">{mode === "app" ? t("verifyBody") : t("backupBody")}</p>
       </div>
       {error ? <Alert tone="danger">{error}</Alert> : null}
@@ -196,7 +196,7 @@ export function TwoFactorSetup({
       {step === "intro" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("setupTitle")}</h1>
+            <h1 className="text-3xl font-light tracking-tight">{t("setupTitle")}</h1>
             <p className="text-muted mt-1 text-sm">{required ? t("setupRequiredBody") : t("setupBody")}</p>
           </div>
           <ul className="text-muted flex flex-col gap-2 text-sm">
@@ -235,7 +235,7 @@ export function TwoFactorSetup({
       {step === "scan" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("scanTitle")}</h1>
+            <h1 className="text-3xl font-light tracking-tight">{t("scanTitle")}</h1>
             <p className="text-muted mt-1 text-sm">{t("scanBody")}</p>
           </div>
           <div className="flex justify-center">
@@ -277,7 +277,7 @@ export function TwoFactorSetup({
       {step === "confirm" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("confirmTitle")}</h1>
+            <h1 className="text-3xl font-light tracking-tight">{t("confirmTitle")}</h1>
             <p className="text-muted mt-1 text-sm">{t("confirmBody")}</p>
           </div>
           <CodeInput
@@ -300,7 +300,7 @@ export function TwoFactorSetup({
       {step === "codes" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("codesTitle")}</h1>
+            <h1 className="text-3xl font-light tracking-tight">{t("codesTitle")}</h1>
             <p className="text-muted mt-1 text-sm">{t("codesBody")}</p>
           </div>
           <ul

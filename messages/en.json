@@ -1431,5 +1431,40 @@
   "shell": {
     "client": "Owner space",
     "admin": "Administration"
+  },
+  "authFrame": {
+    "footer": "Univair · Saint-Hubert Airport, Quebec",
+    "help": "Need help? {phone}",
+    "privacy": "Privacy",
+    "signIn": {
+      "eyebrow": "Univair Management",
+      "light": "Your aircraft,",
+      "strong": "wherever it is."
+    },
+    "signUp": {
+      "eyebrow": "Welcome aboard",
+      "light": "Everything about your aircraft,",
+      "strong": "in one place."
+    },
+    "invite": {
+      "eyebrow": "Invitation",
+      "light": "Your seat",
+      "strong": "is ready."
+    },
+    "password": {
+      "eyebrow": "Access",
+      "light": "A new password,",
+      "strong": "and you're off."
+    },
+    "security": {
+      "eyebrow": "Security",
+      "light": "Your account, protected",
+      "strong": "like your aircraft."
+    },
+    "pending": {
+      "eyebrow": "Almost ready",
+      "light": "Your access",
+      "strong": "is being prepared."
+    }
   }
 }
