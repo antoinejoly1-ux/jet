@@ -1,0 +1,6 @@
+faster-whisper==1.2.1
+resemblyzer==0.1.4
+scikit-learn
+librosa
+webrtcvad-wheels
+# CPU build of PyTorch: pip install torch --index-url https://download.pytorch.org/whl/cpu
