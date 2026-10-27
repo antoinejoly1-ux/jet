@@ -5,6 +5,8 @@ import { notifications, ownerMembers, user } from "@/lib/db/schema";
 import { actionEmail, type TemplateName } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
 import { env } from "@/lib/env";
+import { memberAccess } from "@/lib/auth/policy";
+import { isNotificationType, NOTIFICATION_TYPES } from "@/lib/notification-types";
 import { emailOffFor } from "./notification-center";
 
 export type PendingEmail = {
@@ -26,11 +28,20 @@ export async function notifyOwnerMembers(
   data: Record<string, string>,
   email: { template: TemplateName; path: string },
 ): Promise<PendingEmail[]> {
-  const members = await tx
-    .select({ userId: user.id, email: user.email, locale: user.locale })
+  const rows = await tx
+    .select({
+      userId: user.id,
+      email: user.email,
+      locale: user.locale,
+      role: ownerMembers.role,
+      canSeeFinances: ownerMembers.canSeeFinances,
+    })
     .from(ownerMembers)
     .innerJoin(user, eq(user.id, ownerMembers.userId))
     .where(eq(ownerMembers.ownerId, ownerId));
+  // News about money only reaches members who see this owner's finances.
+  const aboutMoney = isNotificationType(type) && "finance" in NOTIFICATION_TYPES[type];
+  const members = rows.filter((m) => !aboutMoney || memberAccess(m.role, m.canSeeFinances).finances);
   if (members.length === 0) return [];
   await tx.insert(notifications).values(members.map((m) => ({ userId: m.userId, type, data })));
   // Everyone sees it in the app; the email only goes to those who haven't turned it off.

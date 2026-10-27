@@ -2,7 +2,7 @@ import "server-only";
 import { and, eq, inArray } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { aircraft, budgetLines, budgets, owners, shares } from "@/lib/db/schema";
-import { authorize, type Actor } from "@/lib/auth/policy";
+import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { budgetLinesInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
 import { emit } from "./outbox";
@@ -134,8 +134,9 @@ export async function publishBudget(db: Db, actor: Actor, shareId: string, year:
  * actual costs by category and month. Unpublished budgets stay hidden.
  */
 export async function getOwnerFinances(db: Db, actor: Actor, year: number) {
-  if (actor.ownerIds.length === 0) return [];
-  authorize(actor, "finance:read", { ownerIds: actor.ownerIds });
+  const ids = financeOwnerIds(actor);
+  if (ids.length === 0) return [];
+  authorize(actor, "finance:read", { ownerIds: ids });
   const ownerShares = await db
     .select({
       shareId: shares.id,
@@ -147,7 +148,7 @@ export async function getOwnerFinances(db: Db, actor: Actor, year: number) {
     .from(shares)
     .innerJoin(aircraft, eq(aircraft.id, shares.aircraftId))
     .innerJoin(owners, eq(owners.id, shares.ownerId))
-    .where(inArray(shares.ownerId, [...actor.ownerIds]))
+    .where(inArray(shares.ownerId, [...ids]))
     .orderBy(aircraft.registration);
 
   return Promise.all(

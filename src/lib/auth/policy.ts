@@ -9,8 +9,12 @@ import type { StaffRole } from "@/lib/db/schema/_shared";
 export type Actor = {
   id: string;
   staffRole: StaffRole | null;
-  /** Owners this user acts for (via owner_members). */
+  /** Owners this user acts for (via owner_members): they can see the schedule and aircraft. */
   ownerIds: readonly string[];
+  /** Of those, the owners whose finances they see. Defaults to all of `ownerIds`. */
+  financeOwnerIds?: readonly string[];
+  /** Of those, the owners they can act for (write to the team, request flights). Defaults to all of `ownerIds`. */
+  actingOwnerIds?: readonly string[];
   /** Set when the request comes with an API key: exactly these permissions, organisation-wide. */
   apiScopes?: readonly Permission[];
 };
@@ -74,12 +78,30 @@ const STAFF: Record<StaffRole, ReadonlySet<Permission>> = {
 /** Permissions an owner can hold, and only for their own data. Writing to dispatch is the one write. */
 const OWNER_READABLE: ReadonlySet<Permission> = new Set(["owners:read", "fleet:read", "finance:read", "messages:send"]);
 
+/** The owners whose finances this login sees. */
+export const financeOwnerIds = (actor: Actor) => actor.financeOwnerIds ?? actor.ownerIds;
+/** The owners this login can act for. */
+export const actingOwnerIds = (actor: Actor) => actor.actingOwnerIds ?? actor.ownerIds;
+
+/** Which of an owner login's owners a permission applies to. */
+function ownersFor(actor: Actor, permission: Permission) {
+  if (permission === "finance:read") return financeOwnerIds(actor);
+  if (permission === "messages:send") return actingOwnerIds(actor);
+  return actor.ownerIds;
+}
+
 export function can(actor: Actor | null, permission: Permission, scope?: Scope): boolean {
   if (!actor) return false;
   if (actor.apiScopes) return actor.apiScopes.includes(permission);
   if (actor.staffRole && STAFF[actor.staffRole].has(permission)) return true;
   if (!OWNER_READABLE.has(permission) || !scope) return false;
-  return scope.ownerIds.some((ownerId) => actor.ownerIds.includes(ownerId));
+  const mine = ownersFor(actor, permission);
+  return scope.ownerIds.some((ownerId) => mine.includes(ownerId));
+}
+
+/** What each member role gets, given the per-member finance setting. */
+export function memberAccess(role: "owner" | "assistant" | "read_only", canSeeFinances: boolean) {
+  return { finances: role === "owner" || canSeeFinances, acts: role !== "read_only" };
 }
 
 export class ForbiddenError extends Error {

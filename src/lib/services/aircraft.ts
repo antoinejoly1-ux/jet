@@ -1,10 +1,11 @@
 import "server-only";
 import { and, asc, desc, eq, gt, isNull, or, sql } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
-import { aircraft, auditLog, owners, shares, user } from "@/lib/db/schema";
+import { aircraft, auditLog, holdingCompanies, owners, shares, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { aircraftInput, endShareInput, shareInput, type AircraftInput, type ShareInput } from "@/lib/validation/admin";
 import { recordAudit } from "./audit";
+import { assertHoldingCompany } from "./holding-companies";
 import { ConflictError, NotFoundError } from "./errors";
 
 const FULL = 10_000; // 100% in basis points
@@ -21,23 +22,27 @@ export async function listAircraft(db: Db, actor: Actor) {
       model: aircraft.model,
       homeBase: aircraft.homeBase,
       status: aircraft.status,
+      holdingCompanyName: holdingCompanies.legalName,
       assignedBp: sql<number>`coalesce(sum(${shares.percentageBp}) filter (where ${shares.endsOn} is null or ${shares.endsOn} > current_date), 0)::int`,
       owners: sql<number>`count(${shares.id}) filter (where ${shares.endsOn} is null or ${shares.endsOn} > current_date)::int`,
     })
     .from(aircraft)
     .leftJoin(shares, eq(shares.aircraftId, aircraft.id))
+    .leftJoin(holdingCompanies, eq(holdingCompanies.id, aircraft.holdingCompanyId))
     .where(isNull(aircraft.deletedAt))
-    .groupBy(aircraft.id)
+    .groupBy(aircraft.id, holdingCompanies.legalName)
     .orderBy(asc(aircraft.registration));
 }
 
 export async function getAircraft(db: Db, actor: Actor, id: string) {
   authorize(actor, "fleet:read");
-  const [plane] = await db
-    .select()
+  const [row] = await db
+    .select({ plane: aircraft, holdingCompanyName: holdingCompanies.legalName })
     .from(aircraft)
+    .leftJoin(holdingCompanies, eq(holdingCompanies.id, aircraft.holdingCompanyId))
     .where(and(eq(aircraft.id, id), isNull(aircraft.deletedAt)));
-  if (!plane) throw new NotFoundError("aircraft");
+  if (!row) throw new NotFoundError("aircraft");
+  const plane = { ...row.plane, holdingCompanyName: row.holdingCompanyName };
   const [planeShares, history] = await Promise.all([
     db
       .select({
@@ -71,6 +76,7 @@ export async function createAircraft(db: Db, actor: Actor, raw: AircraftInput) {
   const input = aircraftInput.parse(raw);
   return db.transaction(async (tx) => {
     await assertRegistrationFree(tx, input.registration);
+    await assertHoldingCompany(tx, input.holdingCompanyId);
     const [row] = await tx.insert(aircraft).values(input).returning();
     await recordAudit(tx, {
       actorUserId: actor.id,
@@ -94,6 +100,7 @@ export async function updateAircraft(db: Db, actor: Actor, id: string, raw: Airc
       .for("update");
     if (!before) throw new NotFoundError("aircraft");
     if (before.registration !== input.registration) await assertRegistrationFree(tx, input.registration);
+    await assertHoldingCompany(tx, input.holdingCompanyId);
     const [row] = await tx.update(aircraft).set(input).where(eq(aircraft.id, id)).returning();
     await recordAudit(tx, {
       actorUserId: actor.id,

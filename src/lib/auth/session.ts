@@ -8,7 +8,7 @@ import { ownerMembers, owners } from "@/lib/db/schema";
 import type { Locale, StaffRole } from "@/lib/db/schema/_shared";
 import { env } from "@/lib/env";
 import { auth } from "./auth";
-import type { Actor } from "./policy";
+import { memberAccess, type Actor } from "./policy";
 import { decodeViewAs, VIEW_AS_COOKIE } from "./view-as";
 
 /** The signed-in person, narrowed to what screens and the policy need. */
@@ -55,10 +55,17 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   }
 
   const memberships = await db
-    .select({ ownerId: ownerMembers.ownerId })
+    .select({ ownerId: ownerMembers.ownerId, role: ownerMembers.role, canSeeFinances: ownerMembers.canSeeFinances })
     .from(ownerMembers)
     .where(eq(ownerMembers.userId, u.id));
-  return { ...base, ownerIds: memberships.map((m) => m.ownerId), viewingAs: null };
+  const access = memberships.map((m) => ({ ownerId: m.ownerId, ...memberAccess(m.role, m.canSeeFinances) }));
+  return {
+    ...base,
+    ownerIds: access.map((m) => m.ownerId),
+    financeOwnerIds: access.filter((m) => m.finances).map((m) => m.ownerId),
+    actingOwnerIds: access.filter((m) => m.acts).map((m) => m.ownerId),
+    viewingAs: null,
+  };
 });
 
 export async function requireViewer(): Promise<Viewer> {

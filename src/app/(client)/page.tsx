@@ -131,25 +131,27 @@ async function ShareSection({
           </div>
         </Card>
 
-        <Card>
-          <div className="flex items-center gap-2">
-            <Wallet className="text-muted size-4" aria-hidden />
-            <CardTitle>{t("budget", { year: new Date().getFullYear() })}</CardTitle>
-          </div>
-          {s.budget ? (
-            <>
-              <p className="tabular mt-2 text-2xl font-bold tracking-tight">
-                {formatMoney(s.budget.spentCents, s.budget.currency, locale)}
-              </p>
-              <p className="tabular text-muted text-sm">
-                {t("ofPlanned", { amount: formatMoney(s.budget.plannedCents, s.budget.currency, locale) })}
-              </p>
-              <Meter value={budgetUsed} label={t("budget", { year: new Date().getFullYear() })} />
-            </>
-          ) : (
-            <p className="text-muted mt-2 text-sm">{t("budgetEmpty")}</p>
-          )}
-        </Card>
+        {s.showFinances ? (
+          <Card>
+            <div className="flex items-center gap-2">
+              <Wallet className="text-muted size-4" aria-hidden />
+              <CardTitle>{t("budget", { year: new Date().getFullYear() })}</CardTitle>
+            </div>
+            {s.budget ? (
+              <>
+                <p className="tabular mt-2 text-2xl font-bold tracking-tight">
+                  {formatMoney(s.budget.spentCents, s.budget.currency, locale)}
+                </p>
+                <p className="tabular text-muted text-sm">
+                  {t("ofPlanned", { amount: formatMoney(s.budget.plannedCents, s.budget.currency, locale) })}
+                </p>
+                <Meter value={budgetUsed} label={t("budget", { year: new Date().getFullYear() })} />
+              </>
+            ) : (
+              <p className="text-muted mt-2 text-sm">{t("budgetEmpty")}</p>
+            )}
+          </Card>
+        ) : null}
 
         <InfoCard icon={PlaneTakeoff} title={t("nextFlight")} empty={t("nextFlightEmpty")}>
           {s.nextFlight ? (
@@ -177,18 +179,20 @@ async function ShareSection({
           ) : null}
         </InfoCard>
 
-        <InfoCard icon={FileText} title={t("latestInvoice")} empty={t("latestInvoiceEmpty")}>
-          {s.latestInvoice ? (
-            <>
-              <p className="tabular text-lg font-semibold">
-                {formatMoney(s.latestInvoice.totalCents, s.latestInvoice.currency, locale)}
-              </p>
-              <p className="text-muted text-sm">
-                {s.latestInvoice.number} · {day(s.latestInvoice.issuedOn)}
-              </p>
-            </>
-          ) : null}
-        </InfoCard>
+        {s.showFinances ? (
+          <InfoCard icon={FileText} title={t("latestInvoice")} empty={t("latestInvoiceEmpty")}>
+            {s.latestInvoice ? (
+              <>
+                <p className="tabular text-lg font-semibold">
+                  {formatMoney(s.latestInvoice.totalCents, s.latestInvoice.currency, locale)}
+                </p>
+                <p className="text-muted text-sm">
+                  {s.latestInvoice.number} · {day(s.latestInvoice.issuedOn)}
+                </p>
+              </>
+            ) : null}
+          </InfoCard>
+        ) : null}
 
         <Card>
           <div className="mb-2 flex items-center gap-2">

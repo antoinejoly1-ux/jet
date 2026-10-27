@@ -16,16 +16,19 @@ type Defaults = {
   homeBase: string | null;
   status: string;
   icaoHex: string | null;
+  holdingCompanyId: string | null;
 };
 
 export function AircraftForm({
   action,
   defaults,
   cancelHref,
+  holdingCompanies,
 }: {
   action: (state: FormState, data: FormData) => Promise<FormState>;
   defaults?: Defaults;
   cancelHref: string;
+  holdingCompanies: { id: string; legalName: string }[];
 }) {
   const t = useTranslations("aircraft");
   const tf = useTranslations("formErrors");
@@ -93,6 +96,20 @@ export function AircraftForm({
           ))}
         </SelectField>
       </div>
+      <SelectField
+        id="holdingCompanyId"
+        name="holdingCompanyId"
+        label={t("holdingCompany")}
+        defaultValue={submitted(state, "holdingCompanyId", defaults?.holdingCompanyId ?? "")}
+        error={err("holdingCompanyId")}
+      >
+        <option value="">{t("noHoldingCompany")}</option>
+        {holdingCompanies.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.legalName}
+          </option>
+        ))}
+      </SelectField>
       <div className="flex gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}

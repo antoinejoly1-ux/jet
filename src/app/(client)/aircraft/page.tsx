@@ -52,6 +52,12 @@ export default async function OwnerAircraftPage() {
                 <Badge tone={STATUS_TONE[a.status]}>{th(`status.${a.status}`)}</Badge>
               </div>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+                {a.holdingCompanyName ? (
+                  <>
+                    <dt className="text-muted">{t("ownedBy")}</dt>
+                    <dd className="font-medium">{a.holdingCompanyName}</dd>
+                  </>
+                ) : null}
                 <dt className="text-muted">{t("model")}</dt>
                 <dd className="font-medium">{a.model}</dd>
                 {a.serialNumber ? (

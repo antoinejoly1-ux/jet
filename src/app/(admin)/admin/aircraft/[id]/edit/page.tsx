@@ -8,6 +8,7 @@ import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getAircraft } from "@/lib/services/aircraft";
 import { NotFoundError } from "@/lib/services/errors";
+import { listHoldingCompanyOptions } from "@/lib/services/holding-companies";
 import { updateAircraftAction } from "../../actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,15 +20,17 @@ export default async function EditAircraftPage({ params }: PageProps<"/admin/air
   const { id } = await params;
   if (!can(viewer, "fleet:write")) redirect(`/admin/aircraft/${id}`);
   const t = await getTranslations("aircraft");
-  const detail = await getAircraft(db, viewer, id).catch((e) =>
-    e instanceof NotFoundError ? notFound() : Promise.reject(e),
-  );
+  const [detail, holdingCompanies] = await Promise.all([
+    getAircraft(db, viewer, id).catch((e) => (e instanceof NotFoundError ? notFound() : Promise.reject(e))),
+    listHoldingCompanyOptions(db, viewer),
+  ]);
   return (
     <>
       <PageHeader title={t("editTitle")} description={detail.aircraft.registration} />
       <AircraftForm
         action={updateAircraftAction.bind(null, id)}
         defaults={detail.aircraft}
+        holdingCompanies={holdingCompanies}
         cancelHref={`/admin/aircraft/${id}`}
       />
     </>

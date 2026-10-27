@@ -76,7 +76,8 @@ async function assertOwnAttachment(tx: Tx, actor: Actor, fileId: string | undefi
 
 /** The owner's thread with dispatch. Opening it marks dispatch's messages read, unless staff are only viewing as. */
 export async function getOwnerThread(db: Db, actor: Actor, ownerId: string, { markRead = true } = {}) {
-  authorize(actor, "messages:send", { ownerIds: [ownerId] });
+  // Reading is open to every member; read-only members just can't write.
+  authorize(actor, "owners:read", { ownerIds: [ownerId] });
   const [conversation] = await db.select().from(conversations).where(eq(conversations.ownerId, ownerId));
   if (!conversation) return { conversationId: null, messages: [] };
   if (markRead) await markRead_(db, conversation.id, "staff");

@@ -1,10 +1,35 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { boolean, check, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { deletedAt, id, locale, staffRole, timestamps } from "./_shared";
 import { user } from "./auth";
 
 export const ownerType = pgEnum("owner_type", ["person", "company"]);
-export const memberRole = pgEnum("member_role", ["primary", "viewer"]);
+/**
+ * What a login may do for an owner. An owner acts fully; an executive
+ * assistant sees the schedule and can make requests; read-only can only look.
+ * Finances are visible to owners, and to others only with `canSeeFinances`.
+ */
+export const memberRole = pgEnum("member_role", ["owner", "assistant", "read_only"]);
+
+/**
+ * The company that legally owns an aircraft and invoices its owners, who are
+ * its shareholders. Univers manages it; the money goes through it.
+ */
+export const holdingCompanies = pgTable(
+  "holding_companies",
+  {
+    id: id(),
+    legalName: text("legal_name").notNull(),
+    /** Quebec enterprise number (NEQ) or other registration. */
+    registrationNumber: text("registration_number"),
+    email: text("email"),
+    phone: text("phone"),
+    notes: text("notes"),
+    ...timestamps(),
+    deletedAt: deletedAt(),
+  },
+  (t) => [index("holding_companies_legal_name_idx").on(t.legalName)],
+);
 
 /** The person or company that holds shares. Separate from users (logins). */
 export const owners = pgTable(
@@ -36,7 +61,8 @@ export const ownerMembers = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    role: memberRole("role").notNull().default("primary"),
+    role: memberRole("role").notNull().default("owner"),
+    canSeeFinances: boolean("can_see_finances").notNull().default(false),
     ...timestamps(),
   },
   (t) => [
@@ -56,6 +82,7 @@ export const invitations = pgTable(
     email: text("email").notNull(),
     ownerId: uuid("owner_id").references(() => owners.id, { onDelete: "cascade" }),
     memberRole: memberRole("member_role"),
+    canSeeFinances: boolean("can_see_finances").notNull().default(false),
     staffRole: staffRole("staff_role"),
     tokenHash: text("token_hash").notNull().unique(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),

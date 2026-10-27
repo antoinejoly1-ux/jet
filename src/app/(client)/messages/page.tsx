@@ -7,6 +7,7 @@ import { Composer } from "@/components/messages/composer";
 import { Thread } from "@/components/messages/thread";
 import { Alert } from "@/components/ui/alert";
 import { PageHeader } from "@/components/ui/page-header";
+import { can } from "@/lib/auth/policy";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getOwnerThread } from "@/lib/services/messages";
@@ -51,6 +52,8 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
         <div className="border-border border-t p-3 sm:p-4">
           {viewer.viewingAs ? (
             <p className="text-muted text-sm">{t("viewAsReadOnly")}</p>
+          ) : !can(viewer, "messages:send", { ownerIds: [ownerId] }) ? (
+            <p className="text-muted text-sm">{t("readOnlyMember")}</p>
           ) : (
             <Composer action={sendOwnerMessageAction.bind(null, ownerId)} placeholder={t("ownerPlaceholder")} />
           )}

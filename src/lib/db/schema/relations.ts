@@ -2,7 +2,7 @@ import { relations } from "drizzle-orm";
 import { user } from "./auth";
 import { aircraft, flights, shares } from "./fleet";
 import { budgetLines, budgets, invoices } from "./finance";
-import { invitations, ownerMembers, owners } from "./owners";
+import { holdingCompanies, invitations, ownerMembers, owners } from "./owners";
 
 export const userRelations = relations(user, ({ many }) => ({
   memberships: many(ownerMembers),
@@ -23,7 +23,12 @@ export const invitationRelations = relations(invitations, ({ one }) => ({
   owner: one(owners, { fields: [invitations.ownerId], references: [owners.id] }),
 }));
 
-export const aircraftRelations = relations(aircraft, ({ many }) => ({
+export const holdingCompanyRelations = relations(holdingCompanies, ({ many }) => ({
+  aircraft: many(aircraft),
+}));
+
+export const aircraftRelations = relations(aircraft, ({ one, many }) => ({
+  holdingCompany: one(holdingCompanies, { fields: [aircraft.holdingCompanyId], references: [holdingCompanies.id] }),
   shares: many(shares),
   flights: many(flights),
 }));

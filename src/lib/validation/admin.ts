@@ -33,6 +33,27 @@ export const ownerInput = z.object({
 });
 export type OwnerInput = z.input<typeof ownerInput>;
 
+export const holdingCompanyInput = z.object({
+  legalName: z.string().trim().min(2).max(200),
+  registrationNumber: optionalText,
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email()
+    .optional()
+    .or(z.literal("").transform(() => undefined))
+    .transform((v) => v ?? null),
+  phone: optionalText,
+  notes: z
+    .string()
+    .trim()
+    .max(4000)
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
+export type HoldingCompanyInput = z.input<typeof holdingCompanyInput>;
+
 /** Canadian marks look like C-GJTA; US N-numbers and others are allowed too. */
 export const aircraftInput = z.object({
   registration: z
@@ -56,6 +77,12 @@ export const aircraftInput = z.object({
     .trim()
     .toLowerCase()
     .regex(/^[0-9a-f]{6}$/)
+    .optional()
+    .or(z.literal("").transform(() => undefined))
+    .transform((v) => v ?? null),
+  holdingCompanyId: z
+    .string()
+    .uuid()
     .optional()
     .or(z.literal("").transform(() => undefined))
     .transform((v) => v ?? null),

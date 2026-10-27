@@ -36,6 +36,13 @@
       "when": 1793129595490,
       "tag": "0004_flight_time",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793130525574,
+      "tag": "0005_holding_companies_and_roles",
+      "breakpoints": true
     }
   ]
 }

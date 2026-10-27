@@ -2,7 +2,7 @@ import "server-only";
 import { and, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { aircraft, files, invoices, owners, shares } from "@/lib/db/schema";
-import { authorize, type Actor } from "@/lib/auth/policy";
+import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { formatMoney } from "@/lib/format";
 import { invoiceInput, type InvoiceInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
@@ -56,10 +56,11 @@ export async function listInvoices(db: Db, actor: Actor, opts: { status?: string
 
 /** The signed-in owner's own invoices, newest first. */
 export async function listOwnerInvoices(db: Db, actor: Actor) {
-  if (actor.ownerIds.length === 0) return [];
-  authorize(actor, "finance:read", { ownerIds: actor.ownerIds });
+  const ids = financeOwnerIds(actor);
+  if (ids.length === 0) return [];
+  authorize(actor, "finance:read", { ownerIds: ids });
   return base(db)
-    .where(inArray(shares.ownerId, [...actor.ownerIds]))
+    .where(inArray(shares.ownerId, [...ids]))
     .orderBy(desc(invoices.issuedOn), desc(invoices.number));
 }
 

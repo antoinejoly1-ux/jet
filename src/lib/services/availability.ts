@@ -7,7 +7,15 @@
 import "server-only";
 import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, lt, ne, or } from "drizzle-orm";
 import type { Db } from "@/lib/db";
-import { aircraft, availabilityBlocks, flights, maintenanceEvents, owners, shares } from "@/lib/db/schema";
+import {
+  aircraft,
+  availabilityBlocks,
+  flights,
+  holdingCompanies,
+  maintenanceEvents,
+  owners,
+  shares,
+} from "@/lib/db/schema";
 import { authorize, isStaff, type Actor } from "@/lib/auth/policy";
 import type { Period } from "@/lib/availability-days";
 import { blockInput, type BlockInput } from "@/lib/validation/operations";
@@ -172,10 +180,12 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
       annualHoursMinutes: shares.annualHoursMinutes,
       startsOn: shares.startsOn,
       ownerName: owners.legalName,
+      holdingCompanyName: holdingCompanies.legalName,
     })
     .from(shares)
     .innerJoin(aircraft, eq(aircraft.id, shares.aircraftId))
     .innerJoin(owners, eq(owners.id, shares.ownerId))
+    .leftJoin(holdingCompanies, eq(holdingCompanies.id, aircraft.holdingCompanyId))
     .where(
       and(
         inArray(shares.ownerId, [...actor.ownerIds]),

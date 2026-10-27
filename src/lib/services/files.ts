@@ -4,7 +4,7 @@ import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 import type { Db } from "@/lib/db";
 import { conversations, files, imports, invoices, messages, shares } from "@/lib/db/schema";
-import { authorize, can, type Actor } from "@/lib/auth/policy";
+import { actingOwnerIds, authorize, can, type Actor } from "@/lib/auth/policy";
 import { storage } from "@/lib/storage";
 import { recordAudit } from "./audit";
 import { ConflictError, NotFoundError } from "./errors";
@@ -45,7 +45,7 @@ export type UploadRequest = z.input<typeof uploadRequest>;
 function authorizeUpload(actor: Actor, purpose: UploadPurpose) {
   if (purpose !== "message") return authorize(actor, "finance:write");
   if (can(actor, "messages:reply")) return;
-  authorize(actor, "messages:send", { ownerIds: actor.ownerIds });
+  authorize(actor, "messages:send", { ownerIds: actingOwnerIds(actor) });
 }
 
 /** Uploads one person may start per hour: generous for real work, a ceiling for a runaway script. */

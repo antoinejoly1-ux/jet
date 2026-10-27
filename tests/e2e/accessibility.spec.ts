@@ -41,6 +41,7 @@ test("admin screens", async ({ page }) => {
   for (const path of [
     "/admin",
     "/admin/owners",
+    "/admin/holding-companies",
     "/admin/aircraft",
     "/admin/flights",
     "/admin/flights/new",

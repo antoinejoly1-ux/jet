@@ -1,26 +1,32 @@
 import { sql } from "drizzle-orm";
 import { check, date, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { dataSource, deletedAt, id, timestamps } from "./_shared";
-import { owners } from "./owners";
+import { holdingCompanies, owners } from "./owners";
 
 export const aircraftStatus = pgEnum("aircraft_status", ["available", "flying", "maintenance", "inactive"]);
 export const flightStatus = pgEnum("flight_status", ["scheduled", "completed", "cancelled"]);
 export const availabilityKind = pgEnum("availability_kind", ["available", "booked", "maintenance"]);
 export const maintenanceStatus = pgEnum("maintenance_status", ["planned", "in_progress", "done", "cancelled"]);
 
-export const aircraft = pgTable("aircraft", {
-  id: id(),
-  /** Registration mark, e.g. C-GJET. */
-  registration: text("registration").notNull().unique(),
-  model: text("model").notNull(),
-  serialNumber: text("serial_number"),
-  homeBase: text("home_base"),
-  status: aircraftStatus("status").notNull().default("available"),
-  /** ICAO 24-bit address (hex), used by flight-tracking providers. */
-  icaoHex: text("icao_hex"),
-  ...timestamps(),
-  deletedAt: deletedAt(),
-});
+export const aircraft = pgTable(
+  "aircraft",
+  {
+    id: id(),
+    /** Registration mark, e.g. C-GJET. */
+    registration: text("registration").notNull().unique(),
+    model: text("model").notNull(),
+    serialNumber: text("serial_number"),
+    homeBase: text("home_base"),
+    status: aircraftStatus("status").notNull().default("available"),
+    /** ICAO 24-bit address (hex), used by flight-tracking providers. */
+    icaoHex: text("icao_hex"),
+    /** The company that owns it; null while unknown or for an aircraft Univers only operates. */
+    holdingCompanyId: uuid("holding_company_id").references(() => holdingCompanies.id, { onDelete: "restrict" }),
+    ...timestamps(),
+    deletedAt: deletedAt(),
+  },
+  (t) => [index("aircraft_holding_company_id_idx").on(t.holdingCompanyId)],
+);
 
 /** An owner's stake in an aircraft. Percentages are basis points: 2500 = 25%. */
 export const shares = pgTable(

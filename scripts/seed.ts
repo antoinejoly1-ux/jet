@@ -125,10 +125,21 @@ async function main() {
     .returning();
   const cat = Object.fromEntries(categories.map((c) => [c.nameEn, c.id]));
 
+  // Each aircraft belongs to a holding company whose shareholders are its owners.
+  const companies = await db
+    .insert(s.holdingCompanies)
+    .values([
+      { legalName: "Gestion Aviation JTA inc.", registrationNumber: "1171234567", email: "jta@example.com" },
+      { legalName: "Phenom Partenaires inc.", registrationNumber: "1172345678" },
+      { legalName: "Citation Québec S.E.C.", registrationNumber: "3373456789" },
+    ])
+    .returning();
+
   const fleet = await db
     .insert(s.aircraft)
     .values([
       {
+        holdingCompanyId: companies[0]!.id,
         registration: "C-GJTA",
         model: "Pilatus PC-24",
         serialNumber: "PC24-112",
@@ -137,6 +148,7 @@ async function main() {
         icaoHex: "c05a1b",
       },
       {
+        holdingCompanyId: companies[1]!.id,
         registration: "C-FJTB",
         model: "Embraer Phenom 300E",
         serialNumber: "50500611",
@@ -145,6 +157,7 @@ async function main() {
         icaoHex: "c03b7e",
       },
       {
+        holdingCompanyId: companies[2]!.id,
         registration: "C-GJTC",
         model: "Cessna Citation CJ4",
         serialNumber: "525C-0388",
@@ -373,9 +386,12 @@ async function main() {
   const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", true);
   await createLogin("finance@jet.test", "Fred Finance", "finance", false);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
+  await db.insert(s.ownerMembers).values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "owner" });
+  // Jean's executive assistant: sees the schedule, not the finances.
+  const assistant = await createLogin("assistant@jet.test", "Julie Assistante", null);
   await db
     .insert(s.ownerMembers)
-    .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "primary" });
+    .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: assistant.id, role: "assistant" });
 
   // A short conversation with dispatch, already read on both sides.
   const [conversation] = await db
@@ -408,6 +424,7 @@ async function main() {
   console.log("  dispatch@jet.test  dispatcher  2FA on");
   console.log("  finance@jet.test   finance     2FA not set up yet: shows the setup flow");
   console.log("  owner@jet.test     owner of 25% of C-GJTA");
+  console.log("  assistant@jet.test the owner's assistant: schedule, no finances");
   console.log(`\nDemo 2FA key for admin and dispatch (add it to an authenticator app):`);
   console.log(`  ${new URL(otpauth).searchParams.get("secret")}`);
   console.log(`  backup codes: ${DEMO_BACKUP_CODES.join(", ")}\n`);

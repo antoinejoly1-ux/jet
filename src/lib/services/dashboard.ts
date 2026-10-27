@@ -15,7 +15,7 @@ import {
   transactions,
   user,
 } from "@/lib/db/schema";
-import { authorize, type Actor } from "@/lib/auth/policy";
+import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 
 export type ShareSummary = {
   shareId: string;
@@ -29,6 +29,8 @@ export type ShareSummary = {
   budget: { year: number; plannedCents: number; spentCents: number; currency: "CAD" | "USD" } | null;
   nextFlight: { fromAirport: string; toAirport: string; departsAt: Date } | null;
   /** Owners see maintenance only as a window: the details stay with Univers and the shop. */
+  /** False for members who don't see this owner's finances: no budget or invoice cards. */
+  showFinances: boolean;
   nextMaintenance: { startsAt: Date; endsAt: Date | null } | null;
   latestInvoice: {
     number: string;
@@ -45,11 +47,14 @@ export type ShareSummary = {
  */
 export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]> {
   if (actor.ownerIds.length === 0) return [];
-  authorize(actor, "finance:read", { ownerIds: actor.ownerIds });
+  authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
+  // Assistants and read-only members see budgets and invoices only when allowed.
+  const withFinances = new Set(financeOwnerIds(actor));
 
   const rows = await db
     .select({
       shareId: shares.id,
+      ownerId: shares.ownerId,
       ownerName: owners.legalName,
       percentageBp: shares.percentageBp,
       annualMinutes: shares.annualHoursMinutes,
@@ -121,8 +126,9 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
           .limit(1),
       ]);
 
+      const showFinances = withFinances.has(r.ownerId);
       let budgetSummary: ShareSummary["budget"] = null;
-      if (budget) {
+      if (budget && showFinances) {
         const [[planned], [spent]] = await Promise.all([
           db
             .select({ cents: sum(budgetLines.plannedCents).mapWith(Number) })
@@ -161,7 +167,8 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
         nextMaintenance: nextMaintenance
           ? { startsAt: nextMaintenance.startsAt!, endsAt: nextMaintenance.endsAt }
           : null,
-        latestInvoice: latestInvoice ?? null,
+        latestInvoice: showFinances ? (latestInvoice ?? null) : null,
+        showFinances,
       };
     }),
   );

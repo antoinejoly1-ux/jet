@@ -2,6 +2,7 @@
 
 import {
   BarChart3,
+  Building2,
   CalendarDays,
   ClipboardList,
   FileText,
@@ -82,6 +83,7 @@ const ADMIN: Group[] = [
     key: "clients",
     items: [
       { href: "/admin/owners", key: "owners", icon: Users, mobile: true },
+      { href: "/admin/holding-companies", key: "holdingCompanies", icon: Building2 },
       { href: "/admin/invitations", key: "invitations", icon: MailPlus },
     ],
   },
@@ -97,7 +99,9 @@ const ADMIN: Group[] = [
   { key: "settings", items: [{ href: "/admin/settings", key: "settings", icon: Settings }] },
 ];
 
-const groupsFor = (side: Side) => (side === "admin" ? ADMIN : CLIENT);
+/** The side's destinations, minus any the viewer has no access to (by item key). */
+const groupsFor = (side: Side, hidden: readonly string[] = []) =>
+  (side === "admin" ? ADMIN : CLIENT).map((g) => ({ ...g, items: g.items.filter((i) => !hidden.includes(i.key)) }));
 
 function useIsActive() {
   const pathname = usePathname();
@@ -105,12 +109,12 @@ function useIsActive() {
 }
 
 /** Desktop sidebar (1024px and up). */
-export function Sidebar({ side, badges = {} }: { side: Side; badges?: Badges }) {
+export function Sidebar({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
   return (
     <nav aria-label={t("label")} className="flex flex-col gap-6">
-      {groupsFor(side).map((group) => (
+      {groupsFor(side, hidden).map((group) => (
         <div key={group.key ?? "main"}>
           {group.key ? (
             <p className="text-muted mb-2 px-3 text-xs font-semibold tracking-wider uppercase">
@@ -145,11 +149,11 @@ export function Sidebar({ side, badges = {} }: { side: Side; badges?: Badges }) 
  * Phone and tablet bottom tab bar: the four most used destinations of the
  * current side, plus "More", which opens every destination in a sheet.
  */
-export function BottomTabs({ side, badges = {} }: { side: Side; badges?: Badges }) {
+export function BottomTabs({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
   const [moreOpen, setMoreOpen] = useState(false);
-  const items = groupsFor(side)
+  const items = groupsFor(side, hidden)
     .flatMap((g) => g.items)
     .filter((i) => i.mobile)
     .slice(0, 4);
@@ -167,14 +171,14 @@ export function BottomTabs({ side, badges = {} }: { side: Side; badges?: Badges 
           onClick={(e) => (e.target as HTMLElement).closest("a") && setMoreOpen(false)}
           className="bg-surface fixed inset-0 z-40 overflow-y-auto px-3 pt-6 pb-28 lg:hidden"
         >
-          <Sidebar side={side} badges={badges} />
+          <Sidebar side={side} badges={badges} hidden={hidden} />
         </div>
       ) : null}
       <nav
         aria-label={t("label")}
         className="border-border bg-surface/95 fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
       >
-        <ul className="grid grid-cols-5">
+        <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length + 1}, minmax(0, 1fr))` }}>
           {items.map(({ href, key, icon: Icon }) => (
             <li key={href}>
               <Link

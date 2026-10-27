@@ -80,6 +80,19 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
           {t("assigned", { percent: pct(assignedBp) })}
         </span>
         {!complete ? <span className="text-muted text-sm">{t("notComplete")}</span> : null}
+        <span className="text-muted text-sm">
+          {t("ownedBy")}{" "}
+          {plane.holdingCompanyId ? (
+            <Link
+              href={`/admin/holding-companies/${plane.holdingCompanyId}`}
+              className="text-text font-medium hover:underline"
+            >
+              {plane.holdingCompanyName}
+            </Link>
+          ) : (
+            t("noHoldingCompany")
+          )}
+        </span>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

@@ -1,5 +1,6 @@
 import "server-only";
 import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { z } from "zod";
 import type { Db } from "@/lib/db";
 import { aircraft, auditLog, invitations, ownerMembers, owners, shares, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
@@ -68,6 +69,7 @@ export async function getOwner(db: Db, actor: Actor, id: string) {
         name: user.name,
         email: user.email,
         role: ownerMembers.role,
+        canSeeFinances: ownerMembers.canSeeFinances,
         since: ownerMembers.createdAt,
       })
       .from(ownerMembers)
@@ -153,6 +155,42 @@ export async function archiveOwner(db: Db, actor: Actor, id: string) {
     if (!row) throw new NotFoundError("owner");
     await tx.delete(ownerMembers).where(eq(ownerMembers.ownerId, id));
     await recordAudit(tx, { actorUserId: actor.id, action: "owner.archive", entityType: "owner", entityId: id });
+  });
+}
+
+export const memberAccessInput = z.object({
+  role: z.enum(["owner", "assistant", "read_only"]),
+  canSeeFinances: z.boolean(),
+});
+export type MemberAccessInput = z.input<typeof memberAccessInput>;
+
+/** Changes what one login may do for an owner. Owners always see finances, so the flag only applies to others. */
+export async function updateOwnerMember(
+  db: Db,
+  actor: Actor,
+  ownerId: string,
+  memberId: string,
+  raw: MemberAccessInput,
+) {
+  authorize(actor, "owners:write");
+  const input = memberAccessInput.parse(raw);
+  const next = { role: input.role, canSeeFinances: input.role !== "owner" && input.canSeeFinances };
+  await db.transaction(async (tx) => {
+    const [before] = await tx
+      .select({ role: ownerMembers.role, canSeeFinances: ownerMembers.canSeeFinances, userId: ownerMembers.userId })
+      .from(ownerMembers)
+      .where(and(eq(ownerMembers.id, memberId), eq(ownerMembers.ownerId, ownerId)))
+      .for("update");
+    if (!before) throw new NotFoundError("member");
+    await tx.update(ownerMembers).set(next).where(eq(ownerMembers.id, memberId));
+    await recordAudit(tx, {
+      actorUserId: actor.id,
+      action: "owner.member_update",
+      entityType: "owner",
+      entityId: ownerId,
+      before,
+      after: { userId: before.userId, ...next },
+    });
   });
 }
 

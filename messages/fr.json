@@ -23,7 +23,8 @@
       "budgets": "Budgets",
       "transactions": "Transactions",
       "imports": "Importations",
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "holdingCompanies": "Sociétés"
     },
     "tabs": {
       "dashboard": "Tableau",
@@ -338,8 +339,9 @@
     "loginsTitle": "Accès au portail",
     "noLogins": "Personne n'a encore accès. Envoyez une invitation.",
     "memberRoles": {
-      "primary": "Principal",
-      "viewer": "Lecture"
+      "owner": "Propriétaire",
+      "assistant": "Adjointe ou adjoint",
+      "read_only": "Lecture seule"
     },
     "removeLogin": "Retirer l'accès de {name}",
     "invitationPending": "Invitation envoyée",
@@ -348,7 +350,10 @@
     "archiveBody": "Le propriétaire disparaît des listes et ses accès sont retirés. Son historique est conservé.",
     "archive": "Archiver",
     "archiveConfirm": "Archiver ce propriétaire?",
-    "write": "Écrire"
+    "write": "Écrire",
+    "memberRoleFor": "Rôle de {name}",
+    "seesFinances": "Voit les finances",
+    "saveAccess": "Enregistrer"
   },
   "invitations": {
     "title": "Invitations",
@@ -387,7 +392,14 @@
     "noEmail": "sans courriel",
     "bulkInvite": "{count, plural, one {Inviter # propriétaire} other {Inviter les # propriétaires}} avec courriel",
     "bulkSent": "{count, plural, =0 {Aucune invitation envoyée.} one {# invitation envoyée.} other {# invitations envoyées.}}",
-    "bulkMissing": "{count, plural, one {# propriétaire n'a pas de courriel : ajoutez-le sur sa fiche.} other {# propriétaires n'ont pas de courriel : ajoutez-le sur leur fiche.}}"
+    "bulkMissing": "{count, plural, one {# propriétaire n'a pas de courriel : ajoutez-le sur sa fiche.} other {# propriétaires n'ont pas de courriel : ajoutez-le sur leur fiche.}}",
+    "memberRole": "Rôle",
+    "memberRoleHints": {
+      "owner": "Voit tout, y compris les finances, et peut faire des demandes.",
+      "assistant": "Voit l'horaire et peut faire des demandes au nom du propriétaire.",
+      "read_only": "Peut consulter, sans faire de demandes."
+    },
+    "canSeeFinances": "Peut voir les finances"
   },
   "common": {
     "confirm": "Confirmer",
@@ -459,7 +471,9 @@
       "url": "Adresse HTTPS valide requise.",
       "scopes": "Choisissez au moins un accès.",
       "events": "Choisissez au moins un événement.",
-      "name": "Entrez un nom (2 caractères minimum)."
+      "name": "Entrez un nom (2 caractères minimum).",
+      "registrationNumber": "Entrez au plus 500 caractères.",
+      "holdingCompanyId": "Choisissez une société de la liste."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -498,7 +512,8 @@
     "webhook_disabled": "Ce webhook est désactivé.",
     "webhook_private_address": "Cette adresse mène à un réseau privé; utilisez une adresse publique.",
     "webhook_test_failed": "Le test n'a pas été reçu.",
-    "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard."
+    "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard.",
+    "holding_company_has_aircraft": "Cette société possède encore un appareil. Rattachez-le à une autre société d'abord."
   },
   "aircraft": {
     "title": "Appareils",
@@ -549,7 +564,10 @@
     "addShare": "Ajouter la part",
     "endsOn": "Date de fin",
     "endConfirm": "Terminer la part de {name}?",
-    "endShare": "Terminer"
+    "endShare": "Terminer",
+    "holdingCompany": "Société de portefeuille",
+    "noHoldingCompany": "Aucune société",
+    "ownedBy": "Propriété de"
   },
   "team": {
     "settingsTitle": "Réglages",
@@ -624,7 +642,11 @@
       "hours_add": "a ajouté des heures",
       "budget_save": "a enregistré un budget",
       "budget_publish": "a publié un budget",
-      "import_commit": "a importé un chiffrier"
+      "import_commit": "a importé un chiffrier",
+      "holding_company_create": "a créé la société",
+      "holding_company_update": "a modifié la société",
+      "holding_company_archive": "a archivé la société",
+      "owner_member_update": "a changé un accès"
     }
   },
   "files": {
@@ -973,7 +995,8 @@
     "maintenance": "Maintenance",
     "noMaintenance": "Aucune maintenance enregistrée.",
     "window": "Maintenance du {from} au {to}",
-    "windowOpen": "Maintenance à partir du {from}"
+    "windowOpen": "Maintenance à partir du {from}",
+    "ownedBy": "Propriété de"
   },
   "integrations": {
     "title": "Intégrations",
@@ -1037,7 +1060,8 @@
     "assignTo": "Assigner à",
     "me": "{name} (moi)",
     "resolve": "Résolue",
-    "reopen": "Rouvrir"
+    "reopen": "Rouvrir",
+    "readOnlyMember": "Votre accès est en lecture seule : appelez ou textez l'équipe pour toute demande."
   },
   "notifications": {
     "title": "Notifications",
@@ -1294,5 +1318,38 @@
   "contact": {
     "call": "Appeler",
     "text": "Texto"
+  },
+  "holdingCompanies": {
+    "title": "Sociétés de portefeuille",
+    "subtitle": "Les sociétés qui possèdent les appareils. Leurs actionnaires sont les propriétaires.",
+    "new": "Nouvelle société",
+    "newTitle": "Nouvelle société de portefeuille",
+    "newSubtitle": "Ajoutez la société, puis rattachez-lui son appareil depuis la fiche de l'appareil.",
+    "editTitle": "Modifier la société",
+    "edit": "Modifier",
+    "emptyTitle": "Aucune société",
+    "emptyBody": "Ajoutez la société de portefeuille de chaque appareil.",
+    "noAircraft": "Aucun appareil",
+    "legalName": "Raison sociale",
+    "registrationNumber": "NEQ",
+    "registrationNumberHint": "Numéro d'entreprise du Québec, ou autre immatriculation.",
+    "neq": "NEQ {number}",
+    "email": "Courriel",
+    "phone": "Téléphone",
+    "notes": "Notes",
+    "contact": "Coordonnées",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "aircraftTitle": "Appareils",
+    "noAircraftBody": "Aucun appareil n'est rattaché à cette société.",
+    "aircraftHint": "Pour rattacher un appareil, modifiez sa fiche et choisissez la société.",
+    "shareholders": "Actionnaires",
+    "noShareholders": "Aucun actionnaire pour l'instant : ajoutez des parts sur l'appareil.",
+    "history": "Historique",
+    "archiveTitle": "Archiver la société",
+    "archiveBody": "Possible seulement quand aucun appareil ne lui est rattaché.",
+    "archive": "Archiver",
+    "archiveConfirm": "Archiver cette société?"
   }
 }

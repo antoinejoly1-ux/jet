@@ -23,7 +23,8 @@
       "budgets": "Budgets",
       "transactions": "Transactions",
       "imports": "Imports",
-      "settings": "Settings"
+      "settings": "Settings",
+      "holdingCompanies": "Holding companies"
     },
     "tabs": {
       "dashboard": "Dashboard",
@@ -338,8 +339,9 @@
     "loginsTitle": "Portal access",
     "noLogins": "Nobody has access yet. Send an invitation.",
     "memberRoles": {
-      "primary": "Primary",
-      "viewer": "Read-only"
+      "owner": "Owner",
+      "assistant": "Executive assistant",
+      "read_only": "Read-only"
     },
     "removeLogin": "Remove {name}'s access",
     "invitationPending": "Invitation sent",
@@ -348,7 +350,10 @@
     "archiveBody": "The owner disappears from lists and their access is removed. Their history is kept.",
     "archive": "Archive",
     "archiveConfirm": "Archive this owner?",
-    "write": "Message"
+    "write": "Message",
+    "memberRoleFor": "{name}'s role",
+    "seesFinances": "Sees finances",
+    "saveAccess": "Save"
   },
   "invitations": {
     "title": "Invitations",
@@ -387,7 +392,14 @@
     "noEmail": "no email",
     "bulkInvite": "Invite {count, plural, one {# owner} other {the # owners}} with an email",
     "bulkSent": "{count, plural, =0 {No invitations sent.} one {# invitation sent.} other {# invitations sent.}}",
-    "bulkMissing": "{count, plural, one {# owner has no email: add it on their page.} other {# owners have no email: add it on their page.}}"
+    "bulkMissing": "{count, plural, one {# owner has no email: add it on their page.} other {# owners have no email: add it on their page.}}",
+    "memberRole": "Role",
+    "memberRoleHints": {
+      "owner": "Sees everything, finances included, and can make requests.",
+      "assistant": "Sees the schedule and can make requests for the owner.",
+      "read_only": "Can look, but not make requests."
+    },
+    "canSeeFinances": "Can see finances"
   },
   "common": {
     "confirm": "Confirm",
@@ -459,7 +471,9 @@
       "url": "A valid HTTPS address is required.",
       "scopes": "Choose at least one access.",
       "events": "Choose at least one event.",
-      "name": "Enter a name (at least 2 characters)."
+      "name": "Enter a name (at least 2 characters).",
+      "registrationNumber": "Use 500 characters at most.",
+      "holdingCompanyId": "Choose a company from the list."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -498,7 +512,8 @@
     "webhook_disabled": "This webhook is disabled.",
     "webhook_private_address": "This address leads to a private network; use a public one.",
     "webhook_test_failed": "The test wasn't received.",
-    "too_many_uploads": "Too many uploads in an hour. Try again later."
+    "too_many_uploads": "Too many uploads in an hour. Try again later.",
+    "holding_company_has_aircraft": "This company still owns an aircraft. Attach it to another company first."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -549,7 +564,10 @@
     "addShare": "Add share",
     "endsOn": "End date",
     "endConfirm": "End {name}'s share?",
-    "endShare": "End"
+    "endShare": "End",
+    "holdingCompany": "Holding company",
+    "noHoldingCompany": "No company",
+    "ownedBy": "Owned by"
   },
   "team": {
     "settingsTitle": "Settings",
@@ -624,7 +642,11 @@
       "hours_add": "added hours",
       "budget_save": "saved a budget",
       "budget_publish": "published a budget",
-      "import_commit": "imported a spreadsheet"
+      "import_commit": "imported a spreadsheet",
+      "holding_company_create": "created the company",
+      "holding_company_update": "edited the company",
+      "holding_company_archive": "archived the company",
+      "owner_member_update": "changed an access"
     }
   },
   "files": {
@@ -973,7 +995,8 @@
     "maintenance": "Maintenance",
     "noMaintenance": "No maintenance recorded.",
     "window": "Maintenance from {from} to {to}",
-    "windowOpen": "Maintenance from {from}"
+    "windowOpen": "Maintenance from {from}",
+    "ownedBy": "Owned by"
   },
   "integrations": {
     "title": "Integrations",
@@ -1037,7 +1060,8 @@
     "assignTo": "Assign to",
     "me": "{name} (me)",
     "resolve": "Resolved",
-    "reopen": "Reopen"
+    "reopen": "Reopen",
+    "readOnlyMember": "Your access is read-only: call or text the team with any request."
   },
   "notifications": {
     "title": "Notifications",
@@ -1294,5 +1318,38 @@
   "contact": {
     "call": "Call",
     "text": "Text"
+  },
+  "holdingCompanies": {
+    "title": "Holding companies",
+    "subtitle": "The companies that own the aircraft. Their shareholders are the owners.",
+    "new": "New company",
+    "newTitle": "New holding company",
+    "newSubtitle": "Add the company, then attach its aircraft from the aircraft's page.",
+    "editTitle": "Edit company",
+    "edit": "Edit",
+    "emptyTitle": "No companies",
+    "emptyBody": "Add each aircraft's holding company.",
+    "noAircraft": "No aircraft",
+    "legalName": "Legal name",
+    "registrationNumber": "NEQ",
+    "registrationNumberHint": "Quebec enterprise number, or other registration.",
+    "neq": "NEQ {number}",
+    "email": "Email",
+    "phone": "Phone",
+    "notes": "Notes",
+    "contact": "Contact",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "aircraftTitle": "Aircraft",
+    "noAircraftBody": "No aircraft is attached to this company.",
+    "aircraftHint": "To attach an aircraft, edit it and choose the company.",
+    "shareholders": "Shareholders",
+    "noShareholders": "No shareholders yet: add shares on the aircraft.",
+    "history": "History",
+    "archiveTitle": "Archive the company",
+    "archiveBody": "Only possible when no aircraft is attached to it.",
+    "archive": "Archive",
+    "archiveConfirm": "Archive this company?"
   }
 }
