@@ -8,10 +8,10 @@ export async function NotificationBell({ side, unread }: { side: Side; unread: n
   return (
     <Link
       href={side === "admin" ? "/admin/notifications" : "/notifications"}
-      className="group bg-surface shadow-card hover:bg-surface-muted relative inline-flex size-10 items-center justify-center rounded-full border border-(--card-border)"
+      className="group border-border hover:bg-surface-muted relative inline-flex size-10 items-center justify-center rounded-full border"
       aria-label={unread ? t("bellUnread", { count: unread }) : t("title")}
     >
-      <Bell className="size-[18px]" aria-hidden data-anim="ring" />
+      <Bell className="size-[17px]" strokeWidth={1.5} aria-hidden data-anim="ring" />
       {unread ? (
         <span
           aria-hidden

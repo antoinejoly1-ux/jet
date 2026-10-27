@@ -9,5 +9,5 @@ export type IconMotion =
  * globals.css), so it costs no JavaScript and stops under reduced motion.
  */
 export function Icon({ icon: Glyph, anim, ...props }: LucideProps & { icon: LucideIcon; anim?: IconMotion }) {
-  return <Glyph aria-hidden data-anim={anim} {...props} />;
+  return <Glyph aria-hidden data-anim={anim} strokeWidth={1.5} {...props} />;
 }

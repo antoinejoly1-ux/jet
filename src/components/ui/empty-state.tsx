@@ -1,26 +1,37 @@
 import type { LucideIcon } from "lucide-react";
+import Image, { type StaticImageData } from "next/image";
 import type { ReactNode } from "react";
 
-/** Says what will appear here and when, instead of leaving a blank area. */
+/** Says what will appear here and when, instead of leaving a blank area. A photograph sets the mood when given. */
 export function EmptyState({
-  icon: Icon,
+  icon: Glyph,
   title,
   body,
   action,
+  image,
 }: {
   icon: LucideIcon;
   title: string;
   body: string;
   action?: ReactNode;
+  image?: StaticImageData;
 }) {
   return (
-    <div className="group bg-surface shadow-card flex flex-col items-center rounded-lg border border-(--card-border) px-6 py-14 text-center">
-      <div className="bg-accent/10 text-accent mb-4 flex size-14 items-center justify-center rounded-full">
-        <Icon className="size-6" aria-hidden data-anim="bounce" />
+    <div className="group border-border bg-surface relative flex flex-col items-center overflow-hidden rounded-lg border px-6 py-16 text-center">
+      {image ? (
+        <>
+          <Image src={image} alt="" fill sizes="(min-width: 1024px) 60vw, 100vw" className="object-cover opacity-25" />
+          <div className="from-surface via-surface/80 to-surface/40 absolute inset-0 bg-gradient-to-t" aria-hidden />
+        </>
+      ) : null}
+      <div className="relative flex flex-col items-center">
+        <div className="border-border text-accent mb-5 flex size-14 items-center justify-center rounded-full border">
+          <Glyph className="size-5" strokeWidth={1.5} aria-hidden data-anim="bounce" />
+        </div>
+        <h2 className="text-xl font-light tracking-tight">{title}</h2>
+        <p className="text-muted mt-2 max-w-sm text-sm leading-relaxed">{body}</p>
+        {action ? <div className="mt-6">{action}</div> : null}
       </div>
-      <h2 className="text-base font-semibold">{title}</h2>
-      <p className="text-muted mt-1 max-w-sm text-sm">{body}</p>
-      {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
 }

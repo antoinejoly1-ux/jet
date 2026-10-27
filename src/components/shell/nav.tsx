@@ -27,7 +27,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Route } from "next";
 import { Icon, type IconMotion } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,7 @@ function Count({ n, className }: { n: number | undefined; className?: string }) 
   return (
     <span
       className={cn(
-        "bg-accent text-primary-foreground tabular inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] leading-5 font-semibold",
+        "bg-accent text-accent-foreground tabular inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] leading-5 font-semibold",
         className,
       )}
     >
@@ -112,61 +112,70 @@ function useIsActive() {
 }
 
 /**
- * Desktop navigation. From 1024px it is a slim rail of icons with tooltips;
- * from 1280px the labels and group names show beside them.
+ * The desktop rail: 76px of icons, the current page in an ivory circle,
+ * names as tooltips. Never wider, so the page keeps the room.
  */
-export function Sidebar({
-  side,
-  badges = {},
-  hidden,
-  expanded = false,
-}: {
-  side: Side;
-  badges?: Badges;
-  hidden?: readonly string[];
-  /** Always show labels (the phone "More" sheet). */
-  expanded?: boolean;
-}) {
+export function Rail({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
-  const show = (cls: string) => (expanded ? "" : cls);
   return (
-    <nav aria-label={t("label")} className="flex flex-col gap-4">
+    <nav aria-label={t("label")} className="flex flex-col items-center gap-3">
       {groupsFor(side, hidden).map((group, i) => (
+        <div key={group.key ?? "main"} className="flex flex-col items-center gap-1.5">
+          {i > 0 ? <div className="bg-border my-2 h-px w-6" aria-hidden /> : null}
+          {group.items.map(({ href, key, icon, anim }) => (
+            <Link
+              key={href}
+              href={href}
+              aria-current={isActive(href) ? "page" : undefined}
+              aria-label={t(`items.${key}`)}
+              className={cn(
+                "group text-muted hover:text-text hover:bg-surface-muted relative flex size-11 items-center justify-center rounded-full transition-colors duration-300",
+                "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground",
+              )}
+            >
+              <Icon icon={icon} anim={anim} className="size-[19px]" />
+              {badges[key] ? (
+                <span
+                  className="bg-accent ring-background absolute top-2 right-2 size-2 rounded-full ring-2"
+                  aria-hidden
+                />
+              ) : null}
+              {badges[key] ? <span className="sr-only">{t("unread", { count: badges[key]! })}</span> : null}
+              <span
+                aria-hidden
+                className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-4 translate-x-1 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
+              >
+                {t(`items.${key}`)}
+              </span>
+            </Link>
+          ))}
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+/** Every destination with its name, large, for the phone "More" menu. */
+function MenuList({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
+  const t = useTranslations("nav");
+  const isActive = useIsActive();
+  return (
+    <nav aria-label={t("label")} className="flex flex-col gap-6">
+      {groupsFor(side, hidden).map((group) => (
         <div key={group.key ?? "main"}>
-          {i > 0 && !expanded ? <div className="bg-border mx-auto mb-4 h-px w-8 xl:hidden" aria-hidden /> : null}
-          {group.key ? (
-            <p className={cn("eyebrow mb-2 px-3", show("hidden xl:block"))}>{t(`groups.${group.key}`)}</p>
-          ) : null}
-          <ul className="flex flex-col gap-1">
+          {group.key ? <p className="eyebrow mb-2">{t(`groups.${group.key}`)}</p> : null}
+          <ul className="divide-border divide-y">
             {group.items.map(({ href, key, icon, anim }) => (
               <li key={href}>
                 <Link
                   href={href}
                   aria-current={isActive(href) ? "page" : undefined}
-                  className={cn(
-                    "group text-muted hover:text-text relative flex h-11 items-center gap-3 rounded-full px-3.5 text-sm font-medium transition-colors",
-                    "hover:bg-surface-muted aria-[current=page]:bg-surface aria-[current=page]:text-text aria-[current=page]:shadow-card",
-                    show("justify-center xl:justify-start"),
-                  )}
+                  className="group text-muted aria-[current=page]:text-text flex h-14 items-center gap-4 text-lg font-light"
                 >
-                  <Icon icon={icon} anim={anim} className="size-[18px] shrink-0" />
-                  <span className={cn("flex-1 truncate", show("sr-only xl:not-sr-only"))}>{t(`items.${key}`)}</span>
-                  <Count
-                    n={badges[key]}
-                    className={show(
-                      "absolute top-1 right-1 min-w-4 px-1 text-[10px] leading-4 xl:static xl:min-w-5 xl:px-1.5 xl:text-[11px] xl:leading-5",
-                    )}
-                  />
-                  {/* Tooltip for the icon-only rail. */}
-                  {expanded ? null : (
-                    <span
-                      aria-hidden
-                      className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-3 rounded-full px-3 py-1.5 text-xs font-semibold whitespace-nowrap opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 xl:hidden"
-                    >
-                      {t(`items.${key}`)}
-                    </span>
-                  )}
+                  <Icon icon={icon} anim={anim} className="size-5" />
+                  <span className="flex-1">{t(`items.${key}`)}</span>
+                  <Count n={badges[key]} />
                 </Link>
               </li>
             ))}
@@ -188,36 +197,59 @@ export function FloatingAction({ fab }: { fab: Fab }) {
       href={fab.href}
       aria-label={label}
       title={label}
-      className="group bg-primary text-primary-foreground shadow-float relative flex size-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-105 xl:w-full xl:gap-2 xl:px-5"
+      className="group bg-accent text-accent-foreground shadow-float relative flex size-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-105"
     >
       <Icon
         icon={fab.kind === "call" ? Phone : Plus}
         anim={fab.kind === "call" ? "shake" : "spin"}
         className="size-5"
       />
-      <span className="hidden text-sm font-semibold xl:inline">{label}</span>
     </a>
   );
 }
 
 /**
- * Phone and tablet bottom tab bar: the four most used destinations of the
- * current side, plus "More", which opens every destination in a sheet.
- * The active tab's icon sits in a pill.
+ * Phone and tablet bottom tab bar: the four most used destinations plus
+ * "More", which opens every destination full screen, with the team below.
  */
-export function BottomTabs({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
+export function BottomTabs({
+  side,
+  badges = {},
+  hidden,
+  footer,
+}: {
+  side: Side;
+  badges?: Badges;
+  hidden?: readonly string[];
+  /** Shown at the bottom of the "More" menu (the team and how to reach them). */
+  footer?: React.ReactNode;
+}) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
+  const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
   const items = groupsFor(side, hidden)
     .flatMap((g) => g.items)
     .filter((i) => i.mobile)
     .slice(0, 4);
 
+  // The menu closes on navigation and can't be scrolled behind.
+  useEffect(() => {
+    document.documentElement.style.overflow = moreOpen ? "hidden" : "";
+    return () => {
+      document.documentElement.style.overflow = "";
+    };
+  }, [moreOpen]);
+  const [openedAt, setOpenedAt] = useState(pathname);
+  if (moreOpen && openedAt !== pathname) {
+    setMoreOpen(false);
+    setOpenedAt(pathname);
+  }
+
   const tab =
-    "group flex h-16 w-full flex-col items-center justify-center gap-1 text-[11px] font-medium text-muted aria-[current=page]:text-text";
+    "group flex h-16 w-full flex-col items-center justify-center gap-1 text-[10.5px] font-medium tracking-[0.02em] text-muted aria-[current=page]:text-text";
   const pill =
-    "flex h-8 w-14 items-center justify-center rounded-full transition-colors group-aria-[current=page]:bg-surface-muted";
+    "flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300 group-aria-[current=page]:bg-primary group-aria-[current=page]:text-primary-foreground";
   return (
     <>
       {moreOpen ? (
@@ -225,16 +257,15 @@ export function BottomTabs({ side, badges = {}, hidden }: { side: Side; badges?:
           role="dialog"
           aria-modal="true"
           aria-label={t("more")}
-          // Close the sheet once a destination is picked.
-          onClick={(e) => (e.target as HTMLElement).closest("a") && setMoreOpen(false)}
-          className="bg-background fixed inset-0 z-40 overflow-y-auto px-4 pt-6 pb-28 lg:hidden"
+          className="bg-background animate-rise fixed inset-0 z-40 flex flex-col overflow-y-auto px-6 pt-20 pb-28 lg:hidden"
         >
-          <Sidebar side={side} badges={badges} hidden={hidden} expanded />
+          <MenuList side={side} badges={badges} hidden={hidden} />
+          {footer ? <div className="mt-10">{footer}</div> : null}
         </div>
       ) : null}
       <nav
         aria-label={t("label")}
-        className="border-border bg-surface/90 fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+        className="border-border bg-background/80 fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
         <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length + 1}, minmax(0, 1fr))` }}>
           {items.map(({ href, key, icon, anim }) => (
@@ -245,7 +276,7 @@ export function BottomTabs({ side, badges = {}, hidden }: { side: Side; badges?:
                 className={cn(tab, "relative")}
               >
                 <span className={pill}>
-                  <Icon icon={icon} anim={anim} className="size-5" />
+                  <Icon icon={icon} anim={anim} className="size-[19px]" />
                 </span>
                 <Count n={badges[key]} className="absolute top-1.5 left-1/2 ml-2" />
                 <span className="max-w-full truncate px-1">
@@ -258,12 +289,19 @@ export function BottomTabs({ side, badges = {}, hidden }: { side: Side; badges?:
             <button
               type="button"
               aria-expanded={moreOpen}
-              onClick={() => setMoreOpen((o) => !o)}
+              onClick={() => {
+                setOpenedAt(pathname);
+                setMoreOpen((o) => !o);
+              }}
               className={tab}
               aria-current={moreOpen ? "page" : undefined}
             >
               <span className={pill}>
-                {moreOpen ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
+                {moreOpen ? (
+                  <X className="size-[19px]" strokeWidth={1.5} aria-hidden />
+                ) : (
+                  <Menu className="size-[19px]" strokeWidth={1.5} aria-hidden />
+                )}
               </span>
               <span>{t("more")}</span>
             </button>

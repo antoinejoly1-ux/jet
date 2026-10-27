@@ -603,31 +603,8 @@
     "ownedBy": "Owned by"
   },
   "team": {
-    "settingsTitle": "Settings",
-    "settingsSubtitle": "The team, their roles and the audit log.",
-    "adminOnlyTitle": "Admins only",
-    "adminOnlyBody": "Ask an admin to change the team.",
-    "title": "Team",
-    "invite": "Invite a member",
-    "you": "You",
-    "twoFactorOn": "2-step on",
-    "twoFactorOff": "2-step not set up",
-    "lastSignIn": "Last signed in {date}",
-    "neverSignedIn": "Never signed in",
-    "auditTitle": "Audit log",
-    "auditBody": "Who did what, and when.",
-    "roleFor": "Role for {name}",
-    "roles": {
-      "admin": "Admin",
-      "finance": "Finance",
-      "dispatcher": "Dispatcher"
-    },
-    "removeFromTeam": "Remove from team",
-    "save": "Save",
-    "privacyTitle": "Personal information (Law 25)",
-    "privacyBody": "Owners' requests and the incident register.",
-    "developersTitle": "Developers",
-    "developersBody": "API keys and webhooks to connect other software."
+    "title": "Always here for you",
+    "body": "A call or a text, 7 days a week. We take care of the rest."
   },
   "audit": {
     "empty": "Nothing to show yet.",
@@ -1431,5 +1408,9 @@
     "whereIs": "Where is {registration}",
     "inDuration": "{hours, plural, =0 {in {minutes} min} other {in # h {minutes} min}}",
     "airborneCount": "{count, plural, =0 {Nothing in the air} one {# in the air} other {# in the air}} of {total}"
+  },
+  "shell": {
+    "client": "Owner space",
+    "admin": "Administration"
   }
 }

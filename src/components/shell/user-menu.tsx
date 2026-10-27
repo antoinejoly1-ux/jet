@@ -15,7 +15,7 @@ const initials = (name: string) =>
     .map((p) => p[0]!.toUpperCase())
     .join("");
 
-export function UserMenu({ name, email }: { name: string; email: string }) {
+export function UserMenu({ name, email, image }: { name: string; email: string; image?: string | null }) {
   const t = useTranslations("userMenu");
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -48,9 +48,15 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
         aria-expanded={open}
         aria-label={t("open")}
         onClick={() => setOpen((o) => !o)}
-        className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-full text-sm font-semibold"
+        className="bg-surface-muted text-text border-border flex size-10 items-center justify-center overflow-hidden rounded-full border text-xs font-medium tracking-wide"
       >
-        {initials(name) || "?"}
+        {image ? (
+          // A small, already-sized avatar from our own route: next/image adds nothing here.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt="" className="size-full object-cover" />
+        ) : (
+          initials(name) || "?"
+        )}
       </button>
       {open ? (
         <div

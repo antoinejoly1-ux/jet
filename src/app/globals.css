@@ -1,22 +1,54 @@
 @import "tailwindcss";
 
 /*
- * Design tokens: Univair's paper, ink and bronze. Components use only these
- * semantic names, never raw colours, so a rebrand or a new theme is a change
- * here and nowhere else.
+ * Design tokens, "Hangar Night": Univair's ink, ivory and champagne. Dark is
+ * the signature; "Ivoire" (light) is chosen in Settings, or follows the
+ * device with "system". Components use only these semantic names.
  */
 :root {
-  --background: #f3f1ed;
+  --background: #0c0b0a;
+  --surface: #141311;
+  --surface-muted: #1b1a17;
+  --surface-sunken: #080807;
+  --text: #f2ede4;
+  --text-muted: #a8a196;
+  --border: #2a2723;
+  --primary: #f2ede4;
+  --primary-foreground: #0c0b0a;
+  /* Champagne: readable as text on the dark surfaces and on its own tint. --bronze is for lines and marks. */
+  --accent: #d2b48c;
+  --accent-foreground: #0c0b0a;
+  --bronze: #b8895a;
+  --success: #7fcf9f;
+  --warning: #e6b866;
+  --danger: #f0918a;
+  --live: #7fcf9f;
+  --ring: #d2b48c;
+  --glass: rgb(16 15 13 / 0.55);
+  --glass-strong: rgb(16 15 13 / 0.78);
+  --glass-line: rgb(255 255 255 / 0.12);
+  --shadow-card: none;
+  --shadow-float: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+  --card-border: #2a2723;
+  --map-water: #0a0a09;
+  --map-land: #141311;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --background: #f5f2ec;
   --surface: #ffffff;
-  --surface-muted: #ebe7e0;
-  --surface-sunken: #e6e1d9;
-  --text: #171615;
-  --text-muted: #5f5a53;
-  --border: #e2ddd5;
-  --primary: #171615;
+  --surface-muted: #efeae2;
+  --surface-sunken: #e9e3d9;
+  --text: #161514;
+  --text-muted: #625c54;
+  --border: #e5dfd5;
+  --primary: #161514;
   --primary-foreground: #ffffff;
-  /* Bronze from the Univair brand. --accent is dark enough for text on its own 12% tint (WCAG AA);
-     --bronze is the brand's lighter tone, for marks, rings and the map, never small text. */
   --accent: #7a5530;
   --accent-foreground: #ffffff;
   --bronze: #9c7247;
@@ -25,61 +57,46 @@
   --danger: #a1311f;
   --live: #2f9e5b;
   --ring: #9c7247;
-  --shadow-card: 0 1px 2px rgb(23 22 21 / 0.04), 0 12px 32px -12px rgb(23 22 21 / 0.12);
-  --shadow-float: 0 2px 6px rgb(23 22 21 / 0.08), 0 24px 48px -16px rgb(23 22 21 / 0.28);
-  --card-border: transparent;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 24px;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --glass: rgb(16 15 13 / 0.5);
+  --glass-strong: rgb(16 15 13 / 0.72);
+  --glass-line: rgb(255 255 255 / 0.16);
+  --shadow-card: none;
+  --shadow-float: 0 24px 60px -24px rgb(22 21 20 / 0.35);
+  --card-border: #e5dfd5;
+  --map-water: #0a0a09;
+  --map-land: #141311;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #121110;
-    --surface: #1c1b19;
-    --surface-muted: #262422;
-    --surface-sunken: #0e0d0c;
-    --text: #f3f1ed;
-    --text-muted: #b3ada3;
-    --border: #34312d;
-    --primary: #f3f1ed;
-    --primary-foreground: #121110;
-    --accent: #d4b08a;
-    --accent-foreground: #121110;
-    --bronze: #c9a27a;
-    --success: #6fcf97;
-    --warning: #e8b75c;
-    --danger: #f28b82;
-    --live: #6fcf97;
-    --ring: #d4b08a;
-    --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 16px 40px -20px rgb(0 0 0 / 0.6);
-    --shadow-float: 0 24px 48px -16px rgb(0 0 0 / 0.7);
-    --card-border: #2c2a27;
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --background: #f5f2ec;
+    --surface: #ffffff;
+    --surface-muted: #efeae2;
+    --surface-sunken: #e9e3d9;
+    --text: #161514;
+    --text-muted: #625c54;
+    --border: #e5dfd5;
+    --primary: #161514;
+    --primary-foreground: #ffffff;
+    --accent: #7a5530;
+    --accent-foreground: #ffffff;
+    --bronze: #9c7247;
+    --success: #1f6b3a;
+    --warning: #92400e;
+    --danger: #a1311f;
+    --live: #2f9e5b;
+    --ring: #9c7247;
+    --glass: rgb(16 15 13 / 0.5);
+    --glass-strong: rgb(16 15 13 / 0.72);
+    --glass-line: rgb(255 255 255 / 0.16);
+    --shadow-card: none;
+    --shadow-float: 0 24px 60px -24px rgb(22 21 20 / 0.35);
+    --card-border: #e5dfd5;
+    --map-water: #0a0a09;
+    --map-land: #141311;
+    color-scheme: light;
   }
-}
-
-:root[data-theme="dark"] {
-  --background: #121110;
-  --surface: #1c1b19;
-  --surface-muted: #262422;
-  --surface-sunken: #0e0d0c;
-  --text: #f3f1ed;
-  --text-muted: #b3ada3;
-  --border: #34312d;
-  --primary: #f3f1ed;
-  --primary-foreground: #121110;
-  --accent: #d4b08a;
-  --accent-foreground: #121110;
-  --bronze: #c9a27a;
-  --success: #6fcf97;
-  --warning: #e8b75c;
-  --danger: #f28b82;
-  --live: #6fcf97;
-  --ring: #d4b08a;
-  --shadow-card: 0 1px 0 rgb(255 255 255 / 0.03) inset, 0 16px 40px -20px rgb(0 0 0 / 0.6);
-  --shadow-float: 0 24px 48px -16px rgb(0 0 0 / 0.7);
-  --card-border: #2c2a27;
 }
 
 @theme inline {
@@ -99,6 +116,9 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-live: var(--live);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-line: var(--glass-line);
   --color-ring: var(--ring);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
@@ -123,7 +143,6 @@
 
 @layer base {
   html {
-    color-scheme: light dark;
     /* Whatever the browser scrolls to (a focused field, an anchor) stays clear of the sticky top bar
        and, below 1024px, of the bottom tab bar: focus is never hidden under them (WCAG 2.4.11). */
     scroll-padding-top: 5rem;
@@ -170,9 +189,9 @@
 
 /* Small uppercase labels, widely spaced, as on univairaviation.com. */
 @utility eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
+  font-size: 0.65625rem;
+  font-weight: 500;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -471,4 +490,27 @@
 .um-plane:is(:hover, :focus-visible) .um-plane-tag {
   opacity: 1;
   z-index: 2;
+}
+
+/* A photograph that drifts slowly, like a film still. */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(-1.5%, -1%, 0);
+  }
+}
+@utility animate-ken-burns {
+  animation: ken-burns 30s ease-out both;
+}
+/* Photographs fade in once loaded instead of popping. */
+@keyframes photo-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+@utility animate-photo-in {
+  animation: photo-in 1.2s var(--ease-out) both;
 }

@@ -603,31 +603,8 @@
     "ownedBy": "Propriété de"
   },
   "team": {
-    "settingsTitle": "Réglages",
-    "settingsSubtitle": "L'équipe, ses rôles et le journal d'audit.",
-    "adminOnlyTitle": "Réservé aux administrateurs",
-    "adminOnlyBody": "Demandez à un administrateur de modifier l'équipe.",
-    "title": "Équipe",
-    "invite": "Inviter un membre",
-    "you": "Vous",
-    "twoFactorOn": "2 étapes activée",
-    "twoFactorOff": "2 étapes à configurer",
-    "lastSignIn": "Dernière connexion {date}",
-    "neverSignedIn": "Jamais connecté",
-    "auditTitle": "Journal d'audit",
-    "auditBody": "Qui a fait quoi, et quand.",
-    "roleFor": "Rôle de {name}",
-    "roles": {
-      "admin": "Administrateur",
-      "finance": "Finances",
-      "dispatcher": "Répartiteur"
-    },
-    "removeFromTeam": "Retirer de l'équipe",
-    "save": "Enregistrer",
-    "privacyTitle": "Renseignements personnels (Loi 25)",
-    "privacyBody": "Demandes des propriétaires et registre des incidents.",
-    "developersTitle": "Développeurs",
-    "developersBody": "Clés d'API et webhooks pour relier d'autres logiciels."
+    "title": "Toujours là pour vous",
+    "body": "Un appel ou un texto, 7 jours sur 7. Nous nous occupons du reste."
   },
   "audit": {
     "empty": "Rien à afficher pour l'instant.",
@@ -1431,5 +1408,9 @@
     "whereIs": "Où est {registration}",
     "inDuration": "{hours, plural, =0 {dans {minutes} min} other {dans # h {minutes} min}}",
     "airborneCount": "{count, plural, =0 {Aucun appareil en vol} one {# en vol} other {# en vol}} sur {total}"
+  },
+  "shell": {
+    "client": "Espace propriétaire",
+    "admin": "Administration"
   }
 }
