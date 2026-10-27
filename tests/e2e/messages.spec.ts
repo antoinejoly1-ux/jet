@@ -38,3 +38,12 @@ test("an owner and dispatch talk in the portal", async ({ page, browser }) => {
   await page.getByRole("link", { name: "Résolues" }).click();
   await expect(page.getByRole("link", { name: /Jean Tremblay/ })).toBeVisible();
 });
+
+test("owners can call or text the team from Home and Messages", async ({ page }) => {
+  await signIn(page, "owner@jet.test");
+  for (const path of ["/", "/messages"]) {
+    await page.goto(path);
+    await expect(page.getByRole("link", { name: "Appeler" })).toHaveAttribute("href", "tel:+15145550100");
+    await expect(page.getByRole("link", { name: "Texto" })).toHaveAttribute("href", "sms:+15145550100");
+  }
+});

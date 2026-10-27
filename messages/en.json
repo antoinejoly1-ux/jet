@@ -26,7 +26,8 @@
       "settings": "Settings"
     },
     "tabs": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "availability": "Calendar"
     },
     "unread": "{count} unread"
   },
@@ -992,7 +993,6 @@
   "messages": {
     "title": "Messages",
     "subtitle": "Write to our dispatch team. A real person answers.",
-    "callUs": "Call us",
     "conversationLabel": "Conversation",
     "threadLabel": "Messages in the conversation",
     "ownerEmpty": "Ask a question or request a flight: our team answers here.",
@@ -1290,5 +1290,9 @@
     "createHook": "Create the webhook",
     "secretCreated": "Copy this signing secret now: it won't be shown again.",
     "docsHint": "Keys and webhooks are for admins only. The integration guide is docs/api.md in the repository."
+  },
+  "contact": {
+    "call": "Call",
+    "text": "Text"
   }
 }

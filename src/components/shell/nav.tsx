@@ -57,11 +57,12 @@ const CLIENT: Group[] = [
     items: [
       { href: "/", key: "home", icon: Home, mobile: true },
       { href: "/flights", key: "flights", icon: PlaneTakeoff, mobile: true },
-      { href: "/availability", key: "availability", icon: CalendarDays },
+      { href: "/availability", key: "availability", icon: CalendarDays, mobile: true },
       { href: "/finances", key: "finances", icon: Wallet, mobile: true },
-      { href: "/invoices", key: "invoices", icon: FileText, mobile: true },
+      { href: "/invoices", key: "invoices", icon: FileText },
       { href: "/aircraft", key: "aircraft", icon: Plane },
-      { href: "/messages", key: "messages", icon: MessageSquare, mobile: true },
+      // Owners call or text more than they chat, so Messages stays out of the phone tabs.
+      { href: "/messages", key: "messages", icon: MessageSquare },
     ],
   },
 ];

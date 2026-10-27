@@ -5,6 +5,7 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ContactButtons } from "@/components/common/contact-buttons";
 import { PageHeader } from "@/components/ui/page-header";
 import { daysFrom, dayStart, type DayStatus } from "@/lib/availability-days";
 import type { Actor } from "@/lib/auth/policy";
@@ -29,7 +30,11 @@ export default async function HomePage() {
 
   return (
     <>
-      <PageHeader title={t("greeting", { name: firstName })} description={t("subtitle")} />
+      <PageHeader
+        title={t("greeting", { name: firstName })}
+        description={t("subtitle")}
+        actions={viewer.viewingAs ? null : <ContactButtons />}
+      />
       {summaries.length === 0 ? (
         <EmptyState
           icon={Plane}

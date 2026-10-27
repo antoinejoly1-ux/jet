@@ -1,15 +1,14 @@
-import { Clock, Phone } from "lucide-react";
+import { Clock } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { ContactButtons } from "@/components/common/contact-buttons";
 import { AutoRefresh } from "@/components/messages/auto-refresh";
 import { Composer } from "@/components/messages/composer";
 import { Thread } from "@/components/messages/thread";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
 import { getOwnerThread } from "@/lib/services/messages";
 import { sendOwnerMessageAction } from "./actions";
 
@@ -33,24 +32,10 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
 
   // Staff viewing as the owner see the thread but don't mark it read for them.
   const thread = await getOwnerThread(db, viewer, ownerId, { markRead: !viewer.viewingAs });
-  const phone = env.OPERATOR_PHONE;
 
   return (
     <>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          phone ? (
-            <Button asChild size="sm" variant="secondary">
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>
-                <Phone aria-hidden />
-                {t("callUs")}
-              </a>
-            </Button>
-          ) : null
-        }
-      />
+      <PageHeader title={t("title")} description={t("subtitle")} actions={<ContactButtons />} />
       <AutoRefresh />
       <section
         aria-label={t("conversationLabel")}

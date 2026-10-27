@@ -26,7 +26,8 @@
       "settings": "Réglages"
     },
     "tabs": {
-      "dashboard": "Tableau"
+      "dashboard": "Tableau",
+      "availability": "Calendrier"
     },
     "unread": "{count, plural, one {# non lu} other {# non lus}}"
   },
@@ -992,7 +993,6 @@
   "messages": {
     "title": "Messages",
     "subtitle": "Écrivez à notre équipe de répartition. Une vraie personne vous répond.",
-    "callUs": "Nous appeler",
     "conversationLabel": "Conversation",
     "threadLabel": "Messages de la conversation",
     "ownerEmpty": "Posez votre question ou demandez un vol : notre équipe vous répond ici.",
@@ -1290,5 +1290,9 @@
     "createHook": "Créer le webhook",
     "secretCreated": "Copiez ce secret de signature maintenant : il ne sera plus affiché.",
     "docsHint": "Les clés et webhooks sont réservés aux administrateurs. Le guide d'intégration se trouve dans docs/api.md du dépôt."
+  },
+  "contact": {
+    "call": "Appeler",
+    "text": "Texto"
   }
 }

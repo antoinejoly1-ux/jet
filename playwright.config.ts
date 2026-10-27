@@ -23,6 +23,11 @@ export default defineConfig({
     command: "pnpm start",
     port: PORT,
     reuseExistingServer: !process.env.CI,
-    env: { EMAIL_OUTBOX_FILE: "tmp/emails.jsonl", AUTH_RATE_LIMIT: "off", REQUIRE_STAFF_2FA: "true" },
+    env: {
+      EMAIL_OUTBOX_FILE: "tmp/emails.jsonl",
+      AUTH_RATE_LIMIT: "off",
+      REQUIRE_STAFF_2FA: "true",
+      OPERATOR_PHONE: "+1 514 555-0100",
+    },
   },
 });
