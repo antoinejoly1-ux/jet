@@ -14,7 +14,8 @@ export type Side = "client" | "admin";
 /** Unread counts shown next to destinations, by item key. */
 export type Badges = Partial<Record<string, number>>;
 
-function Count({ n, className }: { n: number | undefined; className?: string }) {
+/** Messages are unread; anything else counted (reports waiting) is to handle. */
+function Count({ n, className, item }: { n: number | undefined; className?: string; item?: string }) {
   const t = useTranslations("nav");
   if (!n) return null;
   return (
@@ -25,7 +26,7 @@ function Count({ n, className }: { n: number | undefined; className?: string }) 
       )}
     >
       <span aria-hidden>{n > 99 ? "99+" : n}</span>
-      <span className="sr-only">{t("unread", { count: n })}</span>
+      <span className="sr-only">{t(item === "messages" || !item ? "unread" : "pending", { count: n })}</span>
     </span>
   );
 }
@@ -156,7 +157,7 @@ export function Sidebar({
                   {expanded ? (
                     <>
                       <span className="flex-1 truncate text-sm">{t(`items.${key}`)}</span>
-                      <Count n={badges[key]} />
+                      <Count n={badges[key]} item={key} />
                     </>
                   ) : (
                     <>
@@ -172,7 +173,12 @@ export function Sidebar({
                       <span className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-4 translate-x-1 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
                         {t(`items.${key}`)}
                       </span>
-                      {badges[key] ? <span className="sr-only"> · {t("unread", { count: badges[key]! })}</span> : null}
+                      {badges[key] ? (
+                        <span className="sr-only">
+                          {" "}
+                          · {t(key === "messages" ? "unread" : "pending", { count: badges[key]! })}
+                        </span>
+                      ) : null}
                     </>
                   )}
                 </Link>
@@ -235,7 +241,7 @@ function MenuList({
                 >
                   <AnimatedIcon name={icon} size={22} />
                   <span className="flex-1">{t(`items.${key}`)}</span>
-                  <Count n={badges[key]} />
+                  <Count n={badges[key]} item={key} />
                 </Link>
               </li>
             ))}
@@ -394,7 +400,7 @@ export function BottomTabs({
                   <span className={pill}>
                     <AnimatedIcon name={icon} size={20} />
                   </span>
-                  <Count n={badges[key]} className="absolute top-1.5 left-1/2 ml-2" />
+                  <Count n={badges[key]} item={key} className="absolute top-1.5 left-1/2 ml-2" />
                   <span className="max-w-full truncate px-1">
                     {t.has(`tabs.${key}`) ? t(`tabs.${key}`) : t(`items.${key}`)}
                   </span>

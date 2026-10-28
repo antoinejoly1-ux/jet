@@ -45,6 +45,7 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
   const tf = await getTranslations("flights");
   const tr = await getTranslations("flightReports");
   const tp = await getTranslations("pilot.form");
+  const tfr = await getTranslations("flightReports");
   const format = await getFormatter();
   const { flight, photoUrl, route, inAir, report, expenses, seesMoney } = await getFlightDetail(db, viewer, id).catch(
     (e) => (e instanceof NotFoundError ? notFound() : Promise.reject(e)),
@@ -231,7 +232,7 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium">{tp(`categories.${e.category}`)}</p>
                       <p className="text-muted text-xs">
-                        {tp(`payers.${e.paidBy}`)}
+                        {tfr(`payers.${e.paidBy}`)}
                         {e.note ? ` · ${e.note}` : ""}
                       </p>
                     </div>

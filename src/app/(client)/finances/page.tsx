@@ -51,7 +51,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
           <>
             <DownloadLink href={`/finances/export?year=${year}`}>{t("exportCsv")}</DownloadLink>
             <nav aria-label={t("year")} className="border-border bg-surface-muted inline-flex rounded-md border p-0.5">
-              {[thisYear - 2, thisYear - 1, thisYear].map((y) => (
+              {[thisYear, thisYear - 1, thisYear - 2].map((y) => (
                 <Link
                   key={y}
                   href={`/finances?year=${y}`}
@@ -86,24 +86,31 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                   </DownloadLink>
                 </div>
                 {!s.published ? <Alert>{t("notPublished", { year })}</Alert> : null}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                   <Card>
                     <CardTitle>{t("planned")}</CardTitle>
-                    <p className="tabular mt-1 text-3xl font-light tracking-tight">
+                    <p className="tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl">
                       {s.published ? money(s.totals.plannedCents, s.currency) : "—"}
                     </p>
                   </Card>
                   <Card>
                     <CardTitle>{t("spent")}</CardTitle>
-                    <p className="tabular mt-1 text-3xl font-light tracking-tight">
+                    <p className="tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl">
                       {money(s.totals.spentCents, s.currency)}
                     </p>
+                  </Card>
+                  <Card>
+                    <CardTitle>{t("billed")}</CardTitle>
+                    <p className="tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl">
+                      {money(s.totals.billedCents, s.currency)}
+                    </p>
+                    <p className="text-muted mt-1 text-xs">{t("billedHint", { year })}</p>
                   </Card>
                   <Card>
                     <CardTitle>{t("remaining")}</CardTitle>
                     <p
                       className={cn(
-                        "tabular mt-1 text-3xl font-light tracking-tight",
+                        "tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl",
                         s.published && remaining < 0 && "text-danger",
                       )}
                     >
@@ -111,6 +118,11 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                     </p>
                   </Card>
                 </div>
+                {s.totals.notInvoicedCents ? (
+                  <p className="text-muted -mt-1 text-sm">
+                    {t("reconcile", { amount: money(s.totals.notInvoicedCents, s.currency) })}
+                  </p>
+                ) : null}
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <Card>
