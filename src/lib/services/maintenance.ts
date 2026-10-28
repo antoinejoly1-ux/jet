@@ -203,6 +203,34 @@ async function assertSecondPair(tx: Tx, actor: Actor, id: string) {
   if (other) throw new ConflictError("maintenance_self_review");
 }
 
+/**
+ * The jobs in review that this person sent there themselves, and so can't
+ * approve (someone else on the team can): the board shows them as waiting.
+ */
+export async function sentToReviewByMe(db: Db, actor: Actor, ids: string[]) {
+  authorize(actor, "fleet:read");
+  if (!ids.length) return new Set<string>();
+  const [other] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(and(inArray(user.staffRole, ["admin", "finance", "dispatcher"]), ne(user.id, actor.id)))
+    .limit(1);
+  if (!other) return new Set<string>();
+  const rows = await db
+    .selectDistinctOn([auditLog.entityId], { id: auditLog.entityId, by: auditLog.actorUserId })
+    .from(auditLog)
+    .where(
+      and(
+        eq(auditLog.entityType, "maintenance"),
+        inArray(auditLog.entityId, ids),
+        eq(auditLog.action, "maintenance.status"),
+        sql`${auditLog.after}->>'status' = 'review'`,
+      ),
+    )
+    .orderBy(auditLog.entityId, desc(auditLog.createdAt));
+  return new Set(rows.filter((r) => r.by === actor.id).map((r) => r.id));
+}
+
 async function lock(tx: Tx, id: string) {
   const [row] = await tx.select().from(maintenanceEvents).where(eq(maintenanceEvents.id, id)).for("update");
   if (!row) throw new NotFoundError("maintenance");

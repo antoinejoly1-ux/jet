@@ -20,9 +20,12 @@ export function MaintenanceRowActions({
   id,
   status,
   actions,
+  awaitingOther = false,
 }: {
   id: string;
   status: Status;
+  /** In review, sent there by this person: someone else approves it. */
+  awaitingOther?: boolean;
   actions: { start: Action; review: Action; done: Action; back: Action; cancel: Action };
 }) {
   const t = useTranslations("maintenance");
@@ -41,11 +44,15 @@ export function MaintenanceRowActions({
       <FormAlert state={backState} />
       <FormAlert state={cancelState} />
       <div className="flex flex-wrap items-center gap-1">
-        <form action={nextAction}>
-          <Button type="submit" size="sm" variant={next === "done" ? "primary" : "secondary"} disabled={pending}>
-            {t(`next.${next}`)}
-          </Button>
-        </form>
+        {next === "done" && awaitingOther ? (
+          <p className="text-muted text-xs">{t("awaitingOther")}</p>
+        ) : (
+          <form action={nextAction}>
+            <Button type="submit" size="sm" variant={next === "done" ? "primary" : "secondary"} disabled={pending}>
+              {t(`next.${next}`)}
+            </Button>
+          </form>
+        )}
         <Button
           type="button"
           size="sm"

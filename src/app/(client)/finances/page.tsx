@@ -14,7 +14,7 @@ import { listOwnerCompanies } from "@/lib/services/pnl";
 import { requireAccess } from "@/lib/auth/session";
 import { lacksFinanceAccess, NoFinanceAccess } from "@/components/billing/no-finance-access";
 import { db } from "@/lib/db";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatMoneyRounded } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { getOwnerFinances } from "@/lib/services/budgets";
 import { scenes } from "@/lib/imagery";
@@ -40,6 +40,8 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
   ]);
   const tres = await getTranslations("reserves");
   const money = (cents: number, currency: "CAD" | "USD" = "CAD") => formatMoney(cents, currency, locale);
+  /** The headline figures, in whole dollars: the cents are in the detail below. */
+  const round = (cents: number, currency: "CAD" | "USD" = "CAD") => formatMoneyRounded(cents, currency, locale);
   const monthName = (m: number) => format.dateTime(new Date(Date.UTC(year, m - 1, 15)), { month: "short" });
 
   return (
@@ -86,35 +88,35 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                   </DownloadLink>
                 </div>
                 {!s.published ? <Alert>{t("notPublished", { year })}</Alert> : null}
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-                  <Card>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("planned")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl">
-                      {s.published ? money(s.totals.plannedCents, s.currency) : "—"}
+                    <p className="tabular mt-1 text-xl font-light tracking-tight sm:text-3xl">
+                      {s.published ? round(s.totals.plannedCents, s.currency) : "—"}
                     </p>
                   </Card>
-                  <Card>
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("spent")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl">
-                      {money(s.totals.spentCents, s.currency)}
+                    <p className="tabular mt-1 text-xl font-light tracking-tight sm:text-3xl">
+                      {round(s.totals.spentCents, s.currency)}
                     </p>
                   </Card>
-                  <Card>
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("billed")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl">
-                      {money(s.totals.billedCents, s.currency)}
+                    <p className="tabular mt-1 text-xl font-light tracking-tight sm:text-3xl">
+                      {round(s.totals.billedCents, s.currency)}
                     </p>
                     <p className="text-muted mt-1 text-xs">{t("billedHint", { year })}</p>
                   </Card>
-                  <Card>
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("remaining")}</CardTitle>
                     <p
                       className={cn(
-                        "tabular mt-1 text-2xl font-light tracking-tight sm:text-3xl",
+                        "tabular mt-1 text-xl font-light tracking-tight sm:text-3xl",
                         s.published && remaining < 0 && "text-danger",
                       )}
                     >
-                      {s.published ? money(remaining, s.currency) : "—"}
+                      {s.published ? round(remaining, s.currency) : "—"}
                     </p>
                   </Card>
                 </div>

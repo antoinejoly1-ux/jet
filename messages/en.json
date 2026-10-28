@@ -1314,7 +1314,8 @@
     "cancelledCount": "{count, plural, one {# cancelled job} other {# cancelled jobs}}",
     "doneOn": "Completed {date}",
     "startedOn": "Started {date}",
-    "seeHistory": "See in the aircraft's history"
+    "seeHistory": "See in the aircraft's history",
+    "awaitingOther": "Waiting for someone else to approve."
   },
   "availability": {
     "title": "Calendar",

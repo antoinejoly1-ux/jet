@@ -13,7 +13,7 @@ import { aircraftPhoto } from "@/lib/aircraft-photos";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { listMaintenance } from "@/lib/services/maintenance";
+import { listMaintenance, sentToReviewByMe } from "@/lib/services/maintenance";
 import { zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { setMaintenanceStatusAction } from "./actions";
@@ -43,6 +43,11 @@ export default async function AdminMaintenancePage() {
   const t = await getTranslations("maintenance");
   const format = await getFormatter();
   const { open, closed } = await listMaintenance(db, viewer);
+  const mine = await sentToReviewByMe(
+    db,
+    viewer,
+    open.filter((r) => r.status === "review").map((r) => r.id),
+  );
   const canWrite = can(viewer, "operations:write");
   const dt = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
   const hm = (d: Date) => format.dateTime(d, { hour: "numeric", minute: "2-digit" });
@@ -160,6 +165,7 @@ export default async function AdminMaintenancePage() {
                                 <MaintenanceRowActions
                                   id={r.id}
                                   status={r.status}
+                                  awaitingOther={mine.has(r.id)}
                                   actions={{
                                     start: status(r.id, "in_progress"),
                                     review: status(r.id, "review"),

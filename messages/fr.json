@@ -1314,7 +1314,8 @@
     "cancelledCount": "{count, plural, one {# travail annulé} other {# travaux annulés}}",
     "doneOn": "Terminé le {date}",
     "startedOn": "Commencé le {date}",
-    "seeHistory": "Voir dans l'historique de l'appareil"
+    "seeHistory": "Voir dans l'historique de l'appareil",
+    "awaitingOther": "En attente d'une autre personne pour l'approbation."
   },
   "availability": {
     "title": "Calendrier",

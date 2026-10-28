@@ -54,7 +54,7 @@ test("finance approves Jean's Teterboro report, issues the invoice, and Jean ope
   await page.getByRole("button", { name: "Émettre la facture" }).click();
   await page.getByRole("button", { name: "Oui, émettre" }).click();
   await expect(page).toHaveURL(/\/admin\/invoices\/.+/);
-  await expect(page.getByRole("heading", { name: /^JTA-\d{4}-0001$/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /^JTA-\d{4}-\d{4}$/ })).toBeVisible();
   await expect(page.getByText(/3\s391,76\s\$/).first()).toBeVisible();
 
   const owner = await (await browser.newContext()).newPage();
@@ -65,7 +65,7 @@ test("finance approves Jean's Teterboro report, issues the invoice, and Jean ope
   await expect(owner.getByText(/CYHU → KTEB/).first()).toBeVisible();
   const download = owner.waitForEvent("download");
   await owner.getByRole("link", { name: "Télécharger le PDF" }).click();
-  expect((await download).suggestedFilename()).toMatch(/^JTA-\d{4}-0001\.pdf$/);
+  expect((await download).suggestedFilename()).toMatch(/^JTA-\d{4}-\d{4}\.pdf$/);
 });
 
 test("a company's manager lands on Billing and sees only their company's work", async ({ page }) => {

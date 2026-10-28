@@ -31,7 +31,7 @@ test("an invoice with its PDF is issued, and only its owner can open the PDF", a
   // Someone else's invoice, to check isolation below.
   await page.getByRole("searchbox").fill("Marie");
   await page.getByRole("button", { name: "Filtrer" }).click();
-  const otherFile = await page.getByRole("link", { name: "Voir le PDF" }).first().getAttribute("href");
+  const otherFile = await page.locator('a[href^="/files/"]').first().getAttribute("href");
 
   const owner = await (await browser.newContext()).newPage();
   await signIn(owner, "owner@jet.test");

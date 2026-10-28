@@ -30,7 +30,7 @@ test("dispatch completes a flight with its flight time and the owner sees it", a
   const row = page
     .getByRole("listitem")
     .filter({ hasText: `CYUL → ${to}` })
-    .filter({ hasText: "Prévu" })
+    .filter({ hasText: "À clôturer" })
     .first();
   await row.getByRole("button", { name: "Terminer" }).click();
   await row.getByLabel("Temps de vol").fill("1:30");
@@ -49,10 +49,8 @@ test("dispatch completes a flight with its flight time and the owner sees it", a
     .filter({ hasText: `CYUL → ${to}` })
     .filter({ hasText: "Prévu" })
     .first();
-  await future.getByRole("button", { name: "Terminer" }).click();
-  await future.getByLabel("Temps de vol").fill("1:00");
-  await future.getByRole("button", { name: "Terminer" }).click();
-  await expect(page.getByText("Ce vol n'est pas encore parti.")).toBeVisible();
+  await expect(future).toBeVisible();
+  await expect(future.getByRole("button", { name: "Terminer" })).toHaveCount(0);
 
   const owner = await (await browser.newContext()).newPage();
   await signIn(owner, "owner@jet.test");
