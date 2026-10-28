@@ -141,13 +141,15 @@ test("starting and finishing maintenance takes the aircraft out of service and b
 
 /** Presses on `from`, moves in small steps to `to` (a point inside it) and lets go, as a mouse would. */
 async function dragTo(page: Page, from: Locator, to: Locator) {
+  await from.scrollIntoViewIfNeeded();
   const a = await from.boundingBox();
   const b = await to.boundingBox();
   const width = page.viewportSize()?.width ?? 1440;
   if (!a || !b) throw new Error("drag: element not visible");
   // On a phone the next column is only partly on screen: aim at its visible part.
   const x = Math.min(b.x + b.width / 2, width - 60);
-  const y = b.y + Math.min(b.height / 2, 120);
+  // Columns are as tall as the longest one: stay level with the card so the point is on screen.
+  const y = Math.min(Math.max(a.y + 20, b.y + 20), b.y + b.height - 20);
   await page.mouse.move(a.x + a.width / 2, a.y + 20);
   await page.mouse.down();
   await page.mouse.move(a.x + a.width / 2 + 10, a.y + 24, { steps: 3 });
