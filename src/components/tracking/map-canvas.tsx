@@ -149,6 +149,8 @@ export default function MapCanvas({
       style: dark ? STYLE.dark : STYLE.light,
       attributionControl: { compact: true },
       cooperativeGestures: true,
+      // The gesture hints in the page's language, not MapLibre's English.
+      locale: gestureHints(document.documentElement.lang),
       dragRotate: false,
       pitchWithRotate: false,
       center: [-73.42, 45.52],
@@ -271,4 +273,14 @@ export default function MapCanvas({
   }, []);
 
   return <div ref={box} role="region" aria-label={label} className="um-map size-full" />;
+}
+
+/** MapLibre's "use two fingers / Ctrl + scroll" hints, in French on the French site. */
+function gestureHints(lang: string): Record<string, string> {
+  if (!lang.startsWith("fr")) return {};
+  return {
+    "CooperativeGesturesHandler.WindowsHelpText": "Utilisez Ctrl + molette pour zoomer sur la carte",
+    "CooperativeGesturesHandler.MacHelpText": "Utilisez ⌘ + molette pour zoomer sur la carte",
+    "CooperativeGesturesHandler.MobileHelpText": "Utilisez deux doigts pour déplacer la carte",
+  };
 }

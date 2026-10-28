@@ -212,8 +212,19 @@ export async function submitReport(db: Db, actor: Actor, raw: ReportInput, now =
     if (existing?.status === "submitted" && existing.pilotUserId !== actor.id)
       throw new ConflictError("report_already_filed");
 
-    // Receipts must be ones this pilot just uploaded, not any file they know the id of.
-    const receiptIds = input.expenses.flatMap((e) => (e.receiptFileId ? [e.receiptFileId] : []));
+    // Receipts must be ones this pilot just uploaded, or ones already on this report (a returned
+    // report sent again as is), not any file they know the id of.
+    const kept = existing
+      ? (
+          await tx
+            .select({ id: flightReportExpenses.receiptFileId })
+            .from(flightReportExpenses)
+            .where(eq(flightReportExpenses.reportId, existing.id))
+        ).flatMap((e) => (e.id ? [e.id] : []))
+      : [];
+    const receiptIds = [...new Set(input.expenses.flatMap((e) => (e.receiptFileId ? [e.receiptFileId] : [])))].filter(
+      (id) => !kept.includes(id),
+    );
     if (receiptIds.length) {
       const owned = await tx
         .select({ id: files.id })
@@ -225,7 +236,7 @@ export async function submitReport(db: Db, actor: Actor, raw: ReportInput, now =
             sql`${files.storageKey} like 'receipts/%'`,
           ),
         );
-      if (owned.length !== new Set(receiptIds).size) throw new ConflictError("invalid_receipt");
+      if (owned.length !== receiptIds.length) throw new ConflictError("invalid_receipt");
     }
 
     let emails: Awaited<ReturnType<typeof alertIfHoursLow>> = [];

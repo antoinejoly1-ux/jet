@@ -2546,7 +2546,9 @@
   },
   "financeAccess": {
     "title": "Finances aren't part of your access",
-    "body": "The account's owner can give you access from their settings, or the Univair team on request."
+    "body": "The account's owner can give you access from their settings, or the Univair team on request.",
+    "staffTitle": "Finance team only",
+    "staffBody": "Your role doesn't include owners' finances."
   },
   "ownerFlightDetail": {
     "back": "Flights",

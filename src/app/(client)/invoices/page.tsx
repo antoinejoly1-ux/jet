@@ -22,7 +22,10 @@ const TONE = { issued: "accent", overdue: "warning", paid: "success", void: "neu
 
 export default async function OwnerInvoicesPage() {
   const viewer = await requireAccess();
-  if (lacksFinanceAccess(viewer)) return <NoFinanceAccess title={(await getTranslations("nav.items"))("invoices")} />;
+  if (lacksFinanceAccess(viewer))
+    return (
+      <NoFinanceAccess title={(await getTranslations("nav.items"))("invoices")} staff={Boolean(viewer.staffRole)} />
+    );
   const t = await getTranslations("ownerInvoices");
   const locale = await getLocale();
   const format = await getFormatter();

@@ -2546,7 +2546,9 @@
   },
   "financeAccess": {
     "title": "Les finances ne font pas partie de votre accès",
-    "body": "Le propriétaire du compte peut vous y donner accès depuis ses paramètres, ou l'équipe Univair sur demande."
+    "body": "Le propriétaire du compte peut vous y donner accès depuis ses paramètres, ou l'équipe Univair sur demande.",
+    "staffTitle": "Réservé aux finances",
+    "staffBody": "Votre rôle ne donne pas accès aux finances des propriétaires."
   },
   "ownerFlightDetail": {
     "back": "Vols",

@@ -148,6 +148,8 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
               and(
                 eq(transactions.shareId, r.shareId),
                 eq(transactions.kind, "cost"),
+                // Same as Finances › Dépensé: before taxes, categorised costs only.
+                isNotNull(transactions.categoryId),
                 gte(transactions.occurredOn, `${year}-01-01`),
                 sql`${transactions.occurredOn} < ${`${year + 1}-01-01`}`,
               ),

@@ -172,8 +172,7 @@ export function WelcomeFlow({
             key={slide}
             className="animate-rise absolute inset-x-6 bottom-5 text-white sm:bottom-6 lg:inset-x-10 lg:bottom-10"
           >
-            <span className="eyebrow text-white/70">{t("tour.count", { n: slide + 1, total: tour.length })}</span>
-            <span className="mt-2 block max-w-md text-xl font-light sm:text-2xl lg:text-4xl">
+            <span className="block max-w-md text-xl font-light sm:text-2xl lg:text-4xl">
               {t(`tour.${tour[slide]!.key}.caption`)}
             </span>
           </p>
@@ -386,7 +385,7 @@ function Nav({
 }) {
   return (
     // On a phone the buttons stay at the foot of the screen, clear of the home indicator.
-    <div className="bg-background/95 sticky bottom-0 z-10 -mx-6 flex items-center gap-3 px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:pt-2 sm:pb-0 sm:backdrop-blur-none">
+    <div className="bg-background sticky bottom-0 z-10 -mx-6 flex items-center gap-3 px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:pt-2 sm:pb-0 sm:backdrop-blur-none">
       <Button type="button" variant="ghost" onClick={onBack} aria-label={backLabel}>
         <ArrowLeft aria-hidden />
       </Button>

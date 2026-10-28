@@ -13,7 +13,7 @@ import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
-import { eq } from "drizzle-orm";
+import { eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { v7 as uuidv7 } from "uuid";
@@ -704,6 +704,8 @@ async function main() {
     ]);
   }
   const pilot = await createLogin("pilote@jet.test", "Marc Pilote", "pilot", staff2fa, tour);
+  // The past reports were Marc's too: they read « Marc Pilote », not an unknown pilot.
+  await db.update(s.flightReports).set({ pilotUserId: pilot.id }).where(isNull(s.flightReports.pilotUserId));
   // Jean's trip to Teterboro two days ago: the pilot's report waits for finance, with its receipts.
   const tripDeparts = new Date(now - 2 * 86_400_000);
   tripDeparts.setUTCHours(13, 0, 0, 0);

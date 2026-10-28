@@ -81,8 +81,8 @@ export function ReserveWorkForm({ action, today }: { action: Action; today: stri
       {asking ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm">{t("payConfirm")}</p>
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" variant="secondary" disabled={pending}>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="submit" disabled={pending}>
               {t("payYes")}
             </Button>
             <Button type="button" variant="ghost" onClick={() => setAsking(false)}>

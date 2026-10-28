@@ -26,7 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FinancesPage({ searchParams }: PageProps<"/finances">) {
   const viewer = await requireAccess();
-  if (lacksFinanceAccess(viewer)) return <NoFinanceAccess title={(await getTranslations("nav.items"))("finances")} />;
+  if (lacksFinanceAccess(viewer))
+    return (
+      <NoFinanceAccess title={(await getTranslations("nav.items"))("finances")} staff={Boolean(viewer.staffRole)} />
+    );
   const t = await getTranslations("finances");
   const locale = lang(await getLocale());
   const format = await getFormatter();

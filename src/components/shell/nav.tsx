@@ -156,7 +156,7 @@ export function Sidebar({
                   <AnimatedIcon name={icon} size={20} className="shrink-0" />
                   {expanded ? (
                     <>
-                      <span className="flex-1 truncate text-sm">{t(`items.${key}`)}</span>
+                      <span className="min-w-0 flex-1 text-sm leading-tight">{t(`items.${key}`)}</span>
                       <Count n={badges[key]} item={key} />
                     </>
                   ) : (

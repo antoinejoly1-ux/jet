@@ -40,7 +40,10 @@ export async function InvoicePreview({
                   : `${tp(`categories.${l.part}`)} · ${t("atCost")}`}
               {l.kind === "hours" && l.minutes != null ? (
                 <span className="text-muted/70 ml-2 text-xs">
-                  {formatHours(l.minutes, locale)} × {cad(l.unitCents ?? 0)} {tr("perHourShort")}
+                  {formatHours(l.minutes, locale)} ×{" "}
+                  <span className="whitespace-nowrap">
+                    {cad(l.unitCents ?? 0)} {tr("perHourShort")}
+                  </span>
                 </span>
               ) : l.description ? (
                 <span className="text-muted/70 ml-2 text-xs">{l.description}</span>
