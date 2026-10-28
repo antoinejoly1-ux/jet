@@ -1,10 +1,11 @@
-/* Animated icons: one small move per icon, pure CSS.
-   An icon moves when it, or any ancestor with the class `ai-trigger` (a button, a nav link),
-   is hovered or keyboard-focused. Add `is-active` to the trigger to hold the "on" pose where it has one.
-   Tune the feel with the two variables below. */
+/* Animated icons: each icon acts out what it stands for, once, when it or the link/button
+   around it (class `ai-trigger`) is hovered or keyboard-focused. A plane takes off, a bell
+   rings, a letter drops into the inbox. `is-active` on the trigger holds a quiet "on" pose
+   where one makes sense (the lit window of Home). Pure CSS; still under reduced motion. */
 
 :root {
   --ai-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ai-out: cubic-bezier(0.55, 0, 0.75, 0.2);
   --ai-speed: 1; /* 1.5 = slower, 0.7 = snappier */
 }
 
@@ -15,14 +16,16 @@
   vertical-align: middle;
 }
 .ai * {
-  transform-box: fill-box; /* each part turns and scales around its own centre */
+  transform-box: fill-box;
   transform-origin: center;
   transition:
     transform calc(0.24s * var(--ai-speed)) var(--ai-ease),
-    opacity 0.2s;
+    opacity 0.2s,
+    fill-opacity 0.2s;
 }
 
-/* :is(...) is the "hover" moment: the icon itself, or its trigger, hovered or focused */
+/* ---------- The kit's own ---------- */
+
 /* pulse: the line redraws, a dot blinks */
 .ai-beat {
   stroke-dasharray: 1;
@@ -39,20 +42,13 @@
   animation: ai-blink 1.6s infinite;
 }
 
-/* chat: the bubble tilts and pops */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-bubble {
-  transform: rotate(-8deg) scale(1.06);
-}
-
-/* cards: the front card slides up, the back one settles */
+/* cards / grid / heart: as in the kit */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-front {
   transform: translate(-1.5px, -2px);
 }
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-back {
   transform: translate(1px, 1px);
 }
-
-/* grid: the tiles spread */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-t1 {
   transform: translate(-1px, -1px);
 }
@@ -65,39 +61,11 @@
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-t4 {
   transform: translate(1px, 1px) scale(1.08);
 }
-
-/* bulb: flickers, rays appear */
-.ai-ray {
-  opacity: 0;
-  transform: scale(0.7);
-}
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible, .ai-trigger.is-active) .ai-ray {
-  opacity: 1;
-  transform: scale(1);
-}
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-bulb {
-  animation: ai-flicker calc(0.6s * var(--ai-speed)) steps(2) 1;
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-beatheart {
+  animation: ai-heartbeat calc(0.7s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* people: both heads bob, one after the other */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-head-a {
-  animation: ai-bob calc(0.5s * var(--ai-speed)) var(--ai-ease);
-}
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-head-b {
-  animation: ai-bob calc(0.5s * var(--ai-speed)) var(--ai-ease) 0.12s;
-}
-
-/* search: the magnifier wiggles */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-glass {
-  animation: ai-wiggle calc(0.5s * var(--ai-speed)) var(--ai-ease);
-}
-
-/* plus: turns a quarter */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-cross {
-  transform: rotate(90deg);
-}
-
-/* menu: the lines spread (and stay spread while the menu is open: .is-active) */
+/* menu: the lines spread (and stay spread while the menu is open) */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible, .ai-trigger.is-active) .ai-top {
   transform: translateY(-1.5px);
 }
@@ -105,140 +73,264 @@
   transform: translateY(1.5px);
 }
 
-/* settings: the gear turns */
+/* plus: a quarter turn */
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-cross {
+  transform: rotate(90deg);
+}
+
+/* ---------- Each icon tells its story ---------- */
+
+/* chat: someone is typing, three dots bouncing in turn */
+.ai-type {
+  opacity: 0;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-type {
+  animation: ai-typing calc(1s * var(--ai-speed)) ease-in-out 2;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-type-2 {
+  animation-delay: 0.12s;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-type-3 {
+  animation-delay: 0.24s;
+}
+
+/* bulb: it switches on */
+.ai-bulb {
+  fill: currentColor;
+  fill-opacity: 0;
+}
+.ai-ray {
+  opacity: 0;
+  transform: scale(0.6);
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-bulb {
+  animation: ai-switch-on calc(0.6s * var(--ai-speed)) steps(1) forwards;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-ray {
+  opacity: 1;
+  transform: scale(1);
+  transition-delay: 0.35s;
+}
+
+/* people: a second person steps in beside the first, who nods */
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-join {
+  animation: ai-step-in calc(0.6s * var(--ai-speed)) var(--ai-ease);
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-head-a {
+  animation: ai-nod calc(0.5s * var(--ai-speed)) var(--ai-ease) 0.3s;
+}
+
+/* search: the magnifier sweeps a small circle, looking, and catches the light */
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-glass {
+  animation: ai-scan calc(0.9s * var(--ai-speed)) ease-in-out;
+}
+.ai-glint {
+  opacity: 0;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-glint {
+  animation: ai-flash calc(0.9s * var(--ai-speed)) ease-in-out;
+}
+
+/* settings: the gear turns a third of a turn and clicks into place */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-gear {
-  transform: rotate(60deg);
+  animation: ai-gear calc(0.8s * var(--ai-speed)) var(--ai-ease) forwards;
 }
 
-/* home: the roof lifts */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-roof {
-  transform: translateY(-1.5px);
+/* home: the door swings open and the window lights up */
+.ai-door {
+  transform-origin: 0% 100%;
+}
+.ai-window {
+  fill-opacity: 0;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-door {
+  transform: scaleX(0.35);
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible, .ai-trigger.is-active) .ai-window {
+  fill-opacity: 1;
+  transition-delay: 0.15s;
 }
 
-/* bell: rings from the top, the clapper swings */
+/* bell: it swings, the clapper follows, the sound rings out */
 .ai-ring {
-  transform-origin: 50% 0;
+  transform-origin: 50% 0%;
+}
+.ai-wave {
+  opacity: 0;
 }
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-ring {
-  animation: ai-ring calc(0.7s * var(--ai-speed)) var(--ai-ease);
+  animation: ai-swing calc(0.8s * var(--ai-speed)) ease-in-out;
 }
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-clapper {
-  animation: ai-swing calc(0.7s * var(--ai-speed)) var(--ai-ease);
+  animation: ai-clap calc(0.8s * var(--ai-speed)) ease-in-out;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-wave {
+  animation: ai-sound calc(0.8s * var(--ai-speed)) ease-out;
 }
 
-/* heart: one beat */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-beatheart {
-  animation: ai-heartbeat calc(0.6s * var(--ai-speed)) var(--ai-ease);
-}
-
-/* ---- Univair's icons, same rules: one small move each ---- */
-
-/* plane and planeTakeoff: it climbs a touch */
+/* plane (Appareils): it flies off the top right and glides back in from the bottom left */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-fly {
-  transform: translate(1.5px, -1.5px);
+  animation: ai-fly-through calc(1s * var(--ai-speed)) var(--ai-ease);
 }
+
+/* planeTakeoff (Vols): it rolls, lifts off and climbs away, then comes back to the runway */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-climb {
-  transform: translate(1px, -1.5px) rotate(-6deg);
+  animation: ai-takeoff calc(1.1s * var(--ai-speed)) ease-in-out;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-runway {
+  animation: ai-rush calc(0.5s * var(--ai-speed)) linear 2;
 }
 
-/* calendar: the rings bob */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-rings {
-  animation: ai-bob calc(0.5s * var(--ai-speed)) var(--ai-ease);
+/* calendar: today's page tears off upward and the next day settles in with a tick */
+.ai-today {
+  stroke-dasharray: 5;
+  stroke-dashoffset: 5;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-days {
+  animation: ai-tear calc(0.8s * var(--ai-speed)) var(--ai-ease);
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-today {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset calc(0.35s * var(--ai-speed)) var(--ai-ease) 0.45s;
 }
 
-/* wallet: the clasp slides open */
+/* wallet: the clasp opens and a card slides up out of it */
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-card {
+  animation: ai-card-out calc(0.8s * var(--ai-speed)) var(--ai-ease) forwards;
+}
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-clasp {
-  transform: translateX(-1.5px);
+  transform: translateX(1.5px);
 }
 
-/* invoice, receipt, clipboard: the lines write themselves; a check draws */
+/* invoice / receipt / list: the lines are written (or ticked) one after the other */
 .ai-write,
+.ai-tick {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) :is(.ai-write, .ai-tick) {
+  animation: ai-draw calc(0.35s * var(--ai-speed)) var(--ai-ease) both;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-w2 {
+  animation-delay: 0.18s;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-w3 {
+  animation-delay: 0.36s;
+}
+/* receipt: the paper feeds out of the printer while it prints */
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-paper {
+  animation: ai-print calc(0.75s * var(--ai-speed)) steps(4);
+}
+
+/* clipboard / shield: the check is drawn */
 .ai-check {
   stroke-dasharray: 1;
   stroke-dashoffset: 0;
 }
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-write {
-  animation: ai-draw calc(0.6s * var(--ai-speed)) var(--ai-ease);
-}
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-check {
-  animation: ai-draw calc(0.5s * var(--ai-speed)) var(--ai-ease) 0.05s;
+  animation: ai-draw calc(0.45s * var(--ai-speed)) var(--ai-ease) 0.1s both;
 }
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-sheet {
-  transform: translateY(-1px);
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-clip {
+  animation: ai-press calc(0.3s * var(--ai-speed)) var(--ai-ease);
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-guard {
+  animation: ai-hold calc(0.5s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* wrench: a quick turn */
+/* ledger: a page turns over */
+.ai-leaf {
+  transform-origin: 0% 50%;
+  opacity: 0;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-leaf {
+  animation: ai-page-turn calc(0.7s * var(--ai-speed)) ease-in-out;
+}
+
+/* wrench: it tightens a bolt, twice */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-turn {
-  animation: ai-twist calc(0.6s * var(--ai-speed)) var(--ai-ease);
+  animation: ai-tighten calc(0.8s * var(--ai-speed)) ease-in-out;
 }
 
-/* upload: the arrow lifts */
+/* upload: the arrow shoots up out of the tray and drops back in */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-lift {
-  transform: translateY(-2px);
+  animation: ai-send-up calc(0.8s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* inbox: the tray dips to take a letter */
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-tray {
-  transform: translateY(1px);
+/* inbox: a letter drops into the tray, which gives a little */
+.ai-letter {
+  opacity: 1;
 }
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-letter {
-  transform: translateY(1.5px);
+  animation: ai-drop-in calc(0.7s * var(--ai-speed)) var(--ai-out);
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-tray {
+  animation: ai-catch calc(0.7s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* phone: it rings */
+/* phone: it rings, the sound waves go out */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-handset {
-  animation: ai-wiggle calc(0.5s * var(--ai-speed)) var(--ai-ease);
+  animation: ai-buzz calc(0.6s * var(--ai-speed)) ease-in-out;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-wave-2 {
+  animation-delay: 0.1s;
 }
 
-/* logout: the arrow steps out */
+/* logout: the arrow walks out the door and comes back */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-out {
-  transform: translateX(1.5px);
+  animation: ai-exit calc(0.8s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* gauge: the needle sweeps up from its pivot */
+/* gauge: the needle sweeps across the dial and settles */
 .ai-needle {
   transform-origin: 0% 100%;
 }
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-needle {
-  transform: rotate(28deg);
+  animation: ai-sweep calc(0.9s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* clock: the minute hand moves on */
+/* clock: the minute hand goes all the way round, the hour hand moves on */
 .ai-hand {
   transform-origin: 50% 100%;
 }
+.ai-hour {
+  transform-origin: 0% 0%;
+}
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-hand {
-  transform: rotate(90deg);
+  animation: ai-round calc(0.9s * var(--ai-speed)) ease-in-out;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-hour {
+  transform: rotate(30deg);
+  transition-duration: 0.9s;
 }
 
-/* mail: the flap lifts */
-.ai-flap {
-  transform-origin: 50% 0;
-}
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-flap {
-  transform: translateY(-1px) scaleY(0.85);
+/* mail: the envelope flies off, sent, and the next one slides in */
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-send {
+  animation: ai-sent calc(0.9s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* key: a quarter turn in the lock */
+/* key: it goes into the lock and turns */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-key {
-  transform: rotate(-14deg);
+  animation: ai-unlock calc(0.9s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* user: the head bobs */
+/* user: a nod hello */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-head {
-  animation: ai-bob calc(0.5s * var(--ai-speed)) var(--ai-ease);
+  animation: ai-nod calc(0.5s * var(--ai-speed)) var(--ai-ease);
 }
 
-/* code: the brackets spread */
+/* code: the brackets open and the slash flips */
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-left {
   transform: translateX(-1.5px);
 }
 :is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-right {
   transform: translateX(1.5px);
 }
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-slash {
+  transform: rotate(180deg);
+  transition-duration: 0.5s;
+}
 
-/* shield: the check draws (uses .ai-check) */
-
+/* ---------- Keyframes ---------- */
 @keyframes ai-draw {
   from {
     stroke-dashoffset: 1;
@@ -249,28 +341,86 @@
 }
 @keyframes ai-blink {
   50% {
-    opacity: 0.25;
+    opacity: 0.2;
   }
 }
-@keyframes ai-flicker {
-  50% {
-    opacity: 0.45;
-  }
-}
-@keyframes ai-bob {
-  40% {
-    transform: translateY(-2px);
-  }
-}
-@keyframes ai-wiggle {
-  25% {
-    transform: rotate(-12deg);
+@keyframes ai-heartbeat {
+  30% {
+    transform: scale(1.12);
   }
   60% {
-    transform: rotate(8deg);
+    transform: scale(0.96);
   }
 }
-@keyframes ai-ring {
+@keyframes ai-typing {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  25% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-1.5px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ai-switch-on {
+  0% {
+    fill-opacity: 0.25;
+  }
+  20% {
+    fill-opacity: 0;
+  }
+  40% {
+    fill-opacity: 0.25;
+  }
+  100% {
+    fill-opacity: 0.25;
+  }
+}
+@keyframes ai-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(3px);
+  }
+}
+@keyframes ai-nod {
+  30% {
+    transform: translateY(1.6px);
+  }
+  60% {
+    transform: translateY(-0.6px);
+  }
+}
+@keyframes ai-scan {
+  25% {
+    transform: translate(1.5px, -1px);
+  }
+  50% {
+    transform: translate(0, -2px);
+  }
+  75% {
+    transform: translate(-1.5px, -1px);
+  }
+}
+@keyframes ai-flash {
+  40%,
+  60% {
+    opacity: 1;
+  }
+}
+@keyframes ai-gear {
+  to {
+    transform: rotate(120deg);
+  }
+}
+@keyframes ai-swing {
   15% {
     transform: rotate(14deg);
   }
@@ -284,49 +434,265 @@
     transform: rotate(-4deg);
   }
 }
-@keyframes ai-swing {
-  15% {
-    transform: translateX(-1.5px);
+@keyframes ai-clap {
+  20% {
+    transform: translateX(-2px);
   }
-  35% {
-    transform: translateX(1.5px);
+  40% {
+    transform: translateX(2px);
   }
-  55% {
+  60% {
     transform: translateX(-1px);
   }
 }
-@keyframes ai-heartbeat {
+@keyframes ai-sound {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
   30% {
-    transform: scale(1.16);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+@keyframes ai-fly-through {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: translate(9px, -9px) scale(0.85);
+    opacity: 0;
+  }
+  41% {
+    transform: translate(-9px, 9px) scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ai-takeoff {
+  0% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-1.5px);
+  }
+  50% {
+    transform: translate(9px, -8px) rotate(-8deg);
+    opacity: 0;
+  }
+  51% {
+    transform: translate(-10px, 2px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ai-rush {
+  to {
+    stroke-dashoffset: 5.2;
+  }
+}
+@keyframes ai-tear {
+  0% {
+    transform: none;
+  }
+  45% {
+    transform: translate(2px, -6px) rotate(10deg);
+    opacity: 0;
+  }
+  46% {
+    transform: translateY(2px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ai-card-out {
+  0% {
+    transform: none;
   }
   55% {
-    transform: scale(0.96);
+    transform: translateY(-3px);
   }
-  75% {
+  100% {
+    transform: translateY(-2px);
+  }
+}
+@keyframes ai-print {
+  from {
+    transform: translateY(-2px);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes ai-press {
+  50% {
+    transform: translateY(0.8px);
+  }
+}
+@keyframes ai-hold {
+  40% {
     transform: scale(1.06);
   }
 }
-@keyframes ai-twist {
-  35% {
-    transform: rotate(-15deg);
+@keyframes ai-page-turn {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(-1);
+  }
+}
+@keyframes ai-tighten {
+  25% {
+    transform: rotate(-30deg);
+  }
+  50% {
+    transform: rotate(0);
+  }
+  75% {
+    transform: rotate(-30deg);
+  }
+}
+@keyframes ai-send-up {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+  41% {
+    transform: translateY(4px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ai-drop-in {
+  0% {
+    transform: translateY(-6px);
+    opacity: 0;
   }
   70% {
-    transform: rotate(6deg);
+    transform: translateY(1.5px);
+    opacity: 1;
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes ai-catch {
+  60% {
+    transform: none;
+  }
+  75% {
+    transform: translateY(1px);
+  }
+}
+@keyframes ai-buzz {
+  10%,
+  30%,
+  50% {
+    transform: rotate(-10deg);
+  }
+  20%,
+  40%,
+  60% {
+    transform: rotate(10deg);
+  }
+  70% {
+    transform: none;
+  }
+}
+@keyframes ai-exit {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: translateX(5px);
+    opacity: 0;
+  }
+  41% {
+    transform: translateX(-3px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ai-sweep {
+  0% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-80deg);
+  }
+  75% {
+    transform: rotate(25deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+@keyframes ai-round {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ai-sent {
+  0% {
+    transform: none;
+  }
+  40% {
+    transform: translate(8px, -6px) rotate(-12deg) scale(0.8);
+    opacity: 0;
+  }
+  41% {
+    transform: translateX(-6px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ai-unlock {
+  0% {
+    transform: none;
+  }
+  30% {
+    transform: translate(1.5px, -1.5px);
+  }
+  65% {
+    transform: translate(1.5px, -1.5px) rotate(-40deg);
+  }
+  100% {
+    transform: none;
   }
 }
 
-/* People who ask their device for less motion get still icons. */
+/* People who prefer less motion see the icons still, in their "on" pose where it matters. */
 @media (prefers-reduced-motion: reduce) {
-  .ai * {
-    transition: none !important;
+  .ai *,
+  .ai-trigger .ai * {
     animation: none !important;
+    transition: none !important;
   }
-}
-
-/* ledger: the open book's right-hand page lifts, as if about to turn */
-.ai-leaf {
-  transform-origin: left center;
-}
-:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-leaf {
-  transform: translateY(-1.5px) skewY(-4deg);
 }

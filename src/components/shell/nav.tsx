@@ -104,14 +104,16 @@ export function Sidebar({
   fab,
   expanded: initial,
   home,
+  brand,
 }: {
   side: Side;
   badges?: Badges;
   hidden?: readonly string[];
   fab: Fab | null;
   expanded: boolean;
-  /** The brand mark at the top. */
+  /** The brand mark at the top: the star in the narrow rail, the full logo when it's open. */
   home: React.ReactNode;
+  brand: React.ReactNode;
 }) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
@@ -130,7 +132,7 @@ export function Sidebar({
       )}
     >
       <div className={cn("flex flex-col gap-6", expanded ? "items-stretch" : "items-center")}>
-        {home}
+        {expanded ? brand : home}
         <nav aria-label={t("label")} className={cn("flex flex-col gap-3", !expanded && "items-center")}>
           {groupsFor(side, hidden).map((group, i) => (
             <div key={group.key ?? "main"} className={cn("flex flex-col gap-1", !expanded && "items-center")}>

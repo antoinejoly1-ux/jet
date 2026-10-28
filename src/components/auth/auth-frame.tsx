@@ -7,19 +7,22 @@ import { AuthPhoto } from "./auth-backdrop";
 import { formatPhone, telHref } from "@/lib/phone";
 
 /**
- * Sign-in, sign-up and every account screen: the form on the app's own
- * background at left, the screen's photograph in a rounded panel at right
- * (a short band above the form on a phone). Follows the chosen theme.
+ * Sign-in, sign-up and every account screen, laid out like the welcome tour:
+ * the screen's photograph in a rounded panel at left with the logo on it, the
+ * form at right on the app's own background (a short photo band above the
+ * form on a phone). Follows the chosen theme.
  */
 export async function AuthFrame({ children, corner }: { children: ReactNode; corner?: ReactNode }) {
   const t = await getTranslations("authFrame");
   const phone = env.OPERATOR_PHONE;
   return (
-    <div className="bg-background text-text min-h-dvh lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <div className="bg-background text-text min-h-dvh lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       <AuthPhoto band />
+      <AuthPhoto />
       <div className="flex min-h-[calc(100dvh-9rem)] flex-col px-6 py-6 sm:px-12 lg:min-h-dvh lg:px-16 xl:px-24">
-        <header className="flex items-center justify-between gap-4">
-          <Link href="/" className="text-text flex flex-col items-start gap-1">
+        <header className="flex min-h-11 items-center justify-between gap-4">
+          {/* The logo is on the photograph; this one only shows when the photo band is too short to carry it. */}
+          <Link href="/" className="text-text flex flex-col items-start gap-1 lg:invisible">
             <Logo className="h-6 w-auto" title="Univair Management" />
             <span aria-hidden className="text-muted text-[8px] font-medium tracking-[0.55em] uppercase">
               Management
@@ -28,7 +31,7 @@ export async function AuthFrame({ children, corner }: { children: ReactNode; cor
           {corner}
         </header>
         <main id="main" className="flex flex-1 items-center py-10">
-          <div className="animate-rise mx-auto w-full max-w-[400px] lg:mx-0">{children}</div>
+          <div className="animate-rise mx-auto w-full max-w-[400px]">{children}</div>
         </main>
         <footer className="text-muted flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>{t("footer")}</p>
@@ -44,7 +47,6 @@ export async function AuthFrame({ children, corner }: { children: ReactNode; cor
           </p>
         </footer>
       </div>
-      <AuthPhoto />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { scenes, type Scene } from "@/lib/imagery";
+import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
 
 /** Each account screen has its own photograph and line, like the pages of a brochure. */
@@ -29,7 +30,7 @@ export function AuthPhoto({ band = false }: { band?: boolean }) {
   const [, scene, line] = SCENE.find(([p]) => pathname.startsWith(p)) ?? SCENE[SCENE.length - 1]!;
   return (
     <div
-      className={cn(band ? "h-36 p-2 sm:h-44 lg:hidden" : "sticky top-0 hidden h-dvh p-3 lg:block")}
+      className={cn(band ? "h-36 p-2 sm:h-44 lg:hidden" : "sticky top-0 hidden h-dvh p-4 lg:block")}
       aria-hidden={band}
     >
       <div className="relative isolate h-full overflow-hidden rounded-[22px] lg:rounded-[28px]">
@@ -46,6 +47,15 @@ export function AuthPhoto({ band = false }: { band?: boolean }) {
           className="animate-ken-burns object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        {band ? null : (
+          // The logo sits on the photograph, as it does in the welcome tour.
+          <span className="absolute top-6 left-6 flex flex-col items-start gap-1 text-white lg:top-8 lg:left-10">
+            <Logo className="h-5 w-auto" title="Univair Management" />
+            <span aria-hidden className="text-[8px] font-medium tracking-[0.55em] text-white/70 uppercase">
+              Management
+            </span>
+          </span>
+        )}
         {band ? null : (
           <div
             className="animate-rise absolute inset-x-10 bottom-10 max-w-md text-white xl:inset-x-14 xl:bottom-14"

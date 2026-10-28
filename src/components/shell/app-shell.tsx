@@ -11,7 +11,7 @@ import { unreadMessageCount } from "@/lib/services/messages";
 import { unreadNotificationCount } from "@/lib/services/notification-center";
 import { countReportsWaiting } from "@/lib/services/flight-reports";
 import { NotificationBell } from "./bell";
-import { Logo, Star } from "@/components/brand/logo";
+import { Logo, ProductMark, Star } from "@/components/brand/logo";
 import { TeamReach } from "@/components/brand/team";
 import { env } from "@/lib/env";
 import { BottomTabs, RAIL_COOKIE, Sidebar, type Fab, type Side } from "./nav";
@@ -117,11 +117,17 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
               <Star className="h-3 w-auto" />
             </Link>
           }
+          brand={
+            <Link href={side === "admin" ? "/admin" : "/"} className="text-text flex px-3.5 pt-1 pb-2">
+              <ProductMark />
+            </Link>
+          }
         />
         <div className="flex min-w-0 flex-col">
           <header className="bg-background/75 sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 backdrop-blur-xl sm:px-6 lg:h-[76px] lg:px-10">
             <p className="eyebrow hidden truncate sm:block">{tShell(side === "admin" ? "admin" : "client")}</p>
-            <div className="col-start-2">
+            {/* On a desktop the full logo heads the sidebar; phones and tablets show it here. */}
+            <div className="col-start-2 lg:invisible">
               <CenterLogo side={side} />
             </div>
             <div className="col-start-3 flex items-center justify-end gap-2 sm:gap-3">

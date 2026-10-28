@@ -18,28 +18,34 @@ const STEPS = ["welcome", "name", "tour", "team", "ready"] as const;
 type Step = (typeof STEPS)[number];
 
 /** What the platform holds for each kind of person, one photograph each. */
-const TOURS: Record<WelcomeAudience, { key: string; scene: Scene; finance?: boolean }[]> = {
+/**
+ * What the platform holds for each kind of person. Each slide shows the real
+ * screen it talks about (captured from the demo by scripts/capture-tour-shots.mjs),
+ * over its photograph: on a desktop for the office, on a phone for the pilot.
+ */
+type Slide = { key: string; scene: Scene; shot: string; phone?: boolean; finance?: boolean };
+const TOURS: Record<WelcomeAudience, Slide[]> = {
   owner: [
-    { key: "live", scene: "cockpit" },
-    { key: "hours", scene: "rampDusk" },
-    { key: "finances", scene: "cabinDoor", finance: true },
-    { key: "flights", scene: "boarding" },
+    { key: "live", scene: "cockpit", shot: "owner-live" },
+    { key: "hours", scene: "rampDusk", shot: "owner-hours" },
+    { key: "finances", scene: "cabinDoor", shot: "owner-finances", finance: true },
+    { key: "flights", scene: "boarding", shot: "owner-flights" },
   ],
   staff: [
-    { key: "todo", scene: "hangarBright" },
-    { key: "fleet", scene: "hangar" },
-    { key: "ops", scene: "hangarCrew" },
-    { key: "billing", scene: "terminal", finance: true },
+    { key: "todo", scene: "hangarBright", shot: "staff-todo" },
+    { key: "fleet", scene: "hangar", shot: "staff-fleet" },
+    { key: "ops", scene: "hangarCrew", shot: "staff-ops" },
+    { key: "billing", scene: "terminal", shot: "staff-billing", finance: true },
   ],
   pilot: [
-    { key: "report", scene: "cockpit" },
-    { key: "receipts", scene: "pilot" },
-    { key: "returned", scene: "hangarPilot" },
+    { key: "report", scene: "cockpit", shot: "pilot-report", phone: true },
+    { key: "receipts", scene: "pilot", shot: "pilot-receipts", phone: true },
+    { key: "returned", scene: "hangarPilot", shot: "pilot-returned", phone: true },
   ],
   manager: [
-    { key: "approved", scene: "terminal" },
-    { key: "taxes", scene: "cabinDoor" },
-    { key: "results", scene: "rampDusk" },
+    { key: "approved", scene: "terminal", shot: "manager-approved" },
+    { key: "taxes", scene: "cabinDoor", shot: "manager-taxes" },
+    { key: "results", scene: "rampDusk", shot: "manager-results" },
   ],
 };
 
@@ -167,6 +173,7 @@ export function WelcomeFlow({
             </span>
           </span>
         </div>
+        {step === "tour" ? <TourShot slide={tour[slide]!} /> : null}
         {step === "tour" ? (
           <p
             key={slide}
@@ -411,5 +418,48 @@ function EnterButton({ label }: { label: string }) {
       {label}
       {entering ? null : <ArrowRight aria-hidden />}
     </Button>
+  );
+}
+
+/**
+ * The real screen the slide talks about, framed like the window it lives in:
+ * a browser on a desktop, a phone for the pilot's side. On a phone's short band
+ * it fills the band, top first.
+ */
+function TourShot({ slide }: { slide: Slide }) {
+  const src = `/images/tour/${slide.shot}.jpg`;
+  return (
+    <div key={slide.shot} className="animate-photo-in absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/45 backdrop-blur-md" aria-hidden />
+      {/* Phone band: the screen itself, cropped to its top. */}
+      <div className="absolute inset-x-4 top-14 bottom-0 overflow-hidden rounded-t-[14px] shadow-2xl lg:hidden">
+        <Image src={src} alt="" fill sizes="100vw" className="object-cover object-top" />
+      </div>
+      {/* Desktop: the screen in its frame, centred above the caption. */}
+      <div
+        className={cn(
+          "relative hidden -translate-y-8 lg:block",
+          slide.phone ? "aspect-[390/844] h-[66%]" : "aspect-[1440/900] w-[90%]",
+        )}
+      >
+        <div
+          className={cn(
+            "border-glass-line bg-background absolute inset-0 overflow-hidden border shadow-2xl",
+            slide.phone ? "border-text rounded-[34px] border-[6px]" : "rounded-[14px]",
+          )}
+        >
+          {slide.phone ? null : (
+            <div className="bg-surface-muted flex h-6 items-center gap-1.5 px-3" aria-hidden>
+              <span className="bg-muted/40 size-2 rounded-full" />
+              <span className="bg-muted/40 size-2 rounded-full" />
+              <span className="bg-muted/40 size-2 rounded-full" />
+            </div>
+          )}
+          <div className={cn("relative", slide.phone ? "h-full" : "h-[calc(100%-1.5rem)]")}>
+            <Image src={src} alt="" fill sizes="(min-width: 1024px) 45vw, 1px" className="object-cover object-top" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
