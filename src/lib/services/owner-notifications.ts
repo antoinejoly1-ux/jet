@@ -2,7 +2,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import type { Db, DbOrTx } from "@/lib/db";
 import { notifications, ownerMembers, user } from "@/lib/db/schema";
-import { actionEmail, type TemplateName } from "@/lib/email/templates";
+import { actionEmail, firstNameOf, type TemplateName } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
 import { env } from "@/lib/env";
 import { memberAccess } from "@/lib/auth/policy";
@@ -35,6 +35,7 @@ export async function notifyOwnerMembers(
     .select({
       userId: user.id,
       email: user.email,
+      name: user.name,
       locale: user.locale,
       role: ownerMembers.role,
       canSeeFinances: ownerMembers.canSeeFinances,
@@ -60,7 +61,7 @@ export async function notifyOwnerMembers(
       to: m.email,
       locale: m.locale,
       path: email.path,
-      vars: dataFor(m.locale),
+      vars: { ...dataFor(m.locale), firstName: firstNameOf(m.name) },
     }));
 }
 

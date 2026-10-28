@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
@@ -15,19 +16,27 @@ import { PasswordField } from "./password-field";
 /** The address last used to sign in on this device, so returning people only type their password. */
 const LAST_EMAIL = "um:last-email";
 
+/** Why someone landed here: a link that no longer works, or a password just changed. */
+export type SignInNotice = "linkUsed" | "linkExpired" | "resetDone";
+
 export function SignInForm({
   next,
   googleEnabled,
   defaultEmail,
+  notice: arrival = null,
 }: {
   next: string;
   googleEnabled: boolean;
   defaultEmail?: string;
+  notice?: SignInNotice | null;
 }) {
   const t = useTranslations("auth");
+  const router = useRouter();
   const emailInput = useRef<HTMLInputElement>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    arrival === "linkUsed" ? t("errors.linkUsed") : arrival === "linkExpired" ? t("errors.linkExpired") : null,
+  );
+  const [notice, setNotice] = useState<string | null>(arrival === "resetDone" ? t("resetSuccess") : null);
   const [pending, setPending] = useState<"password" | "link" | null>(null);
 
   useEffect(() => {
@@ -79,7 +88,13 @@ export function SignInForm({
     }
     setPending("link");
     setError(null);
-    const { error } = await authClient.signIn.magicLink({ email, callbackURL: next });
+    setNotice(null);
+    // A used or expired link comes back to this screen, which then says so.
+    const { error } = await authClient.signIn.magicLink({
+      email,
+      callbackURL: next,
+      errorCallbackURL: `/sign-in?link=magic&next=${encodeURIComponent(next)}`,
+    });
     setPending(null);
     if (error) setError(t("errors.generic"));
     else {
@@ -115,7 +130,17 @@ export function SignInForm({
           label={t("password")}
           required
           aside={
-            <Link href="/forgot-password" className="text-accent text-xs font-medium hover:underline">
+            <Link
+              href="/forgot-password"
+              onClick={(e) => {
+                // Carries the typed address over, so it isn't typed twice.
+                const email = typedEmail();
+                if (!email) return;
+                e.preventDefault();
+                router.push(`/forgot-password?email=${encodeURIComponent(email)}`);
+              }}
+              className="text-accent -my-3.5 inline-block py-3.5 text-xs font-medium hover:underline"
+            >
               {t("forgotPassword")}
             </Link>
           }
@@ -145,7 +170,10 @@ export function SignInForm({
       </div>
       <p className="border-border text-muted border-t pt-6 text-sm">
         {t("noAccount")}{" "}
-        <Link href={`/sign-up?next=${encodeURIComponent(next)}`} className="text-accent font-semibold hover:underline">
+        <Link
+          href={`/sign-up?next=${encodeURIComponent(next)}`}
+          className="text-accent -my-3 inline-block py-3 font-semibold hover:underline"
+        >
           {t("createAccount")}
         </Link>
       </p>

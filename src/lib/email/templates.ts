@@ -23,6 +23,9 @@ export type TemplateName = keyof typeof fr.emails.templates;
 const escape = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
+/** The first word of a person's name, for « Bonjour Marie, ». */
+export const firstNameOf = (name: string | null | undefined) => name?.trim().split(/\s+/)[0] ?? "";
+
 /** Builds a one-action email (a sentence and a button) in the recipient's language. */
 export function actionEmail(
   name: TemplateName,
@@ -33,6 +36,8 @@ export function actionEmail(
 ): Email {
   const fill = (text: string) => text.replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? `{${k}}`);
   const c = copy[locale];
+  // « Bonjour Marie, » when the first name is known, « Bonjour, » otherwise.
+  const greeting = vars.firstName?.trim() ? c.greetingName.replace("{name}", vars.firstName.trim()) : c.greeting;
   const raw = c.templates[name];
   const t = { subject: fill(raw.subject), body: fill(raw.body), cta: raw.cta };
   const phone = env.OPERATOR_PHONE ? formatPhone(env.OPERATOR_PHONE, locale) : "";
@@ -44,7 +49,7 @@ export function actionEmail(
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px">
 <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;padding:36px">
 <tr><td style="padding-bottom:24px"><div style="font-size:18px;font-weight:600;letter-spacing:0.28em">UNIVAIR</div><div style="font-size:9px;font-weight:600;letter-spacing:0.32em;color:#7a5530;padding-top:4px">MANAGEMENT</div></td></tr>
-<tr><td style="font-size:15px;line-height:22px;padding-bottom:12px">${escape(c.greeting)}</td></tr>
+<tr><td style="font-size:15px;line-height:22px;padding-bottom:12px">${escape(greeting)}</td></tr>
 <tr><td style="font-size:15px;line-height:22px;padding-bottom:24px">${escape(t.body)}</td></tr>
 <tr><td><a href="${escape(url)}" style="display:inline-block;background:#171615;color:#ffffff;text-decoration:none;font-weight:600;padding:13px 24px;border-radius:999px">${escape(t.cta)}</a></td></tr>
 <tr><td style="font-size:15px;line-height:22px;padding-top:28px">${escape(c.signature)}${help ? `<br><span style="font-size:13px;color:#5f5a53">${escape(help)}</span>` : ""}</td></tr>
@@ -52,7 +57,7 @@ export function actionEmail(
 ${prefs ? `<tr><td style="font-size:12px;line-height:18px;color:#5f5a53;padding-top:16px">${escape(c.preferences)} <a href="${escape(prefs)}" style="color:#7a5530">${escape(c.preferencesLink)}</a></td></tr>` : ""}
 </table></td></tr></table></body></html>`;
   const text = [
-    c.greeting,
+    greeting,
     "",
     t.body,
     "",

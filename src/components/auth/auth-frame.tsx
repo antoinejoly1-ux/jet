@@ -34,11 +34,11 @@ export async function AuthFrame({ children, corner }: { children: ReactNode; cor
           <p>{t("footer")}</p>
           <p className="flex items-center gap-4">
             {phone ? (
-              <a href={telHref(phone)} className="hover:text-text">
+              <a href={telHref(phone)} className="hover:text-text -my-3.5 inline-block py-3.5 whitespace-nowrap">
                 {t("help", { phone: formatPhone(phone, await getLocale()) })}
               </a>
             ) : null}
-            <Link href="/privacy" className="hover:text-text">
+            <Link href="/privacy" className="hover:text-text -my-3.5 inline-block py-3.5 whitespace-nowrap">
               {t("privacy")}
             </Link>
           </p>

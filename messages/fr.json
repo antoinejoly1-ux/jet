@@ -98,7 +98,9 @@
       "emailTaken": "Un compte existe déjà pour ce courriel. Connectez-vous plutôt.",
       "invalidLink": "Ce lien est invalide ou expiré. Demandez-en un nouveau.",
       "fillBoth": "Entrez votre courriel et votre mot de passe.",
-      "fillAll": "Entrez votre nom et votre courriel."
+      "fillAll": "Entrez votre nom et votre courriel.",
+      "linkUsed": "Ce lien a déjà servi ou a expiré. Demandez-en un nouveau ci-dessous.",
+      "linkExpired": "Ce lien a déjà servi ou a expiré. Connectez-vous ci-dessous; au besoin, nous vous enverrons un nouveau lien de confirmation."
     },
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
@@ -107,7 +109,13 @@
     "inviteOnlyTitle": "L'accès se fait sur invitation",
     "inviteOnlyBody": "Utilisez le courriel où vous avez reçu votre invitation. Sans invitation, votre compte attendra que l'équipe le relie à votre appareil.",
     "emailHint": "Le même courriel que votre invitation.",
-    "callTeam": "Appeler l'équipe · {phone}"
+    "callTeam": "Appeler l'équipe · {phone}",
+    "resetInvalidTitle": "Ce lien ne fonctionne plus",
+    "resetInvalidBody": "Les liens de réinitialisation expirent après une heure et ne servent qu'une fois. Demandez-en un nouveau : ça prend une seconde.",
+    "requestNewLink": "Demander un nouveau lien",
+    "resetSuccess": "Votre mot de passe a été changé. Connectez-vous avec le nouveau.",
+    "wrongAddress": "Mauvaise adresse?",
+    "startOver": "Recommencer"
   },
   "twoFactor": {
     "invalidCode": "Code invalide. Réessayez.",
@@ -159,7 +167,10 @@
     "setUp": "Activer",
     "openInApp": "Ouvrir dans l'application d'authentification",
     "enableFailed": "Impossible de démarrer la configuration. Réessayez.",
-    "tooManyAttempts": "Trop d'essais. Reconnectez-vous pour recevoir une nouvelle vérification."
+    "tooManyAttempts": "Trop d'essais. Reconnectez-vous pour recevoir une nouvelle vérification.",
+    "notYou": "Pas vous?",
+    "signOut": "Se déconnecter",
+    "codesFileName": "univair-codes-de-secours.txt"
   },
   "invite": {
     "unavailableTitle": "Invitation non disponible",
@@ -1666,9 +1677,9 @@
       "strong": "comme votre appareil."
     },
     "pending": {
-      "eyebrow": "Presque prêt",
-      "light": "Votre accès",
-      "strong": "est en préparation."
+      "eyebrow": "Votre accès",
+      "light": "Presque prêt.",
+      "strong": "On s'occupe du reste."
     }
   },
   "welcome": {
@@ -1696,7 +1707,7 @@
       "body": "Votre photo et votre nom, tels que l'équipe Univair les verra. La photo est facultative.",
       "first": "Prénom",
       "last": "Nom",
-      "language": "Langue de communication",
+      "language": "Langue",
       "required": "Entrez votre prénom.",
       "failed": "Impossible d'enregistrer. Réessayez."
     },
@@ -1744,7 +1755,7 @@
         "title": "Appareils : tout est rangé par avion",
         "body": "Ouvrez un appareil pour trouver ses propriétaires et leurs parts, ses tarifs, sa maintenance, ses réserves et sa photo.",
         "a": "Inviter un propriétaire se fait depuis sa fiche",
-        "b": "⌘K trouve n'importe quel appareil, propriétaire ou vol"
+        "b": "La recherche (⌘K ou Ctrl+K) trouve un appareil, un propriétaire ou un vol."
       },
       "ops": {
         "caption": "Les vols et l'atelier, au même endroit.",
@@ -1758,7 +1769,7 @@
         "title": "Rapports de vol et factures",
         "body": "Le pilote déclare le vol; vous vérifiez ses chiffres et ses reçus, puis la facture se prépare avec les bons tarifs et les taxes.",
         "a": "Les réserves de maintenance se remplissent à chaque heure facturée",
-        "b": "Une correction se fait par écriture inverse, jamais en effaçant"
+        "b": "Rien ne s'efface : chaque correction laisse une trace."
       },
       "report": {
         "caption": "Après chaque vol, deux minutes.",
@@ -1793,7 +1804,7 @@
         "title": "TPS et TVQ comprises",
         "body": "Les taxes sont calculées selon les règles du vol, avec vos numéros d'inscription sur chaque facture.",
         "a": "Les tarifs viennent de l'appareil, à jour",
-        "b": "Une facture se corrige en l'annulant, jamais en l'effaçant"
+        "b": "Rien ne s'efface : chaque correction laisse une trace."
       },
       "results": {
         "caption": "Où en est la société.",
@@ -1810,11 +1821,11 @@
       "inApp": "Vous pouvez aussi nous écrire directement dans l'application.",
       "eyebrowStaff": "Vos collègues",
       "titleStaff": "L'équipe avec qui vous travaillez.",
-      "bodyStaff": "Les propriétaires voient ces visages quand ils nous appellent ou nous écrivent. Ajoutez votre photo pour qu'ils vous reconnaissent aussi."
+      "bodyStaff": "Les propriétaires voient ces visages quand ils nous appellent ou nous écrivent."
     },
     "ready": {
       "eyebrow": "Tout est prêt",
-      "title": "Bienvenue à bord, {name}.",
+      "title": "À vous de jouer, {name}.",
       "body": "Votre espace vous attend.",
       "bodyAircraft": "{registration} vous attend.",
       "enter": "Entrer dans mon espace",
@@ -1843,7 +1854,8 @@
     "saving": "Enregistrement…",
     "hint": "Glissez une photo ici, ou touchez le cercle.",
     "notAnImage": "Choisissez une image (JPG, PNG ou HEIC).",
-    "failed": "La photo n'a pas pu être enregistrée. Réessayez."
+    "failed": "La photo n'a pas pu être enregistrée. Réessayez.",
+    "hintTouch": "Touchez le cercle pour ajouter une photo."
   },
   "teamReach": {
     "title": "Toujours là pour vous",
@@ -1907,7 +1919,8 @@
         "body": "Votre vol {route} du {when} sur {aircraft} est planifié. Vous le retrouverez dans vos prochains vols.",
         "cta": "Voir mes vols"
       }
-    }
+    },
+    "greetingName": "Bonjour {name},"
   },
   "requestFlight": {
     "open": "Demander un vol",
@@ -2345,5 +2358,12 @@
   "financeAccess": {
     "title": "Les finances ne font pas partie de votre accès",
     "body": "Le propriétaire du compte peut vous y donner accès depuis ses paramètres, ou l'équipe Univair sur demande."
+  },
+  "notFound": {
+    "metaTitle": "Page introuvable",
+    "eyebrow": "Erreur 404",
+    "title": "Cette page n'existe pas",
+    "body": "Le lien est peut-être incomplet, ou la page a été déplacée. Revenez à votre espace pour retrouver votre chemin.",
+    "home": "Retour à mon espace"
   }
 }

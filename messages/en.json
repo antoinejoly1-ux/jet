@@ -98,7 +98,9 @@
       "emailTaken": "An account already exists for this email. Sign in instead.",
       "invalidLink": "This link is invalid or expired. Ask for a new one.",
       "fillBoth": "Enter your email and password.",
-      "fillAll": "Enter your name and email."
+      "fillAll": "Enter your name and email.",
+      "linkUsed": "This link was already used or has expired. Ask for a new one below.",
+      "linkExpired": "This link was already used or has expired. Sign in below; if needed, we'll send you a new confirmation link."
     },
     "showPassword": "Show password",
     "hidePassword": "Hide password",
@@ -107,7 +109,13 @@
     "inviteOnlyTitle": "Access is by invitation",
     "inviteOnlyBody": "Use the email your invitation was sent to. Without one, your account waits until the team links it to your aircraft.",
     "emailHint": "The same email as your invitation.",
-    "callTeam": "Call the team · {phone}"
+    "callTeam": "Call the team · {phone}",
+    "resetInvalidTitle": "This link no longer works",
+    "resetInvalidBody": "Reset links expire after an hour and work only once. Ask for a new one: it only takes a second.",
+    "requestNewLink": "Ask for a new link",
+    "resetSuccess": "Your password was changed. Sign in with the new one.",
+    "wrongAddress": "Wrong address?",
+    "startOver": "Start over"
   },
   "twoFactor": {
     "invalidCode": "Invalid code. Try again.",
@@ -159,7 +167,10 @@
     "setUp": "Turn on",
     "openInApp": "Open in authenticator app",
     "enableFailed": "Couldn't start setup. Try again.",
-    "tooManyAttempts": "Too many attempts. Sign in again to start a new check."
+    "tooManyAttempts": "Too many attempts. Sign in again to start a new check.",
+    "notYou": "Not you?",
+    "signOut": "Sign out",
+    "codesFileName": "univair-backup-codes.txt"
   },
   "invite": {
     "unavailableTitle": "Invitation unavailable",
@@ -1666,9 +1677,9 @@
       "strong": "like your aircraft."
     },
     "pending": {
-      "eyebrow": "Almost ready",
-      "light": "Your access",
-      "strong": "is being prepared."
+      "eyebrow": "Your access",
+      "light": "Almost there.",
+      "strong": "We'll take care of the rest."
     }
   },
   "welcome": {
@@ -1744,7 +1755,7 @@
         "title": "Aircraft: everything is filed by plane",
         "body": "Open an aircraft to find its owners and their shares, its rates, maintenance, reserves and photo.",
         "a": "Invite an owner from their page",
-        "b": "⌘K finds any aircraft, owner or flight"
+        "b": "Search (⌘K or Ctrl+K) finds an aircraft, an owner or a flight."
       },
       "ops": {
         "caption": "Flights and the shop, in one place.",
@@ -1758,7 +1769,7 @@
         "title": "Flight reports and invoices",
         "body": "The pilot reports the flight; you check the figures and receipts, then the invoice is prepared with the right rates and taxes.",
         "a": "Maintenance reserves fill with every hour billed",
-        "b": "A correction is a reversing entry, never an erase"
+        "b": "Nothing is erased: every correction leaves a trace."
       },
       "report": {
         "caption": "After each flight, two minutes.",
@@ -1793,7 +1804,7 @@
         "title": "GST and QST included",
         "body": "Taxes are calculated by the flight's rules, with your registration numbers on every invoice.",
         "a": "Rates come from the aircraft, up to date",
-        "b": "An invoice is corrected by voiding it, never by erasing"
+        "b": "Nothing is erased: every correction leaves a trace."
       },
       "results": {
         "caption": "Where the company stands.",
@@ -1810,11 +1821,11 @@
       "inApp": "You can also write to us right in the app.",
       "eyebrowStaff": "Your colleagues",
       "titleStaff": "The team you work with.",
-      "bodyStaff": "Owners see these faces when they call or write to us. Add your photo so they recognize you too."
+      "bodyStaff": "Owners see these faces when they call or write to us."
     },
     "ready": {
       "eyebrow": "All set",
-      "title": "Welcome aboard, {name}.",
+      "title": "Over to you, {name}.",
       "body": "Your space is waiting.",
       "bodyAircraft": "{registration} is waiting for you.",
       "enter": "Enter my space",
@@ -1843,7 +1854,8 @@
     "saving": "Saving…",
     "hint": "Drop a photo here, or tap the circle.",
     "notAnImage": "Choose an image (JPG, PNG or HEIC).",
-    "failed": "The photo couldn't be saved. Try again."
+    "failed": "The photo couldn't be saved. Try again.",
+    "hintTouch": "Tap the circle to add a photo."
   },
   "teamReach": {
     "title": "Always here for you",
@@ -1907,7 +1919,8 @@
         "body": "Your flight {route} on {when} aboard {aircraft} is scheduled. You'll find it in your upcoming flights.",
         "cta": "View my flights"
       }
-    }
+    },
+    "greetingName": "Hello {name},"
   },
   "requestFlight": {
     "open": "Request a flight",
@@ -2345,5 +2358,12 @@
   "financeAccess": {
     "title": "Finances aren't part of your access",
     "body": "The account's owner can give you access from their settings, or the Univair team on request."
+  },
+  "notFound": {
+    "metaTitle": "Page not found",
+    "eyebrow": "Error 404",
+    "title": "This page doesn't exist",
+    "body": "The link may be incomplete, or the page has moved. Head back to your space to find your way.",
+    "home": "Back to my space"
   }
 }

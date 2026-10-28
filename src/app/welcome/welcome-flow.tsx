@@ -46,7 +46,7 @@ const TOURS: Record<WelcomeAudience, { key: string; scene: Scene; finance?: bool
 const STEP_SCENE: Record<Exclude<Step, "tour" | "ready">, Scene> = {
   welcome: "hangar",
   name: "cabinWindow",
-  team: "toast",
+  team: "hangarCrew",
 };
 
 export function WelcomeFlow({
@@ -138,7 +138,14 @@ export function WelcomeFlow({
   return (
     <div className="bg-background text-text flex min-h-dvh flex-col lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       {/* The photograph: full height beside the content on desktop, a band on top on phones. */}
-      <div className="relative h-[38vh] min-h-64 overflow-hidden lg:sticky lg:top-0 lg:m-4 lg:h-[calc(100dvh-2rem)] lg:rounded-[28px]">
+      <div
+        className={cn(
+          "relative overflow-hidden lg:sticky",
+          // On a phone the band shrinks on the steps with a form or a list, so their button stays in view.
+          step === "welcome" || step === "ready" ? "h-[38vh] min-h-64" : "h-[24vh] min-h-44",
+          "lg:top-0 lg:m-4 lg:h-[calc(100dvh-2rem)] lg:min-h-0 lg:rounded-[28px]",
+        )}
+      >
         <div className="absolute inset-0">
           <Image
             key={photo.src}
@@ -161,9 +168,12 @@ export function WelcomeFlow({
           </span>
         </div>
         {step === "tour" ? (
-          <p key={slide} className="animate-rise absolute inset-x-6 bottom-6 text-white lg:inset-x-10 lg:bottom-10">
+          <p
+            key={slide}
+            className="animate-rise absolute inset-x-6 bottom-5 text-white sm:bottom-6 lg:inset-x-10 lg:bottom-10"
+          >
             <span className="eyebrow text-white/70">{t("tour.count", { n: slide + 1, total: tour.length })}</span>
-            <span className="mt-2 block max-w-md text-2xl font-light lg:text-4xl">
+            <span className="mt-2 block max-w-md text-xl font-light sm:text-2xl lg:text-4xl">
               {t(`tour.${tour[slide]!.key}.caption`)}
             </span>
           </p>
@@ -184,7 +194,8 @@ export function WelcomeFlow({
               />
             ))}
           </ol>
-          {step !== "welcome" && step !== "ready" ? (
+          {/* Not on the name step: skipping there would silently drop what was typed. */}
+          {step !== "welcome" && step !== "name" && step !== "ready" ? (
             <button
               type="button"
               onClick={() => go("ready")}
@@ -221,14 +232,13 @@ export function WelcomeFlow({
                 <p className="text-muted mt-4 font-light">{t("name.body")}</p>
               </div>
               {/* The face first: the team will recognize them. A photo is optional. */}
-              <div className="flex items-center gap-5">
-                <AvatarPicker
-                  initialImage={avatar}
-                  initials={`${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase()}
-                  onSaved={setAvatar}
-                  size="md"
-                />
-              </div>
+              <AvatarPicker
+                initialImage={avatar}
+                initials={`${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase()}
+                onSaved={setAvatar}
+                size="md"
+                align="start"
+              />
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field
                   id="firstName"
@@ -286,17 +296,6 @@ export function WelcomeFlow({
                     </li>
                   ))}
                 </ul>
-              </div>
-              <div className="flex gap-2" aria-hidden>
-                {tour.map((s, i) => (
-                  <span
-                    key={s.key}
-                    className={cn(
-                      "h-1 rounded-full transition-all duration-500",
-                      i === slide ? "bg-accent w-8" : "bg-border w-3",
-                    )}
-                  />
-                ))}
               </div>
               <Nav
                 onBack={back}
@@ -386,7 +385,8 @@ function Nav({
   quiet?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3 pt-2">
+    // On a phone the buttons stay at the foot of the screen, clear of the home indicator.
+    <div className="bg-background/95 sticky bottom-0 z-10 -mx-6 flex items-center gap-3 px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:static sm:mx-0 sm:bg-transparent sm:px-0 sm:pt-2 sm:pb-0 sm:backdrop-blur-none">
       <Button type="button" variant="ghost" onClick={onBack} aria-label={backLabel}>
         <ArrowLeft aria-hidden />
       </Button>

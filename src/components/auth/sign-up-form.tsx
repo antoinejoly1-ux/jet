@@ -25,7 +25,10 @@ export function SignUpForm({
 }) {
   const t = useTranslations("auth");
   const [error, setError] = useState<string | null>(null);
+  const [tooShort, setTooShort] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
+  /** What was typed, kept so « Recommencer » brings it back to fix the address. */
+  const [typed, setTyped] = useState({ name: "", email: defaultEmail ?? "" });
   const [pending, setPending] = useState(false);
   const invited = Boolean(defaultEmail);
 
@@ -35,16 +38,15 @@ export function SignUpForm({
     const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
+    setTyped({ name, email });
     if (!name || !email) {
       setError(t("errors.fillAll"));
       return;
     }
-    if (password.length < 10) {
-      setError(t("errors.passwordTooShort"));
-      return;
-    }
-    setPending(true);
     setError(null);
+    setTooShort(password.length < 10);
+    if (password.length < 10) return;
+    setPending(true);
     const { error } = await authClient.signUp.email({ name, email, password, callbackURL: next });
     setPending(false);
     if (error) setError(error.code === "USER_ALREADY_EXISTS" ? t("errors.emailTaken") : t("errors.generic"));
@@ -59,7 +61,17 @@ export function SignUpForm({
         </span>
         <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("checkInboxTitle")}</h1>
         <p className="text-muted text-[15px] leading-relaxed">{t("checkInboxBody", { email: sentTo })}</p>
-        <Link href="/sign-in" className="text-accent text-sm font-semibold hover:underline">
+        <p className="text-muted text-sm">
+          {t("wrongAddress")}{" "}
+          <button
+            type="button"
+            onClick={() => setSentTo(null)}
+            className="text-accent -my-3 inline-block py-3 font-semibold hover:underline"
+          >
+            {t("startOver")}
+          </button>
+        </p>
+        <Link href="/sign-in" className="text-accent -my-3 self-start py-3 text-sm font-semibold hover:underline">
           {t("backToSignIn")}
         </Link>
       </div>
@@ -88,7 +100,7 @@ export function SignUpForm({
       )}
       {error ? <Alert tone="danger">{error}</Alert> : null}
       <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
-        <Field id="name" name="name" autoComplete="name" label={t("name")} required />
+        <Field id="name" name="name" autoComplete="name" label={t("name")} defaultValue={typed.name} required />
         <Field
           id="email"
           name="email"
@@ -96,7 +108,7 @@ export function SignUpForm({
           autoComplete="email"
           inputMode="email"
           label={t("email")}
-          defaultValue={defaultEmail}
+          defaultValue={typed.email}
           hint={invited ? undefined : t("emailHint")}
           required
         />
@@ -106,6 +118,7 @@ export function SignUpForm({
           autoComplete="new-password"
           label={t("password")}
           hint={t("passwordHint")}
+          error={tooShort ? t("errors.passwordTooShort") : undefined}
           required
         />
         <Button type="submit" size="lg" disabled={pending}>
@@ -124,7 +137,10 @@ export function SignUpForm({
       ) : null}
       <p className="border-border text-muted border-t pt-6 text-sm">
         {t("haveAccount")}{" "}
-        <Link href={`/sign-in?next=${encodeURIComponent(next)}`} className="text-accent font-semibold hover:underline">
+        <Link
+          href={`/sign-in?next=${encodeURIComponent(next)}`}
+          className="text-accent -my-3 inline-block py-3 font-semibold hover:underline"
+        >
           {t("signIn")}
         </Link>
       </p>
