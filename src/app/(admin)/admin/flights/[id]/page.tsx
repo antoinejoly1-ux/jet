@@ -27,6 +27,7 @@ import { db } from "@/lib/db";
 import { formatHours, formatMoney } from "@/lib/format";
 import { NotFoundError } from "@/lib/services/errors";
 import { getFlightDetail } from "@/lib/services/flight-detail";
+import { FLIGHT_STATUS_TONE, flightDisplayStatus } from "@/lib/flight-status";
 import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { cancelFlightAction, completeFlightAction } from "../actions";
 
@@ -34,7 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("flightDetail"))("title") };
 }
 
-const STATUS_TONE = { scheduled: "accent", completed: "success", cancelled: "neutral" } as const;
 const REPORT_TONE = { submitted: "accent", returned: "warning", approved: "success" } as const;
 
 /** A flight opened from the list: the route on the map, the times, and what the pilot reported. */
@@ -60,6 +60,8 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
     });
   const time = (d: Date) => format.dateTime(d, { hour: "numeric", minute: "2-digit", timeZone: OPERATOR_TIME_ZONE });
   const canOperate = can(viewer, "operations:write");
+  // The same status the list and the aircraft page show: « En vol », « À clôturer »…
+  const shown = flightDisplayStatus(flight);
   const minutes =
     flight.flightMinutes ??
     (flight.arrivesAt ? Math.round((flight.arrivesAt.getTime() - flight.departsAt.getTime()) / 60_000) : null);
@@ -98,7 +100,7 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
                   <LiveDot tone="live" /> {t("inAir")}
                 </span>
               ) : (
-                <Badge tone={STATUS_TONE[flight.status]}>{tf(`statuses.${flight.status}`)}</Badge>
+                <Badge tone={FLIGHT_STATUS_TONE[shown]}>{tf(`statuses.${shown}`)}</Badge>
               )}
             </p>
             <h1 className="mt-2 text-3xl font-light tracking-tight sm:text-[2.6rem]">
@@ -112,6 +114,7 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
             <FlightRowActions
               id={flight.id}
               status={flight.status}
+              departed={flight.departsAt <= new Date()}
               complete={completeFlightAction.bind(null, flight.id)}
               cancel={cancelFlightAction.bind(null, flight.id)}
               plannedMinutes={minutes}
@@ -146,7 +149,7 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
               ) : null}
             </Fact>
             <Fact icon={<UserRound className="size-4" />} label={t("billedTo")}>
-              {flight.ownerName ?? t("charter")}
+              {flight.ownerName ?? tf("noShare")}
             </Fact>
           </dl>
         </Card>

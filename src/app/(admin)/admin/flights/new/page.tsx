@@ -42,7 +42,7 @@ export default async function NewFlightPage({ searchParams }: PageProps<"/admin/
       ? {
           // The return leg: same aircraft and owner, the airports swapped.
           aircraftId: outbound.aircraftId,
-          shareId: outbound.shareId ?? "",
+          shareId: outbound.shareId ?? "none",
           fromAirport: outbound.toAirport,
           toAirport: outbound.fromAirport,
           departsAt: "",

@@ -8,5 +8,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  return <NotificationsPage viewer={await requireStaff()} />;
+  return <NotificationsPage viewer={await requireStaff()} staff />;
 }

@@ -6,9 +6,9 @@
  * block availability.
  */
 import "server-only";
-import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
-import { aircraft, maintenanceEvents, shares } from "@/lib/db/schema";
+import { aircraft, auditLog, maintenanceEvents, shares, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { maintenanceInput, type MaintenanceInput } from "@/lib/validation/operations";
 import { OPERATOR_TIME_ZONE } from "@/lib/time";
@@ -162,6 +162,7 @@ export async function setMaintenanceStatus(db: Db, actor: Actor, id: string, sta
   authorize(actor, "operations:write");
   return db.transaction(async (tx) => {
     const before = await lock(tx, id);
+    if (before.status === "review" && status === "done") await assertSecondPair(tx, actor, id);
     const row = await applyMaintenanceStatus(tx, before, status);
     await recordAudit(tx, {
       actorUserId: actor.id,
@@ -173,6 +174,33 @@ export async function setMaintenanceStatus(db: Db, actor: Actor, id: string, sta
     });
     return row;
   });
+}
+
+/**
+ * Four eyes: whoever sent the work to review doesn't approve it too, unless
+ * nobody else on the team could (no other admin, finance or dispatch login).
+ */
+async function assertSecondPair(tx: Tx, actor: Actor, id: string) {
+  const [sent] = await tx
+    .select({ by: auditLog.actorUserId })
+    .from(auditLog)
+    .where(
+      and(
+        eq(auditLog.entityType, "maintenance"),
+        eq(auditLog.entityId, id),
+        eq(auditLog.action, "maintenance.status"),
+        sql`${auditLog.after}->>'status' = 'review'`,
+      ),
+    )
+    .orderBy(desc(auditLog.createdAt))
+    .limit(1);
+  if (sent?.by !== actor.id) return;
+  const [other] = await tx
+    .select({ id: user.id })
+    .from(user)
+    .where(and(inArray(user.staffRole, ["admin", "finance", "dispatcher"]), ne(user.id, actor.id)))
+    .limit(1);
+  if (other) throw new ConflictError("maintenance_self_review");
 }
 
 async function lock(tx: Tx, id: string) {

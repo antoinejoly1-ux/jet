@@ -3,12 +3,13 @@
 import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/form-alert";
 import { formatHours } from "@/lib/format";
 import { idle, type FormState } from "@/lib/forms";
 import { parseDurationToMinutes } from "@/lib/validation/operations";
+import { cn } from "@/lib/utils";
 
 type Action = (s: FormState, d: FormData) => Promise<FormState>;
 
@@ -22,6 +23,7 @@ const asHm = (minutes: number) => `${Math.floor(minutes / 60)}:${String(minutes 
 export function FlightRowActions({
   id,
   status,
+  departed,
   complete,
   cancel,
   plannedMinutes,
@@ -30,6 +32,8 @@ export function FlightRowActions({
 }: {
   id: string;
   status: "scheduled" | "completed" | "cancelled";
+  /** « Terminer » only once the flight has departed: the service refuses it before. */
+  departed: boolean;
   complete: Action;
   cancel: Action;
   /** Scheduled arrival minus departure, to start the flight time from. */
@@ -39,10 +43,17 @@ export function FlightRowActions({
   startOpen?: boolean;
 }) {
   const t = useTranslations("flights");
-  const tc = useTranslations("common");
   const locale = useLocale();
   const [mode, setMode] = useState<"idle" | "complete" | "cancel">(startOpen ? "complete" : "idle");
-  const [menu, setMenu] = useState(false);
+  const [menu, setMenu] = useState<null | "down" | "up">(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  // Near the bottom of the window the menu opens upward instead of off-screen.
+  const toggleMenu = () => {
+    if (menu) return setMenu(null);
+    const box = trigger.current?.getBoundingClientRect();
+    setMenu(box && window.innerHeight - box.bottom < 140 ? "up" : "down");
+  };
+
   const [entered, setEntered] = useState(plannedMinutes ? asHm(plannedMinutes) : "");
   const minutes = parseDurationToMinutes(entered);
   const [completeState, completeAction, completing] = useActionState(async (s: FormState, d: FormData) => {
@@ -91,7 +102,7 @@ export function FlightRowActions({
           {t("complete")}
         </Button>
         <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
-          {tc("cancel")}
+          {t("close")}
         </Button>
       </form>
     );
@@ -114,7 +125,7 @@ export function FlightRowActions({
           {status === "completed" ? t("cancelCompleted") : t("cancelFlight")}
         </Button>
         <Button type="button" size="sm" variant="ghost" onClick={() => setMode("idle")}>
-          {tc("cancel")}
+          {t("close")}
         </Button>
       </form>
     );
@@ -122,23 +133,29 @@ export function FlightRowActions({
   // The main action stays in view; editing and cancelling wait behind "⋯".
   return (
     <div className="relative flex flex-wrap items-center gap-1">
-      {status === "scheduled" ? (
+      {status === "scheduled" && departed ? (
         <Button type="button" size="sm" variant="secondary" onClick={() => setMode("complete")}>
           {t("complete")}
         </Button>
       ) : null}
       <Button
+        ref={trigger}
         type="button"
         size="icon"
         variant="ghost"
         aria-label={t("moreActions")}
-        aria-expanded={menu}
-        onClick={() => setMenu((m) => !m)}
+        aria-expanded={Boolean(menu)}
+        onClick={toggleMenu}
       >
         <MoreHorizontal aria-hidden />
       </Button>
       {menu ? (
-        <div className="border-border bg-surface shadow-float absolute top-full right-0 z-20 mt-1 flex w-52 flex-col rounded-[14px] border p-1">
+        <div
+          className={cn(
+            "border-border bg-surface shadow-float absolute right-0 z-20 flex w-52 flex-col rounded-[14px] border p-1",
+            menu === "up" ? "bottom-full mb-1" : "top-full mt-1",
+          )}
+        >
           {status === "scheduled" ? (
             <Link
               href={`/admin/flights/${id}/edit`}
@@ -150,7 +167,7 @@ export function FlightRowActions({
           <button
             type="button"
             onClick={() => {
-              setMenu(false);
+              setMenu(null);
               setMode("cancel");
             }}
             className="text-danger hover:bg-surface-muted flex h-11 items-center rounded-[10px] px-3 text-left text-sm"

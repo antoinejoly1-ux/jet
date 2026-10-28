@@ -10,10 +10,12 @@ import { notificationValues } from "@/lib/notification-types";
 type Item = Awaited<ReturnType<typeof listNotifications>>[number];
 
 /** The bell's page: newest first, unread ones marked, each a link to what it's about. */
-export async function NotificationList({ items }: { items: Item[] }) {
+export async function NotificationList({ items, staff = false }: { items: Item[]; staff?: boolean }) {
   const t = await getTranslations("notifications");
   const format = await getFormatter();
-  if (items.length === 0) return <EmptyState icon={Bell} title={t("emptyTitle")} body={t("emptyBody")} />;
+  // The team's bell isn't about invoices and budgets: it says what it does carry.
+  if (items.length === 0)
+    return <EmptyState icon={Bell} title={t("emptyTitle")} body={t(staff ? "emptyBodyStaff" : "emptyBody")} />;
   return (
     <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
       {items.map((n) => (

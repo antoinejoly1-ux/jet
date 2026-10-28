@@ -106,7 +106,7 @@ export function EndShareForm({
 
   if (!open)
     return (
-      <Button type="button" variant="ghost" size="sm" onClick={() => setOpen(true)}>
+      <Button type="button" variant="ghost" size="sm" className="whitespace-nowrap" onClick={() => setOpen(true)}>
         {t("endShare")}
       </Button>
     );
@@ -116,7 +116,7 @@ export function EndShareForm({
       action={formAction}
       role="group"
       aria-label={t("endConfirm", { name: ownerName })}
-      className="flex flex-wrap items-center gap-2"
+      className="border-border flex flex-wrap items-center gap-2 border-t pt-3"
     >
       <FormAlert state={state} />
       <label className="text-sm font-medium" htmlFor={`end-${ownerName}`}>

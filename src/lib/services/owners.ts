@@ -8,10 +8,28 @@ import { ownerInput, type OwnerInput } from "@/lib/validation/admin";
 import { recordAudit } from "./audit";
 import { NotFoundError, ConflictError } from "./errors";
 
-/** Every active owner with the aircraft they hold shares in. Staff only. */
-export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}) {
+export type OwnerAccess = "active" | "invited" | "not_invited";
+
+const hasMembers = sql`exists (select 1 from owner_members m where m.owner_id = ${owners.id})`;
+const hasPendingInvitation = sql`exists (select 1 from invitations i where i.owner_id = ${owners.id}
+  and i.accepted_at is null and i.revoked_at is null and i.expires_at > now())`;
+
+/**
+ * Every active owner with the aircraft they hold shares in. Staff only.
+ * `access` narrows to owners with a login ("active"), with an invitation on
+ * its way ("invited"), or with neither ("not_invited").
+ */
+export async function listOwners(db: Db, actor: Actor, opts: { q?: string; access?: OwnerAccess } = {}) {
   authorize(actor, "owners:read");
   const q = opts.q?.trim();
+  const access =
+    opts.access === "active"
+      ? hasMembers
+      : opts.access === "invited"
+        ? and(sql`not ${hasMembers}`, hasPendingInvitation)
+        : opts.access === "not_invited"
+          ? and(sql`not ${hasMembers}`, sql`not ${hasPendingInvitation}`)
+          : undefined;
   return db
     .select({
       id: owners.id,
@@ -21,6 +39,7 @@ export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}
       aircraft: sql<string[]>`coalesce(array_agg(${aircraft.registration} order by ${aircraft.registration})
         filter (where ${aircraft.id} is not null and (${shares.endsOn} is null or ${shares.endsOn} > current_date)), '{}')`,
       members: sql<number>`(select count(*)::int from owner_members m where m.owner_id = ${owners.id})`,
+      invited: sql<boolean>`${hasPendingInvitation}`,
       image: sql<string | null>`(select u.image from owner_members m join users u on u.id = m.user_id
         where m.owner_id = ${owners.id} and u.image is not null order by (m.role = 'owner') desc limit 1)`,
     })
@@ -30,6 +49,7 @@ export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}
     .where(
       and(
         isNull(owners.deletedAt),
+        access,
         q
           ? or(ilike(owners.legalName, `%${q}%`), ilike(owners.email, `%${q}%`), ilike(aircraft.registration, `%${q}%`))
           : undefined,

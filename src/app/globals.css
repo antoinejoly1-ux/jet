@@ -229,6 +229,22 @@
   animation-delay: 300ms;
 }
 
+/* A row just saved: it glows in the accent, then settles back. */
+@keyframes highlight {
+  from,
+  40% {
+    background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+}
+@utility animate-highlight {
+  animation: highlight 2.4s var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-highlight {
+    animation-duration: 0.01s;
+  }
+}
+
 /* A live dot: a solid centre and a ring that keeps breathing. */
 @keyframes live-ping {
   0% {
@@ -243,8 +259,43 @@
 }
 
 /* ---------- Live map ---------- */
+/* MapLibre's controls ship white with dark icons: they follow the theme here. */
+:root {
+  --map-icon-filter: invert(1);
+}
+:root[data-theme="light"] {
+  --map-icon-filter: none;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --map-icon-filter: none;
+  }
+}
 .um-map .maplibregl-ctrl-attrib {
   font-size: 10px;
+}
+.um-map .maplibregl-ctrl-attrib,
+.um-map .maplibregl-ctrl-attrib.maplibregl-compact {
+  background-color: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--text-muted);
+}
+.um-map .maplibregl-ctrl-attrib a {
+  color: var(--text-muted);
+}
+.um-map .maplibregl-ctrl-group {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.um-map .maplibregl-ctrl-group button + button {
+  border-top-color: var(--border);
+}
+.um-map .maplibregl-ctrl-group button:not(:disabled):hover {
+  background-color: var(--surface-muted);
+}
+.um-map .maplibregl-ctrl-icon,
+.um-map .maplibregl-ctrl-attrib-button {
+  filter: var(--map-icon-filter);
 }
 .um-plane {
   position: relative;

@@ -42,11 +42,35 @@ export function FlightForm({
   const tf = useTranslations("formErrors");
   const [state, formAction, pending] = useActionState(action, idle);
   const [aircraftId, setAircraftId] = useState(submitted(state, "aircraftId", defaults?.aircraftId));
-  const err = (f: string) => (state.status === "error" && state.fields?.[f] ? tf(`fields.${f}`) : undefined);
+  // A field's error goes away as soon as it's changed; a new submit brings back whatever still fails.
+  const [cleared, setCleared] = useState<{ for: FormState; fields: string[] }>({ for: state, fields: [] });
+  const fixed = cleared.for === state ? cleared.fields : [];
+  const err = (f: string) =>
+    state.status === "error" && state.fields?.[f] && !fixed.includes(f) ? tf(`fields.${f}`) : undefined;
   const planeShares = shares.filter((s) => s.aircraftId === aircraftId);
+  // Who pays: the saved choice for this aircraft, the only share, convoyage when the aircraft has no
+  // shares, else nothing until someone picks (« Choisir qui paie les heures »).
+  const shareDefault =
+    defaults?.shareId && aircraftId === defaults.aircraftId
+      ? defaults.shareId
+      : planeShares.length === 1
+        ? planeShares[0]!.id
+        : aircraftId && planeShares.length === 0
+          ? "none"
+          : "";
 
   return (
-    <form action={formAction} className="flex max-w-2xl flex-col gap-5" noValidate>
+    <form
+      action={formAction}
+      className="flex max-w-2xl flex-col gap-5"
+      noValidate
+      onChange={(e) => {
+        const target = e.target as unknown as HTMLInputElement;
+        // Airport pickers type into an unnamed box: their wrapper says which field it is.
+        const name = target.name || target.closest<HTMLElement>("[data-field]")?.dataset.field;
+        if (name && !fixed.includes(name)) setCleared({ for: state, fields: [...fixed, name] });
+      }}
+    >
       <FormAlert state={state} />
       {requestId ? <input type="hidden" name="requestId" value={requestId} /> : null}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -73,36 +97,39 @@ export function FlightForm({
           id="shareId"
           name="shareId"
           label={t("share")}
-          // One share on the aircraft: it's the one.
-          defaultValue={submitted(
-            state,
-            "shareId",
-            defaults?.shareId ?? (planeShares.length === 1 ? planeShares[0]!.id : ""),
-          )}
+          defaultValue={submitted(state, "shareId", shareDefault)}
           error={err("shareId")}
           disabled={!aircraftId}
+          required
         >
-          <option value="">{t("noShare")}</option>
+          <option value="" disabled>
+            {t("chooseShare")}
+          </option>
+          <option value="none">{t("noShare")}</option>
           {planeShares.map((s) => (
             <option key={s.id} value={s.id}>
               {s.label}
             </option>
           ))}
         </SelectField>
-        <AirportField
-          name="fromAirport"
-          label={t("from")}
-          defaultValue={submitted(state, "fromAirport", defaults?.fromAirport)}
-          error={err("fromAirport")}
-          required
-        />
-        <AirportField
-          name="toAirport"
-          label={t("to")}
-          defaultValue={submitted(state, "toAirport", defaults?.toAirport)}
-          error={err("toAirport")}
-          required
-        />
+        <div data-field="fromAirport">
+          <AirportField
+            name="fromAirport"
+            label={t("from")}
+            defaultValue={submitted(state, "fromAirport", defaults?.fromAirport)}
+            error={err("fromAirport")}
+            required
+          />
+        </div>
+        <div data-field="toAirport">
+          <AirportField
+            name="toAirport"
+            label={t("to")}
+            defaultValue={submitted(state, "toAirport", defaults?.toAirport)}
+            error={err("toAirport")}
+            required
+          />
+        </div>
         <Field
           id="departsAt"
           name="departsAt"

@@ -322,3 +322,11 @@
     animation: none !important;
   }
 }
+
+/* ledger: the open book's right-hand page lifts, as if about to turn */
+.ai-leaf {
+  transform-origin: left center;
+}
+:is(.ai:hover, .ai-trigger:hover, .ai-trigger:focus-visible) .ai-leaf {
+  transform: translateY(-1.5px) skewY(-4deg);
+}

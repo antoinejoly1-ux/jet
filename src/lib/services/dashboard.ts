@@ -283,6 +283,7 @@ export async function getOwnerActivity(db: Db, actor: Actor, { limit = 8 } = {})
 export type QueueKey =
   | "flightReports"
   | "toInvoice"
+  | "overdueInvoices"
   | "flightsToClose"
   | "flightRequests"
   | "awaitingReply"
@@ -375,13 +376,22 @@ export async function getAdminQueue(db: Db, actor: Actor, now = new Date()) {
           )
       : zero,
   ]);
-  const [reports, toInvoice] = await Promise.all([
+  const money = can(actor, "finance:write");
+  const [reports, toInvoice, [overdueInvoices]] = await Promise.all([
     countReportsWaiting(db, actor),
-    can(actor, "finance:write") ? listToInvoice(db, actor).then((r) => r.length) : 0,
+    money ? listToInvoice(db, actor).then((r) => r.length) : 0,
+    // Issued, unpaid and past their due date: someone should follow up.
+    money
+      ? db
+          .select({ n: count() })
+          .from(invoices)
+          .where(and(eq(invoices.status, "issued"), sql`${invoices.dueOn} < current_date`))
+      : zero,
   ]);
   const rows: { key: QueueKey; count: number; href: string }[] = [
     { key: "flightReports", count: reports, href: "/admin/flight-reports" },
     { key: "toInvoice", count: toInvoice, href: "/admin/flight-reports#to-invoice" },
+    { key: "overdueInvoices", count: overdueInvoices!.n, href: "/admin/invoices?status=issued" },
     { key: "flightsToClose", count: toClose!.n, href: "/admin/flights#to-close" },
     { key: "flightRequests", count: requests!.n, href: "/admin/messages" },
     { key: "awaitingReply", count: awaiting!.n, href: "/admin/messages" },
