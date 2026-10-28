@@ -37,7 +37,7 @@ export default async function EditFlightPage({ params }: PageProps<"/admin/fligh
         {...options}
         defaults={{
           aircraftId: flight.aircraftId,
-          shareId: flight.shareId ?? "",
+          shareId: flight.shareId ?? "none",
           fromAirport: flight.fromAirport,
           toAirport: flight.toAirport,
           departsAt: utcToZonedLocal(flight.departsAt),

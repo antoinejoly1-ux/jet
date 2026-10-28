@@ -1,4 +1,4 @@
-import { AlertTriangle, BarChart3, Building2, ChevronRight, MailPlus, Pencil, Wrench } from "lucide-react";
+import { AlertTriangle, BarChart3, Building2, ChevronLeft, ChevronRight, MailPlus, Pencil, Wrench } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -35,6 +35,7 @@ import { listMaintenance } from "@/lib/services/maintenance";
 import { listOwners } from "@/lib/services/owners";
 import { hourlyTotal, listRates, perHour, RATE_PARTS } from "@/lib/services/rates";
 import { getAircraftReserves } from "@/lib/services/reserves";
+import { FLIGHT_STATUS_TONE, flightDisplayStatus } from "@/lib/flight-status";
 import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 import {
   addBlockAction,
@@ -55,7 +56,6 @@ export async function generateMetadata({ params }: PageProps<"/admin/aircraft/[i
 }
 
 const STATUS_TONE = { available: "success", flying: "accent", maintenance: "warning", inactive: "neutral" } as const;
-const FLIGHT_TONE = { scheduled: "accent", completed: "success", cancelled: "neutral" } as const;
 const JOB_TONE = {
   planned: "accent",
   in_progress: "warning",
@@ -160,6 +160,13 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
 
   return (
     <>
+      <Link
+        href="/admin/aircraft"
+        className="text-muted hover:text-text mb-2 -ml-1 inline-flex h-11 items-center gap-1 text-sm"
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        {th("back")}
+      </Link>
       {/* The aircraft itself, large. */}
       <div className="bg-surface-muted relative -mx-4 mb-8 h-80 overflow-hidden sm:mx-0 sm:h-72 sm:rounded-[28px] lg:h-80">
         <Image
@@ -250,7 +257,7 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
                         </Button>
                       ) : null}
                       {canWrite ? (
-                        <span className="ml-auto">
+                        <span className="ml-auto has-[form]:ml-0 has-[form]:basis-full">
                           <EndShareForm action={endShareAction.bind(null, plane.id, s.id)} ownerName={s.ownerName} />
                         </span>
                       ) : null}
@@ -472,7 +479,9 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
                                 {when(f.departsAt)} · {f.ownerName ?? tf("noShare")}
                               </span>
                             </span>
-                            <Badge tone={FLIGHT_TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
+                            <Badge tone={FLIGHT_STATUS_TONE[flightDisplayStatus(f, now)]}>
+                              {tf(`statuses.${flightDisplayStatus(f, now)}`)}
+                            </Badge>
                           </Link>
                         </li>
                       ))}
@@ -495,7 +504,12 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
                       <span className="min-w-0 flex-1">
                         <span className="block text-sm font-medium">{j.title}</span>
                         <span className="text-muted block text-xs">
-                          {j.startsAt ? when(j.startsAt) : j.dueOn ? day(j.dueOn) : ""}
+                          {[
+                            j.startsAt ? when(j.startsAt) : null,
+                            j.dueOn ? tm("dueOnDate", { date: day(j.dueOn) }) : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </span>
                       </span>
                       <Badge tone={JOB_TONE[j.status]}>{tm(`statuses.${j.status}`)}</Badge>
@@ -518,6 +532,7 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
               <Card>
                 <AvailabilityCalendar
+                  staff
                   month={month}
                   periods={periods}
                   hrefFor={(m) => `/admin/aircraft/${plane.id}?month=${m}#availability`}

@@ -1,4 +1,4 @@
-import { Eye, MailPlus, MessageSquare, Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, Eye, MailPlus, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -41,6 +41,13 @@ export default async function OwnerDetailPage({ params }: PageProps<"/admin/owne
 
   return (
     <>
+      <Link
+        href="/admin/owners"
+        className="text-muted hover:text-text mb-2 -ml-1 inline-flex h-11 items-center gap-1 text-sm"
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        {t("back")}
+      </Link>
       <PageHeader
         title={owner.legalName}
         description={`${t(`types.${owner.type}`)}${owner.email ? ` · ${owner.email}` : ""}`}
@@ -136,7 +143,8 @@ export default async function OwnerDetailPage({ params }: PageProps<"/admin/owne
         <Card className="lg:col-span-2">
           <CardTitle className="mb-3">{t("loginsTitle")}</CardTitle>
           {members.length === 0 && pendingInvitations.length === 0 ? (
-            <p className="text-muted text-sm">{t("noLogins")}</p>
+            // Only those who can invite are told to send an invitation.
+            <p className="text-muted text-sm">{can(viewer, "owners:invite") ? t("noLogins") : t("noLoginsYet")}</p>
           ) : (
             <ul className="divide-border divide-y">
               {members.map((m) => (

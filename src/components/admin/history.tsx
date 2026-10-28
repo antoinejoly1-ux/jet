@@ -1,4 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { auditActionKey } from "@/lib/audit-labels";
 
 type Entry = { id: string; action: string; actorName: string | null; createdAt: Date };
 
@@ -10,7 +11,7 @@ export async function History({ entries }: { entries: Entry[] }) {
   return (
     <ol className="flex flex-col gap-3">
       {entries.map((e) => {
-        const key = `actions.${e.action.replace(/\./g, "_")}`;
+        const key = auditActionKey(e.action);
         return (
           <li key={e.id} className="flex flex-col text-sm sm:flex-row sm:items-baseline sm:gap-3">
             <span className="text-muted tabular shrink-0 text-xs sm:w-40">

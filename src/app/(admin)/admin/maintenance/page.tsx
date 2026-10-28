@@ -14,6 +14,7 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { listMaintenance } from "@/lib/services/maintenance";
+import { zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { setMaintenanceStatusAction } from "./actions";
 
@@ -44,16 +45,29 @@ export default async function AdminMaintenancePage() {
   const { open, closed } = await listMaintenance(db, viewer);
   const canWrite = can(viewer, "operations:write");
   const dt = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+  const hm = (d: Date) => format.dateTime(d, { hour: "numeric", minute: "2-digit" });
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
   type Row = (typeof open)[number];
-  const when = (r: Row) =>
-    r.startsAt
+  // A window on one day reads « 28 oct., 9 h – 15 h 02 »; a same-minute window is just its time.
+  const range = (a: Date, b: Date) =>
+    Math.abs(b.getTime() - a.getTime()) < 60_000
+      ? dt(a)
+      : zonedDay(a) === zonedDay(b)
+        ? `${dt(a)} – ${hm(b)}`
+        : `${dt(a)} – ${dt(b)}`;
+  /** The dates that matter at each stage; a deadline stays in view until the job is done. */
+  const when = (r: Row) => {
+    const due = r.dueOn ? t("dueOnDate", { date: day(r.dueOn) }) : null;
+    if (r.status === "done") return r.endsAt ? t("doneOn", { date: dt(r.endsAt) }) : (due ?? t("notScheduled"));
+    const window = r.startsAt
       ? r.endsAt
-        ? `${dt(r.startsAt)} – ${dt(r.endsAt)}`
-        : t("from", { date: dt(r.startsAt) })
-      : r.dueOn
-        ? t("dueOnDate", { date: day(r.dueOn) })
-        : t("notScheduled");
+        ? range(r.startsAt, r.endsAt)
+        : r.status === "planned"
+          ? t("from", { date: dt(r.startsAt) })
+          : t("startedOn", { date: dt(r.startsAt) })
+      : null;
+    return [window, due].filter(Boolean).join(" · ") || t("notScheduled");
+  };
   const all = [...open, ...closed];
   const byColumn = (c: (typeof COLUMNS)[number]) => all.filter((r) => r.status === c).slice(0, c === "done" ? 30 : 100);
   const cancelled = closed.filter((r) => r.status === "cancelled");
@@ -128,6 +142,17 @@ export default async function AdminMaintenancePage() {
                             {r.source === "sync" ? (
                               <div className="mt-2">
                                 <Badge>{t("syncedFromCamp")}</Badge>
+                              </div>
+                            ) : null}
+                            {c === "done" ? (
+                              // Finished work leads to the aircraft's history, where it's signed off.
+                              <div className="border-border mt-3 border-t pt-3">
+                                <Link
+                                  href={`/admin/aircraft/${r.aircraftId}#history`}
+                                  className="text-muted hover:text-text text-xs font-medium underline-offset-4 hover:underline"
+                                >
+                                  {t("seeHistory")}
+                                </Link>
                               </div>
                             ) : null}
                             {canWrite && c !== "done" ? (

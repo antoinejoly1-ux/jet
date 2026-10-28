@@ -23,7 +23,7 @@ export function InviteForm({
   const [state, action, pending] = useActionState<InviteState, FormData>(createInvitationAction, { status: "idle" });
   const [target, setTarget] = useState(state.status === "error" ? state.values.target : (defaultTarget ?? ""));
   const [role, setRole] = useState<"owner" | "assistant" | "read_only">("owner");
-  const forOwner = !target.startsWith("staff:");
+  const forOwner = target.startsWith("owner:");
 
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -49,11 +49,15 @@ export function InviteForm({
           key={state.status === "error" ? state.values.target : (defaultTarget ?? "")}
           id="target"
           name="target"
-          defaultValue={state.status === "error" ? state.values.target : defaultTarget}
+          // Nothing chosen until someone picks: inviting the wrong owner gives away their data.
+          defaultValue={(state.status === "error" ? state.values.target : defaultTarget) ?? ""}
           onChange={(e) => setTarget(e.target.value)}
           required
           className="border-border bg-surface h-11 w-full min-w-0 rounded-md border px-3 text-base sm:text-sm"
         >
+          <option value="" disabled>
+            {canInviteStaff ? t("chooseTarget") : t("chooseOwner")}
+          </option>
           <optgroup label={t("ownersGroup")}>
             {owners.map((o) => (
               <option key={o.id} value={`owner:${o.id}`}>

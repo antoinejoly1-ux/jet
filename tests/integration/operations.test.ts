@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, ne } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ForbiddenError, type Actor } from "@/lib/auth/policy";
 import type { Db } from "@/lib/db";
@@ -192,8 +192,28 @@ describe("maintenance review", () => {
     // Sent back, then approved.
     await setMaintenanceStatus(db, dispatcher, job.id, "in_progress");
     await setMaintenanceStatus(db, dispatcher, job.id, "review");
-    await setMaintenanceStatus(db, dispatcher, job.id, "done");
+    // Four eyes: whoever sent it to review can't sign it off while someone else on the team can.
+    await expect(setMaintenanceStatus(db, dispatcher, job.id, "done")).rejects.toMatchObject({
+      code: "maintenance_self_review",
+    });
+    await setMaintenanceStatus(db, admin, job.id, "done");
     expect(await status()).toBe("available");
+  });
+
+  it("lets the only person on the team approve their own review", async () => {
+    await db.update(user).set({ staffRole: null }).where(ne(user.id, dispatcher.id));
+    const job = await planMaintenance(db, dispatcher, {
+      aircraftId: planeId,
+      type: "inspection",
+      title: "Remplacement de pneus",
+      dueOn: "2026-11-30",
+    });
+    await setMaintenanceStatus(db, dispatcher, job.id, "in_progress");
+    await setMaintenanceStatus(db, dispatcher, job.id, "review");
+    const done = await setMaintenanceStatus(db, dispatcher, job.id, "done");
+    expect(done.status).toBe("done");
+    // The deadline stays on the job through the work.
+    expect(done.dueOn).toBe("2026-11-30");
   });
 });
 

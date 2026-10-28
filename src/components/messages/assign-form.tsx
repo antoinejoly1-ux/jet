@@ -21,8 +21,8 @@ export function AssignForm({
   return (
     <form action={formAction} className="flex items-center gap-2">
       <FormAlert state={state} />
-      <label htmlFor="assignee" className="sr-only">
-        {t("assignTo")}
+      <label htmlFor="assignee" className="text-muted text-sm whitespace-nowrap">
+        {t("assignedTo")}
       </label>
       <Select
         key={current}

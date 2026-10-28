@@ -36,7 +36,7 @@
     },
     "unread": "{count, plural, one {# non lu} other {# non lus}}",
     "fabCall": "Appeler l'équipe",
-    "fabNewFlight": "Nouveau vol",
+    "fabNewFlight": "Planifier un vol",
     "fabRequest": "Demander un vol",
     "expand": "Afficher les libellés",
     "collapse": "Réduire"
@@ -426,9 +426,7 @@
     "inTheAir": "Appareils en vol",
     "todayTitle": "Les vols d'aujourd'hui",
     "todayEmpty": "Aucun vol aujourd'hui.",
-    "newFlight": "Nouveau vol",
-    "charter": "Nolisé",
-    "clientsTitle": "Clients et accès",
+    "newFlight": "Planifier un vol",
     "ofFleet": "sur {total} appareils",
     "queue": {
       "title": "À traiter",
@@ -441,7 +439,13 @@
       "lowHours": "{count, plural, one {part sous 10 % de ses heures} other {parts sous 10 % de leurs heures}}",
       "ownersNeverInvited": "{count, plural, one {propriétaire jamais invité} other {propriétaires jamais invités}}",
       "flightReports": "{count, plural, one {rapport de vol à vérifier} other {rapports de vol à vérifier}}",
-      "toInvoice": "{count, plural, one {vol approuvé à facturer} other {vols approuvés à facturer}}"
+      "toInvoice": "{count, plural, one {vol approuvé à facturer} other {vols approuvés à facturer}}",
+      "overdueInvoices": "{count, plural, one {facture en retard de paiement} other {factures en retard de paiement}}"
+    },
+    "money": {
+      "flightReports": "À vérifier ({count})",
+      "toInvoice": "À facturer ({count})",
+      "overdueInvoices": "Factures en retard ({count})"
     }
   },
   "owners": {
@@ -504,7 +508,18 @@
     "memberRoleFor": "Rôle de {name}",
     "seesFinances": "Voit les finances",
     "saveAccess": "Enregistrer",
-    "loginsCount": "{count, plural, =0 {Aucun accès} one {# accès} other {# accès}}"
+    "back": "Propriétaires",
+    "accounts": "{count, plural, one {# compte} other {# comptes}}",
+    "notInvited": "Pas encore invité",
+    "accessFilter": "Accès au portail",
+    "accessFilters": {
+      "all": "Tous",
+      "not_invited": "Pas encore invités",
+      "invited": "Invitation envoyée",
+      "active": "Avec un compte"
+    },
+    "noResultsFilterBody": "Aucun propriétaire dans ce filtre.",
+    "noLoginsYet": "Personne n'a encore accès au portail."
   },
   "invitations": {
     "title": "Invitations",
@@ -551,7 +566,9 @@
       "assistant": "Voit l'horaire et peut faire des demandes au nom du propriétaire.",
       "read_only": "Peut consulter, sans faire de demandes."
     },
-    "canSeeFinances": "Peut voir les finances"
+    "canSeeFinances": "Peut voir les finances",
+    "chooseOwner": "Choisir le propriétaire",
+    "chooseTarget": "Choisir le propriétaire ou le rôle"
   },
   "common": {
     "confirm": "Confirmer",
@@ -591,7 +608,7 @@
       "status": "Choisissez un statut.",
       "locale": "Choisissez une langue.",
       "notes": "Notes trop longues.",
-      "shareId": "Choisissez une part.",
+      "shareId": "Choisissez qui paie les heures, ou « Aucun — convoyage ».",
       "number": "Entrez le numéro de facture.",
       "total": "Montant invalide (ex. 8 297,00).",
       "issuedOn": "Choisissez une date.",
@@ -707,7 +724,8 @@
     "report_already_invoiced": "Ce vol est déjà facturé.",
     "prefix_taken": "Ce préfixe est déjà utilisé par une autre société.",
     "no_account_for_email": "Aucun compte avec ce courriel. Demandez à la personne de s'inscrire d'abord.",
-    "staff_already_has_access": "Cette personne fait partie de l'équipe Univair : elle a déjà accès."
+    "staff_already_has_access": "Cette personne fait partie de l'équipe Univair : elle a déjà accès.",
+    "maintenance_self_review": "Vous avez envoyé ces travaux en vérification : une autre personne de l'équipe doit les approuver."
   },
   "aircraft": {
     "title": "Appareils",
@@ -810,7 +828,9 @@
       "team": "Équipe",
       "invoice": "Factures",
       "transaction": "Transactions",
-      "budget": "Budgets"
+      "budget": "Budgets",
+      "flight": "Vols",
+      "maintenance": "Maintenance"
     },
     "older": "Entrées plus anciennes",
     "actions": {
@@ -850,7 +870,76 @@
       "profile_avatar_set": "a changé sa photo",
       "profile_avatar_remove": "a retiré sa photo",
       "profile_onboarded": "a terminé l'accueil",
-      "profile_tour_restarted": "a demandé à revoir la visite"
+      "profile_tour_restarted": "a demandé à revoir la visite",
+      "account_email_preferences": "a changé ses préférences de courriel",
+      "aircraft_photo": "a changé la photo de l'appareil",
+      "aircraft_rate_set": "a fixé le tarif horaire",
+      "api_key_create": "a créé une clé d'API",
+      "api_key_revoke": "a révoqué une clé d'API",
+      "availability_block": "a bloqué une période",
+      "availability_unblock": "a retiré un blocage",
+      "company_expense_add": "a ajouté une dépense de la société",
+      "company_expense_reverse": "a contrepassé une dépense de la société",
+      "conversation_assign": "a assigné une conversation",
+      "flight_cancel": "a annulé un vol",
+      "flight_complete": "a terminé un vol",
+      "flight_request": "a demandé un vol",
+      "flight_schedule": "a planifié un vol",
+      "flight_update": "a modifié un vol",
+      "flight_report_approve": "a approuvé un rapport de vol",
+      "flight_report_resubmit": "a renvoyé un rapport de vol corrigé",
+      "flight_report_return": "a retourné un rapport de vol au pilote",
+      "flight_report_submit": "a envoyé un rapport de vol",
+      "holding_company_billing": "a modifié la facturation de la société",
+      "holding_company_manager_add": "a ajouté un gestionnaire",
+      "holding_company_manager_remove": "a retiré un gestionnaire",
+      "integration_link_share": "a relié une part au logiciel de planification",
+      "invoice_issue": "a émis une facture",
+      "maintenance_plan": "a planifié un entretien",
+      "maintenance_status": "a changé l'étape d'un entretien",
+      "maintenance_update": "a modifié un entretien",
+      "privacy_export": "a exporté ses renseignements personnels",
+      "privacy_incident": "a inscrit un incident de confidentialité",
+      "privacy_incident_reporting": "a mis à jour la déclaration d'un incident",
+      "privacy_request": "a fait une demande Loi 25",
+      "privacy_request_close": "a fermé une demande Loi 25",
+      "privacy_retention": "a appliqué la durée de conservation",
+      "reserve_target": "a fixé la cible d'une réserve",
+      "reserve_work": "a payé des travaux à même la réserve",
+      "sync_block_created": "a importé un blocage",
+      "sync_block_updated": "a mis à jour un blocage",
+      "sync_block_unchanged": "a vérifié un blocage (aucun changement)",
+      "sync_flight_created": "a importé un vol",
+      "sync_flight_updated": "a mis à jour un vol",
+      "sync_flight_unchanged": "a vérifié un vol (aucun changement)",
+      "sync_maintenance_created": "a importé un entretien",
+      "sync_maintenance_updated": "a mis à jour un entretien",
+      "sync_maintenance_unchanged": "a vérifié un entretien (aucun changement)",
+      "webhook_create": "a créé un webhook",
+      "webhook_disable": "a désactivé un webhook",
+      "webhook_enable": "a activé un webhook"
+    },
+    "entities": {
+      "aircraft": "appareil",
+      "api_key": "clé d'API",
+      "conversation": "conversation",
+      "file": "fichier",
+      "flight": "vol",
+      "flight_report": "rapport de vol",
+      "holding_company": "société",
+      "import": "importation",
+      "incident": "incident",
+      "invitation": "invitation",
+      "invoice": "facture",
+      "maintenance": "entretien",
+      "message": "message",
+      "owner": "propriétaire",
+      "privacy_request": "demande Loi 25",
+      "session": "session",
+      "share": "part",
+      "transaction": "transaction",
+      "user": "utilisateur",
+      "webhook": "webhook"
     }
   },
   "files": {
@@ -1062,7 +1151,7 @@
     "subtitle": "Planifiez les vols, puis terminez-les avec le temps de vol pour déduire les heures.",
     "new": "Planifier un vol",
     "newTitle": "Planifier un vol",
-    "newSubtitle": "Les heures sont déduites de la part choisie quand le vol est terminé.",
+    "newSubtitle": "Les heures sont déduites de la part facturée quand le vol est terminé.",
     "editTitle": "Modifier le vol",
     "saved": "Vol enregistré.",
     "view": "Période",
@@ -1076,17 +1165,19 @@
     "filter": "Filtrer",
     "emptyUpcomingTitle": "Aucun vol à venir",
     "emptyUpcomingBody": "Les vols des 30 prochains jours apparaîtront ici.",
-    "emptyPastTitle": "Aucun vol récent",
-    "emptyPastBody": "Les vols des 60 derniers jours apparaîtront ici.",
+    "emptyPastTitle": "Aucun vol passé",
+    "emptyPastBody": "Les vols effectués apparaîtront ici, du plus récent au plus ancien.",
     "today": "Aujourd'hui",
     "statuses": {
       "scheduled": "Prévu",
       "completed": "Terminé",
-      "cancelled": "Annulé"
+      "cancelled": "Annulé",
+      "in_flight": "En vol",
+      "to_close": "À clôturer"
     },
     "synced": "Synchronisé",
-    "noShare": "Sans propriétaire (convoyage)",
-    "share": "Heures de",
+    "noShare": "Aucun — convoyage",
+    "share": "Facturé à",
     "from": "Départ",
     "to": "Arrivée",
     "airportHint": "Code OACI, ex. CYUL.",
@@ -1115,7 +1206,11 @@
     "toCloseBody": "Ces vols ont atterri : inscrivez le temps de vol pour le débiter de la banque d'heures.",
     "saveAndReturn": "Enregistrer et planifier le retour",
     "returnTitle": "Le retour · {route}",
-    "returnSubtitle": "Même appareil, même propriétaire, les aéroports inversés. Il reste l'heure à choisir."
+    "returnSubtitle": "Même appareil, même propriétaire, les aéroports inversés. Il reste l'heure à choisir.",
+    "chooseShare": "Choisir qui paie les heures",
+    "close": "Fermer",
+    "older": "Plus anciens",
+    "cancelledCount": "{count, plural, one {# vol annulé} other {# vols annulés}}"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1180,7 +1275,10 @@
     "columnEmpty": "Rien ici.",
     "boardSubtitle": "Chaque travail avance d'une colonne à l'autre, de la planification à l'approbation.",
     "syncedFromCamp": "CAMP",
-    "cancelledCount": "{count, plural, one {# travail annulé} other {# travaux annulés}}"
+    "cancelledCount": "{count, plural, one {# travail annulé} other {# travaux annulés}}",
+    "doneOn": "Terminé le {date}",
+    "startedOn": "Commencé le {date}",
+    "seeHistory": "Voir dans l'historique de l'appareil"
   },
   "availability": {
     "title": "Calendrier",
@@ -1192,7 +1290,8 @@
       "free": "Libre",
       "mine": "Votre vol",
       "booked": "Réservé",
-      "maintenance": "Maintenance"
+      "maintenance": "Maintenance",
+      "flight": "Vol"
     },
     "takenTitle": "Périodes occupées",
     "allFree": "Libre tout le mois.",
@@ -1286,7 +1385,7 @@
     "inboxSubtitle": "Les conversations avec les propriétaires.",
     "filters": "Filtrer les conversations",
     "filterNames": {
-      "waiting": "En attente",
+      "waiting": "À répondre",
       "open": "Ouvertes",
       "mine": "Les miennes",
       "resolved": "Résolues"
@@ -1311,7 +1410,8 @@
     "reopen": "Rouvrir",
     "readOnlyMember": "Votre accès est en lecture seule : appelez ou textez l'équipe pour toute demande.",
     "responseHintClosed": "Hors des heures de bureau : réponse dès 7 h. Une urgence? Appelez-nous.",
-    "replyAndResolve": "Répondre et résoudre"
+    "replyAndResolve": "Répondre et résoudre",
+    "assignedTo": "Assignée à"
   },
   "notifications": {
     "title": "Notifications",
@@ -1350,7 +1450,8 @@
       "flight": {
         "confirmed": "Vol confirmé : {route} sur {aircraft}, le {when}"
       }
-    }
+    },
+    "emptyBodyStaff": "Les messages des propriétaires, les demandes de vol et les alertes apparaîtront ici."
   },
   "exports": {
     "date": "Date",
@@ -2005,8 +2106,10 @@
       "company": "Société",
       "aircraft": "Appareil",
       "invoice": "Facture",
-      "conversation": "Conversation"
-    }
+      "conversation": "Conversation",
+      "flight": "Vol"
+    },
+    "pagesTitle": "Pages"
   },
   "pilot": {
     "side": "Pilote",
@@ -2309,7 +2412,6 @@
     "flightTime": "Temps de vol",
     "planned": "prévu",
     "billedTo": "Facturé à",
-    "charter": "Nolisement (sans propriétaire)",
     "reportTitle": "Rapport du pilote",
     "openReport": "Ouvrir le rapport",
     "openInvoice": "Voir la facture",
@@ -2352,7 +2454,8 @@
       "recentEmpty": "Aucun vol dans les 60 derniers jours."
     },
     "noJobs": "Aucun entretien prévu ou en cours.",
-    "allMaintenance": "Tout l'entretien"
+    "allMaintenance": "Tout l'entretien",
+    "back": "Appareils"
   },
   "teamInvite": {
     "title": "Inviter dans l'équipe",

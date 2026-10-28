@@ -53,17 +53,26 @@ const base = (db: Db) =>
 export async function listFlights(
   db: Db,
   actor: Actor,
-  opts: { from: Date; to: Date; aircraftId?: string; status?: string },
+  opts: {
+    from?: Date;
+    to: Date;
+    aircraftId?: string;
+    status?: string;
+    /** Newest first (the "Passés" list, a page at a time). */
+    latestFirst?: boolean;
+    limit?: number;
+  },
 ) {
   authorize(actor, "fleet:read");
-  const filters: SQL[] = [gte(flights.departsAt, opts.from), lt(flights.departsAt, opts.to)];
+  const filters: SQL[] = [lt(flights.departsAt, opts.to)];
+  if (opts.from) filters.push(gte(flights.departsAt, opts.from));
   if (opts.aircraftId) filters.push(eq(flights.aircraftId, opts.aircraftId));
   if (opts.status === "scheduled" || opts.status === "completed" || opts.status === "cancelled")
     filters.push(eq(flights.status, opts.status));
   return base(db)
     .where(and(...filters))
-    .orderBy(asc(flights.departsAt))
-    .limit(1000);
+    .orderBy(opts.latestFirst ? desc(flights.departsAt) : asc(flights.departsAt))
+    .limit(Math.min(opts.limit ?? 1000, 1000));
 }
 
 export async function getFlight(db: Db, actor: Actor, id: string) {

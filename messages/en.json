@@ -36,7 +36,7 @@
     },
     "unread": "{count} unread",
     "fabCall": "Call the team",
-    "fabNewFlight": "New flight",
+    "fabNewFlight": "Schedule a flight",
     "fabRequest": "Request a flight",
     "expand": "Show labels",
     "collapse": "Collapse"
@@ -426,9 +426,7 @@
     "inTheAir": "Aircraft in the air",
     "todayTitle": "Today's flights",
     "todayEmpty": "No flights today.",
-    "newFlight": "New flight",
-    "charter": "Charter",
-    "clientsTitle": "Clients and access",
+    "newFlight": "Schedule a flight",
     "ofFleet": "of {total} aircraft",
     "queue": {
       "title": "To do",
@@ -441,7 +439,13 @@
       "lowHours": "{count, plural, one {share under 10% of its hours} other {shares under 10% of their hours}}",
       "ownersNeverInvited": "{count, plural, one {owner never invited} other {owners never invited}}",
       "flightReports": "{count, plural, one {flight report to check} other {flight reports to check}}",
-      "toInvoice": "{count, plural, one {approved flight to invoice} other {approved flights to invoice}}"
+      "toInvoice": "{count, plural, one {approved flight to invoice} other {approved flights to invoice}}",
+      "overdueInvoices": "{count, plural, one {invoice past due} other {invoices past due}}"
+    },
+    "money": {
+      "flightReports": "To review ({count})",
+      "toInvoice": "To invoice ({count})",
+      "overdueInvoices": "Overdue invoices ({count})"
     }
   },
   "owners": {
@@ -504,7 +508,18 @@
     "memberRoleFor": "{name}'s role",
     "seesFinances": "Sees finances",
     "saveAccess": "Save",
-    "loginsCount": "{count, plural, =0 {No access} one {# login} other {# logins}}"
+    "back": "Owners",
+    "accounts": "{count, plural, one {# account} other {# accounts}}",
+    "notInvited": "Not invited yet",
+    "accessFilter": "Portal access",
+    "accessFilters": {
+      "all": "All",
+      "not_invited": "Not invited yet",
+      "invited": "Invitation sent",
+      "active": "With an account"
+    },
+    "noResultsFilterBody": "No owners match this filter.",
+    "noLoginsYet": "Nobody has portal access yet."
   },
   "invitations": {
     "title": "Invitations",
@@ -551,7 +566,9 @@
       "assistant": "Sees the schedule and can make requests for the owner.",
       "read_only": "Can look, but not make requests."
     },
-    "canSeeFinances": "Can see finances"
+    "canSeeFinances": "Can see finances",
+    "chooseOwner": "Choose the owner",
+    "chooseTarget": "Choose the owner or the role"
   },
   "common": {
     "confirm": "Confirm",
@@ -591,7 +608,7 @@
       "status": "Choose a status.",
       "locale": "Choose a language.",
       "notes": "Notes too long.",
-      "shareId": "Choose a share.",
+      "shareId": "Choose who pays for the hours, or “None — ferry flight”.",
       "number": "Enter the invoice number.",
       "total": "Invalid amount (e.g. 8,297.00).",
       "issuedOn": "Choose a date.",
@@ -707,7 +724,8 @@
     "report_already_invoiced": "This flight is already invoiced.",
     "prefix_taken": "Another company already uses this prefix.",
     "no_account_for_email": "No account with this email. Ask the person to sign up first.",
-    "staff_already_has_access": "This person is on the Univair team: they already have access."
+    "staff_already_has_access": "This person is on the Univair team: they already have access.",
+    "maintenance_self_review": "You sent this work to review: someone else on the team has to approve it."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -810,7 +828,9 @@
       "team": "Team",
       "invoice": "Invoices",
       "transaction": "Transactions",
-      "budget": "Budgets"
+      "budget": "Budgets",
+      "flight": "Flights",
+      "maintenance": "Maintenance"
     },
     "older": "Older entries",
     "actions": {
@@ -850,7 +870,76 @@
       "profile_avatar_set": "changed their photo",
       "profile_avatar_remove": "removed their photo",
       "profile_onboarded": "finished the welcome tour",
-      "profile_tour_restarted": "asked to see the tour again"
+      "profile_tour_restarted": "asked to see the tour again",
+      "account_email_preferences": "changed their email preferences",
+      "aircraft_photo": "changed the aircraft photo",
+      "aircraft_rate_set": "set the hourly rate",
+      "api_key_create": "created an API key",
+      "api_key_revoke": "revoked an API key",
+      "availability_block": "blocked a period",
+      "availability_unblock": "removed a block",
+      "company_expense_add": "added a company expense",
+      "company_expense_reverse": "reversed a company expense",
+      "conversation_assign": "assigned a conversation",
+      "flight_cancel": "cancelled a flight",
+      "flight_complete": "completed a flight",
+      "flight_request": "requested a flight",
+      "flight_schedule": "scheduled a flight",
+      "flight_update": "edited a flight",
+      "flight_report_approve": "approved a flight report",
+      "flight_report_resubmit": "resubmitted a flight report",
+      "flight_report_return": "returned a flight report to the pilot",
+      "flight_report_submit": "submitted a flight report",
+      "holding_company_billing": "changed the company's billing",
+      "holding_company_manager_add": "added a manager",
+      "holding_company_manager_remove": "removed a manager",
+      "integration_link_share": "linked a share to the scheduling software",
+      "invoice_issue": "issued an invoice",
+      "maintenance_plan": "planned maintenance",
+      "maintenance_status": "moved maintenance to another stage",
+      "maintenance_update": "edited maintenance",
+      "privacy_export": "exported their personal information",
+      "privacy_incident": "logged a privacy incident",
+      "privacy_incident_reporting": "updated an incident's reporting",
+      "privacy_request": "made a Law 25 request",
+      "privacy_request_close": "closed a Law 25 request",
+      "privacy_retention": "applied the retention policy",
+      "reserve_target": "set a reserve target",
+      "reserve_work": "paid for work from the reserve",
+      "sync_block_created": "imported a block",
+      "sync_block_updated": "updated a block",
+      "sync_block_unchanged": "checked a block (no change)",
+      "sync_flight_created": "imported a flight",
+      "sync_flight_updated": "updated a flight",
+      "sync_flight_unchanged": "checked a flight (no change)",
+      "sync_maintenance_created": "imported maintenance",
+      "sync_maintenance_updated": "updated maintenance",
+      "sync_maintenance_unchanged": "checked maintenance (no change)",
+      "webhook_create": "created a webhook",
+      "webhook_disable": "disabled a webhook",
+      "webhook_enable": "enabled a webhook"
+    },
+    "entities": {
+      "aircraft": "aircraft",
+      "api_key": "API key",
+      "conversation": "conversation",
+      "file": "file",
+      "flight": "flight",
+      "flight_report": "flight report",
+      "holding_company": "company",
+      "import": "import",
+      "incident": "incident",
+      "invitation": "invitation",
+      "invoice": "invoice",
+      "maintenance": "maintenance",
+      "message": "message",
+      "owner": "owner",
+      "privacy_request": "Law 25 request",
+      "session": "session",
+      "share": "share",
+      "transaction": "transaction",
+      "user": "user",
+      "webhook": "webhook"
     }
   },
   "files": {
@@ -1062,7 +1151,7 @@
     "subtitle": "Schedule flights, then complete them with flight time to deduct hours.",
     "new": "Schedule a flight",
     "newTitle": "Schedule a flight",
-    "newSubtitle": "Hours are deducted from the chosen share when the flight is completed.",
+    "newSubtitle": "Hours come off the billed share when the flight is completed.",
     "editTitle": "Edit flight",
     "saved": "Flight saved.",
     "view": "Period",
@@ -1076,17 +1165,19 @@
     "filter": "Filter",
     "emptyUpcomingTitle": "No upcoming flights",
     "emptyUpcomingBody": "Flights in the next 30 days will appear here.",
-    "emptyPastTitle": "No recent flights",
-    "emptyPastBody": "Flights from the last 60 days will appear here.",
+    "emptyPastTitle": "No past flights",
+    "emptyPastBody": "Flights flown will appear here, newest first.",
     "today": "Today",
     "statuses": {
       "scheduled": "Scheduled",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "in_flight": "In flight",
+      "to_close": "To close"
     },
     "synced": "Synced",
-    "noShare": "No owner (positioning)",
-    "share": "Hours from",
+    "noShare": "None — ferry flight",
+    "share": "Billed to",
     "from": "From",
     "to": "To",
     "airportHint": "ICAO code, e.g. CYUL.",
@@ -1115,7 +1206,11 @@
     "toCloseBody": "These flights have landed: enter the flight time to charge it to the hour bank.",
     "saveAndReturn": "Save and plan the return",
     "returnTitle": "The return · {route}",
-    "returnSubtitle": "Same aircraft, same owner, airports swapped. Only the time is left to choose."
+    "returnSubtitle": "Same aircraft, same owner, airports swapped. Only the time is left to choose.",
+    "chooseShare": "Choose who pays for the hours",
+    "close": "Close",
+    "older": "Older",
+    "cancelledCount": "{count, plural, one {# cancelled flight} other {# cancelled flights}}"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1180,7 +1275,10 @@
     "columnEmpty": "Nothing here.",
     "boardSubtitle": "Each job moves from column to column, from planning to sign-off.",
     "syncedFromCamp": "CAMP",
-    "cancelledCount": "{count, plural, one {# cancelled job} other {# cancelled jobs}}"
+    "cancelledCount": "{count, plural, one {# cancelled job} other {# cancelled jobs}}",
+    "doneOn": "Completed {date}",
+    "startedOn": "Started {date}",
+    "seeHistory": "See in the aircraft's history"
   },
   "availability": {
     "title": "Calendar",
@@ -1192,7 +1290,8 @@
       "free": "Free",
       "mine": "Your flight",
       "booked": "Booked",
-      "maintenance": "Maintenance"
+      "maintenance": "Maintenance",
+      "flight": "Flight"
     },
     "takenTitle": "Taken periods",
     "allFree": "Free all month.",
@@ -1286,7 +1385,7 @@
     "inboxSubtitle": "Conversations with owners.",
     "filters": "Filter conversations",
     "filterNames": {
-      "waiting": "Waiting",
+      "waiting": "To answer",
       "open": "Open",
       "mine": "Mine",
       "resolved": "Resolved"
@@ -1311,7 +1410,8 @@
     "reopen": "Reopen",
     "readOnlyMember": "Your access is read-only: call or text the team with any request.",
     "responseHintClosed": "Outside office hours: we'll reply from 7 a.m. Urgent? Call us.",
-    "replyAndResolve": "Reply and resolve"
+    "replyAndResolve": "Reply and resolve",
+    "assignedTo": "Assigned to"
   },
   "notifications": {
     "title": "Notifications",
@@ -1350,7 +1450,8 @@
       "flight": {
         "confirmed": "Flight confirmed: {route} on {aircraft}, {when}"
       }
-    }
+    },
+    "emptyBodyStaff": "Owners' messages, flight requests and alerts will appear here."
   },
   "exports": {
     "date": "Date",
@@ -1996,7 +2097,7 @@
     "resultsTitle": "Results",
     "empty": "No results.",
     "actions": {
-      "newFlight": "Plan a flight",
+      "newFlight": "Schedule a flight",
       "newOwner": "New owner",
       "invite": "Invite an owner"
     },
@@ -2005,8 +2106,10 @@
       "company": "Company",
       "aircraft": "Aircraft",
       "invoice": "Invoice",
-      "conversation": "Conversation"
-    }
+      "conversation": "Conversation",
+      "flight": "Flight"
+    },
+    "pagesTitle": "Pages"
   },
   "pilot": {
     "side": "Pilot",
@@ -2309,7 +2412,6 @@
     "flightTime": "Flight time",
     "planned": "planned",
     "billedTo": "Billed to",
-    "charter": "Charter (no owner)",
     "reportTitle": "Pilot's report",
     "openReport": "Open the report",
     "openInvoice": "View the invoice",
@@ -2352,7 +2454,8 @@
       "recentEmpty": "No flights in the last 60 days."
     },
     "noJobs": "No maintenance planned or under way.",
-    "allMaintenance": "All maintenance"
+    "allMaintenance": "All maintenance",
+    "back": "Aircraft"
   },
   "teamInvite": {
     "title": "Invite to the team",

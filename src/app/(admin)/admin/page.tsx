@@ -19,12 +19,11 @@ import { getFleetLive } from "@/lib/services/tracking";
 import { cancelFlightAction, completeFlightAction } from "./flights/actions";
 import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { FLIGHT_STATUS_TONE, flightDisplayStatus } from "@/lib/flight-status";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("dashboard") };
 }
-
-const STATUS_TONE = { scheduled: "accent", completed: "success", cancelled: "neutral" } as const;
 
 export default async function AdminDashboardPage() {
   const viewer = await requireStaff();
@@ -47,27 +46,17 @@ export default async function AdminDashboardPage() {
     timeZone: OPERATOR_TIME_ZONE,
   });
 
-  const clients: { key: string; value: number; icon: AnimatedIconName; href: Route }[] = [
-    { key: "owners", value: stats.owners, icon: "people", href: "/admin/owners" },
-    {
-      key: "pendingInvitations",
-      value: stats.pendingInvitations,
-      icon: "mail",
-      href: "/admin/invitations",
-    },
-    {
-      key: "accountsWaiting",
-      value: stats.accountsWaiting,
-      icon: "user",
-      href: "/admin/invitations",
-    },
-    {
-      key: "ownersWithoutAccess",
-      value: stats.ownersWithoutAccess,
-      icon: "key",
-      href: "/admin/invitations",
-    },
-  ];
+  const queued = (key: QueueKey) => queue.find((r) => r.key === key)?.count ?? 0;
+  // Those whose day is money (finance: the books, not the fleet) start with it, even when it's all done.
+  const moneyLead =
+    can(viewer, "finance:write") && !can(viewer, "fleet:write")
+      ? ([
+          { key: "flightReports", href: "/admin/flight-reports" },
+          { key: "toInvoice", href: "/admin/flight-reports#to-invoice" },
+          { key: "overdueInvoices", href: "/admin/invoices?status=issued" },
+        ] as const)
+      : null;
+  const now = new Date();
 
   return (
     <div className="flex flex-col gap-10">
@@ -81,33 +70,48 @@ export default async function AdminDashboardPage() {
         <h1 className="mt-3 text-3xl leading-tight font-light tracking-[-0.025em] sm:text-[2.6rem]">
           {t("heroLight")} <span className="text-accent">{t("heroNow")}</span>
         </h1>
+        {moneyLead ? (
+          <p className="mt-4 flex flex-wrap gap-x-2 gap-y-1 text-[15px]">
+            {moneyLead.map(({ key, href }, i) => (
+              <span key={key} className="inline-flex items-center gap-2">
+                {i > 0 ? (
+                  <span className="text-muted" aria-hidden>
+                    ·
+                  </span>
+                ) : null}
+                <Link href={href as Route} className="hover:underline">
+                  {t(`money.${key}`, { count: queued(key) })}
+                </Link>
+              </span>
+            ))}
+          </p>
+        ) : null}
       </header>
 
-      <FleetLive initial={fleet} />
+      <Queue rows={queue} />
 
-      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-        <section aria-labelledby="today-title">
-          <div className="mb-5 flex items-end justify-between gap-3">
-            <h2 id="today-title" className="text-2xl font-light tracking-tight">
-              {t("todayTitle")}
-            </h2>
-            {can(viewer, "operations:write") ? (
-              <Button asChild size="sm" variant="secondary">
-                <Link href="/admin/flights/new" className="ai-trigger">
-                  <AnimatedIcon name="planeTakeoff" size={18} />
-                  {t("newFlight")}
-                </Link>
-              </Button>
-            ) : null}
-          </div>
-          {today.length === 0 ? (
-            <p className="border-border text-muted rounded-lg border px-6 py-10 text-center text-sm">
-              {t("todayEmpty")}
-            </p>
-          ) : (
-            <ol className="border-border relative ml-3 border-l">
-              {today.map((f) => (
-                <li key={f.id} className="relative pb-6 pl-8 last:pb-0">
+      <section aria-labelledby="today-title">
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <h2 id="today-title" className="text-2xl font-light tracking-tight">
+            {t("todayTitle")}
+          </h2>
+          {can(viewer, "operations:write") ? (
+            <Button asChild size="sm" variant="secondary">
+              <Link href="/admin/flights/new" className="ai-trigger">
+                <AnimatedIcon name="planeTakeoff" size={18} />
+                {t("newFlight")}
+              </Link>
+            </Button>
+          ) : null}
+        </div>
+        {today.length === 0 ? (
+          <p className="border-border text-muted rounded-lg border px-6 py-10 text-center text-sm">{t("todayEmpty")}</p>
+        ) : (
+          <ol className="border-border relative ml-3 border-l">
+            {today.map((f) => {
+              const shown = flightDisplayStatus(f, now);
+              return (
+                <li key={f.id} className="relative pb-6 pl-6 last:pb-0 sm:pl-8">
                   <span
                     className={cn(
                       "ring-background absolute top-2 -left-[5px] size-[9px] rounded-full ring-4",
@@ -115,68 +119,54 @@ export default async function AdminDashboardPage() {
                     )}
                     aria-hidden
                   />
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <span className="tabular w-24 shrink-0 text-2xl font-light whitespace-nowrap">
-                      {format.dateTime(f.departsAt, { hour: "numeric", minute: "2-digit" })}
-                    </span>
-                    <Link href={`/admin/flights/${f.id}`} className="group min-w-0 flex-1">
-                      <span className="block font-medium group-hover:underline">
-                        {f.fromAirport} <span className="text-muted">→</span> {f.toAirport}
+                  {/* Under 640px the buttons go under the text, so the route never wraps word by word. */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+                    <div className="flex min-w-0 flex-1 items-baseline gap-4 sm:gap-6">
+                      <span className="tabular w-16 shrink-0 text-xl font-light whitespace-nowrap sm:w-24 sm:text-2xl">
+                        {format.dateTime(f.departsAt, { hour: "numeric", minute: "2-digit" })}
                       </span>
-                      <span className="text-muted block text-sm">
-                        {f.registration} · {f.ownerName ?? t("charter")}
-                      </span>
-                    </Link>
-                    {/* Landed but still "Prévu": close it right here. */}
-                    {can(viewer, "operations:write") && f.status === "scheduled" && f.departsAt < new Date() ? (
-                      <FlightRowActions
-                        id={f.id}
-                        status={f.status}
-                        complete={completeFlightAction.bind(null, f.id)}
-                        cancel={cancelFlightAction.bind(null, f.id)}
-                        plannedMinutes={
-                          f.arrivesAt ? Math.round((f.arrivesAt.getTime() - f.departsAt.getTime()) / 60_000) : null
-                        }
-                        ownerName={f.ownerName}
-                      />
+                      <Link href={`/admin/flights/${f.id}`} className="group min-w-0 flex-1">
+                        <span className="block font-medium group-hover:underline">
+                          {f.fromAirport} <span className="text-muted">→</span> {f.toAirport}
+                        </span>
+                        <span className="text-muted block truncate text-sm">
+                          {f.registration} · {f.ownerName ?? tf("noShare")}
+                        </span>
+                      </Link>
+                    </div>
+                    {/* Departed but still "Prévu": close it right here. */}
+                    {can(viewer, "operations:write") && f.status === "scheduled" && f.departsAt <= now ? (
+                      <div className="shrink-0 pl-20 sm:pl-0">
+                        <FlightRowActions
+                          id={f.id}
+                          status={f.status}
+                          departed={f.departsAt <= now}
+                          complete={completeFlightAction.bind(null, f.id)}
+                          cancel={cancelFlightAction.bind(null, f.id)}
+                          plannedMinutes={
+                            f.arrivesAt ? Math.round((f.arrivesAt.getTime() - f.departsAt.getTime()) / 60_000) : null
+                          }
+                          ownerName={f.ownerName}
+                        />
+                      </div>
                     ) : (
-                      <Badge tone={STATUS_TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
+                      <span className="shrink-0 pl-20 sm:pl-0">
+                        <Badge tone={FLIGHT_STATUS_TONE[shown]}>{tf(`statuses.${shown}`)}</Badge>
+                      </span>
                     )}
                   </div>
                 </li>
-              ))}
-            </ol>
-          )}
-        </section>
+              );
+            })}
+          </ol>
+        )}
+      </section>
 
-        <section aria-labelledby="clients-title">
-          <h2 id="clients-title" className="mb-5 text-2xl font-light tracking-tight">
-            {t("clientsTitle")}
-          </h2>
-          <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
-            {clients.map(({ key, value, icon, href }) => (
-              <li key={key}>
-                <Link
-                  href={href}
-                  className="group ai-trigger hover:bg-surface-muted/60 flex items-center gap-4 px-6 py-4 transition-colors"
-                >
-                  <span className="border-border text-muted group-hover:text-text flex size-9 items-center justify-center rounded-full border transition-colors">
-                    <AnimatedIcon name={icon} size={18} />
-                  </span>
-                  <span className="flex-1 text-sm">{t(key)}</span>
-                  <span className="tabular text-2xl font-light">{value}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
+      <FleetLive initial={fleet} />
 
-      <Queue rows={queue} />
-
+      {/* Today's flights are listed above: the strip keeps what the page doesn't already show. */}
       <InstrumentStrip>
         <Instrument label={t("inTheAir")} value={airborne} caption={t("ofFleet", { total: fleet.length })} />
-        <Instrument label={t("flightsToday")} value={stats.flightsToday} href="/admin/flights" />
         <Instrument label={t("flightsThisWeek")} value={stats.flightsThisWeek} href="/admin/flights" />
         <Instrument label={t("inMaintenance")} value={stats.inMaintenance} href="/admin/maintenance" />
       </InstrumentStrip>
@@ -187,6 +177,7 @@ export default async function AdminDashboardPage() {
 const QUEUE_ICON: Record<QueueKey, AnimatedIconName> = {
   flightReports: "clipboard",
   toInvoice: "invoice",
+  overdueInvoices: "clock",
   flightsToClose: "plane",
   flightRequests: "planeTakeoff",
   awaitingReply: "chat",

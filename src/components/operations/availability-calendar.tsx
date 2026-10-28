@@ -26,12 +26,15 @@ export async function AvailabilityCalendar({
   hrefFor,
   periodAction,
   requestable = false,
+  staff = false,
 }: {
   month: string;
   periods: Period[];
   hrefFor: (month: string) => string;
   /** Owners: a tap on a free day opens "Demander un vol" with that date. */
   requestable?: boolean;
+  /** The team's view: no « Votre vol », just « Vol ». */
+  staff?: boolean;
   /** Extra control per period, e.g. removing a manual block. */
   periodAction?: (p: Period) => ReactNode;
 }) {
@@ -54,7 +57,9 @@ export async function AvailabilityCalendar({
   const describe = (p: Period) => {
     if (p.kind === "maintenance") return p.label ? `${t("legend.maintenance")} · ${p.label}` : t("legend.maintenance");
     if (p.kind === "booked") return [t("legend.booked"), p.ownerName].filter(Boolean).join(" · ");
-    return [p.mine ? t("yourFlight") : null, p.label, p.ownerName].filter(Boolean).join(" · ");
+    return [p.mine ? t(staff ? "legend.flight" : "yourFlight") : null, p.label, p.ownerName]
+      .filter(Boolean)
+      .join(" · ");
   };
 
   return (
@@ -120,7 +125,7 @@ export async function AvailabilityCalendar({
           {(["free", "mine", "booked", "maintenance"] as const).map((s) => (
             <li key={s} className="inline-flex items-center gap-1.5">
               <span className={cn("size-3 rounded-sm", CELL[s])} aria-hidden />
-              {t(`legend.${s}`)}
+              {t(`legend.${staff && s === "mine" ? "flight" : s}`)}
             </li>
           ))}
         </ul>

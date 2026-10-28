@@ -1,6 +1,17 @@
 "use client";
 
-import { Building2, FileText, Inbox, MailPlus, Plane, PlaneTakeoff, Search, UserPlus, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  FileText,
+  Inbox,
+  MailPlus,
+  Plane,
+  PlaneTakeoff,
+  Search,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ComponentType } from "react";
@@ -9,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 
 type Hit = {
-  kind: "owner" | "company" | "aircraft" | "invoice" | "conversation";
+  kind: "owner" | "company" | "aircraft" | "flight" | "invoice" | "conversation";
   id: string;
   title: string;
   detail: string | null;
@@ -23,27 +34,42 @@ type Entry = {
   icon: ComponentType<{ className?: string }>;
 };
 
+type Shortcut = { kind: "page" | "action"; key: string; href: string };
+
 const ICON: Record<Hit["kind"], Entry["icon"]> = {
   aircraft: Plane,
+  flight: PlaneTakeoff,
   owner: Users,
   company: Building2,
   invoice: FileText,
   conversation: Inbox,
 };
 
+const ACTION_ICON: Record<string, Entry["icon"]> = { newFlight: PlaneTakeoff, newOwner: UserPlus, invite: MailPlus };
+
+/** Case and accents aside: « societe » finds « Société ». */
+const fold = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
 /**
- * ⌘K / Ctrl-K: find an owner, an aircraft, a company, an invoice or a
- * conversation by typing, or jump straight to a frequent action. A search
+ * ⌘K / Ctrl-K: find an owner, an aircraft, a flight, a company, an invoice
+ * or a conversation by typing, or jump to a page or a frequent action (only
+ * those this person's role can use; typing filters them too). A search
  * button in the top bar opens it on touch screens.
  */
 export function CommandPalette() {
   const t = useTranslations("search");
+  const tn = useTranslations("nav.items");
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const [q, setQ] = useState("");
   const [hits, setHits] = useState<Hit[]>([]);
   const [active, setActive] = useState(0);
+  const [shortcuts, setShortcuts] = useState<Shortcut[] | null>(null);
 
   const open = () => {
     setQ("");
@@ -63,6 +89,17 @@ export function CommandPalette() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // The pages and actions this role can use, asked once when the shell loads.
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/search?shortcuts=1", { signal: controller.signal })
+      .then(async (res) => (res.ok ? setShortcuts((await res.json()) as Shortcut[]) : undefined))
+      .catch(() => {
+        // Aborted or offline: no shortcuts, search still works.
+      });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -85,21 +122,29 @@ export function CommandPalette() {
     };
   }, [q]);
 
-  const actions: Entry[] = [
-    { key: "newFlight", label: t("actions.newFlight"), href: "/admin/flights/new", icon: PlaneTakeoff },
-    { key: "newOwner", label: t("actions.newOwner"), href: "/admin/owners/new", icon: UserPlus },
-    { key: "invite", label: t("actions.invite"), href: "/admin/invitations", icon: MailPlus },
-  ];
-  const entries: Entry[] =
-    q.trim().length < 2
-      ? actions
-      : hits.map((h) => ({
-          key: `${h.kind}-${h.id}`,
-          label: h.title,
-          detail: h.detail ? `${t(`kinds.${h.kind}`)} · ${h.detail}` : t(`kinds.${h.kind}`),
-          href: h.href,
-          icon: ICON[h.kind],
-        }));
+  const query = fold(q.trim());
+  const shortcutEntries: Entry[] = (shortcuts ?? []).map((sc) => ({
+    key: `${sc.kind}-${sc.key}`,
+    label: sc.kind === "action" ? t(`actions.${sc.key}`) : tn(sc.key),
+    detail: sc.kind === "page" ? t("pagesTitle") : null,
+    href: sc.href,
+    icon: sc.kind === "action" ? (ACTION_ICON[sc.key] ?? ArrowRight) : ArrowRight,
+  }));
+  const entries: Entry[] = !query
+    ? shortcutEntries.filter((e) => e.key.startsWith("action-"))
+    : [
+        // Typing « vol » finds the Vols page and « Planifier un vol » before any record.
+        ...shortcutEntries.filter((e) => fold(e.label).includes(query)),
+        ...(query.length < 2
+          ? []
+          : hits.map((h) => ({
+              key: `${h.kind}-${h.id}`,
+              label: h.title,
+              detail: h.detail ? `${t(`kinds.${h.kind}`)} · ${h.detail}` : t(`kinds.${h.kind}`),
+              href: h.href,
+              icon: ICON[h.kind],
+            }))),
+      ];
 
   const go = (e: Entry) => {
     dialog.current?.close();
@@ -136,7 +181,10 @@ export function CommandPalette() {
             aria-label={t("open")}
             placeholder={t("placeholder")}
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e) => {
+              setQ(e.target.value);
+              setActive(0);
+            }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
                 e.preventDefault();
@@ -155,7 +203,7 @@ export function CommandPalette() {
             Esc
           </kbd>
         </div>
-        <p className="eyebrow px-5 pt-4 pb-2">{q.trim().length < 2 ? t("actionsTitle") : t("resultsTitle")}</p>
+        <p className="eyebrow px-5 pt-4 pb-2">{query ? t("resultsTitle") : t("actionsTitle")}</p>
         {entries.length === 0 ? (
           <p className="text-muted px-5 pb-6 text-sm">{t("empty")}</p>
         ) : (

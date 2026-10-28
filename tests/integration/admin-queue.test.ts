@@ -5,6 +5,7 @@ import { ownerMembers, user } from "@/lib/db/schema";
 import { addShare, createAircraft } from "@/lib/services/aircraft";
 import { getAdminQueue } from "@/lib/services/dashboard";
 import { requestFlight } from "@/lib/services/flight-requests";
+import { createInvoice, markInvoicePaid } from "@/lib/services/invoices";
 import { scheduleFlight } from "@/lib/services/flights";
 import { replyAsStaff, sendOwnerMessage, conversationIdForOwner } from "@/lib/services/messages";
 import { createOwner } from "@/lib/services/owners";
@@ -90,6 +91,18 @@ describe("À traiter", () => {
     // Answering takes the thread off the list.
     await replyAsStaff(db, dispatcher, (await conversationIdForOwner(db, dispatcher, ownerId))!, { body: "Oui" });
     expect(await counts(dispatcher)).not.toHaveProperty("awaitingReply");
+  });
+
+  it("counts invoices past their due date, for those who handle money", async () => {
+    const day = (offset: number) => new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
+    const invoice = (number: string, dueOn: string) =>
+      createInvoice(db, finance, { shareId, number, issuedOn: day(-40), dueOn, total: "100,00", currency: "CAD" });
+    await invoice("INV-1", day(-10));
+    await invoice("INV-2", day(10));
+    const paid = await invoice("INV-3", day(-10));
+    await markInvoicePaid(db, finance, paid.id);
+    expect(await counts(finance)).toMatchObject({ overdueInvoices: 1 });
+    expect(await counts(dispatcher)).not.toHaveProperty("overdueInvoices");
   });
 
   it("is for staff only", async () => {
