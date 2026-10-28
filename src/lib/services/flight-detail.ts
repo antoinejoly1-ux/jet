@@ -79,6 +79,8 @@ export async function getFlightDetail(db: Db, actor: Actor, id: string, now = ne
       invoiceId: flightReports.invoiceId,
       submittedAt: flightReports.submittedAt,
       pilotName: user.name,
+      pilotId: user.id,
+      pilotImage: user.image,
     })
     .from(flightReports)
     .leftJoin(user, eq(user.id, flightReports.pilotUserId))
@@ -138,6 +140,8 @@ export async function getOwnerFlightDetail(db: Db, actor: Actor, id: string, now
       flightMinutes: flightReports.flightMinutes,
       invoiceId: flightReports.invoiceId,
       pilotName: user.name,
+      pilotId: user.id,
+      pilotImage: user.image,
     })
     .from(flightReports)
     .leftJoin(user, eq(user.id, flightReports.pilotUserId))
@@ -149,6 +153,8 @@ export async function getOwnerFlightDetail(db: Db, actor: Actor, id: string, now
     route,
     inAir,
     pilotName: report?.pilotName ?? null,
+    pilotId: report?.pilotId ?? null,
+    pilotImage: report?.pilotImage ?? null,
     reportedMinutes: report?.status === "approved" ? report.flightMinutes : null,
     invoiceId: money && report?.status === "approved" ? report.invoiceId : null,
   };

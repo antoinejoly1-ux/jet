@@ -3,7 +3,7 @@
  * maintenance moves aircraft in and out of service, and owners see their own
  * flights, their aircraft and when it's free, without co-owners' details.
  */
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import { signIn } from "./support";
 
 /** "YYYY-MM-DDTHH:mm", `days` from today, for datetime-local inputs. */
@@ -137,4 +137,65 @@ test("starting and finishing maintenance takes the aircraft out of service and b
   await expect(page.getByRole("region", { name: /^Terminé/ })).toContainText(title);
   await page.goto("/admin/aircraft");
   await expect(page.getByRole("listitem").filter({ hasText: "C-GJTC" })).toContainText("Disponible");
+});
+
+/** Presses on `from`, moves in small steps to `to` (a point inside it) and lets go, as a mouse would. */
+async function dragTo(page: Page, from: Locator, to: Locator) {
+  await from.scrollIntoViewIfNeeded();
+  const a = await from.boundingBox();
+  const b = await to.boundingBox();
+  const width = page.viewportSize()?.width ?? 1440;
+  if (!a || !b) throw new Error("drag: element not visible");
+  // On a phone the next column is only partly on screen: aim at its visible part.
+  const x = Math.min(b.x + b.width / 2, width - 60);
+  // Columns are as tall as the longest one: stay level with the card so the point is on screen.
+  const y = Math.min(Math.max(a.y + 20, b.y + 20), b.y + b.height - 20);
+  await page.mouse.move(a.x + a.width / 2, a.y + 20);
+  await page.mouse.down();
+  await page.mouse.move(a.x + a.width / 2 + 10, a.y + 24, { steps: 3 });
+  await page.mouse.move(x, y, { steps: 15 });
+  await page.mouse.up();
+}
+
+test("dragging a card from Planifié to En cours starts the job", async ({ page }, testInfo) => {
+  const title = `Glisser e2e ${testInfo.project.name} ${Date.now()}`;
+  await signIn(page, "dispatch@jet.test");
+  await page.goto("/admin/maintenance/new");
+  await page.getByLabel("Appareil").selectOption({ label: "C-GUVR · Beechcraft King Air 350i" });
+  await page.getByLabel("Travaux").fill(title);
+  await page.getByLabel("Début").fill(local(20, "08:00"));
+  await page.getByLabel("Fin", { exact: true }).fill(local(21, "17:00"));
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
+  await expect(page.getByText("Maintenance enregistrée.")).toBeVisible();
+
+  const planned = page.getByRole("region", { name: /^Planifié/ });
+  const inProgress = page.getByRole("region", { name: /^En cours/ });
+  const card = planned.getByRole("listitem").filter({ hasText: title });
+  await expect(card).toBeVisible();
+
+  if (testInfo.project.name === "desktop") {
+    // A jump of two columns is refused, with the reason, and the card stays put.
+    await dragTo(page, card.getByText(title), page.getByRole("region", { name: /^Terminé/ }));
+    await expect(page.getByRole("alert").filter({ hasText: "une colonne à la fois" })).toBeVisible();
+    await expect(planned).toContainText(title);
+  }
+
+  await dragTo(page, card.getByText(title), inProgress);
+  await expect(inProgress).toContainText(title);
+  await expect(planned).not.toContainText(title);
+  // It sticks: the server moved it, not only the screen.
+  await page.reload();
+  await expect(page.getByRole("region", { name: /^En cours/ })).toContainText(title);
+
+  // Leave the aircraft as it was for the other tests.
+  await page
+    .getByRole("region", { name: /^En cours/ })
+    .getByRole("listitem")
+    .filter({ hasText: title })
+    .getByRole("button", { name: "Autres actions" })
+    .click();
+  const row = page.getByRole("listitem").filter({ hasText: title });
+  await row.getByRole("button", { name: "Annuler les travaux" }).click();
+  await page.getByRole("button", { name: "Annuler les travaux" }).last().click();
+  await expect(page.getByRole("region", { name: /^En cours/ })).not.toContainText(title);
 });

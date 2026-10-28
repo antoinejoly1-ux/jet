@@ -17,6 +17,7 @@ import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { approveReportAction, issueInvoiceAction, returnReportAction } from "../actions";
 import { InvoicePreview } from "@/components/billing/invoice-preview";
 import { Button } from "@/components/ui/button";
+import { PersonAvatar } from "@/components/ui/person";
 import { canIssueInvoicesFor } from "@/lib/auth/policy";
 import { previewInvoice } from "@/lib/services/billing";
 
@@ -74,19 +75,26 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
           </>
         }
         title={`${report.fromAirport} → ${report.toAirport}`}
-        description={t("filedBy", {
-          pilot: report.pilotName ?? t("unknownPilot"),
-          // Same shape as everywhere else: « mercredi 28 octobre 2026, 9 h 00 ».
-          date: format.dateTime(report.departsAt, {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            timeZone: OPERATOR_TIME_ZONE,
-          }),
-        })}
+        description={
+          <span className="inline-flex items-center gap-2">
+            {report.pilotName ? <PersonAvatar name={report.pilotName} image={report.pilotImage} /> : null}
+            <span>
+              {t("filedBy", {
+                pilot: report.pilotName ?? t("unknownPilot"),
+                // Same shape as everywhere else: « mercredi 28 octobre 2026, 9 h 00 ».
+                date: format.dateTime(report.departsAt, {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZone: OPERATOR_TIME_ZONE,
+                }),
+              })}
+            </span>
+          </span>
+        }
       />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

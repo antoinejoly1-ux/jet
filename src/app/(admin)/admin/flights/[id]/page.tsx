@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { LiveDot } from "@/components/ui/live-dot";
+import { PersonAvatar } from "@/components/ui/person";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
@@ -188,7 +189,8 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
           <Card>
             <div className="flex flex-wrap items-center gap-3">
               <Badge tone={REPORT_TONE[report.status]}>{tr(`statuses.${report.status}`)}</Badge>
-              <span className="text-muted text-sm">
+              <span className="text-muted inline-flex items-center gap-2 text-sm">
+                {report.pilotName ? <PersonAvatar name={report.pilotName} image={report.pilotImage} /> : null}
                 {t("filedBy", {
                   pilot: report.pilotName ?? tr("unknownPilot"),
                   date: format.dateTime(report.submittedAt, { dateStyle: "medium", timeZone: OPERATOR_TIME_ZONE }),
