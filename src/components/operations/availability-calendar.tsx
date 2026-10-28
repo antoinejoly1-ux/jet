@@ -9,7 +9,7 @@ import { zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 const CELL: Record<DayStatus, string> = {
-  free: "bg-success/12 text-success",
+  free: "bg-success/12 text-success ring-1 ring-inset ring-success/30",
   mine: "bg-accent text-primary-foreground",
   booked: "bg-muted/35 text-text",
   maintenance: "bg-warning/25 text-warning",
@@ -46,6 +46,9 @@ export async function AvailabilityCalendar({
     format.dateTime(new Date(Date.UTC(2024, 0, 1 + i)), { weekday: "narrow", timeZone: "UTC" }),
   );
   const today = zonedDay(new Date());
+  // What's still ahead matters; a month already under way lists only what hasn't ended.
+  const underWay = month <= today.slice(0, 7);
+  const listed = underWay ? periods.filter((p) => zonedDay(p.endsAt) >= today) : periods;
   const range = (p: Period) =>
     `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "numeric", minute: "2-digit" } : { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}`;
   const describe = (p: Period) => {
@@ -125,13 +128,13 @@ export async function AvailabilityCalendar({
 
       <section aria-labelledby="taken-periods">
         <h3 id="taken-periods" className="mb-2 text-sm font-semibold">
-          {t("takenTitle")}
+          {underWay ? t("upcomingTitle") : t("takenTitle")}
         </h3>
-        {periods.length === 0 ? (
-          <p className="text-muted text-sm">{t("allFree")}</p>
+        {listed.length === 0 ? (
+          <p className="text-muted text-sm">{underWay ? t("allFreeRest") : t("allFree")}</p>
         ) : (
           <ul className="border-border divide-border divide-y rounded-lg border">
-            {periods.map((p, i) => (
+            {listed.map((p, i) => (
               <li key={i} className="flex items-start gap-3 px-3 py-2 text-sm">
                 <span
                   className={cn(

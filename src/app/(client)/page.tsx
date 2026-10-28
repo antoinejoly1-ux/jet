@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { TeamFaces } from "@/components/brand/team";
 import { ContactButtons } from "@/components/common/contact-buttons";
+import { RouteLabel } from "@/components/flights/route-label";
 import { RequestFlightButton } from "@/components/flights/request-flight";
 import { LiveAircraft } from "@/components/tracking/live-aircraft";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import { daysFrom, dayStart, type DayStatus } from "@/lib/availability-days";
 import type { Viewer } from "@/lib/auth/session";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
 import { formatHours, formatMoney, formatMoneyRounded } from "@/lib/format";
 import { scenes } from "@/lib/imagery";
 import { insightsFor, type Insight } from "@/lib/insights";
@@ -29,7 +29,6 @@ import { listOwnerFlights } from "@/lib/services/flights";
 import { getAircraftLive, type AircraftLive } from "@/lib/services/tracking";
 import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
-import { telHref } from "@/lib/phone";
 import { notificationValues } from "@/lib/notification-types";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -94,11 +93,12 @@ export default async function HomePage() {
 }
 
 const AHEAD = 14;
+// The same colours as the Calendrier page: free is green, booked is grey.
 const DOT: Record<DayStatus, string> = {
-  free: "bg-text/80",
+  free: "bg-success/30 ring-1 ring-inset ring-success/40",
   mine: "bg-accent",
-  booked: "bg-text/20",
-  maintenance: "bg-warning/70",
+  booked: "bg-muted/35",
+  maintenance: "bg-warning/50",
 };
 
 async function ShareSection({
@@ -144,10 +144,6 @@ async function ShareSection({
         greeting={first}
         showOwner={showOwner}
         firstName={viewer.name.split(" ")[0] ?? ""}
-        facts={[
-          t("hero.factHours", { hours: formatHours(s.minutesRemaining, locale) }),
-          t("hero.factFree", { count: freeDays, days: AHEAD }),
-        ]}
       />
 
       {/* The instrument strip: four readings, hairlines between, no boxes. */}
@@ -223,10 +219,10 @@ async function ShareSection({
             ))}
           </ol>
           <div className="text-muted mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs">
-            <Legend className="bg-text/80" label={t("legendFree")} />
-            <Legend className="bg-accent" label={t("legendMine")} />
-            <Legend className="bg-text/20" label={t("legendBooked")} />
-            <Legend className="bg-warning/70" label={t("legendMaintenance")} />
+            <Legend className={DOT.free} label={t("legendFree")} />
+            <Legend className={DOT.mine} label={t("legendMine")} />
+            <Legend className={DOT.booked} label={t("legendBooked")} />
+            <Legend className={DOT.maintenance} label={t("legendMaintenance")} />
           </div>
         </Card>
 
@@ -244,7 +240,7 @@ async function ShareSection({
                 </p>
                 <div className="mt-auto pt-6">
                   <Button asChild variant="secondary" size="sm">
-                    <Link href="/invoices">{t("seeInvoices")}</Link>
+                    <Link href={`/invoices/${s.latestInvoice.id}`}>{t("seeInvoice")}</Link>
                   </Button>
                 </div>
               </>
@@ -265,15 +261,12 @@ async function Hero({
   greeting,
   showOwner,
   firstName,
-  facts,
 }: {
   summary: ShareSummary;
   live: AircraftLive;
   greeting: boolean;
   showOwner: boolean;
   firstName: string;
-  /** The two answers owners look for first, shown in the hero on phones. */
-  facts: string[];
 }) {
   const t = await getTranslations("home");
   const tr = await getTranslations("requestFlight");
@@ -370,16 +363,6 @@ async function Hero({
               {subline}
             </p>
           ) : null}
-          <p className="mt-5 flex flex-wrap gap-2 sm:hidden">
-            {facts.map((f) => (
-              <span
-                key={f}
-                className="border-glass-line bg-glass rounded-full border px-3.5 py-1.5 text-sm text-white backdrop-blur-md"
-              >
-                {f}
-              </span>
-            ))}
-          </p>
 
           {live.state === "in_flight" && live.leg ? (
             <div className="mt-8 max-w-xl">
@@ -413,9 +396,6 @@ async function Hero({
                 {live.state === "in_flight" ? t("hero.follow") : t("hero.seeOnMap")}
               </a>
             </Button>
-            <div className="[&_a]:border-glass-line [&_a]:bg-white/10 [&_a]:text-white [&_a]:backdrop-blur-md [&_a:first-child]:bg-white/10">
-              <ContactButtons />
-            </div>
           </div>
         </div>
       </div>
@@ -426,7 +406,7 @@ async function Hero({
 function Legend({ className, label }: { className: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-2">
-      <span className={cn("size-2 rounded-full", className)} aria-hidden />
+      <span className={cn("size-2.5 rounded-full", className)} aria-hidden />
       {label}
     </span>
   );
@@ -442,7 +422,6 @@ async function UpcomingFlights({
 }) {
   const t = await getTranslations("home");
   const tr = await getTranslations("requestFlight");
-  const phone = env.OPERATOR_PHONE;
   const format = await getFormatter();
   const now = new Date();
   return (
@@ -469,14 +448,12 @@ async function UpcomingFlights({
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-3 text-lg font-light tracking-wide">
-                  <span>{r.from}</span>
-                  <span className="bg-border relative h-px flex-1" aria-hidden />
-                  <span>{r.to}</span>
-                </div>
+                <p className="text-lg font-light">
+                  <RouteLabel from={r.from} to={r.to} />
+                </p>
                 <p className="text-muted mt-1 text-xs">
                   <span className="text-warning font-medium">{tr("pending")}</span> · {tr("pendingHint")} ·{" "}
-                  {r.registration}
+                  <span className="whitespace-nowrap">{r.registration}</span>
                 </p>
               </div>
             </li>
@@ -484,63 +461,46 @@ async function UpcomingFlights({
           {flights.map((f) => {
             const flying = f.status === "scheduled" && f.departsAt <= now;
             return (
-              <li key={f.id} className="flex items-center gap-5 py-5">
-                <div className="border-border flex w-14 shrink-0 flex-col items-center rounded-[14px] border py-2">
-                  <span className="text-muted text-xs font-medium tracking-[0.16em] uppercase">
-                    {format.dateTime(f.departsAt, { month: "short" }).replace(".", "")}
-                  </span>
-                  <span className="tabular text-2xl font-light">
-                    {format.dateTime(f.departsAt, { day: "numeric" })}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-3 text-lg font-light tracking-wide">
-                    <span>{f.fromAirport}</span>
-                    <span className="bg-border relative h-px flex-1">
-                      <Plane
-                        className="text-muted absolute top-1/2 left-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rotate-45"
-                        strokeWidth={1.5}
-                        aria-hidden
-                      />
+              <li key={f.id}>
+                <Link
+                  href={`/flights/${f.id}`}
+                  className="hover:bg-surface-muted/60 -mx-3 flex items-center gap-5 rounded-[14px] px-3 py-5"
+                >
+                  <div className="border-border flex w-14 shrink-0 flex-col items-center rounded-[14px] border py-2">
+                    <span className="text-muted text-xs font-medium tracking-[0.16em] uppercase">
+                      {format.dateTime(f.departsAt, { month: "short" }).replace(".", "")}
                     </span>
-                    <span>{f.toAirport}</span>
+                    <span className="tabular text-2xl font-light">
+                      {format.dateTime(f.departsAt, { day: "numeric" })}
+                    </span>
                   </div>
-                  <p className="text-muted mt-1 text-xs">
-                    {flying ? (
-                      <span className="text-live inline-flex items-center gap-1.5">
-                        <LiveDot className="size-2" /> {t("inTheAir")}
-                      </span>
-                    ) : (
-                      format.dateTime(f.departsAt, {
-                        weekday: "long",
-                        hour: "numeric",
-                        minute: "2-digit",
-                        timeZoneName: "short",
-                      })
-                    )}
-                    {" · "}
-                    {f.registration}
-                  </p>
-                </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-light">
+                      <RouteLabel from={f.fromAirport} to={f.toAirport} />
+                    </p>
+                    <p className="text-muted mt-1 text-xs">
+                      {flying ? (
+                        <span className="text-live inline-flex items-center gap-1.5">
+                          <LiveDot className="size-2" /> {t("inTheAir")}
+                        </span>
+                      ) : (
+                        format.dateTime(f.departsAt, {
+                          weekday: "long",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          timeZoneName: "short",
+                        })
+                      )}
+                      {" · "}
+                      <span className="whitespace-nowrap">{f.registration}</span>
+                    </p>
+                  </div>
+                </Link>
               </li>
             );
           })}
         </ul>
       )}
-      {/* An invitation, not an empty space: planning the next flight is one call away. */}
-      <div className="border-border mt-auto flex flex-wrap items-center justify-between gap-4 border-t pt-6">
-        <p className="text-muted max-w-xs text-sm">{t("planNext")}</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <RequestFlightButton variant="accent" size="sm">
-            {tr("open")}
-          </RequestFlightButton>
-          {phone ? (
-            <Button asChild variant="ghost" size="sm">
-              <a href={telHref(phone)}>{t("planNextCta")}</a>
-            </Button>
-          ) : null}
-        </div>
-      </div>
     </Card>
   );
 }
@@ -608,8 +568,8 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
               item.kind === "flight" ? (
                 <>
                   {t("flightCompleted")}{" "}
-                  <span className="whitespace-nowrap">
-                    {item.from} → {item.to}
+                  <span>
+                    <RouteLabel from={item.from} to={item.to} codes={false} />
                   </span>
                   <span className="text-muted block text-xs">
                     {item.registration}
@@ -650,7 +610,12 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
                     {row}
                   </Link>
                 ) : (
-                  <div className="group flex items-center gap-4 py-4">{row}</div>
+                  <Link
+                    href={`/flights/${item.id}`}
+                    className="hover:bg-surface/60 -mx-3 flex items-center gap-4 rounded-[14px] px-3 py-4"
+                  >
+                    {row}
+                  </Link>
                 )}
               </li>
             );

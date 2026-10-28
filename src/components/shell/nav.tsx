@@ -39,7 +39,7 @@ const CLIENT: Group[] = [
     items: [
       { href: "/", key: "home", icon: "home", mobile: true },
       { href: "/availability", key: "availability", icon: "calendar", mobile: true },
-      { href: "/flights", key: "flights", icon: "planeTakeoff" },
+      { href: "/flights", key: "flights", icon: "list" },
       { href: "/messages", key: "messages", icon: "chat", mobile: true },
       { href: "/finances", key: "finances", icon: "wallet" },
       { href: "/invoices", key: "invoices", icon: "invoice" },
@@ -205,14 +205,23 @@ export function Sidebar({
 }
 
 /** Every destination with its name, large, for the phone "More" menu. */
-function MenuList({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
+function MenuList({
+  side,
+  badges = {},
+  hidden,
+}: {
+  side: Side;
+  badges?: Badges;
+  /** Destinations not to list: those without access, and those already in the tab bar. */
+  hidden?: readonly string[];
+}) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
   return (
     <nav aria-label={t("label")} className="flex flex-col gap-6">
       {groupsFor(side, hidden).map((group) => (
         <div key={group.key ?? "main"}>
-          {group.key ? <p className="eyebrow mb-2">{t(`groups.${group.key}`)}</p> : null}
+          {group.key && group.items.length > 1 ? <p className="eyebrow mb-2">{t(`groups.${group.key}`)}</p> : null}
           <ul className="divide-border divide-y">
             {group.items.map(({ href, key, icon }) => (
               <li key={href}>
@@ -305,10 +314,13 @@ export function BottomTabs({
   const [moreOpen, setMoreOpen] = useState(false);
   const request = useRequestFlight();
   const all = groupsFor(side, hidden).flatMap((g) => g.items);
-  const items = all.filter((i) => i.mobile).slice(0, 4);
+  // People with few destinations (a company manager) get them as tabs rather than a lone "More".
+  const mobile = all.filter((i) => i.mobile);
+  const items = (mobile.length >= 2 ? mobile : [...mobile, ...all.filter((i) => !i.mobile)]).slice(0, 4);
   // Owners: the request button sits in the middle, the one action they come for.
   // Logins that can't request get Vols there instead.
   const center = side === "client" ? (request ? "request" : all.find((i) => i.key === "flights")) : null;
+  const inTabs = [...items.map((i) => i.key), ...(center && center !== "request" ? [center.key] : [])];
 
   // The menu closes on navigation and can't be scrolled behind.
   useEffect(() => {
@@ -336,7 +348,7 @@ export function BottomTabs({
           aria-label={t("more")}
           className="bg-background animate-rise fixed inset-0 z-40 flex flex-col overflow-y-auto px-6 pt-20 pb-28 lg:hidden"
         >
-          <MenuList side={side} badges={badges} hidden={hidden} />
+          <MenuList side={side} badges={badges} hidden={[...(hidden ?? []), ...inTabs]} />
           {footer ? <div className="mt-10">{footer}</div> : null}
         </div>
       ) : null}

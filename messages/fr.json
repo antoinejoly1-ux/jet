@@ -213,7 +213,7 @@
     "budgetEmpty": "Le budget de l'année sera publié par notre équipe.",
     "nextFlight": "Prochain vol",
     "nextFlightEmpty": "Aucun vol à venir.",
-    "nextMaintenance": "Prochaine maintenance",
+    "nextMaintenance": "Maintenance",
     "nextMaintenanceEmpty": "Aucune maintenance prévue.",
     "latestInvoice": "Dernière facture",
     "latestInvoiceEmpty": "Votre première facture apparaîtra ici après votre premier vol.",
@@ -238,7 +238,7 @@
     "heroOne": "Votre appareil,",
     "heroMany": "Vos appareils,",
     "heroNow": "en ce moment",
-    "flownThisYear": "Heures volées en {year}",
+    "flownThisYear": "Volées en {year}",
     "spentThisYear": "Dépensé en {year}",
     "freeDaysShort": "{count, plural, one {# jour} other {# jours}}",
     "freeDaysLabel": "libres sur les {days} prochains",
@@ -274,7 +274,8 @@
     "allFlights": "Tous vos vols",
     "inTheAir": "En vol",
     "planNext": "Un prochain départ en tête? Dites-nous où et quand, nous nous occupons du reste.",
-    "planNextCta": "Ou appelez-nous"
+    "planNextCta": "Ou appelez-nous",
+    "seeInvoice": "Voir la facture"
   },
   "account": {
     "title": "Mon compte",
@@ -615,7 +616,7 @@
       "registrationNumber": "Entrez au plus 500 caractères.",
       "holdingCompanyId": "Choisissez une société de la liste.",
       "from": "Choisissez l'aéroport de départ.",
-      "to": "Choisissez une destination différente du départ.",
+      "to": "Choisissez une destination, différente du départ.",
       "date": "Choisissez la date du vol.",
       "time": "Entrez une heure valide, ou laissez vide.",
       "returnDate": "Le retour doit suivre l'aller.",
@@ -1192,7 +1193,9 @@
     "addBlock": "Bloquer",
     "removeQuestion": "Retirer ce blocage?",
     "remove": "Retirer",
-    "requestOn": "Demander un vol le {date}"
+    "requestOn": "Demander un vol le {date}",
+    "upcomingTitle": "À venir",
+    "allFreeRest": "Rien de prévu d'ici la fin du mois."
   },
   "ownerFlights": {
     "title": "Vos vols",
@@ -1932,7 +1935,7 @@
     "sentBody": "L'équipe vous confirme le vol sous peu, ici et par courriel. Un imprévu? Appelez-nous.",
     "sentMessages": "Voir dans Messages",
     "close": "Fermer",
-    "pending": "Demandé",
+    "pending": "Demande envoyée",
     "pendingHint": "En attente de confirmation",
     "card": {
       "title": "Demande de vol",
@@ -1942,7 +1945,7 @@
       "plan": "Planifier ce vol",
       "scheduled": "Vol planifié",
       "viewFlight": "Voir le vol",
-      "requested": "En attente"
+      "requested": "Demande envoyée"
     },
     "fewer": "Un passager de moins",
     "more": "Un passager de plus"
@@ -2345,5 +2348,17 @@
   "financeAccess": {
     "title": "Les finances ne font pas partie de votre accès",
     "body": "Le propriétaire du compte peut vous y donner accès depuis ses paramètres, ou l'équipe Univair sur demande."
+  },
+  "ownerFlightDetail": {
+    "back": "Vols",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "flightTime": "Temps de vol",
+    "planned": "prévu",
+    "pilot": "Pilote",
+    "invoice": "Voir la facture",
+    "inAir": "En vol",
+    "noMap": "Carte non disponible pour ce trajet.",
+    "question": "Une question sur ce vol? Écrivez-nous"
   }
 }

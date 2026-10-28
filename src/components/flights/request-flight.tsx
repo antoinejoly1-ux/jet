@@ -94,7 +94,16 @@ function RequestFlightForm({
   const [roundTrip, setRoundTrip] = useState(Boolean(submitted(state, "returnDate")));
   const [passengers, setPassengers] = useState(Number(submitted(state, "passengers", "2")) || 2);
   const share = shares.find((s) => s.id === shareId) ?? shares[0]!;
-  const err = (f: string) => (state.status === "error" && state.fields?.[f] ? tf(`fields.${f}`) : undefined);
+  // A field's error goes away as soon as it's edited, rather than lingering until the next send.
+  const [edited, setEdited] = useState<{ after: FormState; fields: string[] }>({ after: state, fields: [] });
+  const fresh = edited.after === state ? edited.fields : [];
+  const err = (f: string) =>
+    state.status === "error" && state.fields?.[f] && !fresh.includes(f) ? tf(`fields.${f}`) : undefined;
+  const markEdited = (e: React.FormEvent<HTMLFormElement>) => {
+    const field = (e.target as HTMLElement).closest<HTMLElement>("[data-field]")?.dataset.field;
+    const name = field ?? (e.target as HTMLInputElement).name;
+    if (name && !fresh.includes(name)) setEdited({ after: state, fields: [...fresh, name] });
+  };
   const heading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -123,7 +132,7 @@ function RequestFlightForm({
     );
 
   return (
-    <form action={action} className="flex flex-col gap-5 p-6 sm:p-9" noValidate>
+    <form action={action} onInput={markEdited} className="flex flex-col gap-5 p-6 sm:p-9" noValidate>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 id="request-flight-title" className="text-3xl font-light tracking-tight">

@@ -71,7 +71,7 @@ export function AirportField({
   };
 
   return (
-    <div className="relative flex flex-col gap-1.5">
+    <div className="relative flex flex-col gap-1.5" data-field={name}>
       <Label htmlFor={id}>{label}</Label>
       <Input
         id={id}

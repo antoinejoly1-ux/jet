@@ -75,7 +75,8 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
       : viewer.viewingAs || (!viewer.staffRole && viewer.ownerIds.length === 0)
         ? null
         : { kind: "request", callHref: phone ? telHref(phone) : null };
-  const expanded = (await cookies()).get(RAIL_COOKIE)?.value === "open";
+  // The rail starts open, with names, until someone collapses it.
+  const expanded = (await cookies()).get(RAIL_COOKIE)?.value !== "closed";
   const toast = await readFlash();
   const tToast = await getTranslations("toasts");
   return (

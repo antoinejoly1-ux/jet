@@ -38,6 +38,7 @@ export type ShareSummary = {
   showFinances: boolean;
   nextMaintenance: { startsAt: Date; endsAt: Date | null } | null;
   latestInvoice: {
+    id: string;
     number: string;
     issuedOn: string;
     totalCents: number;
@@ -119,6 +120,7 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
           .limit(1),
         db
           .select({
+            id: invoices.id,
             number: invoices.number,
             issuedOn: invoices.issuedOn,
             totalCents: invoices.totalCents,

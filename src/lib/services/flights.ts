@@ -68,6 +68,11 @@ export async function listFlights(
 
 export async function getFlight(db: Db, actor: Actor, id: string) {
   authorize(actor, "fleet:read");
+  return getFlightUnchecked(db, id);
+}
+
+/** For services that already checked the actor may see this flight (an owner's own). */
+export async function getFlightUnchecked(db: Db, id: string) {
   const [row] = await base(db).where(eq(flights.id, id));
   if (!row) throw new NotFoundError("flight");
   return row;

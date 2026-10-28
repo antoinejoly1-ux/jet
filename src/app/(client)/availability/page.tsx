@@ -20,11 +20,20 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("availability") };
 }
 
+/** This month, or next month once this one has a week or less left: owners look ahead. */
+function defaultMonth() {
+  const today = zonedDay(new Date());
+  const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+  const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  if (daysInMonth - d >= 7) return today.slice(0, 7);
+  return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+}
+
 export default async function OwnerAvailabilityPage({ searchParams }: PageProps<"/availability">) {
   const viewer = await requireAccess();
   const t = await getTranslations("availability");
   const sp = await searchParams;
-  const month = typeof sp.month === "string" && isMonth(sp.month) ? sp.month : zonedDay(new Date()).slice(0, 7);
+  const month = typeof sp.month === "string" && isMonth(sp.month) ? sp.month : defaultMonth();
   const fleet = await listOwnerAircraft(db, viewer);
   const unique = [...new Map(fleet.map((a) => [a.id, a])).values()];
   if (unique.length === 0)

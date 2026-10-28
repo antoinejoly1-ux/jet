@@ -266,7 +266,7 @@ export function LiveAircraft({
           ) : (
             <span>{t("noSignal")}</span>
           )}
-          {live.source ? (
+          {live.source && side === "admin" ? (
             <>
               <span aria-hidden>·</span>
               <span>{t(`sources.${live.source}`)}</span>

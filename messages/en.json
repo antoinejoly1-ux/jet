@@ -213,7 +213,7 @@
     "budgetEmpty": "This year's budget will be published by our team.",
     "nextFlight": "Next flight",
     "nextFlightEmpty": "No upcoming flights.",
-    "nextMaintenance": "Next maintenance",
+    "nextMaintenance": "Maintenance",
     "nextMaintenanceEmpty": "No maintenance planned.",
     "latestInvoice": "Latest invoice",
     "latestInvoiceEmpty": "Your first invoice will appear here after your first flight.",
@@ -238,7 +238,7 @@
     "heroOne": "Your aircraft,",
     "heroMany": "Your aircraft,",
     "heroNow": "right now",
-    "flownThisYear": "Hours flown in {year}",
+    "flownThisYear": "Flown in {year}",
     "spentThisYear": "Spent in {year}",
     "freeDaysShort": "{count, plural, one {# day} other {# days}}",
     "freeDaysLabel": "free in the next {days}",
@@ -274,7 +274,8 @@
     "allFlights": "All your flights",
     "inTheAir": "In flight",
     "planNext": "Thinking of your next trip? Tell us where and when; we take care of the rest.",
-    "planNextCta": "Or call us"
+    "planNextCta": "Or call us",
+    "seeInvoice": "View invoice"
   },
   "account": {
     "title": "My account",
@@ -615,7 +616,7 @@
       "registrationNumber": "Use 500 characters at most.",
       "holdingCompanyId": "Choose a company from the list.",
       "from": "Choose the departure airport.",
-      "to": "Choose a destination other than the departure.",
+      "to": "Choose a destination, different from the departure.",
       "date": "Choose the flight date.",
       "time": "Enter a valid time, or leave it empty.",
       "returnDate": "The return must come after the outbound flight.",
@@ -1192,7 +1193,9 @@
     "addBlock": "Block",
     "removeQuestion": "Remove this block?",
     "remove": "Remove",
-    "requestOn": "Request a flight on {date}"
+    "requestOn": "Request a flight on {date}",
+    "upcomingTitle": "Coming up",
+    "allFreeRest": "Nothing planned for the rest of the month."
   },
   "ownerFlights": {
     "title": "Your flights",
@@ -1932,7 +1935,7 @@
     "sentBody": "The team will confirm your flight shortly, here and by email. Something urgent? Call us.",
     "sentMessages": "See it in Messages",
     "close": "Close",
-    "pending": "Requested",
+    "pending": "Request sent",
     "pendingHint": "Waiting for confirmation",
     "card": {
       "title": "Flight request",
@@ -1942,7 +1945,7 @@
       "plan": "Plan this flight",
       "scheduled": "Flight scheduled",
       "viewFlight": "View the flight",
-      "requested": "Waiting"
+      "requested": "Request sent"
     },
     "fewer": "One passenger fewer",
     "more": "One more passenger"
@@ -2345,5 +2348,17 @@
   "financeAccess": {
     "title": "Finances aren't part of your access",
     "body": "The account's owner can give you access from their settings, or the Univair team on request."
+  },
+  "ownerFlightDetail": {
+    "back": "Flights",
+    "departure": "Departure",
+    "arrival": "Arrival",
+    "flightTime": "Flight time",
+    "planned": "planned",
+    "pilot": "Pilot",
+    "invoice": "View the invoice",
+    "inAir": "In the air",
+    "noMap": "No map for this route.",
+    "question": "A question about this flight? Write to us"
   }
 }

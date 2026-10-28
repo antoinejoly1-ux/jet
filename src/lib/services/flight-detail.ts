@@ -4,13 +4,14 @@
  * what the pilot reported. Amounts only show to those who see finances.
  */
 import "server-only";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import type { Db } from "@/lib/db";
-import { aircraft, files, flightReportExpenses, flightReports, user } from "@/lib/db/schema";
-import { authorize, can, type Actor } from "@/lib/auth/policy";
+import { aircraft, files, flightReportExpenses, flightReports, flights, shares, user } from "@/lib/db/schema";
+import { authorize, can, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { airport } from "@/lib/airports";
 import { aircraftPhotoUrl } from "@/lib/aircraft-photo-url";
-import { getFlight } from "./flights";
+import { getFlight, getFlightUnchecked } from "./flights";
+import { NotFoundError } from "./errors";
 import { getAircraftLive, type AircraftLive } from "./tracking";
 
 const ref = (code: string) => {
@@ -18,18 +19,17 @@ const ref = (code: string) => {
   return a ? { icao: a.icao, name: a.name, city: a.city, lat: a.lat, lon: a.lon } : null;
 };
 
-export async function getFlightDetail(db: Db, actor: Actor, id: string, now = new Date()) {
-  authorize(actor, "fleet:read");
-  const flight = await getFlight(db, actor, id);
+type FlightRow = Awaited<ReturnType<typeof getFlight>>;
+
+/** The route for the map: the live view while this flight is the one in the air, else its two airports. */
+async function routeOf(db: Db, actor: Actor, flight: FlightRow, now: Date, ownerView: boolean) {
   const [plane] = await db
-    .select({ model: aircraft.model, photoFileId: aircraft.photoFileId, holdingCompanyId: aircraft.holdingCompanyId })
+    .select({ model: aircraft.model, photoFileId: aircraft.photoFileId })
     .from(aircraft)
     .where(eq(aircraft.id, flight.aircraftId));
-
-  // The route for the map: the live view while this flight is the one in the air, else its two airports.
   const from = ref(flight.fromAirport);
   const to = ref(flight.toAirport);
-  const live = await getAircraftLive(db, actor, flight.aircraftId, { now }).catch(() => null);
+  const live = await getAircraftLive(db, actor, flight.aircraftId, { now, ownerView }).catch(() => null);
   const inAir =
     live?.state === "in_flight" &&
     flight.status === "scheduled" &&
@@ -61,6 +61,13 @@ export async function getFlightDetail(db: Db, actor: Actor, id: string, now = ne
           generatedAt: now.toISOString(),
         }
       : null;
+  return { plane, route, inAir: Boolean(inAir) };
+}
+
+export async function getFlightDetail(db: Db, actor: Actor, id: string, now = new Date()) {
+  authorize(actor, "fleet:read");
+  const flight = await getFlight(db, actor, id);
+  const { plane, route, inAir } = await routeOf(db, actor, flight, now, false);
 
   const [report] = await db
     .select({
@@ -108,3 +115,41 @@ export async function getFlightDetail(db: Db, actor: Actor, id: string, now = ne
 }
 
 export type FlightDetail = Awaited<ReturnType<typeof getFlightDetail>>;
+
+/**
+ * One of the owner's own flights: where and when, the route on the map, who
+ * flew it and for how long, and its invoice when they see finances. Nothing
+ * about other owners, and no receipts.
+ */
+export async function getOwnerFlightDetail(db: Db, actor: Actor, id: string, now = new Date()) {
+  if (!actor.ownerIds.length) throw new NotFoundError("flight");
+  const [mine] = await db
+    .select({ ownerId: shares.ownerId })
+    .from(flights)
+    .innerJoin(shares, eq(shares.id, flights.shareId))
+    .where(and(eq(flights.id, id), inArray(shares.ownerId, [...actor.ownerIds])));
+  if (!mine) throw new NotFoundError("flight");
+  authorize(actor, "fleet:read", { ownerIds: [mine.ownerId] });
+  const flight = await getFlightUnchecked(db, id);
+  const { plane, route, inAir } = await routeOf(db, actor, flight, now, true);
+  const [report] = await db
+    .select({
+      status: flightReports.status,
+      flightMinutes: flightReports.flightMinutes,
+      invoiceId: flightReports.invoiceId,
+      pilotName: user.name,
+    })
+    .from(flightReports)
+    .leftJoin(user, eq(user.id, flightReports.pilotUserId))
+    .where(eq(flightReports.flightId, id));
+  const money = financeOwnerIds(actor).includes(mine.ownerId);
+  return {
+    flight: { ...flight, model: plane?.model ?? "" },
+    photoUrl: aircraftPhotoUrl(flight.aircraftId, plane?.photoFileId ?? null),
+    route,
+    inAir,
+    pilotName: report?.pilotName ?? null,
+    reportedMinutes: report?.status === "approved" ? report.flightMinutes : null,
+    invoiceId: money && report?.status === "approved" ? report.invoiceId : null,
+  };
+}
