@@ -154,7 +154,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "border-border sticky top-0 hidden h-dvh flex-col justify-between overflow-y-auto border-r py-6 lg:flex",
+        "border-border sticky top-0 z-40 hidden h-dvh flex-col justify-between overflow-visible border-r py-6 lg:flex",
         expanded ? "items-stretch px-4" : "items-center",
       )}
     >

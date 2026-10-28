@@ -2148,5 +2148,24 @@
     "companiesTitle": "Company results",
     "companiesBody": "What the owning company billed and paid this year: does it balance?",
     "companyResults": "{name} results"
+  },
+  "flightDetail": {
+    "title": "Flight",
+    "back": "Flights",
+    "inAir": "In the air",
+    "noMap": "Unknown airports: no map for this flight.",
+    "summary": "The flight",
+    "departure": "Departure",
+    "arrival": "Arrival",
+    "flightTime": "Flight time",
+    "planned": "planned",
+    "billedTo": "Billed to",
+    "charter": "Charter (no owner)",
+    "reportTitle": "Pilot's report",
+    "openReport": "Open the report",
+    "openInvoice": "View the invoice",
+    "noReport": "The pilot hasn't sent their report yet.",
+    "noReportCancelled": "Flight cancelled: no report.",
+    "filedBy": "Sent by {pilot} on {date}"
   }
 }

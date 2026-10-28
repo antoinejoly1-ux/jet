@@ -148,9 +148,9 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
             {toClose.map((f) => (
               <li key={f.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:gap-6">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">
+                  <Link href={`/admin/flights/${f.id}`} className="font-medium hover:underline">
                     {f.fromAirport} → {f.toAirport}
-                  </p>
+                  </Link>
                   <p className="text-muted text-sm first-letter:uppercase">
                     {format.dateTime(f.departsAt, { weekday: "short", day: "numeric", month: "short" })} ·{" "}
                     {time(f.departsAt)} · {f.registration} · {f.ownerName ?? t("noShare")}
@@ -186,13 +186,20 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
               </h2>
               <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
                 {flights.map((f) => (
-                  <li key={f.id} className="flex flex-col gap-2 px-5 py-4 md:flex-row md:items-center md:gap-5">
+                  <li
+                    key={f.id}
+                    className="hover:bg-surface-muted/60 relative flex flex-col gap-2 px-5 py-4 transition-colors md:flex-row md:items-center md:gap-5"
+                  >
                     <span className="tabular w-20 shrink-0 text-xl font-light">{time(f.departsAt)}</span>
                     <div className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2">
-                        <span className={`font-medium ${f.status === "cancelled" ? "text-muted line-through" : ""}`}>
+                        {/* The whole row opens the flight; its buttons stay above the link. */}
+                        <Link
+                          href={`/admin/flights/${f.id}`}
+                          className={`font-medium after:absolute after:inset-0 ${f.status === "cancelled" ? "text-muted line-through" : ""}`}
+                        >
                           {f.fromAirport} → {f.toAirport}
-                        </span>
+                        </Link>
                         <Badge tone={TONE[f.status]}>{t(`statuses.${f.status}`)}</Badge>
                         {f.source === "sync" ? <Badge>{t("synced")}</Badge> : null}
                       </p>
@@ -202,14 +209,16 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
                       </p>
                     </div>
                     {canWrite ? (
-                      <FlightRowActions
-                        id={f.id}
-                        status={f.status}
-                        complete={completeFlightAction.bind(null, f.id)}
-                        cancel={cancelFlightAction.bind(null, f.id)}
-                        plannedMinutes={planned(f)}
-                        ownerName={f.ownerName}
-                      />
+                      <div className="relative z-10">
+                        <FlightRowActions
+                          id={f.id}
+                          status={f.status}
+                          complete={completeFlightAction.bind(null, f.id)}
+                          cancel={cancelFlightAction.bind(null, f.id)}
+                          plannedMinutes={planned(f)}
+                          ownerName={f.ownerName}
+                        />
+                      </div>
                     ) : null}
                   </li>
                 ))}

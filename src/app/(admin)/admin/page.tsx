@@ -88,32 +88,20 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-12">
-      <FleetLive
-        initial={fleet}
-        header={
-          <header>
-            <p className="eyebrow flex items-center gap-2.5">
-              <Star className="text-bronze h-2.5 w-auto" />
-              <span>
-                {t("hello", { name: firstName })} · <span className="first-letter:uppercase">{date}</span>
-              </span>
-            </p>
-            <h1 className="mt-4 text-4xl leading-[1.05] font-light tracking-[-0.03em] sm:text-5xl">
-              {t("heroLight")} <span className="text-accent">{t("heroNow")}</span>
-            </h1>
-          </header>
-        }
-      />
+    <div className="flex flex-col gap-10">
+      <header>
+        <p className="eyebrow flex items-center gap-2.5">
+          <Star className="text-bronze h-2.5 w-auto" />
+          <span>
+            {t("hello", { name: firstName })} · <span className="first-letter:uppercase">{date}</span>
+          </span>
+        </p>
+        <h1 className="mt-3 text-3xl leading-tight font-light tracking-[-0.025em] sm:text-[2.6rem]">
+          {t("heroLight")} <span className="text-accent">{t("heroNow")}</span>
+        </h1>
+      </header>
 
-      <Queue rows={queue} />
-
-      <InstrumentStrip>
-        <Instrument label={t("inTheAir")} value={airborne} caption={t("ofFleet", { total: fleet.length })} />
-        <Instrument label={t("flightsToday")} value={stats.flightsToday} href="/admin/flights" />
-        <Instrument label={t("flightsThisWeek")} value={stats.flightsThisWeek} href="/admin/flights" />
-        <Instrument label={t("inMaintenance")} value={stats.inMaintenance} href="/admin/maintenance" />
-      </InstrumentStrip>
+      <FleetLive initial={fleet} />
 
       <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <section aria-labelledby="today-title">
@@ -146,17 +134,17 @@ export default async function AdminDashboardPage() {
                     aria-hidden
                   />
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                    <span className="tabular w-16 text-2xl font-light">
+                    <span className="tabular w-24 shrink-0 text-2xl font-light whitespace-nowrap">
                       {format.dateTime(f.departsAt, { hour: "numeric", minute: "2-digit" })}
                     </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block font-medium">
+                    <Link href={`/admin/flights/${f.id}`} className="group min-w-0 flex-1">
+                      <span className="block font-medium group-hover:underline">
                         {f.fromAirport} <span className="text-muted">→</span> {f.toAirport}
                       </span>
                       <span className="text-muted block text-sm">
                         {f.registration} · {f.ownerName ?? t("charter")}
                       </span>
-                    </span>
+                    </Link>
                     {/* Landed but still "Prévu": close it right here. */}
                     {can(viewer, "operations:write") && f.status === "scheduled" && f.departsAt < new Date() ? (
                       <FlightRowActions
@@ -201,6 +189,15 @@ export default async function AdminDashboardPage() {
           </ul>
         </section>
       </div>
+
+      <Queue rows={queue} />
+
+      <InstrumentStrip>
+        <Instrument label={t("inTheAir")} value={airborne} caption={t("ofFleet", { total: fleet.length })} />
+        <Instrument label={t("flightsToday")} value={stats.flightsToday} href="/admin/flights" />
+        <Instrument label={t("flightsThisWeek")} value={stats.flightsThisWeek} href="/admin/flights" />
+        <Instrument label={t("inMaintenance")} value={stats.inMaintenance} href="/admin/maintenance" />
+      </InstrumentStrip>
     </div>
   );
 }

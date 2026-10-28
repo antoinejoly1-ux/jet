@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 /*
- * Design tokens, "Hangar Night": Univair's ink, ivory and champagne. Dark is
- * the signature; "Ivoire" (light) is chosen in Settings, or follows the
- * device with "system". Components use only these semantic names.
+ * Design tokens: Univair's ink, ivory and champagne. "Ivoire" (light) is the
+ * default; "Hangar Night" (dark) is chosen in Settings, or follows the device
+ * with "system". The base block below is the dark palette that light
+ * overrides. Components use only these semantic names.
  */
 :root {
   --background: #0c0b0a;
@@ -55,7 +56,7 @@
   --success: #1f6b3a;
   --warning: #92400e;
   --danger: #a1311f;
-  --live: #2f9e5b;
+  --live: #1f7a45;
   --ring: #9c7247;
   --glass: rgb(16 15 13 / 0.5);
   --glass-strong: rgb(16 15 13 / 0.72);
@@ -63,8 +64,8 @@
   --shadow-card: none;
   --shadow-float: 0 24px 60px -24px rgb(22 21 20 / 0.35);
   --card-border: #e5dfd5;
-  --map-water: #0a0a09;
-  --map-land: #141311;
+  --map-water: #dfe2e0;
+  --map-land: #f3f1ed;
   color-scheme: light;
 }
 
@@ -85,7 +86,7 @@
     --success: #1f6b3a;
     --warning: #92400e;
     --danger: #a1311f;
-    --live: #2f9e5b;
+    --live: #1f7a45;
     --ring: #9c7247;
     --glass: rgb(16 15 13 / 0.5);
     --glass-strong: rgb(16 15 13 / 0.72);
@@ -93,8 +94,8 @@
     --shadow-card: none;
     --shadow-float: 0 24px 60px -24px rgb(22 21 20 / 0.35);
     --card-border: #e5dfd5;
-    --map-water: #0a0a09;
-    --map-land: #141311;
+    --map-water: #dfe2e0;
+    --map-land: #f3f1ed;
     color-scheme: light;
   }
 }
@@ -242,194 +243,43 @@
 }
 
 /*
- * Animated icons. <Icon anim="…"> marks the svg; the motion plays when the
- * nearest .group (a link, button or card) is hovered or focused. CSS only.
+ * Icons draw themselves: when the nearest .group (a link, button or card) is
+ * hovered or focused, each stroke of the icon is traced from its start, the
+ * way the line icons in polished apps come alive. CSS only: every stroke gets
+ * a dash as long as itself (lucide strokes on a 24px grid are shorter than
+ * 100 units) whose offset runs from hidden to drawn. `data-anim` marks the
+ * svg; its value no longer matters.
  */
-[data-anim] {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-@keyframes ic-plane {
-  0% {
-    transform: translate(0, 0) rotate(0);
+@keyframes ic-draw {
+  from {
+    stroke-dashoffset: 100;
   }
-  45% {
-    transform: translate(3px, -3px) rotate(-6deg);
-  }
-  46% {
-    transform: translate(-4px, 4px) rotate(0);
-    opacity: 0;
-  }
-  60% {
-    opacity: 1;
-  }
-  100% {
-    transform: translate(0, 0);
-  }
-}
-@keyframes ic-ring {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  20% {
-    transform: rotate(14deg);
-  }
-  40% {
-    transform: rotate(-12deg);
-  }
-  60% {
-    transform: rotate(8deg);
-  }
-  80% {
-    transform: rotate(-4deg);
-  }
-}
-@keyframes ic-flip {
-  0% {
-    transform: rotateX(0);
-  }
-  50% {
-    transform: rotateX(180deg) scale(0.9);
-  }
-  100% {
-    transform: rotateX(360deg);
-  }
-}
-@keyframes ic-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  35% {
-    transform: translateY(-3px) scale(1.04);
-  }
-  65% {
-    transform: translateY(1px);
-  }
-}
-@keyframes ic-drop {
-  0% {
-    transform: translateY(0);
-  }
-  30% {
-    transform: translateY(-5px);
-  }
-  60% {
-    transform: translateY(1px) scaleY(0.9);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}
-@keyframes ic-wiggle {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  25% {
-    transform: rotate(-8deg) scale(1.05);
-  }
-  75% {
-    transform: rotate(6deg) scale(1.05);
-  }
-}
-@keyframes ic-spin {
   to {
-    transform: rotate(90deg);
+    stroke-dashoffset: 0;
   }
 }
-@keyframes ic-settle {
-  0%,
-  100% {
-    transform: translateY(0);
+.group:is(:hover, :focus-visible) [data-anim] > *,
+[data-anim]:hover > * {
+  stroke-dasharray: 100;
+  animation: ic-draw 0.9s var(--ease-out) both;
+}
+.group:is(:hover, :focus-visible) [data-anim] > :nth-child(2),
+[data-anim]:hover > :nth-child(2) {
+  animation-delay: 0.08s;
+}
+.group:is(:hover, :focus-visible) [data-anim] > :nth-child(3),
+[data-anim]:hover > :nth-child(3) {
+  animation-delay: 0.16s;
+}
+.group:is(:hover, :focus-visible) [data-anim] > :nth-child(n + 4),
+[data-anim]:hover > :nth-child(n + 4) {
+  animation-delay: 0.24s;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-anim] > * {
+    animation: none !important;
+    stroke-dasharray: none !important;
   }
-  40% {
-    transform: translateY(-2px) scale(1.06);
-  }
-}
-@keyframes ic-slide {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  50% {
-    transform: translateX(3px);
-  }
-}
-@keyframes ic-twist {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  50% {
-    transform: rotate(-25deg);
-  }
-}
-@keyframes ic-shake {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  20%,
-  60% {
-    transform: rotate(-12deg);
-  }
-  40%,
-  80% {
-    transform: rotate(12deg);
-  }
-}
-@keyframes ic-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.15);
-  }
-}
-.group:is(:hover, :focus-visible) [data-anim],
-[data-anim]:hover {
-  animation-duration: 0.7s;
-  animation-timing-function: var(--ease-out);
-}
-.group:is(:hover, :focus-visible) [data-anim="plane"] {
-  animation-name: ic-plane;
-}
-.group:is(:hover, :focus-visible) [data-anim="ring"] {
-  animation-name: ic-ring;
-}
-.group:is(:hover, :focus-visible) [data-anim="flip"] {
-  animation-name: ic-flip;
-}
-.group:is(:hover, :focus-visible) [data-anim="bounce"] {
-  animation-name: ic-bounce;
-}
-.group:is(:hover, :focus-visible) [data-anim="drop"] {
-  animation-name: ic-drop;
-}
-.group:is(:hover, :focus-visible) [data-anim="wiggle"] {
-  animation-name: ic-wiggle;
-}
-.group:is(:hover, :focus-visible) [data-anim="spin"] {
-  animation-name: ic-spin;
-  animation-fill-mode: forwards;
-}
-.group:is(:hover, :focus-visible) [data-anim="settle"] {
-  animation-name: ic-settle;
-}
-.group:is(:hover, :focus-visible) [data-anim="slide"] {
-  animation-name: ic-slide;
-}
-.group:is(:hover, :focus-visible) [data-anim="twist"] {
-  animation-name: ic-twist;
-}
-.group:is(:hover, :focus-visible) [data-anim="shake"] {
-  animation-name: ic-shake;
-}
-.group:is(:hover, :focus-visible) [data-anim="pulse"] {
-  animation-name: ic-pulse;
 }
 
 /* ---------- Live map ---------- */

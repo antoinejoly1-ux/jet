@@ -29,5 +29,5 @@ test("the back office sees the whole fleet", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "La flotte en direct" })).toBeVisible();
   // Other tests add aircraft, so only the number in the air is fixed.
   await expect(page.getByText(/^2 en vol sur \d+$/)).toBeVisible();
-  await expect(page.getByRole("link", { name: /C-FUNV/ })).toContainText("CYUL → KTEB");
+  await expect(page.getByRole("link", { name: /C-FUNV · Bombardier/ })).toContainText("CYUL → KTEB");
 });

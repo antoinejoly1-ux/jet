@@ -10,6 +10,7 @@
  * charter shows nothing but "in flight" (the same rule as availability).
  */
 import "server-only";
+import { aircraftPhotoUrl } from "@/lib/aircraft-photo-url";
 import { and, asc, eq, gt, inArray, isNull, lte, ne, or, sql } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { aircraft, aircraftPositions, flights, owners, shares } from "@/lib/db/schema";
@@ -40,6 +41,8 @@ export type AircraftLive = {
   aircraftId: string;
   registration: string;
   model: string;
+  /** The aircraft's own photo when one was uploaded; otherwise show the model's. */
+  photoUrl: string | null;
   state: "in_flight" | "on_ground" | "maintenance" | "unknown";
   position: {
     lat: number;
@@ -190,6 +193,7 @@ type ViewInput = {
   model: string;
   status: string;
   homeBase: string | null;
+  photoFileId: string | null;
 };
 
 async function buildViews(
@@ -286,6 +290,7 @@ async function buildViews(
       aircraftId: plane.aircraftId,
       registration: plane.registration,
       model: plane.model,
+      photoUrl: aircraftPhotoUrl(plane.aircraftId, plane.photoFileId),
       state,
       position: hasPos
         ? {
@@ -332,6 +337,7 @@ const planeColumns = {
   model: aircraft.model,
   status: aircraft.status,
   homeBase: aircraft.homeBase,
+  photoFileId: aircraft.photoFileId,
 };
 
 /** Every owner with an active share in this aircraft: the scope for owner reads. */

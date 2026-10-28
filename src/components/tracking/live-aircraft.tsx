@@ -108,11 +108,11 @@ export function LiveAircraft({
     <section
       id="live"
       aria-labelledby={`live-${live.aircraftId}`}
-      className={cn("theme-dark border-border bg-background relative overflow-hidden rounded-[28px] border", className)}
+      className={cn("border-border bg-surface relative overflow-hidden rounded-[28px] border", className)}
     >
       <div className="relative h-80 sm:h-[26rem] lg:h-[580px]">
         {/* The photo shows while the map loads, and stays if WebGL isn't available. */}
-        <Image src={photo} alt="" fill sizes="100vw" placeholder="blur" className="object-cover opacity-40" />
+        <Image src={photo} alt="" fill sizes="100vw" placeholder="blur" className="object-cover opacity-30" />
         <div className="absolute inset-0">
           <MapCanvas
             aircraft={[live]}
@@ -124,7 +124,7 @@ export function LiveAircraft({
         </div>
       </div>
 
-      <div className="lg:border-glass-line lg:bg-glass-strong flex flex-col gap-6 p-6 sm:p-8 lg:absolute lg:top-6 lg:left-6 lg:w-[380px] lg:rounded-[22px] lg:border lg:p-7 lg:backdrop-blur-xl">
+      <div className="lg:border-border lg:bg-surface/90 lg:shadow-float flex flex-col gap-6 p-6 sm:p-8 lg:absolute lg:top-6 lg:left-6 lg:w-[380px] lg:rounded-[22px] lg:border lg:p-7 lg:backdrop-blur-xl">
         <div>
           <p className="eyebrow flex items-center gap-2">
             <LiveDot tone={flying && !live.stale ? "live" : "muted"} />

@@ -12,9 +12,11 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { dataSource, deletedAt, id, timestamps } from "./_shared";
 import { holdingCompanies, owners } from "./owners";
+import { files } from "./platform";
 
 export const aircraftStatus = pgEnum("aircraft_status", ["available", "flying", "maintenance", "inactive"]);
 export const flightStatus = pgEnum("flight_status", ["scheduled", "completed", "cancelled"]);
@@ -35,6 +37,8 @@ export const aircraft = pgTable(
     icaoHex: text("icao_hex"),
     /** The company that owns it; null while unknown or for an aircraft Univair only operates. */
     holdingCompanyId: uuid("holding_company_id").references(() => holdingCompanies.id, { onDelete: "restrict" }),
+    /** Its own photo, uploaded by the team; until then, the model's. */
+    photoFileId: uuid("photo_file_id").references((): AnyPgColumn => files.id, { onDelete: "set null" }),
     ...timestamps(),
     deletedAt: deletedAt(),
   },

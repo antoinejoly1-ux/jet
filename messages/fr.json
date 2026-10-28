@@ -2148,5 +2148,24 @@
     "companiesTitle": "Résultats de la société",
     "companiesBody": "Ce que la société propriétaire a facturé et payé cette année : s'équilibre-t-elle?",
     "companyResults": "Résultats de {name}"
+  },
+  "flightDetail": {
+    "title": "Vol",
+    "back": "Vols",
+    "inAir": "En vol",
+    "noMap": "Aéroports inconnus : pas de carte pour ce vol.",
+    "summary": "Le vol",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "flightTime": "Temps de vol",
+    "planned": "prévu",
+    "billedTo": "Facturé à",
+    "charter": "Nolisement (sans propriétaire)",
+    "reportTitle": "Rapport du pilote",
+    "openReport": "Ouvrir le rapport",
+    "openInvoice": "Voir la facture",
+    "noReport": "Le pilote n'a pas encore envoyé son rapport.",
+    "noReportCancelled": "Vol annulé : aucun rapport.",
+    "filedBy": "Envoyé par {pilot} le {date}"
   }
 }

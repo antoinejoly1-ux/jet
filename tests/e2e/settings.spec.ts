@@ -4,17 +4,18 @@ import { signIn } from "./support";
 test("the look chosen in Settings sticks across visits", async ({ page }) => {
   await signIn(page, "owner@jet.test");
   await page.goto("/account");
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-
-  await page.getByRole("button", { name: /^Clair/ }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(page.getByRole("button", { name: /^Clair/ })).toHaveAttribute("aria-pressed", "true");
-  await page.goto("/");
+  // Light is the default.
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 
-  await page.goto("/account#appearance");
   await page.getByRole("button", { name: /^Sombre/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("button", { name: /^Sombre/ })).toHaveAttribute("aria-pressed", "true");
+  await page.goto("/");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+  await page.goto("/account#appearance");
+  await page.getByRole("button", { name: /^Clair/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
 });
 
 test("Settings shows every section, with the team a call away", async ({ page }) => {

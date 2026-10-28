@@ -78,8 +78,9 @@ test("pilot screens", async ({ page }) => {
   await audit(page, new URL(page.url()).pathname);
 });
 
-test("dark mode", async ({ page }) => {
-  await page.emulateMedia({ colorScheme: "dark" });
+test("dark mode", async ({ page, baseURL }) => {
+  // Light is the default; "Hangar Night" is chosen in Settings (a cookie).
+  await page.context().addCookies([{ name: "theme", value: "dark", url: baseURL! }]);
   await audit(page, "/sign-in");
   await signIn(page, "admin@jet.test");
   for (const path of ["/", "/availability", "/finances", "/messages", "/admin", "/admin/flights", "/admin/maintenance"])

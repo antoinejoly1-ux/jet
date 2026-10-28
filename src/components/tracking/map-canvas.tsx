@@ -141,8 +141,9 @@ export default function MapCanvas({
 
   useEffect(() => {
     if (!box.current) return;
-    // The map is always the night style: it reads as an instrument, and matches the cinematic panels.
-    const dark = true;
+    // The map follows the page: the night style in "Hangar Night", the paper style otherwise.
+    const theme = document.documentElement.dataset.theme;
+    const dark = theme === "dark" || (theme === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
     const map = new maplibregl.Map({
       container: box.current,
       style: dark ? STYLE.dark : STYLE.light,
