@@ -222,7 +222,9 @@ describe("flight reports", () => {
     const report = await submitReport(db, pilot, { flightId: f.id, flightTime: "2:00" });
     await returnReport(db, finance, report.id, { note: "Il manque le reçu du carburant." });
     const back = await listPilotFlights(db, pilot);
-    expect(back.toReport.find((r) => r.id === f.id)).toMatchObject({
+    // Pinned apart from the flights still to report.
+    expect(back.toReport.map((r) => r.id)).not.toContain(f.id);
+    expect(back.toFix.find((r) => r.id === f.id)).toMatchObject({
       reportStatus: "returned",
       reviewNote: "Il manque le reçu du carburant.",
     });

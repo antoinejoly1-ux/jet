@@ -44,7 +44,7 @@ async function ownerLogin(ownerId: string, email: string): Promise<Actor> {
   return { id: u!.id, staffRole: null, ownerIds: [ownerId] };
 }
 
-/** Flies 2 h, with $500 of fuel bought on the way, and invoices it. */
+/** Flies 2 h, with $500 of fuel bought on the way (covered by the rate's fuel part), and invoices it. */
 async function invoicedFlight() {
   const [f] = await db
     .insert(flights)
@@ -122,6 +122,15 @@ describe("maintenance reserves", () => {
     expect(after.history).toHaveLength(1);
   });
 
+  it("refuses to pay more than a reserve holds, unless finance says to anyway", async () => {
+    await invoicedFlight(); // engine reserve: $460
+    const work = { component: "engine" as const, amount: "1 000", occurredOn: `${year}-03-01`, note: "Démarreur" };
+    await expect(payFromReserve(db, finance, planeId, work)).rejects.toThrow("reserve_insufficient");
+    await payFromReserve(db, finance, planeId, { ...work, override: "on" });
+    const after = await getAircraftReserves(db, finance, planeId);
+    expect(after.components.find((c) => c.component === "engine")!.balanceCents).toBe(46_000 - 100_000);
+  });
+
   it("owners see their aircraft's reserves and their part; dispatch and other owners can't change or see them", async () => {
     await invoicedFlight();
     const [mine] = await listOwnerReserves(db, anne);
@@ -140,11 +149,15 @@ describe("maintenance reserves", () => {
 
   it("voiding a generated invoice gives back its reserves and ledger lines, and the flight can be invoiced again", async () => {
     const invoice = await invoicedFlight();
-    await voidInvoice(db, finance, invoice.id, "Mauvais propriétaire");
+    await voidInvoice(db, finance, invoice.id, "Mauvais propriétaire", new Date(`${year}-12-15T15:00:00Z`));
+    // Every reversal, ledger and reserves alike, is dated the day of the void.
+    const reversals = await db.select().from(reserveLedger).where(eq(reserveLedger.kind, "adjustment"));
+    expect(new Set(reversals.map((r) => r.occurredOn))).toEqual(new Set([`${year}-12-15`]));
     const reserves = await getAircraftReserves(db, finance, planeId);
     expect(reserves.components.every((c) => c.balanceCents === 0)).toBe(true);
     const ledger = await db.select().from(transactions).where(eq(transactions.invoiceId, invoice.id));
     expect(ledger.reduce((s, x) => s + x.amountCents, 0)).toBe(0);
+    expect(new Set(ledger.filter((x) => x.reversesId).map((x) => x.occurredOn))).toEqual(new Set([`${year}-12-15`]));
     // Nothing was deleted: both the entries and their reversals are there.
     expect((await db.select().from(reserveLedger)).length).toBe(8);
   });
@@ -177,7 +190,8 @@ describe("company results", () => {
       fuel: 150_000,
       pilot: 36_000,
       reserves: 94_000,
-      rebilled: 50_000,
+      // The fuel receipt is in the hourly rate: a company cost, not rebilled.
+      rebilled: 0,
       uploaded: 0,
     });
     expect(Object.fromEntries(pnl.expenses.map((e) => [e.key, e.cents]))).toEqual({
@@ -185,7 +199,7 @@ describe("company results", () => {
       fuel: 50_000,
       maintenance_reserves: 20_000,
     });
-    expect(pnl.resultCents).toBe(330_000 - 170_000);
+    expect(pnl.resultCents).toBe(280_000 - 170_000);
     expect(pnl.reserves).toEqual({ setAsideCents: 94_000, spentCents: 20_000, balanceCents: 74_000 });
   });
 
@@ -198,6 +212,21 @@ describe("company results", () => {
     });
     const pnl = await getCompanyPnl(db, finance, companyId, year);
     expect(pnl.revenue.find((r) => r.key === "uploaded")!.cents).toBe(123_400);
+    // No before-tax amount on that upload: the line says the taxes are in it.
+    expect(pnl.uploadedIncludesTaxes).toBe(true);
+  });
+
+  it("counts an upload before taxes when its subtotal is known", async () => {
+    await db.insert(invoices).values({
+      shareId,
+      number: "INV-2",
+      issuedOn: `${year}-01-15`,
+      totalCents: 114_975,
+      subtotalCents: 100_000,
+    });
+    const pnl = await getCompanyPnl(db, finance, companyId, year);
+    expect(pnl.revenue.find((r) => r.key === "uploaded")!.cents).toBe(100_000);
+    expect(pnl.uploadedIncludesTaxes).toBe(false);
   });
 
   it("its owners and managers see it; other owners, dispatch and pilots don't", async () => {

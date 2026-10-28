@@ -1,5 +1,5 @@
 import { FileText, Plus, Search } from "lucide-react";
-import type { Metadata } from "next";
+import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { InvoiceRowActions } from "@/components/admin/invoice-row-actions";
@@ -15,7 +15,8 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
-import { listInvoices } from "@/lib/services/invoices";
+import { listInvoicesPage } from "@/lib/services/invoices";
+import { zonedDay } from "@/lib/time";
 import { markPaidAction, voidInvoiceAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,6 +34,7 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
   const status = str("status");
   const year = Number(str("year")) || undefined;
   const q = str("q");
+  const page = Number(str("page")) || 1;
 
   if (!can(viewer, "finance:read")) {
     return (
@@ -42,9 +44,14 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
       </>
     );
   }
-  const rows = await listInvoices(db, viewer, { status, year, q });
+  const list = await listInvoicesPage(db, viewer, { status, year, q, page });
+  const rows = list.rows;
   const canWrite = can(viewer, "finance:write");
-  const thisYear = new Date().getFullYear();
+  const today = zonedDay(new Date());
+  const thisYear = Number(today.slice(0, 4));
+  const money = (c: number) => formatMoney(c, "CAD", viewer.locale);
+  const pageHref = (p: number) =>
+    `/admin/invoices?${new URLSearchParams({ ...(q ? { q } : {}), ...(status ? { status } : {}), ...(year ? { year: String(year) } : {}), ...(p > 1 ? { page: String(p) } : {}) })}`;
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
 
   return (
@@ -75,6 +82,30 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
           <Alert tone="success">{t("created")}</Alert>
         </div>
       ) : null}
+      <dl className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="border-border bg-surface rounded-lg border p-5">
+          <dt className="eyebrow">{t("receivable")}</dt>
+          <dd className="tabular mt-2 text-2xl font-light tracking-tight">{money(list.receivableCents)}</dd>
+          <dd className="text-muted mt-1 text-sm">{t("openCount", { count: list.receivableCount })}</dd>
+        </div>
+        <div
+          className={`rounded-lg border p-5 ${list.overdueCount ? "border-danger/40 bg-danger/8" : "border-border bg-surface"}`}
+        >
+          <dt className="eyebrow">{t("overdueTotal")}</dt>
+          <dd className={`tabular mt-2 text-2xl font-light tracking-tight ${list.overdueCount ? "text-danger" : ""}`}>
+            {money(list.overdueCents)}
+          </dd>
+          <dd className="mt-1 text-sm">
+            {list.overdueCount ? (
+              <Link href="/admin/invoices?status=overdue" className="text-danger underline underline-offset-4">
+                {t("openCount", { count: list.overdueCount })}
+              </Link>
+            ) : (
+              <span className="text-muted">{t("noneOverdue")}</span>
+            )}
+          </dd>
+        </div>
+      </dl>
       <form role="search" className="mb-5 flex flex-wrap gap-2">
         <div className="relative min-w-56 flex-1">
           <Search
@@ -90,15 +121,15 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
             className="pl-9"
           />
         </div>
-        <Select name="status" defaultValue={status} aria-label={t("status")} className="w-40">
+        <Select name="status" defaultValue={status} aria-label={t("status")} className="w-44">
           <option value="">{t("allStatuses")}</option>
-          {(["issued", "paid", "void"] as const).map((s) => (
+          {(["issued", "overdue", "paid", "void"] as const).map((s) => (
             <option key={s} value={s}>
-              {t(`statuses.${s}`)}
+              {s === "overdue" ? t("overdue") : t(`statuses.${s}`)}
             </option>
           ))}
         </Select>
-        <Select name="year" defaultValue={year ? String(year) : ""} aria-label={t("year")} className="w-32">
+        <Select name="year" defaultValue={year ? String(year) : ""} aria-label={t("year")} className="w-48">
           <option value="">{t("allYears")}</option>
           {[thisYear, thisYear - 1, thisYear - 2].map((y) => (
             <option key={y} value={y}>
@@ -121,9 +152,12 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
                 <p className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold">{r.number}</span>
                   <Badge tone={TONE[r.status]}>{t(`statuses.${r.status}`)}</Badge>
+                  {r.overdue ? <Badge tone="danger">{t("overdue")}</Badge> : null}
                 </p>
                 <p className="text-muted truncate text-sm">
                   {r.registration} · {r.ownerName} · {day(r.issuedOn)}
+                  {r.status === "issued" && r.dueOn ? ` · ${t("dueShort", { date: day(r.dueOn) })}` : ""}
+                  {r.status === "paid" && r.paidOn ? ` · ${t("paidShort", { date: day(r.paidOn) })}` : ""}
                   {r.status === "void" && r.voidReason ? ` · ${r.voidReason}` : ""}
                 </p>
               </div>
@@ -133,20 +167,22 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
                 {formatMoney(r.totalCents, r.currency, viewer.locale)}
               </span>
               <div className="flex flex-wrap items-center gap-1">
-                {r.fileId ? (
+                {/* One action for every invoice: open it (its page, or the uploaded PDF). */}
+                {r.holdingCompanyId ? (
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={`/admin/invoices/${r.id}`}>{t("open")}</Link>
+                  </Button>
+                ) : r.fileId ? (
                   <Button asChild size="sm" variant="ghost">
                     <a href={`/files/${r.fileId}?inline=1`} target="_blank" rel="noreferrer">
-                      {t("viewPdf")}
+                      {t("open")}
                     </a>
-                  </Button>
-                ) : r.holdingCompanyId ? (
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href={`/admin/invoices/${r.id}`}>{t("viewDetail")}</Link>
                   </Button>
                 ) : null}
                 {canWrite ? (
                   <InvoiceRowActions
                     status={r.status}
+                    today={today}
                     markPaid={markPaidAction.bind(null, r.id)}
                     voidAction={voidInvoiceAction.bind(null, r.id)}
                   />
@@ -156,6 +192,25 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
           ))}
         </ul>
       )}
+      {list.pages > 1 ? (
+        <nav aria-label={t("pagination")} className="mt-5 flex items-center justify-between gap-3 text-sm">
+          {list.page > 1 ? (
+            <Button asChild size="sm" variant="secondary">
+              <Link href={pageHref(list.page - 1) as Route}>{t("previous")}</Link>
+            </Button>
+          ) : (
+            <span />
+          )}
+          <span className="text-muted">{t("pageOf", { page: list.page, pages: list.pages })}</span>
+          {list.page < list.pages ? (
+            <Button asChild size="sm" variant="secondary">
+              <Link href={pageHref(list.page + 1) as Route}>{t("next")}</Link>
+            </Button>
+          ) : (
+            <span />
+          )}
+        </nav>
+      ) : null}
     </>
   );
 }

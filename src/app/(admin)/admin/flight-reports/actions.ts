@@ -13,7 +13,7 @@ export async function approveReportAction(id: string, _prev: FormState, formData
   const viewer = await requireStaff();
   const values = formValues(formData);
   try {
-    await approveReport(db, viewer, id, { shareId: values.shareId ?? "" });
+    await approveReport(db, viewer, id, { shareId: values.shareId ?? "", usdRate: values.usdRate });
   } catch (err) {
     return formError(err, values);
   }
@@ -37,11 +37,11 @@ export async function returnReportAction(id: string, _prev: FormState, formData:
 }
 
 /** Finance issues the holding company's invoice for an approved report. */
-export async function issueInvoiceAction(reportId: string, _prev: FormState): Promise<FormState> {
+export async function issueInvoiceAction(reportId: string, _prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await requireStaff();
   let id: string;
   try {
-    id = (await issueInvoice(db, viewer, reportId)).id;
+    id = (await issueInvoice(db, viewer, reportId, { zeroRated: formData.get("zeroRated") === "on" })).id;
   } catch (err) {
     return formError(err);
   }

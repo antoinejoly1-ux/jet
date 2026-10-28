@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { FormAlert } from "@/components/ui/form-alert";
@@ -11,12 +11,18 @@ import { idle, submitted, type FormState } from "@/lib/forms";
 const COMPONENTS = ["engine", "propeller", "airframe", "avionics"] as const;
 type Action = (prev: FormState, data: FormData) => Promise<FormState>;
 
-/** Maintenance paid out of one reserve: « payé par la réserve hélice ». */
+/**
+ * Maintenance paid out of one reserve: « payé par la réserve hélice ». Asks
+ * once more before paying; when the reserve doesn't hold enough, the server
+ * refuses and the form offers to pay anyway (the reserve goes negative).
+ */
 export function ReserveWorkForm({ action, today }: { action: Action; today: string }) {
   const t = useTranslations("reserves");
   const tf = useTranslations("formErrors");
   const [state, formAction, pending] = useActionState(action, idle);
+  const [asking, setAsking] = useState(false);
   const err = (f: string) => (state.status === "error" && state.fields?.[f] ? tf(`fields.${f}`) : undefined);
+  const short = state.status === "error" && state.code === "reserve_insufficient";
   return (
     <form
       action={formAction}
@@ -66,11 +72,31 @@ export function ReserveWorkForm({ action, today }: { action: Action; today: stri
           required
         />
       </div>
-      <div>
-        <Button type="submit" variant="secondary" disabled={pending}>
-          {t("pay")}
-        </Button>
-      </div>
+      {short ? (
+        <label className="flex min-h-11 items-start gap-2.5 text-sm">
+          <input type="checkbox" name="override" className="mt-1" />
+          <span>{t("payAnyway")}</span>
+        </label>
+      ) : null}
+      {asking ? (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm">{t("payConfirm")}</p>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="secondary" disabled={pending}>
+              {t("payYes")}
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setAsking(false)}>
+              {t("notYet")}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div>
+          <Button type="button" variant="secondary" onClick={() => setAsking(true)}>
+            {t("pay")}
+          </Button>
+        </div>
+      )}
     </form>
   );
 }

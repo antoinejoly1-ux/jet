@@ -93,6 +93,7 @@ export default async function PilotFlightPage({ params }: { params: Promise<{ id
               key: e.id,
               category: e.category,
               amount: (e.amountCents / 100).toFixed(2).replace(".", locale.startsWith("fr") ? "," : "."),
+              currency: e.currency,
               paidBy: e.paidBy,
               receiptFileId: e.receiptFileId ?? "",
               note: e.note ?? "",
@@ -108,7 +109,7 @@ export default async function PilotFlightPage({ params }: { params: Promise<{ id
           {expenses.map((e) => (
             <div key={e.id} className="flex justify-between gap-4 px-5 py-4">
               <dt className="text-muted">{t(`form.categories.${e.category}`)}</dt>
-              <dd className="font-medium">{formatMoney(e.amountCents, "CAD", locale)}</dd>
+              <dd className="font-medium">{formatMoney(e.amountCents, e.currency, locale)}</dd>
             </div>
           ))}
         </dl>

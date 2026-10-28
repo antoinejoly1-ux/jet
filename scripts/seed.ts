@@ -13,9 +13,12 @@ import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
+import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { v7 as uuidv7 } from "uuid";
+import en from "../messages/en.json";
+import fr from "../messages/fr.json";
 import * as s from "../src/lib/db/schema";
 
 config({ path: ".env.local" });
@@ -272,6 +275,43 @@ async function main() {
     .returning();
 
   console.log("Flights, hours, money…");
+  // What an hour costs, on Charles's numbers: about $1,400 on a PC-12, $750 of it fuel, the rest
+  // set aside per component for the big jobs (an overhaul, a propeller) and the pilot.
+  const pc12 = { fuel: 75_000, engine: 23_000, propeller: 8_500, airframe: 12_000, avionics: 3_500, pilot: 18_000 };
+  const scale = [1, 1, 1.9, 1.3, 3]; // PC-12, PC-12, CJ4, King Air, Challenger
+  await db.insert(s.aircraftRates).values(
+    fleet.map((plane, i) => {
+      const c = (cents: number) => Math.round((cents * scale[i]!) / 100) * 100;
+      return {
+        aircraftId: plane.id,
+        effectiveFrom: `${year - 1}-01-01`,
+        fuelCentsPerHour: c(pc12.fuel),
+        engineReserveCentsPerHour: c(pc12.engine),
+        propellerReserveCentsPerHour: c(pc12.propeller),
+        airframeReserveCentsPerHour: c(pc12.airframe),
+        avionicsReserveCentsPerHour: c(pc12.avionics),
+        pilotCentsPerHour: c(pc12.pilot),
+      };
+    }),
+  );
+  // C-GJTA's company issues its invoices from the portal: its past flights are billed the same way
+  // (approved report → invoice at the rate → the owner's ledger, labelled in the owner's language),
+  // so one invoice per flight is the only source of that flight's costs. The other aircraft keep
+  // invoices uploaded as PDFs, each with its own cost lines.
+  const jta = companies[0]!;
+  const ownerLocale = new Map(ownerRows.map((o) => [o.id, o.locale === "en" ? ("en" as const) : ("fr" as const)]));
+  const labels = { fr, en };
+  const ratePerHour = { ...pc12 } as Record<keyof typeof pc12, number>;
+  const lineCategory: Record<string, string | undefined> = {
+    fuel: cat.Fuel,
+    engine: cat.Maintenance,
+    propeller: cat.Maintenance,
+    airframe: cat.Maintenance,
+    avionics: cat.Maintenance,
+    pilot: cat.Crew,
+    airport_fees: cat["Airport fees"],
+  };
+  let jtaSeq = 0;
   const airports = ["CYUL", "CYQB", "CYYZ", "KTEB", "KPBI", "KMIA", "MYNN", "TNCM", "CYVR", "KBOS"];
   let invoiceSeq = 1;
   for (const share of shareRows) {
@@ -327,6 +367,125 @@ async function main() {
         const fuel = Math.round(flown * (28 + rand() * 8)) * 100;
         const crew = Math.round(flown * 10) * 100;
         const fees = Math.round(400 + rand() * 900) * 100;
+        if (share.aircraftId === fleet[0]!.id) {
+          const locale = ownerLocale.get(share.ownerId) ?? "fr";
+          const L = labels[locale];
+          const issuedOn = isoDay(new Date(departs.getTime() + 2 * 86_400_000));
+          const paid = departs.getTime() < today.getTime() - 40 * 86_400_000;
+          const number = `JTA-${year}-${String(++jtaSeq).padStart(4, "0")}`;
+          const hourLines = (Object.keys(ratePerHour) as (keyof typeof pc12)[]).map((part) => ({
+            kind: "hours" as const,
+            part,
+            minutes: flown,
+            unitCents: ratePerHour[part],
+            amountCents: Math.round((ratePerHour[part] * flown) / 60),
+            description: null,
+          }));
+          const lines = [
+            ...hourLines,
+            // Fuel bought on the way is in the hourly rate: shown, not billed again.
+            {
+              kind: "included" as const,
+              part: "fuel",
+              minutes: null,
+              unitCents: null,
+              amountCents: 0,
+              description: null,
+            },
+            {
+              kind: "expense" as const,
+              part: "airport_fees",
+              minutes: null,
+              unitCents: null,
+              amountCents: fees,
+              description: null,
+            },
+          ];
+          const subtotal = lines.reduce((n, l) => n + l.amountCents, 0);
+          const gst = Math.round(subtotal * 0.05);
+          const qst = Math.round(subtotal * 0.09975);
+          const [invoice] = await db
+            .insert(s.invoices)
+            .values({
+              shareId: share.id,
+              flightId: flight!.id,
+              number,
+              issuedOn,
+              dueOn: isoDay(new Date(departs.getTime() + 32 * 86_400_000)),
+              totalCents: subtotal + gst + qst,
+              subtotalCents: subtotal,
+              gstCents: gst,
+              qstCents: qst,
+              status: paid ? "paid" : "issued",
+              paidOn: paid ? isoDay(new Date(departs.getTime() + 20 * 86_400_000)) : null,
+              holdingCompanyId: jta.id,
+              issuer: {
+                legalName: jta.legalName,
+                address: jta.address,
+                gstNumber: jta.gstNumber,
+                qstNumber: jta.qstNumber,
+                paymentInstructions: jta.paymentInstructions,
+              },
+            })
+            .returning();
+          await db.insert(s.invoiceLines).values(lines.map((l, i) => ({ ...l, invoiceId: invoice!.id, sortOrder: i })));
+          const [report] = await db
+            .insert(s.flightReports)
+            .values({
+              flightId: flight!.id,
+              flightMinutes: flown,
+              shareId: share.id,
+              status: "approved",
+              reviewedAt: new Date(departs.getTime() + 86_400_000),
+              submittedAt: new Date(departs.getTime() + 4 * 3_600_000),
+              invoiceId: invoice!.id,
+            })
+            .returning();
+          const fuelReceipt = Math.round(flown * (11 + rand() * 2)) * 100;
+          await db.insert(s.flightReportExpenses).values([
+            { reportId: report!.id, category: "fuel", amountCents: fuelReceipt, amountCadCents: fuelReceipt },
+            { reportId: report!.id, category: "airport_fees", amountCents: fees, amountCadCents: fees },
+          ]);
+          await db.insert(s.reserveLedger).values(
+            hourLines
+              .filter((l) => l.part !== "fuel" && l.part !== "pilot")
+              .map((l) => ({
+                aircraftId: fleet[0]!.id,
+                component: l.part as "engine" | "propeller" | "airframe" | "avionics",
+                kind: "flight" as const,
+                amountCents: l.amountCents,
+                occurredOn: isoDay(departs),
+                invoiceId: invoice!.id,
+              })),
+          );
+          const label = (l: (typeof lines)[number]) =>
+            l.kind === "hours"
+              ? L.rates.parts[l.part as keyof typeof L.rates.parts]
+              : `${L.pilot.form.categories[l.part as keyof typeof L.pilot.form.categories]} (${L.invoiceDetail.atCost})`;
+          await db.insert(s.transactions).values([
+            ...lines
+              .filter((l) => l.amountCents > 0)
+              .map((l) => ({
+                shareId: share.id,
+                occurredOn: isoDay(departs),
+                categoryId: lineCategory[l.part] ?? null,
+                kind: "cost" as const,
+                amountCents: l.amountCents,
+                invoiceId: invoice!.id,
+                description: `${number} · ${label(l)}`,
+              })),
+            {
+              shareId: share.id,
+              occurredOn: isoDay(departs),
+              categoryId: null,
+              kind: "cost" as const,
+              amountCents: gst + qst,
+              invoiceId: invoice!.id,
+              description: `${number} · ${L.invoiceDetail.ledgerTaxes}`,
+            },
+          ]);
+          continue;
+        }
         const total = fuel + crew + fees;
         const number = `INV-${year}-${String(invoiceSeq++).padStart(4, "0")}`;
         const fileId = await storeDemoFile(
@@ -409,6 +568,12 @@ async function main() {
     }
   }
 
+  // The portal numbers JTA's next invoice after the ones above.
+  await db
+    .update(s.holdingCompanies)
+    .set({ invoiceSeq: jtaSeq, invoiceSeqYear: year })
+    .where(eq(s.holdingCompanies.id, jta.id));
+
   // Upcoming flights and maintenance per aircraft.
   const now = Date.now();
   for (const [i, plane] of fleet.entries()) {
@@ -471,25 +636,6 @@ async function main() {
   ]);
 
   console.log("Rates and flight reports…");
-  // What an hour costs, on Charles's numbers: about $1,400 on a PC-12, $750 of it fuel, the rest
-  // set aside per component for the big jobs (an overhaul, a propeller) and the pilot.
-  const pc12 = { fuel: 75_000, engine: 23_000, propeller: 8_500, airframe: 12_000, avionics: 3_500, pilot: 18_000 };
-  const scale = [1, 1, 1.9, 1.3, 3]; // PC-12, PC-12, CJ4, King Air, Challenger
-  await db.insert(s.aircraftRates).values(
-    fleet.map((plane, i) => {
-      const c = (cents: number) => Math.round((cents * scale[i]!) / 100) * 100;
-      return {
-        aircraftId: plane.id,
-        effectiveFrom: `${year - 1}-01-01`,
-        fuelCentsPerHour: c(pc12.fuel),
-        engineReserveCentsPerHour: c(pc12.engine),
-        propellerReserveCentsPerHour: c(pc12.propeller),
-        airframeReserveCentsPerHour: c(pc12.airframe),
-        avionicsReserveCentsPerHour: c(pc12.avionics),
-        pilotCentsPerHour: c(pc12.pilot),
-      };
-    }),
-  );
   // On a Vercel preview, testers sign in without an authenticator app (REQUIRE_STAFF_2FA=false there).
   const staff2fa = !process.env.VERCEL;
   // On a Vercel preview the team, pilot and manager demo accounts meet the welcome tour on first sign-in;

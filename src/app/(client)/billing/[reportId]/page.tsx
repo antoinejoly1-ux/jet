@@ -48,6 +48,7 @@ export default async function PrepareInvoicePage({ params }: PageProps<"/billing
           draft={draft}
           locale={await getLocale()}
           issue={viewer.viewingAs ? null : issueInvoiceAction.bind(null, reportId)}
+          showReceipts
         />
       </Card>
     </>

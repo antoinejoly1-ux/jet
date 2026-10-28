@@ -28,7 +28,15 @@ export async function PnlView({ pnl, locale }: { pnl: Pnl; locale: string }) {
           {pnl.revenue
             .filter((r) => r.cents !== 0 || r.key !== "uploaded")
             .map((r) => (
-              <Row key={r.key} label={t(`revenueLines.${r.key}`)} value={cad(r.cents)} />
+              <Row
+                key={r.key}
+                label={
+                  r.key === "uploaded" && pnl.uploadedIncludesTaxes
+                    ? `${t("revenueLines.uploaded")} ${t("taxesIncluded")}`
+                    : t(`revenueLines.${r.key}`)
+                }
+                value={cad(r.cents)}
+              />
             ))}
         </Table>
         <Table title={t("expenses")} total={cad(pnl.expensesCents)} totalLabel={t("totalExpenses")}>

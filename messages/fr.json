@@ -39,7 +39,8 @@
     "fabNewFlight": "Nouveau vol",
     "fabRequest": "Demander un vol",
     "expand": "Afficher les libellés",
-    "collapse": "Réduire"
+    "collapse": "Réduire",
+    "pending": "{count, plural, one {# à traiter} other {# à traiter}}"
   },
   "toggle": {
     "label": "Changer de vue",
@@ -638,7 +639,8 @@
       "paymentInstructions": "Texte trop long.",
       "category": "Choisissez un type.",
       "target": "Montant invalide (ex. 200 000).",
-      "component": "Choisissez une réserve."
+      "component": "Choisissez une réserve.",
+      "usdRate": "Entrez le taux, par exemple 1,3850."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -694,7 +696,12 @@
     "report_already_invoiced": "Ce vol est déjà facturé.",
     "prefix_taken": "Ce préfixe est déjà utilisé par une autre société.",
     "no_account_for_email": "Aucun compte avec ce courriel. Demandez à la personne de s'inscrire d'abord.",
-    "staff_already_has_access": "Cette personne fait partie de l'équipe Univair : elle a déjà accès."
+    "staff_already_has_access": "Cette personne fait partie de l'équipe Univair : elle a déjà accès.",
+    "fx_rate_missing": "Des reçus en dollars américains n'ont pas encore de taux de change.",
+    "flight_already_invoiced": "Ce vol a déjà une facture en vigueur : annulez-la avant d'en émettre une autre.",
+    "invoice_paid": "Une facture payée ne s'annule pas : émettez plutôt un crédit ou un remboursement.",
+    "paid_in_future": "La date du paiement ne peut pas être dans le futur.",
+    "reserve_insufficient": "La réserve ne contient pas ce montant. Vérifiez le montant ou cochez « Payer quand même »."
   },
   "aircraft": {
     "title": "Appareils",
@@ -887,7 +894,26 @@
     "issue": "Émettre la facture",
     "cancel": "Annuler",
     "exportCsv": "Exporter (CSV)",
-    "viewDetail": "Voir"
+    "viewDetail": "Voir",
+    "overdue": "En retard",
+    "receivable": "À recevoir",
+    "openCount": "{count, plural, =0 {Aucune facture} one {# facture} other {# factures}}",
+    "overdueTotal": "En retard",
+    "noneOverdue": "Aucune facture en retard",
+    "dueShort": "échéance le {date}",
+    "paidShort": "payée le {date}",
+    "open": "Ouvrir",
+    "pagination": "Pages",
+    "previous": "Précédentes",
+    "next": "Suivantes",
+    "pageOf": "Page {page} sur {pages}",
+    "paidOn": "Date du paiement",
+    "paymentReference": "Référence (facultatif)",
+    "paymentReferencePlaceholder": "N° de chèque ou de virement",
+    "recordPayment": "Enregistrer le paiement",
+    "close": "Fermer",
+    "voidHint": "La facture reste visible, marquée annulée, et ses écritures sont contrepassées.",
+    "keepInvoice": "Garder la facture"
   },
   "ownerInvoices": {
     "title": "Factures",
@@ -1019,7 +1045,14 @@
       "invalid_kind": "Type inconnu (coût, revenu ou paiement)",
       "invalid_amount": "Montant illisible ou nul",
       "unknown_category": "Catégorie inconnue"
-    }
+    },
+    "dateOrderTitle": "Dans quel ordre sont les dates?",
+    "dateOrderBody": "Une date comme {example} peut se lire de deux façons, et aucune ligne du fichier ne permet de trancher.",
+    "dateOrders": {
+      "dmy": "Jour/mois/année (31/01/2026)",
+      "mdy": "Mois/jour/année (01/31/2026)"
+    },
+    "sampleCaption": "Les {count} premières lignes, telles qu'elles seront importées"
   },
   "finances": {
     "title": "Finances",
@@ -1035,7 +1068,10 @@
     "byMonth": "Dépenses par mois",
     "peak": "Mois le plus élevé : {amount}",
     "exportCsv": "Exporter (CSV)",
-    "statementPdf": "Relevé {year} (PDF)"
+    "statementPdf": "Relevé {year} (PDF)",
+    "billed": "Facturé",
+    "billedHint": "Factures émises en {year}, taxes incluses",
+    "reconcile": "« Dépensé » compte vos coûts avant taxes, dont {amount} inscrits directement sans facture (hangar, assurance…). « Facturé » compte les factures émises, taxes incluses."
   },
   "flights": {
     "title": "Vols",
@@ -1991,7 +2027,7 @@
     "body": "Après chaque vol : le temps de vol, le carburant et vos dépenses, avec une photo de chaque reçu. Le rapport part aux finances, qui facturent le bon propriétaire.",
     "toReport": "Vols à rapporter",
     "nothingToReport": "Tout est rapporté",
-    "nothingToReportBody": "Les vols des 14 derniers jours apparaîtront ici dès leur départ.",
+    "nothingToReportBody": "Les vols des 14 derniers jours apparaîtront ici une fois atterris.",
     "returnedNote": "Renvoyé par les finances :",
     "fix": "Corriger",
     "report": "Remplir",
@@ -2005,7 +2041,7 @@
     "back": "Rapports de vol",
     "form": {
       "flightTime": "Temps de vol",
-      "flightTimeHint": "Par exemple 2 h 15 ou 2,25",
+      "flightTimeHint": "1:35 ou 1 h 35",
       "fuelLitres": "Carburant ajouté (litres)",
       "expenses": "Dépenses",
       "expensesBody": "Une ligne par reçu. Prenez le reçu en photo : il est joint au rapport.",
@@ -2026,7 +2062,7 @@
         "catering": "Traiteur",
         "other": "Autre"
       },
-      "amount": "Montant ($)",
+      "amount": "Montant",
       "paidBy": "Payé par",
       "payers": {
         "company_card": "Carte de la compagnie",
@@ -2037,8 +2073,11 @@
       "receiptAttached": "Reçu joint",
       "addReceipt": "Photo du reçu",
       "viewReceipt": "Voir",
-      "uploadFailed": "La photo n'a pas pu être envoyée. Réessayez."
-    }
+      "uploadFailed": "La photo n'a pas pu être envoyée. Réessayez.",
+      "flightTimeEcho": "= {time}",
+      "currency": "Devise"
+    },
+    "toFix": "À corriger ({count})"
   },
   "rates": {
     "title": "Tarif horaire",
@@ -2072,7 +2111,7 @@
     "expensesSummary": "{count, plural, one {# dépense} other {# dépenses}} · {total}",
     "noExpenses": "Aucune dépense",
     "statuses": {
-      "submitted": "Envoyé",
+      "submitted": "À vérifier",
       "returned": "À corriger",
       "approved": "Approuvé"
     },
@@ -2088,7 +2127,7 @@
     "openReceipt": "Ouvrir le reçu : {category}",
     "noReceipt": "Sans reçu",
     "chargesTitle": "Ce que le vol représente",
-    "chargesBody": "Le temps de vol au tarif de l'appareil le jour du vol, plus les dépenses refacturées au coût.",
+    "chargesBody": "Le temps de vol au tarif de l'appareil le jour du vol, plus les dépenses refacturées au coût (en dollars canadiens).",
     "expensesAtCost": "Dépenses refacturées au coût",
     "beforeTaxes": "Total avant taxes",
     "noRate": "Cet appareil n'a pas encore de tarif horaire.",
@@ -2111,7 +2150,18 @@
     "invoiceTitle": "Facture",
     "openInvoice": "Voir la facture",
     "noCompany": "L'appareil n'appartient à aucune société : impossible d'émettre une facture à son nom.",
-    "setCompany": "Choisir la société"
+    "setCompany": "Choisir la société",
+    "payers": {
+      "company_card": "Carte de la compagnie",
+      "pilot": "Payé par le pilote, à rembourser"
+    },
+    "fuelIncluded": "Carburant inclus au tarif horaire",
+    "fuelIncludedBody": "Le tarif de l'appareil comprend le carburant : ce reçu est un coût de la société, il n'est pas refacturé.",
+    "notBilled": "non facturé",
+    "usdAtApproval": "Les reçus en dollars américains sont convertis au taux saisi à l'approbation.",
+    "usdRate": "Taux de change USD → CAD",
+    "usdRateHint": "Dollars canadiens pour 1 $ US, d'après le relevé de la carte. Ex. 1,3850",
+    "approvedRate": "Taux USD → CAD : {rate}."
   },
   "invoiceDetail": {
     "title": "Facture",
@@ -2141,7 +2191,7 @@
     "unitPrice": "Prix unitaire",
     "amount": "Montant",
     "managedBy": "Gérée par Univair Management",
-    "previewFrom": "Émise au nom de {company}, à {owner}.",
+    "previewFrom": "Sera émise au nom de {company}, à {owner}.",
     "notCharged": "non facturée",
     "noTaxNumbers": "Aucun numéro de TPS ni de TVQ dans le profil de la société : la facture sera sans taxes.",
     "needsRate": "L'appareil n'a pas de tarif horaire : fixez-le avant d'émettre.",
@@ -2149,7 +2199,20 @@
     "issueConfirm": "La facture sera numérotée et envoyée au propriétaire. Elle ne pourra plus être modifiée, seulement annulée.",
     "issueYes": "Oui, émettre",
     "issuing": "Émission…",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "ledgerTaxes": "TPS/TVQ",
+    "fuelIncluded": "Carburant inclus au tarif horaire",
+    "notBilled": "non facturé",
+    "receipts": "Reçus",
+    "needsFxRate": "Des reçus en dollars américains n'ont pas de taux de change : faites approuver le rapport par les finances avec le taux.",
+    "zeroRated": "Vol international : détaxé",
+    "zeroRatedHint": "Sans TPS ni TVQ. À confirmer avec votre comptable avant de cocher.",
+    "issueConfirmZeroRated": "La facture sera numérotée, sans TPS ni TVQ (vol international détaxé), et envoyée au propriétaire. Elle ne pourra plus être modifiée, seulement annulée.",
+    "notYet": "Pas maintenant",
+    "voidBanner": "Annulée le {date}",
+    "voidBannerNoDate": "Annulée",
+    "paidOn": "payée le {date}",
+    "zeroRatedLine": "Vol international détaxé : TPS et TVQ"
   },
   "billingProfile": {
     "title": "Facturation",
@@ -2185,7 +2248,13 @@
     "issued": "Factures émises",
     "prepareTitle": "Préparer la facture",
     "prepareBody": "Vérifiez les lignes et les taxes, puis émettez la facture au nom de la société.",
-    "results": "Résultats de la société"
+    "results": "Résultats de la société",
+    "groups": {
+      "issued": "À recevoir ({count})",
+      "paid": "Payées ({count})",
+      "void": "Annulées ({count})"
+    },
+    "back": "Facturation"
   },
   "pnl": {
     "title": "Résultats de la société",
@@ -2231,10 +2300,10 @@
     "exportCsv": "Exporter (CSV)",
     "year": "Année",
     "companyExpenses": "Dépenses de la société",
-    "companyExpensesBody": "Ce que la société paie en dehors des vols : pilotes, assurances, hangar… Une erreur s'annule par une écriture inverse.",
+    "companyExpensesBody": "Ce que la société paie en dehors des vols : pilotes, assurances, hangar… Une erreur se contrepasse par une écriture inverse.",
     "noCompanyExpenses": "Aucune dépense inscrite cette année.",
-    "reversal": "écriture inverse",
-    "reverse": "Annuler",
+    "reversal": "contrepassation",
+    "reverse": "Contrepasser",
     "addExpenseTitle": "Inscrire une dépense",
     "category": "Type",
     "amount": "Montant ($)",
@@ -2242,7 +2311,8 @@
     "description": "Description (facultatif)",
     "addExpense": "Inscrire",
     "section": "Section",
-    "line": "Ligne"
+    "line": "Ligne",
+    "taxesIncluded": "(taxes incluses)"
   },
   "reserves": {
     "title": "Réserves d'entretien",
@@ -2272,7 +2342,11 @@
     "totalWithPart": "{total} en réserve · votre part : {part}",
     "companiesTitle": "Résultats de la société",
     "companiesBody": "Ce que la société propriétaire a facturé et payé cette année : s'équilibre-t-elle?",
-    "companyResults": "Résultats de {name}"
+    "companyResults": "Résultats de {name}",
+    "payConfirm": "Le montant sera retiré de la réserve choisie. Une erreur se corrige par une contrepassation, jamais par une modification.",
+    "payYes": "Oui, payer depuis la réserve",
+    "notYet": "Pas maintenant",
+    "payAnyway": "Payer quand même : la réserve passera sous zéro."
   },
   "flightDetail": {
     "title": "Vol",

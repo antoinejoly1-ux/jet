@@ -1,7 +1,7 @@
 import "server-only";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, lt, ne, sql } from "drizzle-orm";
 import type { Db } from "@/lib/db";
-import { aircraft, budgetLines, budgets, owners, shares } from "@/lib/db/schema";
+import { aircraft, budgetLines, budgets, invoices, owners, shares, transactions } from "@/lib/db/schema";
 import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { budgetLinesInput } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
@@ -151,9 +151,42 @@ export async function getOwnerFinances(db: Db, actor: Actor, year: number) {
     .where(inArray(shares.ownerId, [...ids]))
     .orderBy(aircraft.registration);
 
+  const from = `${year}-01-01`;
+  const to = `${year + 1}-01-01`;
   return Promise.all(
     ownerShares.map(async (s) => {
-      const [view, months] = await Promise.all([loadBudget(db, s.shareId, year), monthlyTotals(db, s.shareId, year)]);
+      const [view, months, billed] = await Promise.all([
+        loadBudget(db, s.shareId, year),
+        monthlyTotals(db, s.shareId, year),
+        // What was invoiced (live invoices issued this year), and the part of the ledger's costs
+        // that came from an invoice: the rest was entered directly (hangar, insurance, imports…).
+        Promise.all([
+          db
+            .select({ cents: sql<number>`coalesce(sum(${invoices.totalCents}), 0)`.mapWith(Number) })
+            .from(invoices)
+            .where(
+              and(
+                eq(invoices.shareId, s.shareId),
+                ne(invoices.status, "void"),
+                gte(invoices.issuedOn, from),
+                lt(invoices.issuedOn, to),
+              ),
+            ),
+          db
+            .select({ cents: sql<number>`coalesce(sum(${transactions.amountCents}), 0)`.mapWith(Number) })
+            .from(transactions)
+            .where(
+              and(
+                eq(transactions.shareId, s.shareId),
+                eq(transactions.kind, "cost"),
+                isNotNull(transactions.categoryId),
+                isNotNull(transactions.invoiceId),
+                gte(transactions.occurredOn, from),
+                lt(transactions.occurredOn, to),
+              ),
+            ),
+        ]).then(([[i], [c]]) => ({ billedCents: i?.cents ?? 0, invoicedCostCents: c?.cents ?? 0 })),
+      ]);
       const published = view.budget?.status === "published";
       return {
         ...s,
@@ -164,7 +197,14 @@ export async function getOwnerFinances(db: Db, actor: Actor, year: number) {
           plannedCents: published ? r.plannedCents : 0,
           remainingCents: published ? r.remainingCents : -r.spentCents,
         })),
-        totals: { plannedCents: published ? view.totals.plannedCents : 0, spentCents: view.totals.spentCents },
+        totals: {
+          plannedCents: published ? view.totals.plannedCents : 0,
+          spentCents: view.totals.spentCents,
+          /** Invoices issued this year (not voided), taxes included. */
+          billedCents: billed.billedCents,
+          /** Costs in « Dépensé » (before taxes) that no invoice carries: entered directly (hangar, insurance…). */
+          notInvoicedCents: view.totals.spentCents - billed.invoicedCostCents,
+        },
         months,
       };
     }),

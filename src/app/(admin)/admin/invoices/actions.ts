@@ -19,14 +19,15 @@ export async function createInvoiceAction(_prev: FormState, formData: FormData):
   redirect("/admin/invoices?created=1");
 }
 
-export async function markPaidAction(id: string, _prev: FormState): Promise<FormState> {
+export async function markPaidAction(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await requireStaff();
+  const values = formValues(formData);
   try {
-    await markInvoicePaid(db, viewer, id);
+    await markInvoicePaid(db, viewer, id, { paidOn: values.paidOn || undefined, reference: values.reference });
   } catch (err) {
-    return formError(err);
+    return formError(err, values);
   }
-  revalidatePath("/admin/invoices");
+  revalidatePath("/admin/invoices", "layout");
   return { status: "success" };
 }
 
@@ -37,6 +38,6 @@ export async function voidInvoiceAction(id: string, _prev: FormState, formData: 
   } catch (err) {
     return formError(err, formValues(formData));
   }
-  revalidatePath("/admin/invoices");
+  revalidatePath("/admin/invoices", "layout");
   return { status: "success" };
 }

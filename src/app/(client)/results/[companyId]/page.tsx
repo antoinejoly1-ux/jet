@@ -1,4 +1,6 @@
+import { ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { PnlView } from "@/components/billing/pnl-view";
@@ -29,8 +31,19 @@ export default async function ResultsPage({ params, searchParams }: PageProps<"/
   const pnl = await getCompanyPnl(db, viewer, companyId, year).catch((e) =>
     e instanceof NotFoundError || e instanceof ForbiddenError ? notFound() : Promise.reject(e),
   );
+  // Back to where people come from: the company's billing for its managers, Finances for owners.
+  const manages = !!viewer.managedCompanyIds?.includes(companyId);
+  const tb = await getTranslations("billing");
+  const tn = await getTranslations("nav.items");
   return (
     <>
+      <Link
+        href={manages ? "/billing" : "/finances"}
+        className="text-muted hover:text-text mb-2 -ml-1 inline-flex h-11 items-center gap-1 text-sm"
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        {manages ? tb("back") : tn("finances")}
+      </Link>
       <PageHeader
         eyebrow={pnl.company.legalName}
         title={t("titleYear", { year })}

@@ -1,10 +1,10 @@
-import { Download, Plane } from "lucide-react";
+import { Ban, Download, Plane } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatHours, formatMoney } from "@/lib/format";
 import type { getInvoiceDetail } from "@/lib/services/billing";
-import { OPERATOR_TIME_ZONE } from "@/lib/time";
+import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 
 const TONE = { issued: "accent", paid: "success", void: "neutral" } as const;
 
@@ -15,9 +15,12 @@ const TONE = { issued: "accent", paid: "success", void: "neutral" } as const;
 export async function InvoiceDetail({
   detail,
   locale,
+  actions,
 }: {
   detail: Awaited<ReturnType<typeof getInvoiceDetail>>;
   locale: string;
+  /** The team's actions (mark paid, void), shown next to the status. */
+  actions?: React.ReactNode;
 }) {
   const t = await getTranslations("invoiceDetail");
   const ti = await getTranslations("invoices");
@@ -28,15 +31,36 @@ export async function InvoiceDetail({
   const cad = (c: number) => formatMoney(c, invoice.currency, locale);
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "long" });
   const issuer = invoice.issuer;
+  const voided = invoice.status === "void";
+  const overdue = invoice.status === "issued" && !!invoice.dueOn && invoice.dueOn < zonedDay(new Date());
 
   return (
     <div className="flex flex-col gap-6">
+      {voided ? (
+        <div
+          role="note"
+          className="border-danger/40 bg-danger/8 text-danger flex items-start gap-3 rounded-lg border p-4"
+        >
+          <Ban className="mt-0.5 size-5 shrink-0" aria-hidden />
+          <p className="text-sm">
+            <strong className="font-semibold tracking-wide uppercase">
+              {invoice.voidedOn ? t("voidBanner", { date: day(invoice.voidedOn) }) : t("voidBannerNoDate")}
+            </strong>
+            {invoice.voidReason ? <span className="text-text"> · {invoice.voidReason}</span> : null}
+          </p>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         <Badge tone={TONE[invoice.status]}>{ti(`statuses.${invoice.status}`)}</Badge>
+        {overdue ? <Badge tone="danger">{ti("overdue")}</Badge> : null}
         <span className="text-muted text-sm">
           {t("issuedOn", { date: day(invoice.issuedOn) })}
           {invoice.dueOn && invoice.status === "issued" ? ` · ${t("dueOn", { date: day(invoice.dueOn) })}` : ""}
+          {invoice.status === "paid" && invoice.paidOn
+            ? ` · ${t("paidOn", { date: day(invoice.paidOn) })}${invoice.paymentReference ? ` (${invoice.paymentReference})` : ""}`
+            : ""}
         </span>
+        {actions}
         <Button asChild size="sm" variant="secondary" className="ml-auto">
           <a href={`/invoices/${invoice.id}/pdf`}>
             <Download aria-hidden />
@@ -78,7 +102,11 @@ export async function InvoiceDetail({
             <li key={l.id} className="flex items-baseline justify-between gap-4 px-6 py-3.5">
               <div className="min-w-0">
                 <p className="text-sm font-medium">
-                  {l.kind === "hours" ? tr(`parts.${l.part}`) : tp(`categories.${l.part}`)}
+                  {l.kind === "hours"
+                    ? tr(`parts.${l.part}`)
+                    : l.kind === "included"
+                      ? t("fuelIncluded")
+                      : tp(`categories.${l.part}`)}
                   {l.kind === "expense" ? <span className="text-muted font-normal"> · {t("atCost")}</span> : null}
                 </p>
                 <p className="text-muted text-xs">
@@ -87,7 +115,9 @@ export async function InvoiceDetail({
                     : (l.description ?? "")}
                 </p>
               </div>
-              <span className="tabular text-sm">{cad(l.amountCents)}</span>
+              <span className={l.kind === "included" ? "text-muted text-xs" : "tabular text-sm"}>
+                {l.kind === "included" ? t("notBilled") : cad(l.amountCents)}
+              </span>
             </li>
           ))}
         </ul>
@@ -108,19 +138,23 @@ export async function InvoiceDetail({
               <dd className="tabular">{cad(invoice.qstCents)}</dd>
             </div>
           ) : null}
+          {invoice.zeroRated ? (
+            <div className="flex justify-between">
+              <dt className="text-muted">{t("zeroRatedLine")}</dt>
+              <dd className="tabular">{cad(0)}</dd>
+            </div>
+          ) : null}
           <div className="border-border mt-1 flex justify-between border-t pt-3 text-base">
             <dt className="font-medium">{t("total")}</dt>
             <dd className="tabular font-semibold">{cad(invoice.totalCents)}</dd>
           </div>
         </dl>
       </section>
-      {issuer?.paymentInstructions ? (
+      {/* A voided invoice isn't to be paid: no payment instructions. */}
+      {issuer?.paymentInstructions && !voided ? (
         <p className="text-muted text-sm whitespace-pre-line">
           <span className="text-text font-medium">{t("howToPay")}</span> {issuer.paymentInstructions}
         </p>
-      ) : null}
-      {invoice.status === "void" && invoice.voidReason ? (
-        <p className="text-muted text-sm">{t("voided", { reason: invoice.voidReason })}</p>
       ) : null}
     </div>
   );

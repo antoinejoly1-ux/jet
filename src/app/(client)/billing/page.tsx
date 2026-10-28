@@ -11,7 +11,7 @@ import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours, formatMoney } from "@/lib/format";
 import { listManagedInvoices, listToInvoice } from "@/lib/services/billing";
-import { OPERATOR_TIME_ZONE } from "@/lib/time";
+import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("billing") };
@@ -33,6 +33,7 @@ export default async function BillingPage() {
   const [toInvoice, issued] = await Promise.all([listToInvoice(db, viewer), listManagedInvoices(db, viewer)]);
   const when = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeZone: OPERATOR_TIME_ZONE });
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
+  const today = zonedDay(new Date());
 
   return (
     <>
@@ -75,29 +76,45 @@ export default async function BillingPage() {
         )}
       </section>
 
-      {issued.length ? (
-        <section aria-labelledby="issued" className="mt-12 flex flex-col gap-3">
-          <h2 id="issued" className="eyebrow">
-            {t("issued")}
-          </h2>
-          <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
-            {issued.map((i) => (
-              <li key={i.id}>
-                <Link href={`/invoices/${i.id}`} className="hover:bg-surface-muted flex items-center gap-4 px-5 py-4">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium">{i.number}</p>
-                    <p className="text-muted text-sm">
-                      {i.ownerName} · {i.registration} · {day(i.issuedOn)}
-                    </p>
-                  </div>
-                  <span className="tabular text-sm font-semibold">{formatMoney(i.totalCents, "CAD", locale)}</span>
-                  <Badge tone={TONE[i.status]}>{ti(`statuses.${i.status}`)}</Badge>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+      {(["issued", "paid", "void"] as const).map((status) => {
+        const group = issued.filter((i) => i.status === status);
+        if (!group.length) return null;
+        const muted = status === "void";
+        return (
+          <section key={status} aria-labelledby={`invoices-${status}`} className="mt-12 flex flex-col gap-3">
+            <h2 id={`invoices-${status}`} className="eyebrow">
+              {t(`groups.${status}`, { count: group.length })}
+            </h2>
+            <ul
+              className={`border-border bg-surface divide-border divide-y rounded-lg border ${muted ? "opacity-70" : ""}`}
+            >
+              {group.map((i) => {
+                const overdue = i.status === "issued" && !!i.dueOn && i.dueOn < today;
+                return (
+                  <li key={i.id}>
+                    <Link
+                      href={`/invoices/${i.id}`}
+                      className="hover:bg-surface-muted flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className={`font-medium ${muted ? "text-muted" : ""}`}>{i.number}</p>
+                        <p className="text-muted text-sm">
+                          {i.ownerName} · {i.registration} · {day(i.issuedOn)}
+                        </p>
+                      </div>
+                      <span className={`tabular text-sm font-semibold ${muted ? "text-muted line-through" : ""}`}>
+                        {formatMoney(i.totalCents, i.currency, locale)}
+                      </span>
+                      {overdue ? <Badge tone="danger">{ti("overdue")}</Badge> : null}
+                      <Badge tone={TONE[i.status]}>{ti(`statuses.${i.status}`)}</Badge>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        );
+      })}
     </>
   );
 }

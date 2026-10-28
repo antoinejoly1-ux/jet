@@ -127,7 +127,13 @@ export async function getCompanyPnl(db: Db, actor: Actor, companyId: string, yea
     // Invoices uploaded as PDFs (before the portal issued them) have no lines: their total counts.
     planeIds.length
       ? db
-          .select({ cents: sql<number>`coalesce(sum(${invoices.totalCents}), 0)`.mapWith(Number) })
+          .select({
+            // Before taxes where the upload says so; the taxes are owed to the governments, not revenue.
+            cents: sql<number>`coalesce(sum(coalesce(${invoices.subtotalCents}, ${invoices.totalCents})), 0)`.mapWith(
+              Number,
+            ),
+            withTaxes: sql<number>`count(*) filter (where ${invoices.subtotalCents} is null)`.mapWith(Number),
+          })
           .from(invoices)
           .innerJoin(shares, eq(shares.id, invoices.shareId))
           .where(
@@ -139,12 +145,16 @@ export async function getCompanyPnl(db: Db, actor: Actor, companyId: string, yea
               lt(invoices.issuedOn, to),
             ),
           )
-      : [{ cents: 0 }],
+      : [{ cents: 0, withTaxes: 0 }],
     planeIds.length
       ? db
           .select({
             category: flightReportExpenses.category,
-            cents: sql<number>`sum(${flightReportExpenses.amountCents})`.mapWith(Number),
+            // In CAD: fixed at approval (USD receipts converted at finance's rate).
+            cents:
+              sql<number>`sum(coalesce(${flightReportExpenses.amountCadCents}, ${flightReportExpenses.amountCents}))`.mapWith(
+                Number,
+              ),
           })
           .from(flightReportExpenses)
           .innerJoin(flightReports, eq(flightReports.id, flightReportExpenses.reportId))
@@ -231,6 +241,8 @@ export async function getCompanyPnl(db: Db, actor: Actor, companyId: string, yea
     expenses,
     expensesCents,
     resultCents: revenueCents - expensesCents,
+    /** Some uploaded invoices have no before-tax amount: their line includes the taxes, and says so. */
+    uploadedIncludesTaxes: (uploaded[0]?.withTaxes ?? 0) > 0,
     reserves: { setAsideCents: r.setAside, spentCents: r.spent, balanceCents: r.balance },
   };
 }

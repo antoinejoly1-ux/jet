@@ -17,13 +17,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const TONE = { submitted: "accent", returned: "warning", approved: "success" } as const;
 
-/** Flights to report, latest first, then the reports already sent. */
+/** Reports sent back to fix first, then landed flights to report (latest first), then the reports already sent. */
 export default async function PilotHome() {
   const viewer = await requirePilot();
   const t = await getTranslations("pilot");
   const format = await getFormatter();
   const locale = await getLocale();
-  const { toReport, mine } = await listPilotFlights(db, viewer);
+  const { toFix, toReport, mine } = await listPilotFlights(db, viewer);
   const when = (d: Date) =>
     format.dateTime(d, {
       weekday: "short",
@@ -41,6 +41,43 @@ export default async function PilotHome() {
         title={t("title")}
         description={t("body")}
       />
+
+      {toFix.length ? (
+        <section aria-labelledby="to-fix" className="mb-12 flex flex-col gap-3">
+          <h2 id="to-fix" className="eyebrow text-warning">
+            {t("toFix", { count: toFix.length })}
+          </h2>
+          <ul className="flex flex-col gap-3">
+            {toFix.map((f) => (
+              <li key={f.id}>
+                <Link
+                  href={`/pilot/flights/${f.id}`}
+                  className="border-warning/40 bg-warning/8 hover:border-warning flex items-center gap-4 rounded-lg border p-5 transition-colors"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-light tracking-tight">
+                      {f.fromAirport} → {f.toAirport}
+                    </p>
+                    <p className="text-muted mt-1 text-sm">
+                      {f.registration} · {when(f.departsAt)}
+                    </p>
+                    <p className="text-warning mt-2 flex items-start gap-1.5 text-sm">
+                      <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+                      <span>
+                        {t("returnedNote")} {f.reviewNote}
+                      </span>
+                    </p>
+                  </div>
+                  <span className="text-accent flex shrink-0 items-center gap-1 text-sm font-medium">
+                    {t("fix")}
+                    <ChevronRight className="size-4" aria-hidden />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section aria-labelledby="to-report" className="flex flex-col gap-3">
         <h2 id="to-report" className="eyebrow">
@@ -63,17 +100,9 @@ export default async function PilotHome() {
                     <p className="text-muted mt-1 text-sm">
                       {f.registration} · {when(f.departsAt)}
                     </p>
-                    {f.reportStatus === "returned" ? (
-                      <p className="text-warning mt-2 flex items-start gap-1.5 text-sm">
-                        <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
-                        <span>
-                          {t("returnedNote")} {f.reviewNote}
-                        </span>
-                      </p>
-                    ) : null}
                   </div>
                   <span className="text-accent flex shrink-0 items-center gap-1 text-sm font-medium">
-                    {f.reportStatus === "returned" ? t("fix") : t("report")}
+                    {t("report")}
                     <ChevronRight className="size-4" aria-hidden />
                   </span>
                 </Link>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Camera, Check, Loader2, Plus, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionState, useId, useState } from "react";
 import { submitReportAction } from "@/app/pilot/actions";
 import { uploadFile } from "@/components/files/upload";
@@ -10,7 +10,9 @@ import { Field } from "@/components/ui/field";
 import { FormAlert } from "@/components/ui/form-alert";
 import { Select } from "@/components/ui/select";
 import { TextareaField } from "@/components/ui/textarea";
+import { formatHours } from "@/lib/format";
 import { idle, submitted, type FormState } from "@/lib/forms";
+import { parseDurationToMinutes } from "@/lib/validation/operations";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = ["fuel", "handling", "airport_fees", "hotel", "per_diem", "catering", "other"] as const;
@@ -19,6 +21,8 @@ export type ExpenseRow = {
   key: string;
   category: (typeof CATEGORIES)[number];
   amount: string;
+  /** Receipts abroad are in US dollars; finance converts them when approving. */
+  currency: "CAD" | "USD";
   paidBy: "pilot" | "company_card";
   receiptFileId: string;
   note: string;
@@ -48,6 +52,7 @@ const blank = (): ExpenseRow => ({
   key: `new-${++seq}`,
   category: "fuel",
   amount: "",
+  currency: "CAD",
   paidBy: "company_card",
   receiptFileId: "",
   note: "",
@@ -66,7 +71,11 @@ export function ReportForm({
 }) {
   const t = useTranslations("pilot.form");
   const tf = useTranslations("formErrors");
+  const locale = useLocale();
   const [state, action, pending] = useActionState<FormState, FormData>(submitReportAction, idle);
+  // Echo the time as read, so "1.35" (1 h 21) isn't taken for 1 h 35 without the pilot seeing it.
+  const [flightTime, setFlightTime] = useState(submitted(state, "flightTime", initial.flightTime));
+  const minutes = flightTime.trim() ? parseDurationToMinutes(flightTime) : null;
   // Rows are state, not form fields, so a refused send keeps everything typed.
   const [rows, setRows] = useState<ExpenseRow[]>(initial.expenses);
   const [uploading, setUploading] = useState<string | null>(null);
@@ -94,17 +103,23 @@ export function ReportForm({
       <FormAlert state={state} />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field
-          id="flightTime"
-          name="flightTime"
-          label={t("flightTime")}
-          hint={t("flightTimeHint")}
-          inputMode="decimal"
-          autoComplete="off"
-          defaultValue={submitted(state, "flightTime", initial.flightTime)}
-          error={err("flightTime")}
-          required
-        />
+        <div className="flex flex-col gap-1">
+          <Field
+            id="flightTime"
+            name="flightTime"
+            label={t("flightTime")}
+            hint={t("flightTimeHint")}
+            inputMode="decimal"
+            autoComplete="off"
+            value={flightTime}
+            onChange={(e) => setFlightTime(e.target.value)}
+            error={err("flightTime")}
+            required
+          />
+          <p id="flightTime-echo" aria-live="polite" className="text-sm font-medium">
+            {minutes && minutes <= 24 * 60 ? t("flightTimeEcho", { time: formatHours(minutes, locale) }) : ""}
+          </p>
+        </div>
         <Field
           id="fuelLitres"
           name="fuelLitres"
@@ -217,14 +232,39 @@ function ExpenseItem({
             ))}
           </Select>
         </div>
-        <Field
-          id={`${id}-amount`}
-          label={t("amount")}
-          inputMode="decimal"
-          placeholder="0,00"
-          value={row.amount}
-          onChange={(e) => onChange({ amount: e.target.value })}
-        />
+        <div className="flex items-end gap-2">
+          <div className="min-w-0 flex-1">
+            <Field
+              id={`${id}-amount`}
+              label={t("amount")}
+              inputMode="decimal"
+              placeholder="0,00"
+              value={row.amount}
+              onChange={(e) => onChange({ amount: e.target.value })}
+            />
+          </div>
+          <div
+            role="radiogroup"
+            aria-label={t("currency")}
+            className="border-border bg-surface-muted inline-flex h-11 shrink-0 rounded-md border p-0.5"
+          >
+            {(["CAD", "USD"] as const).map((c) => (
+              <button
+                key={c}
+                type="button"
+                role="radio"
+                aria-checked={row.currency === c}
+                onClick={() => onChange({ currency: c })}
+                className={cn(
+                  "text-muted min-w-12 rounded-[5px] px-2.5 text-sm font-semibold",
+                  row.currency === c && "bg-surface text-text shadow-sm",
+                )}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor={`${id}-paid`} className="text-muted text-xs font-medium tracking-[0.04em]">
             {t("paidBy")}
