@@ -459,8 +459,10 @@ async function main() {
   ]);
 
   console.log("Demo logins…");
-  await createLogin("admin@jet.test", "Alex Admin", "admin", true);
-  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", true);
+  // On a Vercel preview, testers sign in without an authenticator app (REQUIRE_STAFF_2FA=false there).
+  const staff2fa = !process.env.VERCEL;
+  await createLogin("admin@jet.test", "Alex Admin", "admin", staff2fa);
+  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", staff2fa);
   await createLogin("finance@jet.test", "Fred Finance", "finance", false);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
   await db.insert(s.ownerMembers).values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "owner" });
