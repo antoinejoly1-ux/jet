@@ -16,7 +16,9 @@ import { env } from "@/lib/env";
 import { BottomTabs, RAIL_COOKIE, Sidebar, type Fab, type Side } from "./nav";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
+import { readFlash } from "@/lib/flash";
 import { telHref } from "@/lib/phone";
+import { Toast } from "@/components/ui/toast";
 
 const FINANCE_PAGES = ["finances", "invoices"];
 
@@ -56,6 +58,8 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
         ? null
         : { kind: "request", callHref: phone ? telHref(phone) : null };
   const expanded = (await cookies()).get(RAIL_COOKIE)?.value === "open";
+  const toast = await readFlash();
+  const tToast = await getTranslations("toasts");
   return (
     <>
       {viewer.viewingAs ? (
@@ -114,6 +118,7 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
             {children}
           </main>
         </div>
+        {toast ? <Toast id={toast} message={tToast(toast)} closeLabel={tToast("close")} /> : null}
         <BottomTabs side={side} badges={badges} hidden={hidden} footer={side === "client" ? <TeamReach /> : null} />
       </div>
     </>

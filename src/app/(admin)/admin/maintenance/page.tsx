@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { MaintenanceRowActions } from "@/components/admin/maintenance-row-actions";
-import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -25,11 +24,10 @@ export const STATUS_TONE = {
   cancelled: "neutral",
 } as const;
 
-export default async function AdminMaintenancePage({ searchParams }: PageProps<"/admin/maintenance">) {
+export default async function AdminMaintenancePage() {
   const viewer = await requireStaff();
   const t = await getTranslations("maintenance");
   const format = await getFormatter();
-  const sp = await searchParams;
   const { open, closed } = await listMaintenance(db, viewer);
   const canWrite = can(viewer, "operations:write");
   const dt = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
@@ -94,11 +92,6 @@ export default async function AdminMaintenancePage({ searchParams }: PageProps<"
           ) : null
         }
       />
-      {sp.saved ? (
-        <div className="mb-4">
-          <Alert tone="success">{t("saved")}</Alert>
-        </div>
-      ) : null}
       {open.length === 0 ? (
         <EmptyState icon={Wrench} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (

@@ -1,8 +1,22 @@
-import { KeyRound, MailPlus, PlaneTakeoff, UserRoundX, Users, type LucideIcon } from "lucide-react";
+import {
+  CalendarClock,
+  CheckCircle2,
+  Clock3,
+  KeyRound,
+  MailPlus,
+  MessageSquare,
+  PlaneLanding,
+  PlaneTakeoff,
+  UserRoundX,
+  Users,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import { Star } from "@/components/brand/logo";
+import { FlightRowActions } from "@/components/admin/flight-row-actions";
 import { FleetLive } from "@/components/tracking/fleet-live";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,9 +26,10 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { dayStart } from "@/lib/availability-days";
-import { getAdminStats } from "@/lib/services/dashboard";
+import { getAdminQueue, getAdminStats, type QueueKey } from "@/lib/services/dashboard";
 import { listFlights } from "@/lib/services/flights";
 import { getFleetLive } from "@/lib/services/tracking";
+import { cancelFlightAction, completeFlightAction } from "./flights/actions";
 import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
@@ -30,10 +45,11 @@ export default async function AdminDashboardPage() {
   const tf = await getTranslations("flights");
   const format = await getFormatter();
   const todayStart = dayStart(zonedDay(new Date()));
-  const [stats, fleet, today] = await Promise.all([
+  const [stats, fleet, today, queue] = await Promise.all([
     getAdminStats(db, viewer, todayStart),
     getFleetLive(db, viewer),
     listFlights(db, viewer, { from: todayStart, to: new Date(todayStart.getTime() + 86_400_000) }),
+    getAdminQueue(db, viewer),
   ]);
   const airborne = fleet.filter((a) => a.state === "in_flight").length;
   const firstName = viewer.name.split(" ")[0] ?? "";
@@ -88,11 +104,13 @@ export default async function AdminDashboardPage() {
         }
       />
 
+      <Queue rows={queue} />
+
       <InstrumentStrip>
         <Instrument label={t("inTheAir")} value={airborne} caption={t("ofFleet", { total: fleet.length })} />
-        <Instrument label={t("flightsToday")} value={stats.flightsToday} />
-        <Instrument label={t("flightsThisWeek")} value={stats.flightsThisWeek} />
-        <Instrument label={t("inMaintenance")} value={stats.inMaintenance} />
+        <Instrument label={t("flightsToday")} value={stats.flightsToday} href="/admin/flights" />
+        <Instrument label={t("flightsThisWeek")} value={stats.flightsThisWeek} href="/admin/flights" />
+        <Instrument label={t("inMaintenance")} value={stats.inMaintenance} href="/admin/maintenance" />
       </InstrumentStrip>
 
       <div className="grid gap-12 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
@@ -137,7 +155,21 @@ export default async function AdminDashboardPage() {
                         {f.registration} · {f.ownerName ?? t("charter")}
                       </span>
                     </span>
-                    <Badge tone={STATUS_TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
+                    {/* Landed but still "Prévu": close it right here. */}
+                    {can(viewer, "operations:write") && f.status === "scheduled" && f.departsAt < new Date() ? (
+                      <FlightRowActions
+                        id={f.id}
+                        status={f.status}
+                        complete={completeFlightAction.bind(null, f.id)}
+                        cancel={cancelFlightAction.bind(null, f.id)}
+                        plannedMinutes={
+                          f.arrivesAt ? Math.round((f.arrivesAt.getTime() - f.departsAt.getTime()) / 60_000) : null
+                        }
+                        ownerName={f.ownerName}
+                      />
+                    ) : (
+                      <Badge tone={STATUS_TONE[f.status]}>{tf(`statuses.${f.status}`)}</Badge>
+                    )}
                   </div>
                 </li>
               ))}
@@ -168,5 +200,51 @@ export default async function AdminDashboardPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+const QUEUE_ICON: Record<QueueKey, [LucideIcon, IconMotion]> = {
+  flightsToClose: [PlaneLanding, "plane"],
+  flightRequests: [PlaneTakeoff, "plane"],
+  awaitingReply: [MessageSquare, "wiggle"],
+  maintenanceOverdue: [Wrench, "twist"],
+  maintenanceSoon: [CalendarClock, "flip"],
+  lowHours: [Clock3, "pulse"],
+  ownersNeverInvited: [MailPlus, "slide"],
+};
+
+/** "À traiter": what needs someone today, most urgent first, each a count and a way in. */
+async function Queue({ rows }: { rows: { key: QueueKey; count: number; href: string }[] }) {
+  const t = await getTranslations("adminDashboard.queue");
+  return (
+    <section aria-labelledby="queue-title">
+      <h2 id="queue-title" className="mb-5 text-2xl font-light tracking-tight">
+        {t("title")}
+      </h2>
+      {rows.length === 0 ? (
+        <p className="border-border text-muted flex items-center gap-3 rounded-lg border px-6 py-5 text-sm">
+          <CheckCircle2 className="text-success size-5" strokeWidth={1.5} aria-hidden />
+          {t("empty")}
+        </p>
+      ) : (
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {rows.map(({ key, count, href }) => {
+            const [icon, anim] = QUEUE_ICON[key];
+            return (
+              <li key={key}>
+                <Link
+                  href={href as Route}
+                  className="group border-border bg-surface hover:border-text/30 flex h-full items-center gap-4 rounded-lg border px-5 py-4 transition-colors"
+                >
+                  <span className="tabular w-10 text-3xl font-light">{count}</span>
+                  <span className="min-w-0 flex-1 text-sm">{t(key, { count })}</span>
+                  <Icon icon={icon} anim={anim} className="text-muted group-hover:text-text size-4" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }

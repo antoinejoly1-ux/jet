@@ -1,21 +1,23 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, ne, sql, sum } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import {
   aircraft,
   budgetLines,
   budgets,
+  conversations,
   flights,
   hourLedger,
   invitations,
   invoices,
   maintenanceEvents,
+  messages,
   owners,
   shares,
   transactions,
   user,
 } from "@/lib/db/schema";
-import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
+import { authorize, can, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { listNotifications } from "./notification-center";
 
 export type ShareSummary = {
@@ -274,4 +276,109 @@ export async function getOwnerActivity(db: Db, actor: Actor, { limit = 8 } = {})
     ...flown.map((f) => ({ kind: "flight" as const, ...f })),
   ];
   return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
+}
+
+export type QueueKey =
+  | "flightsToClose"
+  | "flightRequests"
+  | "awaitingReply"
+  | "maintenanceSoon"
+  | "maintenanceOverdue"
+  | "lowHours"
+  | "ownersNeverInvited";
+
+/**
+ * "À traiter": what needs someone on the team today, each with how many.
+ * Only what this person's role can act on; zero rows are left out.
+ */
+export async function getAdminQueue(db: Db, actor: Actor, now = new Date()) {
+  authorize(actor, "admin:access");
+  const ops = can(actor, "operations:write");
+  const replies = can(actor, "messages:reply");
+  const invites = can(actor, "owners:invite");
+  const zero = Promise.resolve([{ n: 0 }]);
+  const in48h = new Date(now.getTime() + 48 * 3_600_000);
+  // A flight counts as flown once it has landed, or two hours after departure without an arrival time.
+  const landed = sql`coalesce(${flights.arrivesAt}, ${flights.departsAt} + interval '2 hours') < ${now}`;
+
+  const [[toClose], [requests], [awaiting], [soon], [overdue], [low], [neverInvited]] = await Promise.all([
+    ops
+      ? db
+          .select({ n: count() })
+          .from(flights)
+          .where(and(eq(flights.status, "scheduled"), landed))
+      : zero,
+    ops
+      ? db
+          .select({ n: count() })
+          .from(messages)
+          .where(and(sql`${messages.meta}->>'kind' = 'flight_request'`, sql`${messages.meta}->>'status' = 'requested'`))
+      : zero,
+    replies
+      ? // Open threads whose latest message is the owner's: someone is waiting for us.
+        db
+          .select({ n: count() })
+          .from(conversations)
+          .where(
+            and(
+              isNull(conversations.resolvedAt),
+              sql`(select u.staff_role from messages m left join users u on u.id = m.sender_user_id
+                 where m.conversation_id = ${conversations.id} order by m.created_at desc limit 1) is null`,
+              sql`exists (select 1 from messages m where m.conversation_id = ${conversations.id})`,
+            ),
+          )
+      : zero,
+    ops
+      ? db
+          .select({ n: count() })
+          .from(maintenanceEvents)
+          .where(
+            and(
+              eq(maintenanceEvents.status, "planned"),
+              gte(maintenanceEvents.startsAt, now),
+              lt(maintenanceEvents.startsAt, in48h),
+            ),
+          )
+      : zero,
+    ops
+      ? db
+          .select({ n: count() })
+          .from(maintenanceEvents)
+          .where(and(eq(maintenanceEvents.status, "in_progress"), lt(maintenanceEvents.endsAt, now)))
+      : zero,
+    // Active shares at or under 10% of their yearly hours.
+    db
+      .select({ n: count() })
+      .from(shares)
+      .where(
+        and(
+          or(isNull(shares.endsOn), sql`${shares.endsOn} > current_date`),
+          sql`${shares.annualHoursMinutes} > 0`,
+          sql`coalesce((select sum(h.minutes) from hour_ledger h where h.share_id = ${shares.id}), 0)
+              <= ${shares.annualHoursMinutes} * 0.1`,
+        ),
+      ),
+    invites
+      ? db
+          .select({ n: count() })
+          .from(owners)
+          .where(
+            and(
+              isNull(owners.deletedAt),
+              sql`not exists (select 1 from owner_members m where m.owner_id = ${owners.id})`,
+              sql`not exists (select 1 from invitations i where i.owner_id = ${owners.id})`,
+            ),
+          )
+      : zero,
+  ]);
+  const rows: { key: QueueKey; count: number; href: string }[] = [
+    { key: "flightsToClose", count: toClose!.n, href: "/admin/flights#to-close" },
+    { key: "flightRequests", count: requests!.n, href: "/admin/messages" },
+    { key: "awaitingReply", count: awaiting!.n, href: "/admin/messages" },
+    { key: "maintenanceOverdue", count: overdue!.n, href: "/admin/maintenance" },
+    { key: "maintenanceSoon", count: soon!.n, href: "/admin/maintenance" },
+    { key: "lowHours", count: low!.n, href: "/admin/budgets" },
+    { key: "ownersNeverInvited", count: neverInvited!.n, href: "/admin/invitations" },
+  ];
+  return rows.filter((r) => r.count > 0);
 }

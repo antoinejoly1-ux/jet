@@ -62,7 +62,7 @@ test("shares on one aircraft can never exceed 100%", async ({ page }) => {
 
   // Ending a share frees its percentage (shares are ended, never deleted).
   const luc = page.getByRole("listitem").filter({ hasText: "Luc Bergeron" });
-  await luc.getByRole("button", { name: "Terminer" }).click();
+  await luc.getByRole("button", { name: "Clôturer la part" }).click();
   await luc.getByRole("button", { name: "Confirmer" }).click();
   await expect(page.getByText("40 % attribués")).toBeVisible();
   await expect(page.getByText("1 ancien propriétaire")).toBeVisible();

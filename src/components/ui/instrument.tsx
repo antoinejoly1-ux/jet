@@ -1,3 +1,5 @@
+import type { Route } from "next";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -21,17 +23,28 @@ export function Instrument({
   value,
   caption,
   meter,
+  href,
 }: {
   label: string;
   value: ReactNode;
   caption?: ReactNode;
   meter?: number | null;
+  /** Where the reading leads: the number becomes a link. */
+  href?: Route;
 }) {
   const percent = meter != null ? Math.min(100, Math.max(0, Math.round(meter * 100))) : null;
   return (
     <div className="min-w-0 pr-4">
       <dt className="eyebrow">{label}</dt>
-      <dd className="tabular mt-3 text-3xl font-light tracking-tight sm:text-[2.6rem]">{value}</dd>
+      <dd className="tabular mt-3 text-3xl font-light tracking-tight sm:text-[2.6rem]">
+        {href ? (
+          <Link href={href} className="decoration-border underline-offset-8 hover:underline">
+            {value}
+          </Link>
+        ) : (
+          value
+        )}
+      </dd>
       {caption ? <dd className="text-muted mt-1 text-sm">{caption}</dd> : null}
       {percent != null ? (
         <dd className="mt-4">

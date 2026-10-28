@@ -8,6 +8,9 @@ describe("flight time", () => {
     expect(parseDurationToMinutes("2.25")).toBe(135);
     expect(parseDurationToMinutes("2,5")).toBe(150);
     expect(parseDurationToMinutes(" 3 ")).toBe(180);
+    expect(parseDurationToMinutes("2h15")).toBe(135);
+    expect(parseDurationToMinutes("2 h 15")).toBe(135);
+    expect(parseDurationToMinutes("1H")).toBe(60);
   });
 
   it("rejects anything else", () => {

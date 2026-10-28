@@ -402,7 +402,18 @@
     "newFlight": "Nouveau vol",
     "charter": "Nolisé",
     "clientsTitle": "Clients et accès",
-    "ofFleet": "sur {total} appareils"
+    "ofFleet": "sur {total} appareils",
+    "queue": {
+      "title": "À traiter",
+      "empty": "Rien à traiter pour l'instant. Belle journée.",
+      "flightsToClose": "{count, plural, one {vol à clôturer} other {vols à clôturer}} (temps de vol à inscrire)",
+      "flightRequests": "{count, plural, one {demande de vol à planifier} other {demandes de vol à planifier}}",
+      "awaitingReply": "{count, plural, one {conversation attend une réponse} other {conversations attendent une réponse}}",
+      "maintenanceOverdue": "{count, plural, one {maintenance a dépassé sa fin prévue} other {maintenances ont dépassé leur fin prévue}}",
+      "maintenanceSoon": "{count, plural, one {maintenance commence d'ici 48 h} other {maintenances commencent d'ici 48 h}}",
+      "lowHours": "{count, plural, one {part sous 10 % de ses heures} other {parts sous 10 % de leurs heures}}",
+      "ownersNeverInvited": "{count, plural, one {propriétaire jamais invité} other {propriétaires jamais invités}}"
+    }
   },
   "owners": {
     "title": "Propriétaires",
@@ -683,7 +694,7 @@
     "addShare": "Ajouter la part",
     "endsOn": "Date de fin",
     "endConfirm": "Terminer la part de {name}?",
-    "endShare": "Terminer",
+    "endShare": "Clôturer la part",
     "holdingCompany": "Société de portefeuille",
     "noHoldingCompany": "Aucune société",
     "ownedBy": "Propriété de"
@@ -1010,7 +1021,7 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "flightTime": "Temps de vol",
-    "flightTimePlaceholder": "ex. 2:15",
+    "flightTimePlaceholder": "2:15",
     "complete": "Terminer",
     "cancelReason": "Raison (facultatif)",
     "cancelFlight": "Annuler le vol",
@@ -1019,7 +1030,13 @@
     "exportCsv": "Exporter (CSV)",
     "flown": "{hours} de vol",
     "planRequestTitle": "Planifier la demande · {registration}",
-    "planRequestSubtitle": "Tout ce que le propriétaire a demandé est déjà inscrit. À l'enregistrement, la demande est fermée et le propriétaire reçoit la confirmation."
+    "planRequestSubtitle": "Tout ce que le propriétaire a demandé est déjà inscrit. À l'enregistrement, la demande est fermée et le propriétaire reçoit la confirmation.",
+    "moreActions": "Autres actions",
+    "flightTimeRead": "= {hours}",
+    "flightTimeReadOwner": "= {hours} · débité à {owner}",
+    "flightTimeInvalid": "Ex. 2:15, 2h15 ou 2,25",
+    "toCloseTitle": "À clôturer",
+    "toCloseBody": "Ces vols ont atterri : inscrivez le temps de vol pour le débiter de la banque d'heures."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1757,5 +1774,17 @@
     },
     "fewer": "Un passager de moins",
     "more": "Un passager de plus"
+  },
+  "toasts": {
+    "flightScheduled": "Vol enregistré.",
+    "flightUpdated": "Vol modifié.",
+    "flightClosed": "Vol clôturé : les heures sont débitées.",
+    "flightCancelled": "Vol annulé.",
+    "maintenanceSaved": "Maintenance enregistrée.",
+    "maintenanceStatus": "Statut de la maintenance mis à jour.",
+    "invitationSent": "Invitation envoyée.",
+    "invitationRevoked": "Invitation révoquée.",
+    "profileSaved": "Profil enregistré.",
+    "close": "Fermer"
   }
 }

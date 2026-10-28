@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { FlightRowActions } from "@/components/admin/flight-row-actions";
-import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -44,10 +43,24 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
     view === "upcoming"
       ? { from: today, to: new Date(today.getTime() + 31 * DAY_MS) }
       : { from: new Date(now.getTime() - 60 * DAY_MS), to: now };
-  const [rows, fleet] = await Promise.all([
+  const [rows, fleet, recent] = await Promise.all([
     listFlights(db, viewer, { ...window, aircraftId: aircraftId || undefined }),
     listAircraft(db, viewer),
+    // Flights that have landed but are still "Prévu": their hours aren't counted until someone closes them.
+    view === "upcoming"
+      ? listFlights(db, viewer, {
+          from: new Date(now.getTime() - 60 * DAY_MS),
+          to: now,
+          aircraftId: aircraftId || undefined,
+          status: "scheduled",
+        })
+      : Promise.resolve([]),
   ]);
+  const landed = (f: { departsAt: Date; arrivesAt: Date | null }) =>
+    (f.arrivesAt ?? new Date(f.departsAt.getTime() + 2 * 3_600_000)) < now;
+  const toClose = recent.filter(landed);
+  const planned = (f: { departsAt: Date; arrivesAt: Date | null }) =>
+    f.arrivesAt ? Math.round((f.arrivesAt.getTime() - f.departsAt.getTime()) / 60_000) : null;
   if (view === "past") rows.reverse();
   const canWrite = can(viewer, "operations:write");
 
@@ -95,11 +108,6 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
           </>
         }
       />
-      {str("saved") ? (
-        <div className="mb-4">
-          <Alert tone="success">{t("saved")}</Alert>
-        </div>
-      ) : null}
 
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <nav aria-label={t("view")} className="bg-surface-muted inline-flex rounded-md p-1">
@@ -130,6 +138,39 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
         </form>
       </div>
 
+      {toClose.length && canWrite ? (
+        <section id="to-close" aria-labelledby="to-close-title" className="mb-10 scroll-mt-28">
+          <h2 id="to-close-title" className="text-2xl font-light tracking-tight">
+            {t("toCloseTitle")}
+          </h2>
+          <p className="text-muted mt-1 mb-4 text-sm">{t("toCloseBody")}</p>
+          <ul className="border-warning/40 bg-surface divide-border divide-y rounded-lg border">
+            {toClose.map((f) => (
+              <li key={f.id} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center md:gap-6">
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">
+                    {f.fromAirport} → {f.toAirport}
+                  </p>
+                  <p className="text-muted text-sm first-letter:uppercase">
+                    {format.dateTime(f.departsAt, { weekday: "short", day: "numeric", month: "short" })} ·{" "}
+                    {time(f.departsAt)} · {f.registration} · {f.ownerName ?? t("noShare")}
+                  </p>
+                </div>
+                <FlightRowActions
+                  id={f.id}
+                  status={f.status}
+                  complete={completeFlightAction.bind(null, f.id)}
+                  cancel={cancelFlightAction.bind(null, f.id)}
+                  plannedMinutes={planned(f)}
+                  ownerName={f.ownerName}
+                  startOpen
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {rows.length === 0 ? (
         <EmptyState
           icon={PlaneTakeoff}
@@ -140,16 +181,16 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
         <div className="flex flex-col gap-6">
           {[...groups].map(([key, flights]) => (
             <section key={key} aria-labelledby={`day-${key}`}>
-              <h2 id={`day-${key}`} className="text-muted mb-2 text-sm font-semibold first-letter:uppercase">
+              <h2 id={`day-${key}`} className="eyebrow mb-3 first-letter:uppercase">
                 {dayLabel(key)}
               </h2>
-              <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
+              <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
                 {flights.map((f) => (
-                  <li key={f.id} className="flex flex-col gap-2 px-4 py-3 md:flex-row md:items-center md:gap-4">
-                    <span className="tabular w-14 shrink-0 font-semibold">{time(f.departsAt)}</span>
+                  <li key={f.id} className="flex flex-col gap-2 px-5 py-4 md:flex-row md:items-center md:gap-5">
+                    <span className="tabular w-20 shrink-0 text-xl font-light">{time(f.departsAt)}</span>
                     <div className="min-w-0 flex-1">
                       <p className="flex flex-wrap items-center gap-2">
-                        <span className={`font-semibold ${f.status === "cancelled" ? "text-muted line-through" : ""}`}>
+                        <span className={`font-medium ${f.status === "cancelled" ? "text-muted line-through" : ""}`}>
                           {f.fromAirport} → {f.toAirport}
                         </span>
                         <Badge tone={TONE[f.status]}>{t(`statuses.${f.status}`)}</Badge>
@@ -166,6 +207,8 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
                         status={f.status}
                         complete={completeFlightAction.bind(null, f.id)}
                         cancel={cancelFlightAction.bind(null, f.id)}
+                        plannedMinutes={planned(f)}
+                        ownerName={f.ownerName}
                       />
                     ) : null}
                   </li>

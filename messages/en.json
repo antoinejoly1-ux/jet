@@ -402,7 +402,18 @@
     "newFlight": "New flight",
     "charter": "Charter",
     "clientsTitle": "Clients and access",
-    "ofFleet": "of {total} aircraft"
+    "ofFleet": "of {total} aircraft",
+    "queue": {
+      "title": "To do",
+      "empty": "Nothing to do right now. Have a good day.",
+      "flightsToClose": "{count, plural, one {flight to close} other {flights to close}} (flight time to enter)",
+      "flightRequests": "{count, plural, one {flight request to plan} other {flight requests to plan}}",
+      "awaitingReply": "{count, plural, one {conversation waiting for a reply} other {conversations waiting for a reply}}",
+      "maintenanceOverdue": "{count, plural, one {maintenance past its planned end} other {maintenance jobs past their planned end}}",
+      "maintenanceSoon": "{count, plural, one {maintenance starting within 48 h} other {maintenance jobs starting within 48 h}}",
+      "lowHours": "{count, plural, one {share under 10% of its hours} other {shares under 10% of their hours}}",
+      "ownersNeverInvited": "{count, plural, one {owner never invited} other {owners never invited}}"
+    }
   },
   "owners": {
     "title": "Owners",
@@ -683,7 +694,7 @@
     "addShare": "Add share",
     "endsOn": "End date",
     "endConfirm": "End {name}'s share?",
-    "endShare": "End",
+    "endShare": "Close the share",
     "holdingCompany": "Holding company",
     "noHoldingCompany": "No company",
     "ownedBy": "Owned by"
@@ -1010,7 +1021,7 @@
     "save": "Save",
     "cancel": "Cancel",
     "flightTime": "Flight time",
-    "flightTimePlaceholder": "e.g. 2:15",
+    "flightTimePlaceholder": "2:15",
     "complete": "Complete",
     "cancelReason": "Reason (optional)",
     "cancelFlight": "Cancel flight",
@@ -1019,7 +1030,13 @@
     "exportCsv": "Export (CSV)",
     "flown": "{hours} flown",
     "planRequestTitle": "Plan the request · {registration}",
-    "planRequestSubtitle": "Everything the owner asked for is filled in. Saving closes the request and sends the owner a confirmation."
+    "planRequestSubtitle": "Everything the owner asked for is filled in. Saving closes the request and sends the owner a confirmation.",
+    "moreActions": "More actions",
+    "flightTimeRead": "= {hours}",
+    "flightTimeReadOwner": "= {hours} · charged to {owner}",
+    "flightTimeInvalid": "E.g. 2:15, 2h15 or 2.25",
+    "toCloseTitle": "To close",
+    "toCloseBody": "These flights have landed: enter the flight time to charge it to the hour bank."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1757,5 +1774,17 @@
     },
     "fewer": "One passenger fewer",
     "more": "One more passenger"
+  },
+  "toasts": {
+    "flightScheduled": "Flight saved.",
+    "flightUpdated": "Flight updated.",
+    "flightClosed": "Flight closed: the hours are charged.",
+    "flightCancelled": "Flight cancelled.",
+    "maintenanceSaved": "Maintenance saved.",
+    "maintenanceStatus": "Maintenance status updated.",
+    "invitationSent": "Invitation sent.",
+    "invitationRevoked": "Invitation revoked.",
+    "profileSaved": "Profile saved.",
+    "close": "Close"
   }
 }

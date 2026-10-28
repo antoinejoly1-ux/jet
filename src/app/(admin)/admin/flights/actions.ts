@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { flash } from "@/lib/flash";
 import { formError, formValues, type FormState } from "@/lib/forms";
 import { cancelFlight, completeFlight, scheduleFlight, updateFlight } from "@/lib/services/flights";
 import type { CompleteFlightInput, FlightInput } from "@/lib/validation/operations";
@@ -16,8 +17,9 @@ export async function scheduleFlightAction(_prev: FormState, formData: FormData)
   } catch (err) {
     return formError(err, formValues(formData));
   }
+  await flash("flightScheduled");
   revalidatePath("/admin/flights");
-  redirect("/admin/flights?saved=1");
+  redirect("/admin/flights");
 }
 
 export async function updateFlightAction(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
@@ -27,8 +29,9 @@ export async function updateFlightAction(id: string, _prev: FormState, formData:
   } catch (err) {
     return formError(err, formValues(formData));
   }
+  await flash("flightUpdated");
   revalidatePath("/admin/flights");
-  redirect("/admin/flights?saved=1");
+  redirect("/admin/flights");
 }
 
 export async function completeFlightAction(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
@@ -38,7 +41,8 @@ export async function completeFlightAction(id: string, _prev: FormState, formDat
   } catch (err) {
     return formError(err, formValues(formData));
   }
-  revalidatePath("/admin/flights");
+  await flash("flightClosed");
+  revalidatePath("/admin", "layout");
   return { status: "success" };
 }
 
@@ -49,6 +53,7 @@ export async function cancelFlightAction(id: string, _prev: FormState, formData:
   } catch (err) {
     return formError(err, formValues(formData));
   }
-  revalidatePath("/admin/flights");
+  await flash("flightCancelled");
+  revalidatePath("/admin", "layout");
   return { status: "success" };
 }

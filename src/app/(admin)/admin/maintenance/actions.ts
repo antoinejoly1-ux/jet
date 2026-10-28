@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { flash } from "@/lib/flash";
 import { formError, formValues, type FormState } from "@/lib/forms";
 import {
   planMaintenance,
@@ -25,8 +26,9 @@ export async function planMaintenanceAction(_prev: FormState, formData: FormData
   } catch (err) {
     return formError(err, formValues(formData));
   }
+  await flash("maintenanceSaved");
   refresh();
-  redirect("/admin/maintenance?saved=1");
+  redirect("/admin/maintenance");
 }
 
 export async function updateMaintenanceAction(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
@@ -36,8 +38,9 @@ export async function updateMaintenanceAction(id: string, _prev: FormState, form
   } catch (err) {
     return formError(err, formValues(formData));
   }
+  await flash("maintenanceSaved");
   refresh();
-  redirect("/admin/maintenance?saved=1");
+  redirect("/admin/maintenance");
 }
 
 export async function setMaintenanceStatusAction(
@@ -51,6 +54,7 @@ export async function setMaintenanceStatusAction(
   } catch (err) {
     return formError(err);
   }
+  await flash("maintenanceStatus");
   refresh();
   return { status: "success" };
 }
