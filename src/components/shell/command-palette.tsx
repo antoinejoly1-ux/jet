@@ -112,7 +112,7 @@ export function CommandPalette() {
         onClick={open}
         aria-label={t("open")}
         title={`${t("open")} (⌘K)`}
-        className="border-border hover:bg-surface-muted text-muted hover:text-text inline-flex size-11 items-center justify-center rounded-full border"
+        className="border-border hover:bg-surface-muted text-muted hover:text-text hidden size-11 items-center justify-center rounded-full border sm:inline-flex"
       >
         <Search className="size-4" strokeWidth={1.5} aria-hidden />
       </button>

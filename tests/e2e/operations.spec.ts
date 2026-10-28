@@ -17,7 +17,7 @@ async function schedule(page: Page, to: string, departsAt: string) {
   await page.getByLabel("Départ", { exact: true }).fill("cyul");
   await page.getByLabel("Arrivée", { exact: true }).fill(to);
   await page.getByLabel("Heure de départ").fill(departsAt);
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page.getByText("Vol enregistré.")).toBeVisible();
 }
 
@@ -117,7 +117,7 @@ test("starting and finishing maintenance takes the aircraft out of service and b
   await page.getByLabel("Travaux").fill(title);
   await page.getByLabel("Début").fill(local(1, "08:00"));
   await page.getByLabel("Fin", { exact: true }).fill(local(2, "17:00"));
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page.getByText("Maintenance enregistrée.")).toBeVisible();
 
   const row = page.getByRole("listitem").filter({ hasText: title });

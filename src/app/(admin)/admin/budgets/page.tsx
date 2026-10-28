@@ -138,7 +138,7 @@ async function SelectedShare({
   }));
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <Card>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <CardTitle className="text-text text-base">{t("budgetFor", { year })}</CardTitle>
@@ -148,7 +148,7 @@ async function SelectedShare({
           <span className="text-muted min-w-0 flex-1 text-sm">{label}</span>
           <DownloadLink href={`/admin/statements?share=${shareId}&year=${year}`}>{t("statementPdf")}</DownloadLink>
         </div>
-        <div className="mb-4 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             [t("planned"), view.totals.plannedCents],
             [t("spent"), view.totals.spentCents],

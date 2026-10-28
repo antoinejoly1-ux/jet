@@ -39,7 +39,7 @@ export function ProfileForm({
       }}
     >
       <FormAlert state={state} />
-      <fieldset disabled={disabled} className="grid gap-5 sm:grid-cols-2">
+      <fieldset disabled={disabled} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
           id="firstName"
           name="firstName"

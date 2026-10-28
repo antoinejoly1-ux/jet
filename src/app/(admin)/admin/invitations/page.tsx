@@ -73,7 +73,7 @@ export default async function InvitationsPage({ searchParams }: PageProps<"/admi
           <InviteAllButton action={inviteAllAction} count={withEmail.length} />
         </Card>
       ) : null}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
         <Card className="self-start">
           <CardTitle className="mb-4">{t("newInvitation")}</CardTitle>
           <InviteForm

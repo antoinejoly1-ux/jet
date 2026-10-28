@@ -22,7 +22,7 @@ test("an owner requests a flight and dispatch plans it from the card", async ({ 
   await sheet.getByLabel("Date", { exact: true }).fill(date);
   await sheet.getByLabel("Heure souhaitée").fill("09:15");
   await sheet.getByRole("button", { name: "Un passager de plus" }).click();
-  await sheet.getByLabel("Précisions (facultatif)").fill("Deux valises par personne");
+  await sheet.getByRole("textbox", { name: "Précisions (facultatif)" }).fill("Deux valises par personne");
   await sheet.getByRole("button", { name: "Envoyer la demande" }).click();
   await expect(owner.getByRole("heading", { name: "Demande envoyée" })).toBeVisible();
   await owner.getByRole("button", { name: "Fermer" }).click();
@@ -42,7 +42,7 @@ test("an owner requests a flight and dispatch plans it from the card", async ({ 
   await expect(page.getByLabel("Départ", { exact: true })).toHaveValue("CYHU");
   await expect(page.getByLabel("Arrivée", { exact: true })).toHaveValue(code);
   await page.getByLabel("Heure d'arrivée (facultatif)").fill(`${date}T11:00`);
-  await page.getByRole("button", { name: "Enregistrer" }).click();
+  await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page).toHaveURL(/\/admin\/flights/);
 
   await owner.goto("/flights");

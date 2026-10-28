@@ -56,7 +56,7 @@ export function OwnerForm({
         required
         autoFocus
       />
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
           id="email"
           name="email"
@@ -90,7 +90,7 @@ export function OwnerForm({
         label={t("notes")}
         defaultValue={submitted(state, "notes", defaults?.notes)}
       />
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}
         </Button>

@@ -49,7 +49,7 @@ export function FlightForm({
     <form action={formAction} className="flex max-w-2xl flex-col gap-5" noValidate>
       <FormAlert state={state} />
       {requestId ? <input type="hidden" name="requestId" value={requestId} /> : null}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <SelectField
           id="aircraftId"
           name="aircraftId"
@@ -122,7 +122,7 @@ export function FlightForm({
           error={err("arrivesAt")}
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}
         </Button>

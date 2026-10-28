@@ -132,7 +132,7 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
               >
                 {formatMoney(r.totalCents, r.currency, viewer.locale)}
               </span>
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 {r.fileId ? (
                   <Button asChild size="sm" variant="ghost">
                     <a href={`/files/${r.fileId}?inline=1`} target="_blank" rel="noreferrer">

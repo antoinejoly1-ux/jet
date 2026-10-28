@@ -42,7 +42,7 @@ export default async function AircraftListPage() {
       {rows.length === 0 ? (
         <EmptyState icon={Plane} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
-        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((a) => {
             const complete = a.assignedBp === 10_000;
             return (

@@ -47,7 +47,7 @@ export default async function SettingsPage() {
   return (
     <>
       <PageHeader title={t("settingsTitle")} description={t("settingsSubtitle")} />
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-12">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)] lg:gap-12">
         <section aria-labelledby="team-title">
           <div className="mb-5 flex items-end justify-between gap-3">
             <div>

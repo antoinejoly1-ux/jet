@@ -11,7 +11,7 @@ test("an admin creates and edits an owner", async ({ page }) => {
   await signIn(page, "admin@jet.test");
   await page.goto("/admin/owners");
   await page.getByRole("link", { name: "Nouveau propriétaire" }).click();
-  await page.getByLabel("Nom légal").fill(name);
+  await page.getByLabel("Nom ou raison sociale").fill(name);
   await page.getByLabel("Courriel").fill("not-an-email");
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByText("Entrez un courriel valide.")).toBeVisible();
@@ -22,7 +22,7 @@ test("an admin creates and edits an owner", async ({ page }) => {
   await expect(page.getByText("nouveau@example.com").first()).toBeVisible();
 
   await page.getByRole("link", { name: "Modifier" }).click();
-  await page.getByLabel("Nom légal").fill(`${name} inc.`);
+  await page.getByLabel("Nom ou raison sociale").fill(`${name} inc.`);
   await page.getByLabel("Type").selectOption("company");
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByRole("heading", { level: 1, name: `${name} inc.` })).toBeVisible();
@@ -111,7 +111,9 @@ test("the last admin can't be demoted, and the audit log records the team's acti
   await expect(page).toHaveURL(/action=owner\./);
 });
 
-test("staff find anything with ⌘K and see what needs doing", async ({ page }) => {
+test("staff find anything with ⌘K and see what needs doing", async ({ page }, testInfo) => {
+  // The search lives in the desktop top bar (⌘K); phones use the lists.
+  test.skip(testInfo.project.name === "phone");
   await signIn(page, "dispatch@jet.test");
   await expect(page.getByRole("heading", { name: "À traiter" })).toBeVisible();
   await page.getByRole("button", { name: "Rechercher" }).click();

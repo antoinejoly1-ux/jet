@@ -110,7 +110,7 @@ export default async function AccountPage() {
   return (
     <>
       <PageHeader eyebrow={t("title")} title={t("settingsTitle")} description={t("settingsBody")} />
-      <div className="grid gap-8 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-14">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[210px_minmax(0,1fr)] lg:gap-14">
         <SettingsNav label={t("sectionsLabel")} sections={sections} />
 
         <div className="flex max-w-3xl min-w-0 flex-col gap-14">

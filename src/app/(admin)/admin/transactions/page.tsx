@@ -64,7 +64,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
           </DownloadLink>
         }
       />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
           <form className="mb-4 flex flex-wrap gap-2">
             <Select name="share" defaultValue={shareId} aria-label={t("share")} className="min-w-56 flex-1">

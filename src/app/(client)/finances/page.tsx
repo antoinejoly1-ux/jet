@@ -75,7 +75,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                   </DownloadLink>
                 </div>
                 {!s.published ? <Alert>{t("notPublished", { year })}</Alert> : null}
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   <Card>
                     <CardTitle>{t("planned")}</CardTitle>
                     <p className="tabular mt-1 text-3xl font-light tracking-tight">
@@ -101,7 +101,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                   </Card>
                 </div>
 
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <Card>
                     <CardTitle className="mb-4">{t("byCategory")}</CardTitle>
                     <ul className="flex flex-col gap-4">

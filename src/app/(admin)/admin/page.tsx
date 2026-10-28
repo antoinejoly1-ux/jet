@@ -113,7 +113,7 @@ export default async function AdminDashboardPage() {
         <Instrument label={t("inMaintenance")} value={stats.inMaintenance} href="/admin/maintenance" />
       </InstrumentStrip>
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <section aria-labelledby="today-title">
           <div className="mb-5 flex items-end justify-between gap-3">
             <h2 id="today-title" className="text-2xl font-light tracking-tight">
@@ -227,7 +227,7 @@ async function Queue({ rows }: { rows: { key: QueueKey; count: number; href: str
           {t("empty")}
         </p>
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map(({ key, count, href }) => {
             const [icon, anim] = QUEUE_ICON[key];
             return (

@@ -39,7 +39,7 @@ export function AircraftForm({
   return (
     <form action={formAction} className="flex max-w-xl flex-col gap-5" noValidate>
       <FormAlert state={state} />
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
           id="registration"
           name="registration"
@@ -110,7 +110,7 @@ export function AircraftForm({
           </option>
         ))}
       </SelectField>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}
         </Button>

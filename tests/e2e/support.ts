@@ -69,7 +69,9 @@ export async function completeWelcome(page: Page, { firstName }: { firstName: st
   await expect(page.getByRole("button", { name: /^(Changer|Change)$/ })).toBeVisible();
   await page.getByLabel(/^(Prénom|First name)$/).fill(firstName);
   await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  // The name saves first; wait for the tour before walking its slides.
   const next = page.getByRole("button", { name: /^(Suivant|Next)/ });
+  await expect(next).toBeVisible();
   while (await next.isVisible()) await next.click();
   await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
   await expect(page.getByRole("link", { name: /^(Appeler|Call)/ }).first()).toBeVisible();

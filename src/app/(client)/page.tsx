@@ -94,7 +94,7 @@ export default async function HomePage() {
         <ShareSection key={s.shareId} summary={s} viewer={viewer} first={i === 0} showOwner={summaries.length > 1} />
       ))}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <UpcomingFlights flights={flights.upcoming.slice(0, 4)} requests={requests} />
         <TeamPanel />
       </div>
@@ -211,7 +211,7 @@ async function ShareSection({
 
       <LiveAircraft initial={live} photo={heroPhoto(s.aircraft.model)} />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Card className="group">
           <div className="flex items-baseline justify-between gap-4">
             <CardTitle>{t("availability")}</CardTitle>

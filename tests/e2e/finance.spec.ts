@@ -72,7 +72,7 @@ test("a budget stays hidden until published, then the owner sees it", async ({ p
   await page.getByRole("button", { name: "Quitter" }).click();
 
   await page.goto(ownerUrl);
-  await page.getByRole("button", { name: "Publier au propriétaire" }).click();
+  await page.getByRole("button", { name: "Rendre visible au propriétaire" }).click();
   await expect(page.getByText("Publié").first()).toBeVisible();
 
   await page.goto("/admin/owners");

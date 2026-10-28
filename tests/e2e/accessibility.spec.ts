@@ -1,6 +1,6 @@
 /**
  * Every main screen passes axe's WCAG 2.1 A and AA checks, on desktop and
- * phone, in light mode. Anything flagged fails the build.
+ * phone, and never scrolls sideways. Anything flagged fails the build.
  */
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
@@ -17,6 +17,11 @@ async function audit(page: Page, path: string) {
     (v) => `${path} ${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`,
   );
   expect(problems, problems.join("\n")).toEqual([]);
+  // Nothing wider than the screen: a sideways-scrolling page is broken on a phone.
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow, `${path} is ${overflow}px wider than the screen`).toBeLessThanOrEqual(0);
 }
 
 test("public screens", async ({ page }) => {
@@ -48,6 +53,7 @@ test("admin screens", async ({ page }) => {
     "/admin/aircraft",
     "/admin/flights",
     "/admin/flights/new",
+    "/admin/maintenance/new",
     "/admin/maintenance",
     "/admin/messages",
     "/admin/invoices",

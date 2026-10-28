@@ -47,7 +47,7 @@ export function IncidentForm({ action }: { action: Action }) {
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       <FormAlert state={state} />
       {state.status === "success" ? <p className="text-success text-sm font-medium">{t("incidentSaved")}</p> : null}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field
           id="occurredOn"
           name="occurredOn"

@@ -21,7 +21,7 @@ test("an owner downloads their data and makes a request that an admin answers", 
   expect(data.owners.map((o: { legalName: string }) => o.legalName)).toEqual(["Jean Tremblay"]);
 
   await page.getByLabel("Demande", { exact: true }).selectOption("correction");
-  await page.getByLabel("Précisions (facultatif)").fill(details);
+  await page.getByRole("textbox", { name: "Précisions (facultatif)" }).fill(details);
   await page.getByRole("button", { name: "Envoyer la demande" }).click();
   await expect(page.getByText("Demande envoyée.")).toBeVisible();
 

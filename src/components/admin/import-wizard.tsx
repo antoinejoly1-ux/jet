@@ -124,7 +124,7 @@ export function ImportWizard({ lastMapping }: { lastMapping: Record<string, stri
           <h2 id="step-map" className="font-semibold">
             {t("step2")}
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {FIELDS.map((f) => (
               <SelectField
                 key={f}
