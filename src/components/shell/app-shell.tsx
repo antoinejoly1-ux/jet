@@ -126,7 +126,9 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
             </div>
             <div className="col-start-3 flex items-center justify-end gap-2 sm:gap-3">
               {viewer.staffRole && side === "admin" ? <CommandPalette /> : null}
-              {viewer.staffRole ? <SideToggle current={side} /> : null}
+              {viewer.staffRole && (viewer.ownerIds.length > 0 || side === "client") ? (
+                <SideToggle current={side} />
+              ) : null}
               <NotificationBell side={side} unread={notifications} />
               <UserMenu name={viewer.name} email={viewer.email} image={viewer.image} />
             </div>

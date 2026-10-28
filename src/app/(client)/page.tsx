@@ -143,7 +143,7 @@ async function ShareSection({
         live={live}
         greeting={first}
         showOwner={showOwner}
-        firstName={viewer.name.split(" ")[0] ?? ""}
+        firstName={viewer.viewingAs ? viewer.viewingAs.ownerName : (viewer.name.split(" ")[0] ?? "")}
       />
 
       {/* The instrument strip: four readings, hairlines between, no boxes. */}
