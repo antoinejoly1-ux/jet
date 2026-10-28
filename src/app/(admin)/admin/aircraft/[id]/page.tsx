@@ -15,13 +15,15 @@ import { isMonth, monthRange } from "@/lib/availability-days";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { formatHours } from "@/lib/format";
+import { formatHours, formatMoney } from "@/lib/format";
+import { RateForm } from "@/components/billing/rate-form";
+import { hourlyTotal, listRates, perHour, RATE_PARTS } from "@/lib/services/rates";
 import { getAircraft } from "@/lib/services/aircraft";
 import { getAvailability } from "@/lib/services/availability";
 import { NotFoundError } from "@/lib/services/errors";
 import { listOwners } from "@/lib/services/owners";
 import { zonedDay } from "@/lib/time";
-import { addBlockAction, addShareAction, endShareAction, removeBlockAction } from "../actions";
+import { addBlockAction, addShareAction, endShareAction, removeBlockAction, setRateAction } from "../actions";
 
 export async function generateMetadata({ params }: PageProps<"/admin/aircraft/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -39,6 +41,7 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
   const month = typeof sp.month === "string" && isMonth(sp.month) ? sp.month : zonedDay(new Date()).slice(0, 7);
   const ta = await getTranslations("availability");
   const t = await getTranslations("aircraft");
+  const tr = await getTranslations("rates");
   const format = await getFormatter();
   const {
     aircraft: plane,
@@ -51,6 +54,14 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
   const { from, to } = monthRange(month);
   const { periods } = await getAvailability(db, viewer, id, from, to);
   const owners = canWrite ? await listOwners(db, viewer) : [];
+  const seesRates = can(viewer, "finance:read");
+  const canSetRate = can(viewer, "finance:write");
+  const rates = seesRates ? await listRates(db, viewer, id) : [];
+  const todayLocal = zonedDay(new Date());
+  const current = rates.find((r) => r.effectiveFrom <= todayLocal) ?? null;
+  const upcoming = rates.filter((r) => r.effectiveFrom > todayLocal);
+  const cad = (cents: number) => formatMoney(cents, "CAD", viewer.locale);
+  const dollars = (cents: number) => (cents / 100).toFixed(2).replace(".", viewer.locale === "fr" ? "," : ".");
   const today = new Date().toISOString().slice(0, 10);
   const active = shares.filter((s) => !s.endsOn || s.endsOn > today);
   const past = shares.filter((s) => s.endsOn && s.endsOn <= today);
@@ -173,6 +184,56 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
             <CardTitle className="mb-1">{ta("blockTitle")}</CardTitle>
             <p className="text-muted mb-4 text-sm">{ta("blockBody")}</p>
             <AddBlockForm action={addBlockAction.bind(null, plane.id)} />
+          </Card>
+        ) : null}
+
+        {seesRates ? (
+          <Card className={canSetRate ? "lg:col-span-2" : "lg:col-span-3"} id="rate">
+            <CardTitle className="mb-1">{tr("title")}</CardTitle>
+            <p className="text-muted mb-5 text-sm">{tr("body")}</p>
+            {current ? (
+              <>
+                <p className="flex flex-wrap items-baseline gap-x-3">
+                  <span className="tabular text-4xl font-light tracking-tight">{cad(hourlyTotal(current))}</span>
+                  <span className="text-muted text-sm">
+                    {tr("perHour")} · {tr("since", { date: day(current.effectiveFrom) })}
+                  </span>
+                </p>
+                <dl className="divide-border mt-5 divide-y text-sm">
+                  {RATE_PARTS.map((p) => (
+                    <div key={p} className="flex justify-between gap-4 py-2.5">
+                      <dt className="text-muted">
+                        {tr(`parts.${p}`)}
+                        {p !== "fuel" && p !== "pilot" ? (
+                          <span className="text-muted/70 ml-2 text-xs">{tr("reserve")}</span>
+                        ) : null}
+                      </dt>
+                      <dd className="tabular font-medium">{cad(perHour(current, p))}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            ) : (
+              <p className="text-muted text-sm">{tr("none")}</p>
+            )}
+            {upcoming.length ? (
+              <p className="text-muted mt-4 text-sm">
+                {upcoming
+                  .map((r) => tr("upcoming", { date: day(r.effectiveFrom), total: cad(hourlyTotal(r)) }))
+                  .join(" · ")}
+              </p>
+            ) : null}
+          </Card>
+        ) : null}
+
+        {canSetRate ? (
+          <Card>
+            <CardTitle className="mb-4">{tr("setTitle")}</CardTitle>
+            <RateForm
+              action={setRateAction.bind(null, plane.id)}
+              today={todayLocal}
+              defaults={current ? Object.fromEntries(RATE_PARTS.map((p) => [p, dollars(perHour(current, p))])) : {}}
+            />
           </Card>
         ) : null}
 

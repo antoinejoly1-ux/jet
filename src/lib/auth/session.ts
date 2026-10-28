@@ -48,7 +48,7 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
   };
 
   // Staff viewing as an owner see exactly that owner's data and nothing else.
-  if (staffRole) {
+  if (staffRole && staffRole !== "pilot") {
     const viewAsOwnerId = decodeViewAs(env.BETTER_AUTH_SECRET, u.id, (await cookies()).get(VIEW_AS_COOKIE)?.value);
     if (viewAsOwnerId) {
       const [owner] = await db
@@ -83,6 +83,7 @@ export async function requireViewer(): Promise<Viewer> {
 export async function requireAccess(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (needsWelcome(viewer)) redirect("/welcome");
+  if (viewer.staffRole === "pilot") redirect("/pilot");
   if (!viewer.staffRole && viewer.ownerIds.length === 0) redirect("/pending");
   return viewer;
 }
@@ -91,8 +92,17 @@ export async function requireAccess(): Promise<Viewer> {
 export async function requireStaff(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (!viewer.staffRole) redirect("/");
+  if (viewer.staffRole === "pilot") redirect("/pilot");
   if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/admin");
   if (needsWelcome(viewer)) redirect("/welcome");
+  return viewer;
+}
+
+/** Pilots only: their short side for filing flight reports. Staff 2FA rules apply to them too. */
+export async function requirePilot(): Promise<Viewer> {
+  const viewer = await requireViewer();
+  if (viewer.staffRole !== "pilot") redirect(viewer.staffRole ? "/admin" : "/");
+  if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/pilot");
   return viewer;
 }
 
@@ -103,13 +113,17 @@ export function assertNotViewingAs(viewer: Viewer) {
 
 /**
  * Everyone with access goes through the welcome tour once. Someone still
- * waiting for access takes it when access arrives; staff viewing as an owner never do.
+ * waiting for access takes it when access arrives; staff viewing as an owner, and pilots, never do.
  */
 export const needsWelcome = (viewer: Viewer) =>
-  !viewer.onboardedAt && !viewer.viewingAs && (Boolean(viewer.staffRole) || viewer.ownerIds.length > 0);
+  !viewer.onboardedAt &&
+  !viewer.viewingAs &&
+  viewer.staffRole !== "pilot" &&
+  (Boolean(viewer.staffRole) || viewer.ownerIds.length > 0);
 
 /** Where a signed-in person lands: the side staff used last, Home for owners, or the waiting screen. */
-export async function landingPath(viewer: Viewer): Promise<"/" | "/admin" | "/pending"> {
+export async function landingPath(viewer: Viewer): Promise<"/" | "/admin" | "/pending" | "/pilot"> {
+  if (viewer.staffRole === "pilot") return "/pilot";
   if (viewer.staffRole) return (await cookies()).get(SIDE_COOKIE)?.value === "client" ? "/" : "/admin";
   return viewer.ownerIds.length === 0 ? "/pending" : "/";
 }

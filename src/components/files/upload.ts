@@ -22,7 +22,7 @@ function contentTypeOf(file: File): string {
  */
 export async function uploadFile(
   file: File,
-  purpose: "invoice" | "import" | "message" | "avatar",
+  purpose: "invoice" | "import" | "message" | "avatar" | "receipt",
 ): Promise<UploadResult> {
   const request = {
     purpose,

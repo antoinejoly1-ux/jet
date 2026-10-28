@@ -57,6 +57,7 @@ test("admin screens", async ({ page }) => {
     "/admin/maintenance",
     "/admin/messages",
     "/admin/invoices",
+    "/admin/flight-reports",
     "/admin/transactions",
     "/admin/budgets",
     "/admin/imports",
@@ -67,6 +68,14 @@ test("admin screens", async ({ page }) => {
     "/admin/settings/audit",
   ])
     await audit(page, path);
+});
+
+test("pilot screens", async ({ page }) => {
+  await signIn(page, "pilote@jet.test");
+  await audit(page, "/pilot");
+  // The report form of the first flight to report.
+  await page.getByRole("link", { name: /→/ }).first().click();
+  await audit(page, new URL(page.url()).pathname);
 });
 
 test("dark mode", async ({ page }) => {

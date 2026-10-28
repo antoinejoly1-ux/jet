@@ -8,7 +8,18 @@ import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
 import { Avatar } from "@/components/ui/avatar";
 
-export function UserMenu({ name, email, image }: { name: string; email: string; image?: string | null }) {
+export function UserMenu({
+  name,
+  email,
+  image,
+  settings = true,
+}: {
+  name: string;
+  email: string;
+  image?: string | null;
+  /** Pilots have no Settings page: the menu then only signs out. */
+  settings?: boolean;
+}) {
   const t = useTranslations("userMenu");
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -54,15 +65,17 @@ export function UserMenu({ name, email, image }: { name: string; email: string; 
             <p className="truncate text-sm font-semibold">{name}</p>
             <p className="text-muted truncate text-xs">{email}</p>
           </div>
-          <Link
-            role="menuitem"
-            href="/account"
-            onClick={() => setOpen(false)}
-            className="hover:bg-surface-muted flex h-11 items-center gap-2 rounded-full px-3 text-sm"
-          >
-            <UserRound className="size-4" aria-hidden />
-            {t("account")}
-          </Link>
+          {settings ? (
+            <Link
+              role="menuitem"
+              href="/account"
+              onClick={() => setOpen(false)}
+              className="hover:bg-surface-muted flex h-11 items-center gap-2 rounded-full px-3 text-sm"
+            >
+              <UserRound className="size-4" aria-hidden />
+              {t("account")}
+            </Link>
+          ) : null}
           <button
             role="menuitem"
             type="button"

@@ -33,7 +33,9 @@ export type Permission =
   | "messages:reply"
   | "team:manage"
   | "integrations:manage"
-  | "audit:read";
+  | "audit:read"
+  /** A pilot files the report of a flight they flew. */
+  | "reports:file";
 
 /**
  * Which owner(s) the target data belongs to. Required for owner-facing reads:
@@ -58,6 +60,9 @@ const finance: readonly Permission[] = [
   "finance:write",
 ];
 
+/** Pilots file flight reports and see the fleet's flights, never owners' money. */
+const pilot: readonly Permission[] = ["reports:file"];
+
 const admin: readonly Permission[] = [...finance, "fleet:write", "team:manage", "integrations:manage", "audit:read"];
 
 /** What an API key can be granted. Never team, integration or audit administration. */
@@ -73,6 +78,7 @@ const STAFF: Record<StaffRole, ReadonlySet<Permission>> = {
   dispatcher: new Set(dispatcher),
   finance: new Set(finance),
   admin: new Set(admin),
+  pilot: new Set(pilot),
 };
 
 /** Permissions an owner can hold, and only for their own data. Writing to dispatch is the one write. */

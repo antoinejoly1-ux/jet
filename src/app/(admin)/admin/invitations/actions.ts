@@ -20,7 +20,7 @@ export async function createInvitationAction(_prev: InviteState, formData: FormD
   const target = String(formData.get("target") ?? "");
   const email = String(formData.get("email") ?? "");
   const input = target.startsWith("staff:")
-    ? { kind: "staff" as const, email, staffRole: target.slice(6) as "admin" | "finance" | "dispatcher" }
+    ? { kind: "staff" as const, email, staffRole: target.slice(6) as "admin" | "finance" | "dispatcher" | "pilot" }
     : {
         kind: "owner" as const,
         email,

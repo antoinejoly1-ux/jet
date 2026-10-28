@@ -19,6 +19,7 @@ import {
 } from "@/lib/db/schema";
 import { authorize, can, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { listNotifications } from "./notification-center";
+import { countReportsWaiting } from "./flight-reports";
 
 export type ShareSummary = {
   shareId: string;
@@ -279,6 +280,7 @@ export async function getOwnerActivity(db: Db, actor: Actor, { limit = 8 } = {})
 }
 
 export type QueueKey =
+  | "flightReports"
   | "flightsToClose"
   | "flightRequests"
   | "awaitingReply"
@@ -371,7 +373,9 @@ export async function getAdminQueue(db: Db, actor: Actor, now = new Date()) {
           )
       : zero,
   ]);
+  const reports = await countReportsWaiting(db, actor);
   const rows: { key: QueueKey; count: number; href: string }[] = [
+    { key: "flightReports", count: reports, href: "/admin/flight-reports" },
     { key: "flightsToClose", count: toClose!.n, href: "/admin/flights#to-close" },
     { key: "flightRequests", count: requests!.n, href: "/admin/messages" },
     { key: "awaitingReply", count: awaiting!.n, href: "/admin/messages" },

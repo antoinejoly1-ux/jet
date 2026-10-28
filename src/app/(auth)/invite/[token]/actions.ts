@@ -11,7 +11,7 @@ export async function acceptInvitationAction(token: string) {
   let destination: Route = "/";
   try {
     const result = await acceptInvitation(db, token, viewer.id);
-    if (result.staffRole) destination = "/admin";
+    if (result.staffRole) destination = result.staffRole === "pilot" ? "/pilot" : "/admin";
   } catch (err) {
     if (err instanceof InvitationError) redirect(`/invite/${encodeURIComponent(token)}?error=${err.code}` as Route);
     throw err;

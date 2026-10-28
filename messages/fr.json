@@ -24,7 +24,8 @@
       "transactions": "Transactions",
       "imports": "Importations",
       "settings": "Paramètres",
-      "holdingCompanies": "Sociétés"
+      "holdingCompanies": "Sociétés",
+      "flightReports": "Rapports de vol"
     },
     "tabs": {
       "dashboard": "Tableau",
@@ -160,7 +161,8 @@
     "staffRoles": {
       "admin": "l'équipe (administrateur)",
       "finance": "l'équipe (finances)",
-      "dispatcher": "l'équipe (répartition)"
+      "dispatcher": "l'équipe (répartition)",
+      "pilot": "l'équipe (pilote)"
     },
     "title": "Vous êtes invité",
     "body": "Cette invitation donne accès à {target} pour {email}.",
@@ -412,7 +414,8 @@
       "maintenanceOverdue": "{count, plural, one {maintenance a dépassé sa fin prévue} other {maintenances ont dépassé leur fin prévue}}",
       "maintenanceSoon": "{count, plural, one {maintenance commence d'ici 48 h} other {maintenances commencent d'ici 48 h}}",
       "lowHours": "{count, plural, one {part sous 10 % de ses heures} other {parts sous 10 % de leurs heures}}",
-      "ownersNeverInvited": "{count, plural, one {propriétaire jamais invité} other {propriétaires jamais invités}}"
+      "ownersNeverInvited": "{count, plural, one {propriétaire jamais invité} other {propriétaires jamais invités}}",
+      "flightReports": "{count, plural, one {rapport de vol à vérifier} other {rapports de vol à vérifier}}"
     }
   },
   "owners": {
@@ -491,7 +494,8 @@
     "staffRoles": {
       "admin": "Administration",
       "finance": "Finances",
-      "dispatcher": "Répartition"
+      "dispatcher": "Répartition",
+      "pilot": "Pilote"
     },
     "sending": "Envoi…",
     "send": "Envoyer l'invitation",
@@ -601,7 +605,17 @@
       "date": "Choisissez la date du vol.",
       "time": "Entrez une heure valide, ou laissez vide.",
       "returnDate": "Le retour doit suivre l'aller.",
-      "passengers": "De 1 à 19 passagers."
+      "passengers": "De 1 à 19 passagers.",
+      "fuelLitres": "Nombre de litres invalide.",
+      "expenses": "Vérifiez les dépenses : chaque ligne a besoin d’un montant (ex. 412,50).",
+      "effectiveFrom": "Choisissez une date.",
+      "fuel": "Montant invalide (ex. 750,00).",
+      "engine": "Montant invalide.",
+      "propeller": "Montant invalide.",
+      "airframe": "Montant invalide.",
+      "avionics": "Montant invalide.",
+      "pilot": "Montant invalide.",
+      "flightId": "Vol introuvable."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -643,7 +657,13 @@
     "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard.",
     "holding_company_has_aircraft": "Cette société possède encore un appareil. Rattachez-le à une autre société d'abord.",
     "date_in_past": "Choisissez une date à venir.",
-    "unknown_airport": "Nous ne trouvons pas cet aéroport. Choisissez-le dans la liste."
+    "unknown_airport": "Nous ne trouvons pas cet aéroport. Choisissez-le dans la liste.",
+    "flight_cancelled": "Ce vol a été annulé.",
+    "report_approved": "Ce rapport est déjà approuvé : il ne peut plus être modifié.",
+    "report_already_filed": "Un autre pilote a déjà envoyé le rapport de ce vol.",
+    "invalid_receipt": "Un des reçus est invalide. Reprenez la photo.",
+    "report_not_waiting": "Ce rapport a déjà été traité.",
+    "rate_empty": "Entrez au moins un montant."
   },
   "aircraft": {
     "title": "Appareils",
@@ -717,7 +737,8 @@
     "roles": {
       "admin": "Administration",
       "finance": "Finances",
-      "dispatcher": "Répartition"
+      "dispatcher": "Répartition",
+      "pilot": "Pilote"
     },
     "removeFromTeam": "Retirer de l'équipe",
     "save": "Enregistrer",
@@ -1791,7 +1812,11 @@
     "invitationSent": "Invitation envoyée.",
     "invitationRevoked": "Invitation révoquée.",
     "profileSaved": "Profil enregistré.",
-    "close": "Fermer"
+    "close": "Fermer",
+    "reportSent": "Rapport envoyé aux finances.",
+    "reportApproved": "Rapport approuvé.",
+    "reportReturned": "Rapport renvoyé au pilote.",
+    "rateSaved": "Tarif enregistré."
   },
   "search": {
     "open": "Rechercher",
@@ -1811,5 +1836,127 @@
       "invoice": "Facture",
       "conversation": "Conversation"
     }
+  },
+  "pilot": {
+    "side": "Pilote",
+    "title": "Rapports de vol",
+    "hello": "Bonjour {name}",
+    "body": "Après chaque vol : le temps de vol, le carburant et vos dépenses, avec une photo de chaque reçu. Le rapport part aux finances, qui facturent le bon propriétaire.",
+    "toReport": "Vols à rapporter",
+    "nothingToReport": "Tout est rapporté",
+    "nothingToReportBody": "Les vols des 14 derniers jours apparaîtront ici dès leur départ.",
+    "returnedNote": "Renvoyé par les finances :",
+    "fix": "Corriger",
+    "report": "Remplir",
+    "sent": "Rapports envoyés",
+    "statuses": {
+      "submitted": "Envoyé",
+      "returned": "À corriger",
+      "approved": "Approuvé"
+    },
+    "reportTitle": "Rapport de vol",
+    "back": "Rapports de vol",
+    "form": {
+      "flightTime": "Temps de vol",
+      "flightTimeHint": "Par exemple 2 h 15 ou 2,25",
+      "fuelLitres": "Carburant ajouté (litres)",
+      "expenses": "Dépenses",
+      "expensesBody": "Une ligne par reçu. Prenez le reçu en photo : il est joint au rapport.",
+      "addExpense": "Ajouter une dépense",
+      "notes": "Remarques (facultatif)",
+      "notesPlaceholder": "Passagers, imprévus, état de l'appareil…",
+      "sending": "Envoi…",
+      "send": "Envoyer le rapport",
+      "expenseN": "Dépense {n}",
+      "removeExpense": "Retirer la dépense {n}",
+      "category": "Type",
+      "categories": {
+        "fuel": "Carburant",
+        "handling": "Assistance au sol et stationnement",
+        "airport_fees": "Frais d'aéroport",
+        "hotel": "Hôtel",
+        "per_diem": "Per diem",
+        "catering": "Traiteur",
+        "other": "Autre"
+      },
+      "amount": "Montant ($)",
+      "paidBy": "Payé par",
+      "payers": {
+        "company_card": "Carte de la compagnie",
+        "pilot": "Moi (à rembourser)"
+      },
+      "expenseNote": "Détail (facultatif)",
+      "uploading": "Envoi de la photo…",
+      "receiptAttached": "Reçu joint",
+      "addReceipt": "Photo du reçu",
+      "viewReceipt": "Voir",
+      "uploadFailed": "La photo n'a pas pu être envoyée. Réessayez."
+    }
+  },
+  "rates": {
+    "title": "Tarif horaire",
+    "body": "Ce que coûte une heure de vol de cet appareil : carburant, réserves d'entretien par composante et pilote. Le tarif en vigueur le jour du vol s'applique.",
+    "perHour": "de l'heure",
+    "perHourShort": "/ h",
+    "since": "depuis le {date}",
+    "parts": {
+      "fuel": "Carburant",
+      "engine": "Réserve moteur",
+      "propeller": "Réserve hélice",
+      "airframe": "Réserve cellule et cabine",
+      "avionics": "Réserve avionique",
+      "pilot": "Pilote"
+    },
+    "reserve": "réserve",
+    "none": "Aucun tarif encore. Fixez-le pour que les rapports de vol se chiffrent.",
+    "upcoming": "{total} / h à partir du {date}",
+    "setTitle": "Nouveau tarif",
+    "effectiveFrom": "En vigueur à partir du",
+    "perHourHint": "$ par heure de vol",
+    "save": "Enregistrer le tarif"
+  },
+  "flightReports": {
+    "title": "Rapports de vol",
+    "subtitle": "Ce que les pilotes déclarent après chaque vol. Vérifiez qui a volé, puis approuvez ou renvoyez avec une note.",
+    "noAccessTitle": "Réservé aux finances",
+    "noAccessBody": "Les rapports de vol contiennent des montants : ils sont visibles par l'équipe des finances.",
+    "unknownPilot": "Pilote inconnu",
+    "noOwner": "Propriétaire à confirmer",
+    "expensesSummary": "{count, plural, one {# dépense} other {# dépenses}} · {total}",
+    "noExpenses": "Aucune dépense",
+    "statuses": {
+      "submitted": "Envoyé",
+      "returned": "À corriger",
+      "approved": "Approuvé"
+    },
+    "waiting": "À vérifier ({count})",
+    "emptyTitle": "Aucun rapport en attente",
+    "emptyBody": "Les rapports des pilotes arrivent ici dès qu'ils les envoient.",
+    "decided": "Derniers traités",
+    "detailTitle": "Rapport de vol",
+    "filedBy": "Rapport de {pilot} · vol du {date}",
+    "declared": "Déclaré par le pilote",
+    "expensesLabel": "Dépenses",
+    "lastNote": "Note envoyée au pilote :",
+    "openReceipt": "Ouvrir le reçu : {category}",
+    "noReceipt": "Sans reçu",
+    "chargesTitle": "Ce que le vol représente",
+    "chargesBody": "Le temps de vol au tarif de l'appareil le jour du vol, plus les dépenses refacturées au coût.",
+    "expensesAtCost": "Dépenses refacturées au coût",
+    "beforeTaxes": "Total avant taxes",
+    "noRate": "Cet appareil n'a pas encore de tarif horaire.",
+    "setRate": "Fixer le tarif",
+    "decision": "Décision",
+    "approvedFor": "Approuvé, facturé à {owner}.",
+    "returnedToPilot": "Renvoyé au pilote. Il le corrigera depuis son téléphone.",
+    "readOnly": "Seule l’équipe des finances peut approuver un rapport.",
+    "billedTo": "Facturé à (qui a volé)",
+    "chooseShare": "Choisir le propriétaire",
+    "approve": "Approuver le rapport",
+    "returnNote": "Ce qu’il faut corriger",
+    "returnNotePlaceholder": "Ex. : il manque le reçu du carburant à KTEB.",
+    "sendBack": "Renvoyer au pilote",
+    "cancel": "Annuler",
+    "sendBackOpen": "Renvoyer au pilote avec une note"
   }
 }

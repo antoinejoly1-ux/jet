@@ -103,5 +103,5 @@ export type ShareInput = z.input<typeof shareInput>;
 export const endShareInput = z.object({ endsOn: isoDate });
 
 export const staffRoleInput = z.object({
-  role: z.enum(["admin", "finance", "dispatcher", "none"]),
+  role: z.enum(["admin", "finance", "dispatcher", "pilot", "none"]),
 });

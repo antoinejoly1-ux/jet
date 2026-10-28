@@ -28,7 +28,7 @@ export function StaffRoleForm({
           aria-label={t("roleFor", { name })}
           className="h-9 w-40"
         >
-          {(["admin", "finance", "dispatcher"] as const).map((r) => (
+          {(["admin", "finance", "dispatcher", "pilot"] as const).map((r) => (
             <option key={r} value={r}>
               {t(`roles.${r}`)}
             </option>

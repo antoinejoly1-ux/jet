@@ -25,7 +25,7 @@ export const createInvitationInput = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("staff"),
     email: z.string().trim().toLowerCase().email(),
-    staffRole: z.enum(["admin", "finance", "dispatcher"]),
+    staffRole: z.enum(["admin", "finance", "dispatcher", "pilot"]),
   }),
 ]);
 export type CreateInvitationInput = z.input<typeof createInvitationInput>;

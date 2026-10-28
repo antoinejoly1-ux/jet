@@ -18,6 +18,10 @@ export const FLASHES = [
   "invitationSent",
   "invitationRevoked",
   "profileSaved",
+  "reportSent",
+  "reportApproved",
+  "reportReturned",
+  "rateSaved",
 ] as const;
 export type Flash = (typeof FLASHES)[number];
 

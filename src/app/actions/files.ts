@@ -11,10 +11,15 @@ export type UploadStep2 = { ok: true; fileId: string; duplicateOf: string | null
 
 /**
  * Owners may upload chat attachments; everyone may upload their own photo (even
- * mid-welcome, before they have access); everything else is back-office work.
+ * mid-welcome, before they have access); pilots their receipts (the service
+ * checks the role); everything else is back-office work.
  */
 const uploader = (input: UploadRequest) =>
-  input.purpose === "avatar" ? requireViewer() : input.purpose === "message" ? requireAccess() : requireStaff();
+  input.purpose === "avatar" || input.purpose === "receipt"
+    ? requireViewer()
+    : input.purpose === "message"
+      ? requireAccess()
+      : requireStaff();
 
 export async function requestUploadAction(input: UploadRequest): Promise<UploadStep1> {
   const viewer = await uploader(input);

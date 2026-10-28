@@ -63,7 +63,7 @@ export function InviteForm({
           </optgroup>
           {canInviteStaff ? (
             <optgroup label={t("staffGroup")}>
-              {(["dispatcher", "finance", "admin"] as const).map((r) => (
+              {(["dispatcher", "pilot", "finance", "admin"] as const).map((r) => (
                 <option key={r} value={`staff:${r}`}>
                   {t(`staffRoles.${r}`)}
                 </option>

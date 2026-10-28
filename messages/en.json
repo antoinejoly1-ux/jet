@@ -24,7 +24,8 @@
       "transactions": "Transactions",
       "imports": "Imports",
       "settings": "Settings",
-      "holdingCompanies": "Holding companies"
+      "holdingCompanies": "Holding companies",
+      "flightReports": "Flight reports"
     },
     "tabs": {
       "dashboard": "Dashboard",
@@ -160,7 +161,8 @@
     "staffRoles": {
       "admin": "the team (admin)",
       "finance": "the team (finance)",
-      "dispatcher": "the team (dispatch)"
+      "dispatcher": "the team (dispatch)",
+      "pilot": "the team (pilot)"
     },
     "title": "You're invited",
     "body": "This invitation gives {email} access to {target}.",
@@ -412,7 +414,8 @@
       "maintenanceOverdue": "{count, plural, one {maintenance past its planned end} other {maintenance jobs past their planned end}}",
       "maintenanceSoon": "{count, plural, one {maintenance starting within 48 h} other {maintenance jobs starting within 48 h}}",
       "lowHours": "{count, plural, one {share under 10% of its hours} other {shares under 10% of their hours}}",
-      "ownersNeverInvited": "{count, plural, one {owner never invited} other {owners never invited}}"
+      "ownersNeverInvited": "{count, plural, one {owner never invited} other {owners never invited}}",
+      "flightReports": "{count, plural, one {flight report to check} other {flight reports to check}}"
     }
   },
   "owners": {
@@ -491,7 +494,8 @@
     "staffRoles": {
       "admin": "Administration",
       "finance": "Finance",
-      "dispatcher": "Dispatch"
+      "dispatcher": "Dispatch",
+      "pilot": "Pilot"
     },
     "sending": "Sending…",
     "send": "Send invitation",
@@ -601,7 +605,17 @@
       "date": "Choose the flight date.",
       "time": "Enter a valid time, or leave it empty.",
       "returnDate": "The return must come after the outbound flight.",
-      "passengers": "From 1 to 19 passengers."
+      "passengers": "From 1 to 19 passengers.",
+      "fuelLitres": "Invalid number of litres.",
+      "expenses": "Check the expenses: each line needs an amount (e.g. 412.50).",
+      "effectiveFrom": "Choose a date.",
+      "fuel": "Invalid amount (e.g. 750.00).",
+      "engine": "Invalid amount.",
+      "propeller": "Invalid amount.",
+      "airframe": "Invalid amount.",
+      "avionics": "Invalid amount.",
+      "pilot": "Invalid amount.",
+      "flightId": "Flight not found."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -643,7 +657,13 @@
     "too_many_uploads": "Too many uploads in an hour. Try again later.",
     "holding_company_has_aircraft": "This company still owns an aircraft. Attach it to another company first.",
     "date_in_past": "Choose a date that's still ahead.",
-    "unknown_airport": "We can't find that airport. Pick it from the list."
+    "unknown_airport": "We can't find that airport. Pick it from the list.",
+    "flight_cancelled": "This flight was cancelled.",
+    "report_approved": "This report is already approved and can no longer change.",
+    "report_already_filed": "Another pilot already sent the report for this flight.",
+    "invalid_receipt": "One of the receipts is invalid. Take the photo again.",
+    "report_not_waiting": "This report was already handled.",
+    "rate_empty": "Enter at least one amount."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -717,7 +737,8 @@
     "roles": {
       "admin": "Administration",
       "finance": "Finance",
-      "dispatcher": "Dispatch"
+      "dispatcher": "Dispatch",
+      "pilot": "Pilot"
     },
     "removeFromTeam": "Remove from team",
     "save": "Save",
@@ -1791,7 +1812,11 @@
     "invitationSent": "Invitation sent.",
     "invitationRevoked": "Invitation revoked.",
     "profileSaved": "Profile saved.",
-    "close": "Close"
+    "close": "Close",
+    "reportSent": "Report sent to finance.",
+    "reportApproved": "Report approved.",
+    "reportReturned": "Report sent back to the pilot.",
+    "rateSaved": "Rate saved."
   },
   "search": {
     "open": "Search",
@@ -1811,5 +1836,127 @@
       "invoice": "Invoice",
       "conversation": "Conversation"
     }
+  },
+  "pilot": {
+    "side": "Pilot",
+    "title": "Flight reports",
+    "hello": "Hello {name}",
+    "body": "After each flight: the flight time, the fuel and your expenses, with a photo of each receipt. The report goes to finance, who bill the right owner.",
+    "toReport": "Flights to report",
+    "nothingToReport": "All reported",
+    "nothingToReportBody": "Flights from the last 14 days show up here once they depart.",
+    "returnedNote": "Sent back by finance:",
+    "fix": "Fix",
+    "report": "Fill in",
+    "sent": "Reports sent",
+    "statuses": {
+      "submitted": "Sent",
+      "returned": "To fix",
+      "approved": "Approved"
+    },
+    "reportTitle": "Flight report",
+    "back": "Flight reports",
+    "form": {
+      "flightTime": "Flight time",
+      "flightTimeHint": "For example 2:15 or 2.25",
+      "fuelLitres": "Fuel added (litres)",
+      "expenses": "Expenses",
+      "expensesBody": "One line per receipt. Take a photo of the receipt: it's attached to the report.",
+      "addExpense": "Add an expense",
+      "notes": "Remarks (optional)",
+      "notesPlaceholder": "Passengers, surprises, aircraft condition…",
+      "sending": "Sending…",
+      "send": "Send the report",
+      "expenseN": "Expense {n}",
+      "removeExpense": "Remove expense {n}",
+      "category": "Type",
+      "categories": {
+        "fuel": "Fuel",
+        "handling": "Handling and parking",
+        "airport_fees": "Airport fees",
+        "hotel": "Hotel",
+        "per_diem": "Per diem",
+        "catering": "Catering",
+        "other": "Other"
+      },
+      "amount": "Amount ($)",
+      "paidBy": "Paid by",
+      "payers": {
+        "company_card": "Company card",
+        "pilot": "Me (to reimburse)"
+      },
+      "expenseNote": "Detail (optional)",
+      "uploading": "Sending photo…",
+      "receiptAttached": "Receipt attached",
+      "addReceipt": "Receipt photo",
+      "viewReceipt": "View",
+      "uploadFailed": "The photo couldn't be sent. Try again."
+    }
+  },
+  "rates": {
+    "title": "Hourly rate",
+    "body": "What one flight hour of this aircraft costs: fuel, maintenance reserves per component, and the pilot. The rate in force on the day of the flight applies.",
+    "perHour": "per hour",
+    "perHourShort": "/ h",
+    "since": "since {date}",
+    "parts": {
+      "fuel": "Fuel",
+      "engine": "Engine reserve",
+      "propeller": "Propeller reserve",
+      "airframe": "Airframe and cabin reserve",
+      "avionics": "Avionics reserve",
+      "pilot": "Pilot"
+    },
+    "reserve": "reserve",
+    "none": "No rate yet. Set one so flight reports can be priced.",
+    "upcoming": "{total} / h from {date}",
+    "setTitle": "New rate",
+    "effectiveFrom": "In force from",
+    "perHourHint": "$ per flight hour",
+    "save": "Save the rate"
+  },
+  "flightReports": {
+    "title": "Flight reports",
+    "subtitle": "What pilots declare after each flight. Check who flew, then approve or send back with a note.",
+    "noAccessTitle": "Finance only",
+    "noAccessBody": "Flight reports contain amounts: the finance team sees them.",
+    "unknownPilot": "Unknown pilot",
+    "noOwner": "Owner to confirm",
+    "expensesSummary": "{count, plural, one {# expense} other {# expenses}} · {total}",
+    "noExpenses": "No expenses",
+    "statuses": {
+      "submitted": "Sent",
+      "returned": "To fix",
+      "approved": "Approved"
+    },
+    "waiting": "To check ({count})",
+    "emptyTitle": "No reports waiting",
+    "emptyBody": "Pilots' reports arrive here as soon as they send them.",
+    "decided": "Recently handled",
+    "detailTitle": "Flight report",
+    "filedBy": "Report by {pilot} · flight on {date}",
+    "declared": "Declared by the pilot",
+    "expensesLabel": "Expenses",
+    "lastNote": "Note sent to the pilot:",
+    "openReceipt": "Open the receipt: {category}",
+    "noReceipt": "No receipt",
+    "chargesTitle": "What the flight comes to",
+    "chargesBody": "The flight time at the aircraft's rate on the day of the flight, plus expenses rebilled at cost.",
+    "expensesAtCost": "Expenses rebilled at cost",
+    "beforeTaxes": "Total before taxes",
+    "noRate": "This aircraft has no hourly rate yet.",
+    "setRate": "Set the rate",
+    "decision": "Decision",
+    "approvedFor": "Approved, billed to {owner}.",
+    "returnedToPilot": "Sent back to the pilot, who will fix it from their phone.",
+    "readOnly": "Only the finance team can approve a report.",
+    "billedTo": "Billed to (who flew)",
+    "chooseShare": "Choose the owner",
+    "approve": "Approve the report",
+    "returnNote": "What to fix",
+    "returnNotePlaceholder": "E.g. the fuel receipt at KTEB is missing.",
+    "sendBack": "Send back to the pilot",
+    "cancel": "Cancel",
+    "sendBackOpen": "Send back to the pilot with a note"
   }
 }

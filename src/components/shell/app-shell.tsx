@@ -9,6 +9,7 @@ import type { Viewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { unreadMessageCount } from "@/lib/services/messages";
 import { unreadNotificationCount } from "@/lib/services/notification-center";
+import { countReportsWaiting } from "@/lib/services/flight-reports";
 import { NotificationBell } from "./bell";
 import { Logo, Star } from "@/components/brand/logo";
 import { TeamReach } from "@/components/brand/team";
@@ -46,7 +47,8 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
     unreadMessageCount(db, viewer, side),
     unreadNotificationCount(db, viewer),
   ]);
-  const badges = { messages };
+  const reports = side === "admin" ? await countReportsWaiting(db, viewer) : 0;
+  const badges = { messages, flightReports: reports };
   // Members who don't see any owner's finances don't get the finance pages.
   const hidden = side === "client" && !viewer.staffRole && financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : [];
   const phone = env.OPERATOR_PHONE;

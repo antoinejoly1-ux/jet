@@ -3,6 +3,7 @@
 import {
   BarChart3,
   Building2,
+  ClipboardCheck,
   CalendarDays,
   ClipboardList,
   FileText,
@@ -96,6 +97,7 @@ const ADMIN: Group[] = [
   {
     key: "finance",
     items: [
+      { href: "/admin/flight-reports", key: "flightReports", icon: ClipboardCheck, anim: "bounce" },
       { href: "/admin/budgets", key: "budgets", icon: BarChart3, anim: "bounce" },
       { href: "/admin/transactions", key: "transactions", icon: ClipboardList, anim: "slide" },
       { href: "/admin/invoices", key: "invoices", icon: FileText, anim: "slide" },

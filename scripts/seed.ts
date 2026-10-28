@@ -55,13 +55,13 @@ function demoPdf(lines: string[]): Buffer {
 
 const storageDir = path.resolve(process.env.LOCAL_STORAGE_DIR ?? "tmp/storage");
 
-async function storeDemoFile(name: string, bytes: Buffer) {
-  const key = `invoices/${uuidv7()}.pdf`;
+async function storeDemoFile(name: string, bytes: Buffer, folder: "invoices" | "receipts" = "invoices") {
+  const key = `${folder}/${uuidv7()}.pdf`;
   // Staging keeps files in the database (no lasting disk on Vercel); elsewhere, the local folder.
   if (process.env.STORAGE_DRIVER === "database")
     await db.insert(s.storedFiles).values({ key, contentType: "application/pdf", bytes });
   else {
-    await mkdir(path.join(storageDir, "invoices"), { recursive: true });
+    await mkdir(path.join(storageDir, folder), { recursive: true });
     await writeFile(path.join(storageDir, key), bytes);
   }
   const [file] = await db
@@ -458,9 +458,95 @@ async function main() {
     },
   ]);
 
-  console.log("Demo logins…");
+  console.log("Rates and flight reports…");
+  // What an hour costs, on Charles's numbers: about $1,400 on a PC-12, $750 of it fuel, the rest
+  // set aside per component for the big jobs (an overhaul, a propeller) and the pilot.
+  const pc12 = { fuel: 75_000, engine: 23_000, propeller: 8_500, airframe: 12_000, avionics: 3_500, pilot: 18_000 };
+  const scale = [1, 1, 1.9, 1.3, 3]; // PC-12, PC-12, CJ4, King Air, Challenger
+  await db.insert(s.aircraftRates).values(
+    fleet.map((plane, i) => {
+      const c = (cents: number) => Math.round((cents * scale[i]!) / 100) * 100;
+      return {
+        aircraftId: plane.id,
+        effectiveFrom: `${year - 1}-01-01`,
+        fuelCentsPerHour: c(pc12.fuel),
+        engineReserveCentsPerHour: c(pc12.engine),
+        propellerReserveCentsPerHour: c(pc12.propeller),
+        airframeReserveCentsPerHour: c(pc12.airframe),
+        avionicsReserveCentsPerHour: c(pc12.avionics),
+        pilotCentsPerHour: c(pc12.pilot),
+      };
+    }),
+  );
   // On a Vercel preview, testers sign in without an authenticator app (REQUIRE_STAFF_2FA=false there).
   const staff2fa = !process.env.VERCEL;
+  const pilot = await createLogin("pilote@jet.test", "Marc Pilote", "pilot", staff2fa);
+  // Jean's trip to Teterboro two days ago: the pilot's report waits for finance, with its receipts.
+  const tripDeparts = new Date(now - 2 * 86_400_000);
+  tripDeparts.setUTCHours(13, 0, 0, 0);
+  const [trip] = await db
+    .insert(s.flights)
+    .values({
+      aircraftId: fleet[0]!.id,
+      shareId: jeanShare.id,
+      fromAirport: "CYHU",
+      toAirport: "KTEB",
+      departsAt: tripDeparts,
+      arrivesAt: new Date(tripDeparts.getTime() + 105 * 60_000),
+      flightMinutes: 105,
+      status: "completed",
+    })
+    .returning();
+  await db.insert(s.hourLedger).values({ shareId: jeanShare.id, kind: "flight", minutes: -105, flightId: trip!.id });
+  const [report] = await db
+    .insert(s.flightReports)
+    .values({
+      flightId: trip!.id,
+      pilotUserId: pilot.id,
+      flightMinutes: 105,
+      fuelLitres: 640,
+      notes: "Deux passagers. Dégivrage au départ de CYHU.",
+      shareId: jeanShare.id,
+      submittedAt: new Date(tripDeparts.getTime() + 4 * 3_600_000),
+    })
+    .returning();
+  const receipt = (lines: string[]) => storeDemoFile("recu.pdf", demoPdf(lines), "receipts");
+  await db.insert(s.flightReportExpenses).values([
+    {
+      reportId: report!.id,
+      category: "fuel",
+      amountCents: 148_960,
+      paidBy: "company_card",
+      receiptFileId: await receipt(["Signature Flight Support KTEB", "Jet-A 640 L", "Total: 1489.60 USD->CAD"]),
+    },
+    {
+      reportId: report!.id,
+      category: "handling",
+      amountCents: 42_500,
+      paidBy: "company_card",
+      receiptFileId: await receipt(["Signature Flight Support KTEB", "Handling + ramp fee", "Total: 425.00"]),
+    },
+    {
+      reportId: report!.id,
+      category: "per_diem",
+      amountCents: 7_500,
+      paidBy: "pilot",
+      note: "Repas",
+    },
+  ]);
+  // The CJ4 came back from Palm Beach yesterday: the pilot still has to file it.
+  const cj4Back = new Date(now - 30 * 3_600_000);
+  await db.insert(s.flights).values({
+    aircraftId: fleet[2]!.id,
+    shareId: shareRows.find((sh) => sh.aircraftId === fleet[2]!.id)!.id,
+    fromAirport: "KPBI",
+    toAirport: "CYHU",
+    departsAt: cj4Back,
+    arrivesAt: new Date(cj4Back.getTime() + 170 * 60_000),
+    status: "scheduled",
+  });
+
+  console.log("Demo logins…");
   await createLogin("admin@jet.test", "Alex Admin", "admin", staff2fa);
   const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", staff2fa);
   await createLogin("finance@jet.test", "Fred Finance", "finance", false);
