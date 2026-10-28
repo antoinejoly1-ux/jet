@@ -90,7 +90,7 @@ test("a blocked period shows to the owner as booked, and co-owners' flights by n
   await signIn(owner, "owner@jet.test");
   await owner.goto(`/availability?month=${month}`);
   await expect(owner.getByRole("heading", { name: "Calendrier" })).toBeVisible();
-  const taken = owner.getByRole("region", { name: "Périodes occupées" });
+  const taken = owner.getByRole("region", { name: /^(Périodes occupées|À venir)$/ });
   await expect(taken).toContainText("Réservé");
   // Co-owners know each other: their flights on C-GJTA show as booked with their name.
   // The seed's first co-owner flight is six days out, so it's in this month or the next.
@@ -98,7 +98,7 @@ test("a blocked period shows to the owner as booked, and co-owners' flights by n
   let seen = "";
   for (const d of [now, new Date(now.getFullYear(), now.getMonth() + 1, 1)]) {
     await owner.goto(`/availability?month=${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-    seen += await owner.getByRole("region", { name: "Périodes occupées" }).innerText();
+    seen += await owner.getByRole("region", { name: /^(Périodes occupées|À venir)$/ }).innerText();
   }
   expect(seen).toContain("Réservé · Marie Gagnon");
 

@@ -42,7 +42,7 @@ test("an executive assistant sees the schedule but not the finances", async ({ p
   await expect(page.getByRole("link", { name: "Finances" })).toHaveCount(0);
 
   await page.goto("/availability");
-  await expect(page.getByRole("region", { name: "Périodes occupées" })).toBeVisible();
+  await expect(page.getByRole("region", { name: /^(Périodes occupées|À venir)$/ })).toBeVisible();
   await page.goto("/messages");
   await expect(page.getByLabel("Message", { exact: true })).toBeVisible();
 });

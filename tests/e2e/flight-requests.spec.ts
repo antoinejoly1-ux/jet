@@ -29,7 +29,7 @@ test("an owner requests a flight and dispatch plans it from the card", async ({ 
   // Heard, not yet confirmed.
   await owner.goto("/flights");
   await expect(owner.getByText(`CYHU → ${code}`).first()).toBeVisible();
-  await expect(owner.getByText("Demandé").first()).toBeVisible();
+  await expect(owner.getByText("Demande envoyée").first()).toBeVisible();
 
   await signIn(page, "dispatch@jet.test");
   await page.goto("/admin/messages");
