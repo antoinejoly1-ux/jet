@@ -4,8 +4,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { TeamGallery } from "@/components/brand/team";
 import { ContactButtons } from "@/components/common/contact-buttons";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
-import { financeOwnerIds } from "@/lib/auth/policy";
-import { needsWelcome, requireViewer } from "@/lib/auth/session";
+import { can, financeOwnerIds } from "@/lib/auth/policy";
+import { needsWelcome, requireViewer, welcomeAudience } from "@/lib/auth/session";
+import { env } from "@/lib/env";
 import { db } from "@/lib/db";
 import { scenes } from "@/lib/imagery";
 import { listOwnerAircraft } from "@/lib/services/availability";
@@ -23,13 +24,16 @@ export default async function WelcomePage() {
   const [first, ...rest] = viewer.name.trim().split(/\s+/);
   const planes = viewer.ownerIds.length ? await listOwnerAircraft(db, viewer) : [];
   const plane = planes[0];
+  const audience = welcomeAudience(viewer);
   return (
     <WelcomeFlow
       firstName={first ?? ""}
       lastName={rest.join(" ")}
       locale={lang(await getLocale())}
       image={viewer.image}
-      seesFinances={Boolean(viewer.staffRole) || financeOwnerIds(viewer).length > 0}
+      audience={audience}
+      needsTwoFactor={Boolean(viewer.staffRole) && env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled}
+      seesFinances={viewer.staffRole ? can(viewer, "finance:read") : financeOwnerIds(viewer).length > 0}
       aircraft={plane ? { registration: plane.registration, model: plane.model } : null}
       finalPhoto={
         plane ? (/pc-?12/i.test(plane.model) ? scenes.hangarPilot : aircraftPhoto(plane.model)) : scenes.hangar

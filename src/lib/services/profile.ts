@@ -93,6 +93,19 @@ export async function completeOnboarding(db: Db, actor: Actor) {
   });
 }
 
+/** Shows the welcome tour again at the next visit, from Settings. */
+export async function restartOnboarding(db: Db, actor: Actor) {
+  await db.transaction(async (tx) => {
+    await tx.update(user).set({ onboardedAt: null }).where(eq(user.id, actor.id));
+    await recordAudit(tx, {
+      actorUserId: actor.id,
+      action: "profile.tour_restarted",
+      entityType: "user",
+      entityId: actor.id,
+    });
+  });
+}
+
 /** Where a person's photo is stored, for the avatar route. Any signed-in person may see team members' and co-owners' photos. */
 export async function avatarStorageKey(db: Db, userId: string) {
   const [row] = await db

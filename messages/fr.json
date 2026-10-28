@@ -49,7 +49,8 @@
   "userMenu": {
     "open": "Ouvrir le menu du compte",
     "account": "Mon compte",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "tour": "Revoir la visite"
   },
   "comingSoon": {
     "title": "Cet écran arrive bientôt",
@@ -835,7 +836,8 @@
       "profile_update": "a modifié son profil",
       "profile_avatar_set": "a changé sa photo",
       "profile_avatar_remove": "a retiré sa photo",
-      "profile_onboarded": "a terminé l'accueil"
+      "profile_onboarded": "a terminé l'accueil",
+      "profile_tour_restarted": "a demandé à revoir la visite"
     }
   },
   "files": {
@@ -1680,7 +1682,13 @@
       "title": "Bienvenue chez Univair, {name}.",
       "body": "Votre appareil, vos heures, vos vols et votre équipe : tout se retrouve ici, à portée de main, où que vous soyez.",
       "time": "Moins d'une minute pour faire connaissance.",
-      "start": "Commencer"
+      "start": "Commencer",
+      "titleStaff": "Bienvenue dans l'équipe, {name}.",
+      "bodyStaff": "Les appareils, les vols, la maintenance, les propriétaires et la facturation : tout le travail de la journée se retrouve ici.",
+      "titlePilot": "Bienvenue à bord, {name}.",
+      "bodyPilot": "Ici, vous déclarez chaque vol en deux minutes, depuis votre téléphone : temps de vol, carburant et reçus.",
+      "titleManager": "Bienvenue, {name}.",
+      "bodyManager": "La facturation de votre société et ses résultats, préparés par Univair et prêts à envoyer."
     },
     "name": {
       "eyebrow": "Votre profil",
@@ -1722,13 +1730,87 @@
         "body": "Vos prochains départs et tout votre historique, au même endroit.",
         "a": "Chaque vol avec sa route et son temps de vol",
         "b": "Votre historique à exporter quand vous le souhaitez"
+      },
+      "eyebrowStaff": "Votre journée, en bref",
+      "todo": {
+        "caption": "Ce qui attend quelqu'un, d'abord.",
+        "title": "« À traiter », chaque matin",
+        "body": "Le tableau de bord commence par ce qui demande une action : demandes de vol, rapports à vérifier, messages sans réponse, maintenance qui approche.",
+        "a": "Chaque ligne vous mène directement au bon écran",
+        "b": "La carte montre la flotte en direct, avec les vols du jour"
+      },
+      "fleet": {
+        "caption": "Tout, appareil par appareil.",
+        "title": "Appareils : tout est rangé par avion",
+        "body": "Ouvrez un appareil pour trouver ses propriétaires et leurs parts, ses tarifs, sa maintenance, ses réserves et sa photo.",
+        "a": "Inviter un propriétaire se fait depuis sa fiche",
+        "b": "⌘K trouve n'importe quel appareil, propriétaire ou vol"
+      },
+      "ops": {
+        "caption": "Les vols et l'atelier, au même endroit.",
+        "title": "Vols et maintenance",
+        "body": "Planifiez un vol en quelques champs, puis fermez-le à l'arrivée. La maintenance avance en colonnes, de prévue à terminée.",
+        "a": "Chaque vol s'ouvre avec sa route sur la carte et le rapport du pilote",
+        "b": "Une tâche passe en vérification avant d'être approuvée"
+      },
+      "billing": {
+        "caption": "Du rapport de vol à la facture.",
+        "title": "Rapports de vol et factures",
+        "body": "Le pilote déclare le vol; vous vérifiez ses chiffres et ses reçus, puis la facture se prépare avec les bons tarifs et les taxes.",
+        "a": "Les réserves de maintenance se remplissent à chaque heure facturée",
+        "b": "Une correction se fait par écriture inverse, jamais en effaçant"
+      },
+      "report": {
+        "caption": "Après chaque vol, deux minutes.",
+        "title": "Déclarez vos vols",
+        "body": "Vos vols récents vous attendent dans « Rapports de vol ». Entrez le temps de vol et le carburant, puis envoyez.",
+        "a": "Le temps de vol s'écrit comme sur votre carnet : 1:35",
+        "b": "Les vols qui attendent votre rapport sont toujours en haut de la liste"
+      },
+      "receipts": {
+        "caption": "Le reçu, en photo.",
+        "title": "Vos dépenses et reçus",
+        "body": "Carburant, frais d'atterrissage, hôtel : ajoutez la dépense et photographiez le reçu, directement depuis votre téléphone.",
+        "a": "Indiquez si vous l'avez payée ou si c'est la carte d'Univair",
+        "b": "Ce que vous avez avancé vous est remboursé"
+      },
+      "returned": {
+        "caption": "Un doute? On vous le dit.",
+        "title": "Vérifié par la comptabilité",
+        "body": "Chaque rapport est vérifié avant la facture. S'il manque quelque chose, il vous revient avec une note : corrigez et renvoyez.",
+        "a": "Vous voyez où en est chacun de vos rapports",
+        "b": "Un rapport approuvé part à la facturation sans autre démarche"
+      },
+      "approved": {
+        "caption": "Prêt à facturer.",
+        "title": "Les vols approuvés, prêts à facturer",
+        "body": "Chaque vol vérifié par Univair arrive dans « Facturation », avec son temps de vol et ses dépenses.",
+        "a": "Une facture en un clic, numérotée pour votre société",
+        "b": "Le PDF est prêt à envoyer"
+      },
+      "taxes": {
+        "caption": "Les taxes, déjà calculées.",
+        "title": "TPS et TVQ comprises",
+        "body": "Les taxes sont calculées selon les règles du vol, avec vos numéros d'inscription sur chaque facture.",
+        "a": "Les tarifs viennent de l'appareil, à jour",
+        "b": "Une facture se corrige en l'annulant, jamais en l'effaçant"
+      },
+      "results": {
+        "caption": "Où en est la société.",
+        "title": "Les résultats de la société",
+        "body": "Revenus, dépenses et réserves de maintenance de l'année, mis à jour à chaque facture.",
+        "a": "Ce qui est mis de côté pour les grosses inspections",
+        "b": "Les dépenses de la société s'ajoutent en quelques champs"
       }
     },
     "team": {
       "eyebrow": "Toujours là pour vous",
       "title": "Une vraie équipe, à un appel près.",
       "body": "Un vol à planifier, un hôtel, une question sur votre appareil? Appelez ou textez : ce sont ces personnes qui vous répondent, 7 jours sur 7.",
-      "inApp": "Vous pouvez aussi nous écrire directement dans l'application."
+      "inApp": "Vous pouvez aussi nous écrire directement dans l'application.",
+      "eyebrowStaff": "Vos collègues",
+      "titleStaff": "L'équipe avec qui vous travaillez.",
+      "bodyStaff": "Les propriétaires voient ces visages quand ils nous appellent ou nous écrivent. Ajoutez votre photo pour qu'ils vous reconnaissent aussi."
     },
     "ready": {
       "eyebrow": "Tout est prêt",
@@ -1736,9 +1818,21 @@
       "body": "Votre espace vous attend.",
       "bodyAircraft": "{registration} vous attend.",
       "enter": "Entrer dans mon espace",
-      "request": "Faire une première demande de vol"
+      "request": "Faire une première demande de vol",
+      "bodySecurity": "Une dernière étape : protégez votre compte avec un code de connexion. C'est obligatoire pour l'équipe, et ça prend une minute.",
+      "secure": "Protéger mon compte",
+      "bodyStaff": "Votre tableau de bord vous attend.",
+      "enterStaff": "Ouvrir le tableau de bord",
+      "bodyPilot": "Vos vols à déclarer vous attendent.",
+      "enterPilot": "Voir mes rapports de vol",
+      "bodyManager": "La facturation de votre société vous attend.",
+      "enterManager": "Ouvrir la facturation"
     },
-    "skip": "Passer"
+    "skip": "Passer",
+    "settings": {
+      "replayTour": "Revoir la visite",
+      "replayTourBody": "Le guide de bienvenue, du début."
+    }
   },
   "avatar": {
     "choose": "Choisir une photo",

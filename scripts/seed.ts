@@ -492,6 +492,9 @@ async function main() {
   );
   // On a Vercel preview, testers sign in without an authenticator app (REQUIRE_STAFF_2FA=false there).
   const staff2fa = !process.env.VERCEL;
+  // On a Vercel preview the team, pilot and manager demo accounts meet the welcome tour on first sign-in;
+  // local and CI seeds skip it so the e2e helpers land straight on their pages.
+  const tour = { onboarded: !process.env.VERCEL };
   // Reserves carried over from earlier years, what each is saving for, and a job paid from one.
   const opening = `${year}-01-01`;
   for (const [i, plane] of fleet.entries()) {
@@ -554,7 +557,7 @@ async function main() {
       },
     ]);
   }
-  const pilot = await createLogin("pilote@jet.test", "Marc Pilote", "pilot", staff2fa);
+  const pilot = await createLogin("pilote@jet.test", "Marc Pilote", "pilot", staff2fa, tour);
   // Jean's trip to Teterboro two days ago: the pilot's report waits for finance, with its receipts.
   const tripDeparts = new Date(now - 2 * 86_400_000);
   tripDeparts.setUTCHours(13, 0, 0, 0);
@@ -621,13 +624,13 @@ async function main() {
   });
 
   // Sophie keeps Gestion Aviation JTA's books: she issues its invoices from the portal.
-  const manager = await createLogin("gestion@jet.test", "Sophie Gagnon", null);
+  const manager = await createLogin("gestion@jet.test", "Sophie Gagnon", null, false, tour);
   await db.insert(s.holdingCompanyManagers).values({ holdingCompanyId: companies[0]!.id, userId: manager.id });
 
   console.log("Demo logins…");
-  await createLogin("admin@jet.test", "Alex Admin", "admin", staff2fa);
-  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", staff2fa);
-  await createLogin("finance@jet.test", "Fred Finance", "finance", false);
+  await createLogin("admin@jet.test", "Alex Admin", "admin", staff2fa, tour);
+  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", staff2fa, tour);
+  await createLogin("finance@jet.test", "Fred Finance", "finance", false, tour);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
   await db.insert(s.ownerMembers).values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "owner" });
   // A brand-new owner (Hélène Fortin, King Air), to show the welcome tour on first sign-in.

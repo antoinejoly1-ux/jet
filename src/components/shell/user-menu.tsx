@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { replayTourAction } from "@/app/actions/profile";
 import { authClient } from "@/lib/auth/auth-client";
 import { Avatar } from "@/components/ui/avatar";
 import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
@@ -76,6 +77,16 @@ export function UserMenu({
               {t("account")}
             </Link>
           ) : null}
+          <form action={replayTourAction}>
+            <button
+              role="menuitem"
+              type="submit"
+              className="ai-trigger hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
+            >
+              <AnimatedIcon name="bulb" size={18} />
+              {t("tour")}
+            </button>
+          </form>
           <button
             role="menuitem"
             type="button"

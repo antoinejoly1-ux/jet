@@ -6,6 +6,9 @@ import { cache } from "react";
 import { db } from "@/lib/db";
 import { holdingCompanyManagers, ownerMembers, owners } from "@/lib/db/schema";
 import type { Locale, StaffRole } from "@/lib/db/schema/_shared";
+import { needsWelcome } from "./welcome";
+
+export { needsWelcome, welcomeAudience, type WelcomeAudience } from "./welcome";
 import { env } from "@/lib/env";
 import { auth } from "./auth";
 import { memberAccess, type Actor } from "./policy";
@@ -100,8 +103,9 @@ export async function requireStaff(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (!viewer.staffRole) redirect("/");
   if (viewer.staffRole === "pilot") redirect("/pilot");
-  if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/admin");
+  // The tour comes first: it explains the security step that follows.
   if (needsWelcome(viewer)) redirect("/welcome");
+  if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/admin");
   return viewer;
 }
 
@@ -109,6 +113,7 @@ export async function requireStaff(): Promise<Viewer> {
 export async function requirePilot(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (viewer.staffRole !== "pilot") redirect(viewer.staffRole ? "/admin" : "/");
+  if (needsWelcome(viewer)) redirect("/welcome");
   if (env.REQUIRE_STAFF_2FA && !viewer.twoFactorEnabled) redirect("/setup-2fa?next=/pilot");
   return viewer;
 }
@@ -117,16 +122,6 @@ export async function requirePilot(): Promise<Viewer> {
 export function assertNotViewingAs(viewer: Viewer) {
   if (viewer.viewingAs) throw new Error("Read-only: viewing as an owner");
 }
-
-/**
- * Everyone with access goes through the welcome tour once. Someone still
- * waiting for access takes it when access arrives; staff viewing as an owner, and pilots, never do.
- */
-export const needsWelcome = (viewer: Viewer) =>
-  !viewer.onboardedAt &&
-  !viewer.viewingAs &&
-  viewer.staffRole !== "pilot" &&
-  (Boolean(viewer.staffRole) || viewer.ownerIds.length > 0);
 
 /** Where a signed-in person lands: the side staff used last, Home for owners, or the waiting screen. */
 export async function landingPath(viewer: Viewer): Promise<"/" | "/admin" | "/pending" | "/pilot" | "/billing"> {

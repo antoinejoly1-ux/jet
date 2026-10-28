@@ -49,7 +49,8 @@
   "userMenu": {
     "open": "Open account menu",
     "account": "My account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "tour": "See the tour again"
   },
   "comingSoon": {
     "title": "This screen is coming soon",
@@ -835,7 +836,8 @@
       "profile_update": "updated their profile",
       "profile_avatar_set": "changed their photo",
       "profile_avatar_remove": "removed their photo",
-      "profile_onboarded": "finished the welcome tour"
+      "profile_onboarded": "finished the welcome tour",
+      "profile_tour_restarted": "asked to see the tour again"
     }
   },
   "files": {
@@ -1680,7 +1682,13 @@
       "title": "Welcome to Univair, {name}.",
       "body": "Your aircraft, your hours, your flights and your team: everything is here, at hand, wherever you are.",
       "time": "Less than a minute to get acquainted.",
-      "start": "Begin"
+      "start": "Begin",
+      "titleStaff": "Welcome to the team, {name}.",
+      "bodyStaff": "Aircraft, flights, maintenance, owners and billing: the whole day's work is here.",
+      "titlePilot": "Welcome aboard, {name}.",
+      "bodyPilot": "Here you report each flight in two minutes, from your phone: flight time, fuel and receipts.",
+      "titleManager": "Welcome, {name}.",
+      "bodyManager": "Your company's billing and results, prepared by Univair and ready to send."
     },
     "name": {
       "eyebrow": "Your profile",
@@ -1722,13 +1730,87 @@
         "body": "Your next departures and your whole history, in one place.",
         "a": "Every flight with its route and flight time",
         "b": "Your history to export whenever you like"
+      },
+      "eyebrowStaff": "Your day, in short",
+      "todo": {
+        "caption": "What's waiting on someone, first.",
+        "title": "\"To do\", every morning",
+        "body": "The dashboard starts with what needs action: flight requests, reports to review, unanswered messages, maintenance coming up.",
+        "a": "Each line takes you straight to the right screen",
+        "b": "The map shows the fleet live, with today's flights"
+      },
+      "fleet": {
+        "caption": "Everything, aircraft by aircraft.",
+        "title": "Aircraft: everything is filed by plane",
+        "body": "Open an aircraft to find its owners and their shares, its rates, maintenance, reserves and photo.",
+        "a": "Invite an owner from their page",
+        "b": "⌘K finds any aircraft, owner or flight"
+      },
+      "ops": {
+        "caption": "Flights and the shop, in one place.",
+        "title": "Flights and maintenance",
+        "body": "Plan a flight in a few fields, then close it on arrival. Maintenance moves across columns, from planned to done.",
+        "a": "Each flight opens with its route on the map and the pilot's report",
+        "b": "A job goes to review before it's approved"
+      },
+      "billing": {
+        "caption": "From flight report to invoice.",
+        "title": "Flight reports and invoices",
+        "body": "The pilot reports the flight; you check the figures and receipts, then the invoice is prepared with the right rates and taxes.",
+        "a": "Maintenance reserves fill with every hour billed",
+        "b": "A correction is a reversing entry, never an erase"
+      },
+      "report": {
+        "caption": "After each flight, two minutes.",
+        "title": "Report your flights",
+        "body": "Your recent flights wait in \"Flight reports\". Enter the flight time and fuel, then send.",
+        "a": "Flight time is written like your logbook: 1:35",
+        "b": "Flights waiting for your report are always at the top of the list"
+      },
+      "receipts": {
+        "caption": "The receipt, as a photo.",
+        "title": "Your expenses and receipts",
+        "body": "Fuel, landing fees, hotel: add the expense and take a photo of the receipt, straight from your phone.",
+        "a": "Say whether you paid it or used Univair's card",
+        "b": "What you paid is reimbursed to you"
+      },
+      "returned": {
+        "caption": "A question? We'll tell you.",
+        "title": "Checked by accounting",
+        "body": "Each report is checked before invoicing. If something's missing, it comes back to you with a note: fix it and send it again.",
+        "a": "You see where each of your reports stands",
+        "b": "An approved report goes to invoicing with nothing more to do"
+      },
+      "approved": {
+        "caption": "Ready to invoice.",
+        "title": "Approved flights, ready to invoice",
+        "body": "Every flight checked by Univair arrives in \"Billing\", with its flight time and expenses.",
+        "a": "An invoice in one click, numbered for your company",
+        "b": "The PDF is ready to send"
+      },
+      "taxes": {
+        "caption": "Taxes, already worked out.",
+        "title": "GST and QST included",
+        "body": "Taxes are calculated by the flight's rules, with your registration numbers on every invoice.",
+        "a": "Rates come from the aircraft, up to date",
+        "b": "An invoice is corrected by voiding it, never by erasing"
+      },
+      "results": {
+        "caption": "Where the company stands.",
+        "title": "The company's results",
+        "body": "The year's revenue, expenses and maintenance reserves, updated with every invoice.",
+        "a": "What's set aside for the big inspections",
+        "b": "Company expenses are added in a few fields"
       }
     },
     "team": {
       "eyebrow": "Always here for you",
       "title": "A real team, one call away.",
       "body": "A flight to plan, a hotel, a question about your aircraft? Call or text: these are the people who answer, 7 days a week.",
-      "inApp": "You can also write to us right in the app."
+      "inApp": "You can also write to us right in the app.",
+      "eyebrowStaff": "Your colleagues",
+      "titleStaff": "The team you work with.",
+      "bodyStaff": "Owners see these faces when they call or write to us. Add your photo so they recognize you too."
     },
     "ready": {
       "eyebrow": "All set",
@@ -1736,9 +1818,21 @@
       "body": "Your space is waiting.",
       "bodyAircraft": "{registration} is waiting for you.",
       "enter": "Enter my space",
-      "request": "Request my first flight"
+      "request": "Request my first flight",
+      "bodySecurity": "One last step: protect your account with a sign-in code. It's required for the team and takes a minute.",
+      "secure": "Protect my account",
+      "bodyStaff": "Your dashboard is waiting.",
+      "enterStaff": "Open the dashboard",
+      "bodyPilot": "Your flights to report are waiting.",
+      "enterPilot": "See my flight reports",
+      "bodyManager": "Your company's billing is waiting.",
+      "enterManager": "Open billing"
     },
-    "skip": "Skip"
+    "skip": "Skip",
+    "settings": {
+      "replayTour": "See the tour again",
+      "replayTourBody": "The welcome guide, from the start."
+    }
   },
   "avatar": {
     "choose": "Choose a photo",

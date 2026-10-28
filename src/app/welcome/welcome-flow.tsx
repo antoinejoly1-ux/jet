@@ -10,19 +10,38 @@ import { AvatarPicker } from "@/components/account/avatar-picker";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
+import type { WelcomeAudience } from "@/lib/auth/welcome";
 import { scenes, type Scene } from "@/lib/imagery";
 import { cn } from "@/lib/utils";
 
 const STEPS = ["welcome", "name", "tour", "team", "ready"] as const;
 type Step = (typeof STEPS)[number];
 
-/** What the platform holds, one photograph each. */
-const TOUR: { key: string; scene: Scene; finance?: boolean }[] = [
-  { key: "live", scene: "cockpit" },
-  { key: "hours", scene: "rampDusk" },
-  { key: "finances", scene: "cabinDoor", finance: true },
-  { key: "flights", scene: "boarding" },
-];
+/** What the platform holds for each kind of person, one photograph each. */
+const TOURS: Record<WelcomeAudience, { key: string; scene: Scene; finance?: boolean }[]> = {
+  owner: [
+    { key: "live", scene: "cockpit" },
+    { key: "hours", scene: "rampDusk" },
+    { key: "finances", scene: "cabinDoor", finance: true },
+    { key: "flights", scene: "boarding" },
+  ],
+  staff: [
+    { key: "todo", scene: "hangarBright" },
+    { key: "fleet", scene: "hangar" },
+    { key: "ops", scene: "hangarCrew" },
+    { key: "billing", scene: "terminal", finance: true },
+  ],
+  pilot: [
+    { key: "report", scene: "cockpit" },
+    { key: "receipts", scene: "pilot" },
+    { key: "returned", scene: "hangarPilot" },
+  ],
+  manager: [
+    { key: "approved", scene: "terminal" },
+    { key: "taxes", scene: "cabinDoor" },
+    { key: "results", scene: "rampDusk" },
+  ],
+};
 
 const STEP_SCENE: Record<Exclude<Step, "tour" | "ready">, Scene> = {
   welcome: "hangar",
@@ -35,6 +54,8 @@ export function WelcomeFlow({
   lastName: initialLast,
   locale: initialLocale,
   image,
+  audience,
+  needsTwoFactor,
   seesFinances,
   aircraft,
   finalPhoto,
@@ -45,6 +66,9 @@ export function WelcomeFlow({
   lastName: string;
   locale: "fr" | "en";
   image: string | null;
+  audience: WelcomeAudience;
+  /** Staff and pilots who still have to set up a sign-in code: the last step says so. */
+  needsTwoFactor: boolean;
   seesFinances: boolean;
   aircraft: { registration: string; model: string } | null;
   finalPhoto: StaticImageData;
@@ -61,7 +85,10 @@ export function WelcomeFlow({
   const [avatar, setAvatar] = useState<string | null>(image);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const tour = TOUR.filter((s) => !s.finance || seesFinances);
+  const tour = TOURS[audience].filter((s) => !s.finance || seesFinances);
+  /** The team and pilots work with the people shown; owners and managers are served by them. */
+  const colleague = audience === "staff" || audience === "pilot";
+  const tk = (key: string) => (audience === "owner" ? key : `${key}${audience[0]!.toUpperCase()}${audience.slice(1)}`);
   const index = STEPS.indexOf(step);
   const go = (to: Step) => {
     setError(null);
@@ -109,7 +136,7 @@ export function WelcomeFlow({
   }
 
   return (
-    <div className="theme-dark bg-background flex min-h-dvh flex-col lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
+    <div className="bg-background text-text flex min-h-dvh flex-col lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
       {/* The photograph: full height beside the content on desktop, a band on top on phones. */}
       <div className="relative h-[38vh] min-h-64 overflow-hidden lg:sticky lg:top-0 lg:m-4 lg:h-[calc(100dvh-2rem)] lg:rounded-[28px]">
         <div className="absolute inset-0">
@@ -173,9 +200,11 @@ export function WelcomeFlow({
             <div className="max-w-md">
               <p className="eyebrow">{t("welcome.eyebrow")}</p>
               <h1 className="mt-4 text-5xl leading-[1.02] font-light tracking-[-0.03em] sm:text-6xl">
-                {t("welcome.title", { name: initialFirst })}
+                {t(tk("welcome.title") as "welcome.title", { name: initialFirst })}
               </h1>
-              <p className="text-muted mt-6 text-lg leading-relaxed font-light">{t("welcome.body")}</p>
+              <p className="text-muted mt-6 text-lg leading-relaxed font-light">
+                {t(tk("welcome.body") as "welcome.body")}
+              </p>
               <p className="text-muted mt-3 text-sm">{t("welcome.time")}</p>
               <Button className="mt-10" size="lg" onClick={next}>
                 {t("welcome.start")}
@@ -242,7 +271,7 @@ export function WelcomeFlow({
           {step === "tour" ? (
             <div className="flex max-w-md flex-col gap-8">
               <div key={slide} className="animate-rise">
-                <p className="eyebrow">{t("tour.eyebrow")}</p>
+                <p className="eyebrow">{t(colleague ? "tour.eyebrowStaff" : "tour.eyebrow")}</p>
                 <h1 className="mt-4 text-4xl leading-tight font-light tracking-tight sm:text-5xl">
                   {t(`tour.${tour[slide]!.key}.title`)}
                 </h1>
@@ -281,15 +310,19 @@ export function WelcomeFlow({
           {step === "team" ? (
             <div className="flex max-w-xl flex-col gap-8">
               <div>
-                <p className="eyebrow">{t("team.eyebrow")}</p>
-                <h1 className="mt-4 text-4xl leading-tight font-light tracking-tight sm:text-5xl">{t("team.title")}</h1>
-                <p className="text-muted mt-4 text-lg font-light">{t("team.body")}</p>
+                <p className="eyebrow">{t(colleague ? "team.eyebrowStaff" : "team.eyebrow")}</p>
+                <h1 className="mt-4 text-4xl leading-tight font-light tracking-tight sm:text-5xl">
+                  {t(colleague ? "team.titleStaff" : "team.title")}
+                </h1>
+                <p className="text-muted mt-4 text-lg font-light">{t(colleague ? "team.bodyStaff" : "team.body")}</p>
               </div>
               {team}
-              <div className="flex flex-col gap-3">
-                {contact}
-                <p className="text-muted text-sm">{t("team.inApp")}</p>
-              </div>
+              {colleague ? null : (
+                <div className="flex flex-col gap-3">
+                  {contact}
+                  <p className="text-muted text-sm">{t("team.inApp")}</p>
+                </div>
+              )}
               <Nav onBack={back} onNext={next} label={t("continue")} backLabel={t("back")} />
             </div>
           ) : null}
@@ -312,12 +345,16 @@ export function WelcomeFlow({
                   {t("ready.title", { name: first || initialFirst })}
                 </h1>
                 <p className="text-muted mt-5 text-lg font-light">
-                  {aircraft ? t("ready.bodyAircraft", { registration: aircraft.registration }) : t("ready.body")}
+                  {needsTwoFactor
+                    ? t("ready.bodySecurity")
+                    : audience === "owner" && aircraft
+                      ? t("ready.bodyAircraft", { registration: aircraft.registration })
+                      : t(tk("ready.body") as "ready.body")}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
-                <EnterButton label={t("ready.enter")} />
-                {aircraft ? (
+                <EnterButton label={needsTwoFactor ? t("ready.secure") : t(tk("ready.enter") as "ready.enter")} />
+                {audience === "owner" && aircraft ? (
                   <Button type="submit" name="then" value="request" variant="secondary" size="lg">
                     {t("ready.request")}
                   </Button>

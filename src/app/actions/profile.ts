@@ -6,7 +6,14 @@ import { redirect } from "next/navigation";
 import { assertNotViewingAs, landingPath, requireViewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formError, type FormState } from "@/lib/forms";
-import { completeOnboarding, removeAvatar, setAvatar, updateProfile, type ProfileInput } from "@/lib/services/profile";
+import {
+  completeOnboarding,
+  removeAvatar,
+  restartOnboarding,
+  setAvatar,
+  updateProfile,
+  type ProfileInput,
+} from "@/lib/services/profile";
 import { LOCALE_COOKIE } from "@/i18n/request";
 
 /** Name and language, from the welcome tour or Settings. */
@@ -53,4 +60,12 @@ export async function finishWelcomeAction(formData?: FormData) {
   const to = await landingPath(viewer);
   // "Faire une première demande de vol": Home opens the request sheet.
   redirect(formData?.get("then") === "request" && to === "/" ? "/?request=1" : to);
+}
+
+/** « Revoir la visite » in Settings: the tour again, from the start. */
+export async function replayTourAction() {
+  const viewer = await requireViewer();
+  assertNotViewingAs(viewer);
+  await restartOnboarding(db, viewer);
+  redirect("/welcome");
 }

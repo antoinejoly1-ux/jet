@@ -5,6 +5,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { replayTourAction } from "@/app/actions/profile";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 import { AvatarPicker } from "@/components/account/avatar-picker";
 import { EmailPreferencesForm } from "@/components/account/email-preferences-form";
 import { PrivacyRequestForm } from "@/components/account/privacy-request-form";
@@ -87,6 +89,7 @@ function Row({
 export default async function AccountPage() {
   const viewer = await requireViewer();
   const t = await getTranslations("account");
+  const tw = await getTranslations("welcome.settings");
   const locale = lang(await getLocale());
   const format = await getFormatter();
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
@@ -139,7 +142,20 @@ export default async function AccountPage() {
                       <Badge>{t("methods.magicLink")}</Badge>
                     </dd>
                   </dl>
-                  {readOnly ? <p className="text-muted text-xs">{t("readOnly")}</p> : null}
+                  {readOnly ? (
+                    <p className="text-muted text-xs">{t("readOnly")}</p>
+                  ) : (
+                    <form
+                      action={replayTourAction}
+                      className="border-border flex flex-wrap items-center gap-3 border-t pt-5"
+                    >
+                      <Button type="submit" variant="secondary" size="sm" className="ai-trigger">
+                        <AnimatedIcon name="bulb" size={16} />
+                        {tw("replayTour")}
+                      </Button>
+                      <span className="text-muted text-xs">{tw("replayTourBody")}</span>
+                    </form>
+                  )}
                 </div>
               </div>
             </div>
