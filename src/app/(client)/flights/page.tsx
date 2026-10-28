@@ -13,6 +13,7 @@ import { formatHours } from "@/lib/format";
 import { listOpenFlightRequests } from "@/lib/services/flight-requests";
 import { listOwnerFlights } from "@/lib/services/flights";
 import { scenes } from "@/lib/imagery";
+import { zonedLocalToUtc } from "@/lib/time";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("flights") };
@@ -104,7 +105,10 @@ export default async function OwnerFlightsPage() {
                         day: "numeric",
                         month: "long",
                       })}
-                      {r.time ? ` · ${r.time}` : ""} · {r.registration}
+                      {r.time
+                        ? ` · ${format.dateTime(zonedLocalToUtc(`${r.date}T${r.time}`)!, { hour: "numeric", minute: "2-digit" })}`
+                        : ""}{" "}
+                      · {r.registration}
                     </p>
                   </div>
                   <Badge tone="warning">{tr("pending")}</Badge>

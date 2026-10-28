@@ -3,7 +3,7 @@ import { Paperclip } from "lucide-react";
 import Link from "next/link";
 import type { MessageMeta } from "@/lib/services/flight-requests";
 import { getFormatter, getTranslations } from "next-intl/server";
-import { zonedDay } from "@/lib/time";
+import { zonedDay, zonedLocalToUtc } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { ScrollToEnd } from "./scroll-to-end";
 
@@ -47,7 +47,10 @@ async function FlightRequestCard({
       <p className="text-muted mt-2 flex items-center gap-2 text-sm first-letter:uppercase">
         <CalendarClock className="size-3.5 shrink-0" strokeWidth={1.5} aria-hidden />
         <span className="first-letter:uppercase">
-          {date(meta.date)} · {meta.time ?? t("flexible")}
+          {date(meta.date)} ·{" "}
+          {meta.time
+            ? format.dateTime(zonedLocalToUtc(`${meta.date}T${meta.time}`)!, { hour: "numeric", minute: "2-digit" })
+            : t("flexible")}
         </span>
       </p>
       {meta.returnDate ? (

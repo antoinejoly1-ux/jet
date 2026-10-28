@@ -36,7 +36,7 @@ export async function InboxList({ rows, filter, activeId }: { rows: Row[]; filte
             key={f}
             href={href(f)}
             aria-current={f === filter ? "page" : undefined}
-            className="text-muted aria-[current=page]:bg-surface-muted aria-[current=page]:text-text rounded-md px-3 py-1.5 text-sm font-medium"
+            className="text-muted aria-[current=page]:bg-surface-muted aria-[current=page]:text-text shrink-0 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap"
           >
             {t(`filterNames.${f}`)}
           </Link>
