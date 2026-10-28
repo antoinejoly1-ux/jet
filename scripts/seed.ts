@@ -21,7 +21,9 @@ import * as s from "../src/lib/db/schema";
 config({ path: ".env.local" });
 config();
 
-if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production")
+// Vercel builds previews with NODE_ENV=production too: a preview may be seeded, production never.
+const vercelEnv = process.env.VERCEL_ENV;
+if (vercelEnv === "production" || (process.env.NODE_ENV === "production" && vercelEnv !== "preview"))
   throw new Error("Refusing to seed a production database.");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
