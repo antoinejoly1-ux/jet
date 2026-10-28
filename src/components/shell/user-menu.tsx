@@ -43,7 +43,7 @@ export function UserMenu({ name, email, image }: { name: string; email: string; 
         onClick={() => setOpen((o) => !o)}
         className="rounded-full"
       >
-        <Avatar name={name} image={image} />
+        <Avatar name={name} image={image} className="size-11" />
       </button>
       {open ? (
         <div
@@ -58,7 +58,7 @@ export function UserMenu({ name, email, image }: { name: string; email: string; 
             role="menuitem"
             href="/account"
             onClick={() => setOpen(false)}
-            className="hover:bg-surface-muted flex h-10 items-center gap-2 rounded-full px-3 text-sm"
+            className="hover:bg-surface-muted flex h-11 items-center gap-2 rounded-full px-3 text-sm"
           >
             <UserRound className="size-4" aria-hidden />
             {t("account")}
@@ -67,7 +67,7 @@ export function UserMenu({ name, email, image }: { name: string; email: string; 
             role="menuitem"
             type="button"
             onClick={signOut}
-            className="hover:bg-surface-muted flex h-10 w-full items-center gap-2 rounded-full px-3 text-sm"
+            className="hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
           >
             <LogOut className="size-4" aria-hidden />
             {t("signOut")}

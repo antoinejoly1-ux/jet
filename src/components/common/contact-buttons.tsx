@@ -11,13 +11,13 @@ export async function ContactButtons() {
   const t = await getTranslations("contact");
   return (
     <div className="flex flex-wrap gap-2">
-      <Button asChild size="sm">
+      <Button asChild>
         <a href={telHref(phone)}>
           <Phone aria-hidden />
           {t("call")}
         </a>
       </Button>
-      <Button asChild size="sm" variant="secondary">
+      <Button asChild variant="secondary">
         <a href={smsHref(phone)}>
           <MessageCircle aria-hidden />
           {t("text")}

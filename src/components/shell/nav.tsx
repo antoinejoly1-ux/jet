@@ -11,6 +11,8 @@ import {
   Inbox,
   Menu,
   MailPlus,
+  PanelLeftClose,
+  PanelLeftOpen,
   Phone,
   Plus,
   MessageSquare,
@@ -27,8 +29,9 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import type { Route } from "next";
+import { useRequestFlight } from "@/components/flights/request-flight";
 import { Icon, type IconMotion } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 
@@ -60,15 +63,15 @@ const CLIENT: Group[] = [
     key: null,
     items: [
       { href: "/", key: "home", icon: Home, anim: "settle", mobile: true },
-      { href: "/flights", key: "flights", icon: PlaneTakeoff, anim: "plane", mobile: true },
       { href: "/availability", key: "availability", icon: CalendarDays, anim: "flip", mobile: true },
-      { href: "/finances", key: "finances", icon: Wallet, anim: "bounce", mobile: true },
+      { href: "/flights", key: "flights", icon: PlaneTakeoff, anim: "plane" },
+      { href: "/messages", key: "messages", icon: MessageSquare, anim: "wiggle", mobile: true },
+      { href: "/finances", key: "finances", icon: Wallet, anim: "bounce" },
       { href: "/invoices", key: "invoices", icon: FileText, anim: "slide" },
       { href: "/aircraft", key: "aircraft", icon: Plane, anim: "drop" },
-      // Owners call or text more than they chat, so Messages stays out of the phone tabs.
-      { href: "/messages", key: "messages", icon: MessageSquare, anim: "wiggle" },
     ],
   },
+  { key: "settings", items: [{ href: "/account", key: "settings", icon: Settings, anim: "spin" }] },
 ];
 
 const ADMIN: Group[] = [
@@ -111,45 +114,118 @@ function useIsActive() {
   return (href: string) => (href === "/" || href === "/admin" ? pathname === href : pathname.startsWith(href));
 }
 
+/** Cookie remembering whether the desktop rail shows its labels. */
+export const RAIL_COOKIE = "rail";
+
 /**
- * The desktop rail: 76px of icons, the current page in an ivory circle,
- * names as tooltips. Never wider, so the page keeps the room.
+ * The desktop sidebar: a 76px rail of icons (names as tooltips) that opens to
+ * 232px with labels; the choice is remembered. The current page sits in an
+ * ivory pill.
  */
-export function Rail({ side, badges = {}, hidden }: { side: Side; badges?: Badges; hidden?: readonly string[] }) {
+export function Sidebar({
+  side,
+  badges = {},
+  hidden,
+  fab,
+  expanded: initial,
+  home,
+}: {
+  side: Side;
+  badges?: Badges;
+  hidden?: readonly string[];
+  fab: Fab | null;
+  expanded: boolean;
+  /** The brand mark at the top. */
+  home: React.ReactNode;
+}) {
   const t = useTranslations("nav");
   const isActive = useIsActive();
+  const [expanded, setExpanded] = useState(initial);
+  const toggle = () => {
+    const next = !expanded;
+    setExpanded(next);
+    document.cookie = `${RAIL_COOKIE}=${next ? "open" : "closed"}; path=/; max-age=31536000; samesite=lax`;
+    document.querySelector<HTMLElement>("[data-shell]")?.style.setProperty("--rail", next ? "232px" : "76px");
+  };
   return (
-    <nav aria-label={t("label")} className="flex flex-col items-center gap-3">
-      {groupsFor(side, hidden).map((group, i) => (
-        <div key={group.key ?? "main"} className="flex flex-col items-center gap-1.5">
-          {i > 0 ? <div className="bg-border my-2 h-px w-6" aria-hidden /> : null}
-          {group.items.map(({ href, key, icon, anim }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={isActive(href) ? "page" : undefined}
-              className={cn(
-                "group text-muted hover:text-text hover:bg-surface-muted relative flex size-11 items-center justify-center rounded-full transition-colors duration-300",
-                "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground",
-              )}
-            >
-              <Icon icon={icon} anim={anim} className="size-[19px]" />
-              {badges[key] ? (
-                <span
-                  className="bg-accent ring-background absolute top-2 right-2 size-2 rounded-full ring-2"
-                  aria-hidden
-                />
+    <aside
+      className={cn(
+        "border-border sticky top-0 hidden h-dvh flex-col justify-between overflow-y-auto border-r py-6 lg:flex",
+        expanded ? "items-stretch px-4" : "items-center",
+      )}
+    >
+      <div className={cn("flex flex-col gap-6", expanded ? "items-stretch" : "items-center")}>
+        {home}
+        <nav aria-label={t("label")} className={cn("flex flex-col gap-3", !expanded && "items-center")}>
+          {groupsFor(side, hidden).map((group, i) => (
+            <div key={group.key ?? "main"} className={cn("flex flex-col gap-1", !expanded && "items-center")}>
+              {i > 0 ? (
+                expanded && group.key ? (
+                  <p className="eyebrow mt-3 mb-1 px-3">{t(`groups.${group.key}`)}</p>
+                ) : (
+                  <div className="bg-border my-2 h-px w-6" aria-hidden />
+                )
               ) : null}
-              {/* The tooltip doubles as the link's name, so the name is the visible label (and unread counts join it). */}
-              <span className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-4 translate-x-1 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
-                {t(`items.${key}`)}
-              </span>
-              {badges[key] ? <span className="sr-only"> · {t("unread", { count: badges[key]! })}</span> : null}
-            </Link>
+              {group.items.map(({ href, key, icon, anim }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  aria-current={isActive(href) ? "page" : undefined}
+                  className={cn(
+                    "group text-muted hover:text-text hover:bg-surface-muted relative flex items-center rounded-full transition-colors duration-300",
+                    "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground",
+                    expanded ? "h-11 gap-3 px-3.5" : "size-11 justify-center",
+                  )}
+                >
+                  <Icon icon={icon} anim={anim} className="size-[19px] shrink-0" />
+                  {expanded ? (
+                    <>
+                      <span className="flex-1 truncate text-sm">{t(`items.${key}`)}</span>
+                      <Count n={badges[key]} />
+                    </>
+                  ) : (
+                    <>
+                      {badges[key] ? (
+                        <span
+                          className="bg-accent text-accent-foreground ring-background tabular absolute -top-0.5 -right-0.5 flex min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] leading-[18px] font-semibold ring-2"
+                          aria-hidden
+                        >
+                          {badges[key]! > 9 ? "9+" : badges[key]}
+                        </span>
+                      ) : null}
+                      {/* The tooltip doubles as the link's name, so the name is the visible label. */}
+                      <span className="bg-primary text-primary-foreground shadow-float pointer-events-none absolute left-full z-50 ml-4 translate-x-1 rounded-full px-3.5 py-1.5 text-xs font-medium whitespace-nowrap opacity-0 transition-[opacity,transform] duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
+                        {t(`items.${key}`)}
+                      </span>
+                      {badges[key] ? <span className="sr-only"> · {t("unread", { count: badges[key]! })}</span> : null}
+                    </>
+                  )}
+                </Link>
+              ))}
+            </div>
           ))}
-        </div>
-      ))}
-    </nav>
+        </nav>
+      </div>
+      <div className={cn("flex flex-col gap-4 pt-6", expanded ? "items-stretch" : "items-center")}>
+        {fab ? <FloatingAction fab={fab} expanded={expanded} /> : null}
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={expanded}
+          className={cn(
+            "text-muted hover:text-text hover:bg-surface-muted flex h-10 items-center gap-3 rounded-full text-xs transition-colors",
+            expanded ? "px-3.5" : "w-10 justify-center",
+          )}
+        >
+          {expanded ? (
+            <PanelLeftClose className="size-4" strokeWidth={1.5} aria-hidden />
+          ) : (
+            <PanelLeftOpen className="size-4" strokeWidth={1.5} aria-hidden />
+          )}
+          <span className={cn(!expanded && "sr-only")}>{expanded ? t("collapse") : t("expand")}</span>
+        </button>
+      </div>
+    </aside>
   );
 }
 
@@ -183,24 +259,52 @@ function MenuList({ side, badges = {}, hidden }: { side: Side; badges?: Badges; 
   );
 }
 
-/** The round action button at the foot of the rail: call the team (owners) or plan a flight (staff). */
-export type Fab = { kind: "call"; href: string } | { kind: "newFlight"; href: Route };
+/**
+ * The action button at the foot of the sidebar: request a flight (owners who
+ * can), call the team (other owner logins), or plan a flight (staff).
+ */
+export type Fab =
+  { kind: "request"; callHref: string | null } | { kind: "call"; href: string } | { kind: "newFlight"; href: Route };
 
-export function FloatingAction({ fab }: { fab: Fab }) {
+export function FloatingAction({ fab, expanded = false }: { fab: Fab; expanded?: boolean }) {
   const t = useTranslations("nav");
-  const label = fab.kind === "call" ? t("fabCall") : t("fabNewFlight");
+  const request = useRequestFlight();
+  const kind = fab.kind === "request" && !request ? (fab.callHref ? "call" : null) : fab.kind;
+  if (!kind) return null;
+  const label = kind === "request" ? t("fabRequest") : kind === "call" ? t("fabCall") : t("fabNewFlight");
+  const className = cn(
+    "group bg-accent text-accent-foreground shadow-float relative flex items-center justify-center gap-2.5 rounded-full transition-transform duration-300 hover:scale-105",
+    expanded ? "h-12 px-5 text-sm font-medium" : "size-12",
+  );
+  const icon = (
+    <Icon
+      icon={kind === "request" ? PlaneTakeoff : kind === "call" ? Phone : Plus}
+      anim={kind === "request" ? "plane" : kind === "call" ? "shake" : "spin"}
+      className="size-5"
+    />
+  );
+  const content = (
+    <>
+      {icon}
+      {expanded ? <span>{label}</span> : null}
+    </>
+  );
+  if (kind === "request")
+    return (
+      <button
+        type="button"
+        onClick={() => request?.()}
+        aria-label={expanded ? undefined : label}
+        title={label}
+        className={className}
+      >
+        {content}
+      </button>
+    );
+  const href = fab.kind === "request" ? fab.callHref! : fab.href;
   return (
-    <a
-      href={fab.href}
-      aria-label={label}
-      title={label}
-      className="group bg-accent text-accent-foreground shadow-float relative flex size-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-105"
-    >
-      <Icon
-        icon={fab.kind === "call" ? Phone : Plus}
-        anim={fab.kind === "call" ? "shake" : "spin"}
-        className="size-5"
-      />
+    <a href={href} aria-label={expanded ? undefined : label} title={label} className={className}>
+      {content}
     </a>
   );
 }
@@ -225,10 +329,12 @@ export function BottomTabs({
   const isActive = useIsActive();
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
-  const items = groupsFor(side, hidden)
-    .flatMap((g) => g.items)
-    .filter((i) => i.mobile)
-    .slice(0, 4);
+  const request = useRequestFlight();
+  const all = groupsFor(side, hidden).flatMap((g) => g.items);
+  const items = all.filter((i) => i.mobile).slice(0, 4);
+  // Owners: the request button sits in the middle, the one action they come for.
+  // Logins that can't request get Vols there instead.
+  const center = side === "client" ? (request ? "request" : all.find((i) => i.key === "flights")) : null;
 
   // The menu closes on navigation and can't be scrolled behind.
   useEffect(() => {
@@ -244,7 +350,7 @@ export function BottomTabs({
   }
 
   const tab =
-    "group flex h-16 w-full flex-col items-center justify-center gap-1 text-[10.5px] font-medium tracking-[0.02em] text-muted aria-[current=page]:text-text";
+    "group flex h-16 w-full flex-col items-center justify-center gap-1 text-[11.5px] font-medium tracking-[0.01em] text-muted aria-[current=page]:text-text";
   const pill =
     "flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300 group-aria-[current=page]:bg-primary group-aria-[current=page]:text-primary-foreground";
   return (
@@ -264,23 +370,51 @@ export function BottomTabs({
         aria-label={t("label")}
         className="border-border bg-background/80 fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
       >
-        <ul className="grid" style={{ gridTemplateColumns: `repeat(${items.length + 1}, minmax(0, 1fr))` }}>
-          {items.map(({ href, key, icon, anim }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                aria-current={isActive(href) && !moreOpen ? "page" : undefined}
-                className={cn(tab, "relative")}
-              >
-                <span className={pill}>
-                  <Icon icon={icon} anim={anim} className="size-[19px]" />
-                </span>
-                <Count n={badges[key]} className="absolute top-1.5 left-1/2 ml-2" />
-                <span className="max-w-full truncate px-1">
-                  {t.has(`tabs.${key}`) ? t(`tabs.${key}`) : t(`items.${key}`)}
-                </span>
-              </Link>
-            </li>
+        <ul
+          className="grid"
+          style={{ gridTemplateColumns: `repeat(${items.length + (center ? 2 : 1)}, minmax(0, 1fr))` }}
+        >
+          {items.map(({ href, key, icon, anim }, i) => (
+            <Fragment key={href}>
+              {center && i === 2 ? (
+                <li>
+                  {center === "request" ? (
+                    <button type="button" onClick={() => request?.()} className={tab}>
+                      <span className="bg-accent text-accent-foreground shadow-float flex size-11 items-center justify-center rounded-full">
+                        <Icon icon={PlaneTakeoff} anim="plane" className="size-5" />
+                      </span>
+                      <span>{t("tabs.request")}</span>
+                    </button>
+                  ) : (
+                    <Link
+                      href={center.href}
+                      aria-current={isActive(center.href) && !moreOpen ? "page" : undefined}
+                      className={tab}
+                    >
+                      <span className={pill}>
+                        <Icon icon={center.icon} anim={center.anim} className="size-[19px]" />
+                      </span>
+                      <span>{t(`items.${center.key}`)}</span>
+                    </Link>
+                  )}
+                </li>
+              ) : null}
+              <li>
+                <Link
+                  href={href}
+                  aria-current={isActive(href) && !moreOpen ? "page" : undefined}
+                  className={cn(tab, "relative")}
+                >
+                  <span className={pill}>
+                    <Icon icon={icon} anim={anim} className="size-[19px]" />
+                  </span>
+                  <Count n={badges[key]} className="absolute top-1.5 left-1/2 ml-2" />
+                  <span className="max-w-full truncate px-1">
+                    {t.has(`tabs.${key}`) ? t(`tabs.${key}`) : t(`items.${key}`)}
+                  </span>
+                </Link>
+              </li>
+            </Fragment>
           ))}
           <li>
             <button

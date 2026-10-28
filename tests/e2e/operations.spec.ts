@@ -40,7 +40,7 @@ test("dispatch completes a flight with its flight time and the owner sees it", a
     .filter({ hasText: `CYUL → ${to}` })
     .filter({ hasText: "Terminé" })
     .first();
-  await expect(done).toContainText("1,5 h de vol");
+  await expect(done).toContainText("1 h 30 de vol");
 
   // A future flight can't be completed by mistake.
   await schedule(page, to, local(5, "10:00"));
@@ -63,7 +63,7 @@ test("dispatch completes a flight with its flight time and the owner sees it", a
       .getByRole("listitem")
       .filter({ hasText: `CYUL → ${to}` })
       .first(),
-  ).toContainText("1,5 h");
+  ).toContainText("1 h 30");
   await expect(owner.getByRole("region", { name: "À venir" })).toContainText(`CYUL → ${to}`);
 });
 

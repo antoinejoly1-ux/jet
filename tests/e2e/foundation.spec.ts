@@ -59,7 +59,7 @@ test("an invited owner signs up, verifies their email, takes the welcome tour an
   await invitee.getByLabel(/Nom complet|Full name/).fill("Marie Gagnon");
   await expect(invitee.getByLabel(/^(Courriel|Email)$/)).toHaveValue(email);
   await invitee.getByLabel(/^(Mot de passe|Password)$/).fill(PASSWORD);
-  await invitee.getByRole("button", { name: /Créer un compte|Create an account/ }).click();
+  await invitee.getByRole("button", { name: /Créer mon compte|Create my account/ }).click();
   await expect(invitee.getByRole("heading", { name: /Vérifiez vos courriels|Check your email/ })).toBeVisible();
 
   // Verifying the email signs them in and returns them to the invitation.
@@ -88,7 +88,7 @@ test("someone who signs up without an invitation waits on the pending screen", a
   await page.getByLabel(/Nom complet|Full name/).fill("Sam Stranger");
   await page.getByLabel(/^(Courriel|Email)$/).fill(email);
   await page.getByLabel(/^(Mot de passe|Password)$/).fill(PASSWORD);
-  await page.getByRole("button", { name: /Créer un compte|Create an account/ }).click();
+  await page.getByRole("button", { name: /Créer mon compte|Create my account/ }).click();
   await expect(page.getByRole("heading", { name: /Vérifiez vos courriels|Check your email/ })).toBeVisible();
   await page.goto(latestLink(email));
   await expect(page).toHaveURL("/pending");

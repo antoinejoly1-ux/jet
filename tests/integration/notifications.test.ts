@@ -128,7 +128,7 @@ describe("low hours", () => {
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(1);
     expect(await ofType(finance.id, "hours.low_staff")).toHaveLength(1);
     expect(await ofType(dispatcher.id, "hours.low_staff")).toHaveLength(0);
-    expect(sent.map((e) => e.subject)).toEqual(["Il vous reste 1,8 h sur C-GJTA"]);
+    expect(sent.map((e) => e.subject)).toEqual(["Il vous reste 1\u00a0h\u00a045 sur C-GJTA"]);
     await fly("0:30"); // already below: no second warning
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(1);
   });

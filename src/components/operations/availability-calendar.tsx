@@ -3,6 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { RequestDay } from "@/components/flights/request-day";
 import { monthDays, shiftMonth, type DayStatus, type Period } from "@/lib/availability-days";
 import { zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -24,10 +25,13 @@ export async function AvailabilityCalendar({
   periods,
   hrefFor,
   periodAction,
+  requestable = false,
 }: {
   month: string;
   periods: Period[];
   hrefFor: (month: string) => string;
+  /** Owners: a tap on a free day opens "Demander un vol" with that date. */
+  requestable?: boolean;
   /** Extra control per period, e.g. removing a manual block. */
   periodAction?: (p: Period) => ReactNode;
 }) {
@@ -73,29 +77,40 @@ export async function AvailabilityCalendar({
           </div>
         </div>
 
-        <div aria-hidden className="grid grid-cols-7 gap-1 sm:gap-1.5">
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
           {weekdays.map((w, i) => (
-            <span key={i} className="text-muted pb-1 text-center text-xs font-semibold uppercase">
+            <span key={i} aria-hidden className="text-muted pb-1 text-center text-xs font-semibold uppercase">
               {w}
             </span>
           ))}
           {Array.from({ length: lead }, (_, i) => (
             <span key={`lead-${i}`} />
           ))}
-          {days.map((d) => (
-            <span
-              key={d.day}
-              data-status={d.status}
-              className={cn(
-                "tabular flex aspect-square items-start justify-end rounded-md p-1 text-xs font-semibold sm:p-2 sm:text-sm",
-                // Past days go neutral but stay readable; their details remain in the list below.
-                d.day < today ? "bg-surface-muted text-muted" : CELL[d.status],
-                d.day === today && "ring-text ring-2 ring-offset-1 ring-offset-[var(--surface)]",
-              )}
-            >
-              {Number(d.day.slice(8))}
-            </span>
-          ))}
+          {days.map((d) => {
+            const className = cn(
+              "tabular flex aspect-square items-start justify-end rounded-md p-1 text-xs font-semibold sm:p-2 sm:text-sm",
+              // Past days go neutral but stay readable; their details remain in the list below.
+              d.day < today ? "bg-surface-muted text-muted" : CELL[d.status],
+              d.day === today && "ring-text ring-2 ring-offset-1 ring-offset-[var(--surface)]",
+            );
+            const n = Number(d.day.slice(8));
+            return requestable && d.status === "free" && d.day >= today ? (
+              <RequestDay
+                key={d.day}
+                day={d.day}
+                className={className}
+                label={t("requestOn", {
+                  date: format.dateTime(new Date(`${d.day}T12:00:00`), { day: "numeric", month: "long" }),
+                })}
+              >
+                {n}
+              </RequestDay>
+            ) : (
+              <span key={d.day} aria-hidden data-status={d.status} className={className}>
+                {n}
+              </span>
+            );
+          })}
         </div>
 
         <ul className="text-muted flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={t("legendLabel")}>

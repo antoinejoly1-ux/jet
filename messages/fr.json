@@ -28,11 +28,16 @@
     },
     "tabs": {
       "dashboard": "Tableau",
-      "availability": "Calendrier"
+      "availability": "Calendrier",
+      "request": "Demander",
+      "owners": "Clients"
     },
     "unread": "{count, plural, one {# non lu} other {# non lus}}",
     "fabCall": "Appeler l'équipe",
-    "fabNewFlight": "Nouveau vol"
+    "fabNewFlight": "Nouveau vol",
+    "fabRequest": "Demander un vol",
+    "expand": "Afficher les libellés",
+    "collapse": "Réduire"
   },
   "toggle": {
     "label": "Changer de vue",
@@ -59,8 +64,8 @@
     "signIn": "Se connecter",
     "sending": "Envoi…",
     "emailMeALink": "M'envoyer un lien de connexion",
-    "noAccount": "Pas encore de compte?",
-    "createAccount": "Créer un compte",
+    "noAccount": "Vous avez reçu une invitation?",
+    "createAccount": "Créer mon compte",
     "magicLinkSent": "Un lien de connexion a été envoyé à {email}.",
     "continueWithGoogle": "Continuer avec Google",
     "signUpTitle": "Créer un compte",
@@ -170,7 +175,9 @@
   },
   "pending": {
     "title": "Votre accès est en préparation",
-    "body": "Votre compte ({email}) est créé, mais il n'est pas encore lié à un appareil. Notre équipe a été avisée et activera votre accès sous peu."
+    "body": "Votre compte ({email}) est créé, mais il n'est pas encore lié à un appareil. Notre équipe a été avisée et activera votre accès sous peu.",
+    "delay": "C'est habituellement fait en moins d'un jour ouvrable.",
+    "refresh": "Vérifier mon accès"
   },
   "home": {
     "greeting": "Bonjour, {name}",
@@ -186,7 +193,7 @@
     },
     "shareOf": "Part de {percent}",
     "hoursRemaining": "Heures restantes",
-    "ofAnnual": "sur {hours} par année",
+    "ofAnnual": "sur {hours} cette année",
     "budget": "Budget {year}",
     "ofPlanned": "dépensé sur {amount} prévus",
     "budgetEmpty": "Le budget de l'année sera publié par notre équipe.",
@@ -204,7 +211,8 @@
       "hoursPace": "Au rythme de cette année, vos heures restantes dureront environ {months} mois, soit jusqu'en {until}.",
       "hoursUnused": "Vous n'avez pas encore volé cette année : toutes vos heures sont disponibles.",
       "budgetOnTrack": "Vous avez dépensé {spent} du budget, à {year} de l'année : c'est dans le rythme prévu.",
-      "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu."
+      "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu.",
+      "details": "Voir le détail"
     },
     "maintenanceStarts": "Dès le {date}",
     "maintenanceEnds": "Jusqu'au {date}",
@@ -237,7 +245,11 @@
       "maintenanceUntil": "jusqu'au {date}",
       "waiting": "Votre {model} vous attend",
       "waitingAt": "à {city}, prêt pour votre prochain départ",
-      "follow": "Suivre en direct"
+      "follow": "Suivre en direct",
+      "nextDeparture": "prochain départ {date} · {route}",
+      "seeOnMap": "Voir sur la carte",
+      "factHours": "{hours} restantes",
+      "factFree": "Libre {count} j sur {days}"
     },
     "flownCaption": "depuis le 1er janvier",
     "legendFree": "Libre",
@@ -1058,7 +1070,7 @@
   },
   "availability": {
     "title": "Calendrier",
-    "subtitle": "Les jours libres de votre appareil. Vos vols sont en bleu.",
+    "subtitle": "Les jours libres de votre appareil. Touchez un jour libre pour demander un vol.",
     "previousMonth": "Mois précédent",
     "nextMonth": "Mois suivant",
     "legendLabel": "Légende",
@@ -1074,9 +1086,9 @@
     "noAircraftTitle": "Aucun appareil",
     "noAircraftBody": "Le calendrier apparaîtra dès que votre part sera enregistrée.",
     "chooseAircraft": "Choisir l'appareil",
-    "callToBook": "Appeler pour réserver",
-    "bookingHint": "Pour réserver un vol, appelez notre équipe : nous confirmons la disponibilité avec vous.",
-    "bookingHintNoPhone": "Pour réserver un vol, écrivez à notre équipe : nous confirmons la disponibilité avec vous.",
+    "callToBook": "Appeler",
+    "bookingHint": "Touchez un jour libre ou « Demander un vol » : l'équipe confirme la disponibilité avec vous. Pressé? Appelez-nous.",
+    "bookingHintNoPhone": "Touchez un jour libre ou « Demander un vol » : l'équipe confirme la disponibilité avec vous.",
     "blockTitle": "Bloquer une période",
     "blockBody": "Pour un prêt de l'appareil ou une indisponibilité connue.",
     "blockAdded": "Période bloquée.",
@@ -1085,7 +1097,8 @@
     "blockKind": "Affiché comme",
     "addBlock": "Bloquer",
     "removeQuestion": "Retirer ce blocage?",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "requestOn": "Demander un vol le {date}"
   },
   "ownerFlights": {
     "title": "Vos vols",
@@ -1140,7 +1153,7 @@
     "ownerPlaceholder": "Écrivez votre message…",
     "staffPlaceholder": "Répondre…",
     "viewAsReadOnly": "Vous consultez le portail comme ce propriétaire : l'envoi est désactivé.",
-    "responseHint": "Nous répondons pendant les heures d'ouverture, habituellement en moins d'une heure.",
+    "responseHint": "L'équipe répond habituellement en moins d'une heure.",
     "noOwner": "Les messages seront disponibles dès que votre compte sera relié à un propriétaire.",
     "today": "Aujourd'hui",
     "dispatchName": "Répartition · {name}",
@@ -1178,7 +1191,8 @@
     "me": "{name} (moi)",
     "resolve": "Marquer comme résolue",
     "reopen": "Rouvrir",
-    "readOnlyMember": "Votre accès est en lecture seule : appelez ou textez l'équipe pour toute demande."
+    "readOnlyMember": "Votre accès est en lecture seule : appelez ou textez l'équipe pour toute demande.",
+    "responseHintClosed": "Hors des heures de bureau : réponse dès 7 h. Une urgence? Appelez-nous."
   },
   "notifications": {
     "title": "Notifications",
@@ -1516,7 +1530,10 @@
     "fleetSubtitle": "Chaque appareil, là où il est maintenant.",
     "whereIs": "Où est {registration}",
     "inDuration": "{hours, plural, =0 {dans {minutes} min} other {dans # h {minutes} min}}",
-    "airborneCount": "{count, plural, =0 {Aucun appareil en vol} one {# en vol} other {# en vol}} sur {total}"
+    "airborneCount": "{count, plural, =0 {Aucun appareil en vol} one {# en vol} other {# en vol}} sur {total}",
+    "unknownBody": "Nous ne recevons pas sa position pour le moment.",
+    "askTeam": "Demander à l'équipe",
+    "staleBody": "Dernière position reçue il y a {minutes} min. C'est fréquent à basse altitude ou au-dessus de l'eau; elle revient d'elle-même."
   },
   "shell": {
     "client": "Espace propriétaire",
@@ -1567,24 +1584,18 @@
       "eyebrow": "Univair Management",
       "title": "Bienvenue chez Univair, {name}.",
       "body": "Votre appareil, vos heures, vos vols et votre équipe : tout se retrouve ici, à portée de main, où que vous soyez.",
-      "time": "Deux minutes pour faire connaissance.",
+      "time": "Moins d'une minute pour faire connaissance.",
       "start": "Commencer"
     },
     "name": {
-      "eyebrow": "Faisons connaissance",
-      "title": "Comment souhaitez-vous qu'on vous appelle?",
-      "body": "Votre nom apparaît dans vos échanges avec l'équipe et sur vos documents.",
+      "eyebrow": "Votre profil",
+      "title": "Faisons connaissance.",
+      "body": "Votre photo et votre nom, tels que l'équipe Univair les verra. La photo est facultative.",
       "first": "Prénom",
       "last": "Nom",
       "language": "Langue de communication",
       "required": "Entrez votre prénom.",
       "failed": "Impossible d'enregistrer. Réessayez."
-    },
-    "photo": {
-      "eyebrow": "Votre photo",
-      "title": "Un visage sur le nom.",
-      "body": "Votre équipe vous reconnaîtra au premier coup d'œil. Vous pourrez la changer quand vous voudrez.",
-      "later": "Plus tard"
     },
     "tour": {
       "eyebrow": "Ce que vous trouverez ici",
@@ -1629,8 +1640,10 @@
       "title": "Bienvenue à bord, {name}.",
       "body": "Votre espace vous attend.",
       "bodyAircraft": "{registration} vous attend.",
-      "enter": "Entrer dans mon espace"
-    }
+      "enter": "Entrer dans mon espace",
+      "request": "Faire une première demande de vol"
+    },
+    "skip": "Passer"
   },
   "avatar": {
     "choose": "Choisir une photo",

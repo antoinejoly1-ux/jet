@@ -6,7 +6,7 @@
 import "server-only";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { centsToAmount, minutesToHours, toCsv, type Cell, type CsvLocale } from "@/lib/csv";
-import { formatHours, formatMoney } from "@/lib/format";
+import { formatHoursDecimal, formatMoney } from "@/lib/format";
 import { renderStatementPdf, type Section } from "@/lib/pdf/statement";
 import type { AnnualStatement } from "@/lib/services/statements";
 import { utcToZonedLocal } from "@/lib/time";
@@ -150,7 +150,7 @@ export async function statementPdf(s: AnnualStatement) {
   const { locale, t } = await context();
   const format = await getFormatter();
   const money = (cents: number) => formatMoney(cents, s.currency, locale);
-  const hours = (minutes: number) => formatHours(minutes, locale);
+  const hours = (minutes: number) => formatHoursDecimal(minutes, locale);
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
   const category = (r: { nameFr: string; nameEn: string }) => (locale === "en" ? r.nameEn : r.nameFr);
 

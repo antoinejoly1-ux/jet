@@ -11,6 +11,7 @@ import { can } from "@/lib/auth/policy";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getOwnerThread } from "@/lib/services/messages";
+import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { sendOwnerMessageAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,6 +33,13 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
     );
 
   // Staff viewing as the owner see the thread but don't mark it read for them.
+  // Office hours, operator time: 7 h to 19 h. Outside them, say when to expect an answer and how to reach someone now.
+  const hour = Number(
+    new Intl.DateTimeFormat("en-CA", { hour: "numeric", hourCycle: "h23", timeZone: OPERATOR_TIME_ZONE }).format(
+      new Date(),
+    ),
+  );
+  const open = hour >= 7 && hour < 19;
   const thread = await getOwnerThread(db, viewer, ownerId, { markRead: !viewer.viewingAs });
 
   return (
@@ -61,7 +69,7 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
       </section>
       <p className="text-muted mt-3 flex items-center gap-1.5 text-xs">
         <Clock className="size-3.5" aria-hidden />
-        {t("responseHint")}
+        {open ? t("responseHint") : t("responseHintClosed")}
       </p>
     </>
   );

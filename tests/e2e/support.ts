@@ -59,8 +59,7 @@ export async function signIn(page: Page, email: string, { secondFactor = true } 
 export async function completeWelcome(page: Page, { firstName }: { firstName: string }) {
   await expect(page).toHaveURL("/welcome");
   await page.getByRole("button", { name: /^(Commencer|Begin)/ }).click();
-  await page.getByLabel(/^(Prénom|First name)$/).fill(firstName);
-  await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  // Photo and name share one step.
   await page.locator("input[type=file]").setInputFiles({
     name: "me.webp",
     mimeType: "image/webp",
@@ -68,6 +67,7 @@ export async function completeWelcome(page: Page, { firstName }: { firstName: st
   });
   await page.getByRole("button", { name: /Enregistrer la photo|Save photo/ }).click();
   await expect(page.getByRole("button", { name: /^(Changer|Change)$/ })).toBeVisible();
+  await page.getByLabel(/^(Prénom|First name)$/).fill(firstName);
   await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
   const next = page.getByRole("button", { name: /^(Suivant|Next)/ });
   while (await next.isVisible()) await next.click();

@@ -13,7 +13,7 @@ import { Field } from "@/components/ui/field";
 import { scenes, type Scene } from "@/lib/imagery";
 import { cn } from "@/lib/utils";
 
-const STEPS = ["welcome", "name", "photo", "tour", "team", "ready"] as const;
+const STEPS = ["welcome", "name", "tour", "team", "ready"] as const;
 type Step = (typeof STEPS)[number];
 
 /** What the platform holds, one photograph each. */
@@ -27,7 +27,6 @@ const TOUR: { key: string; scene: Scene; finance?: boolean }[] = [
 const STEP_SCENE: Record<Exclude<Step, "tour" | "ready">, Scene> = {
   welcome: "hangar",
   name: "cabinWindow",
-  photo: "cabinLifestyle",
   team: "toast",
 };
 
@@ -145,18 +144,29 @@ export function WelcomeFlow({
       </div>
 
       <div className="flex flex-1 flex-col px-6 py-8 sm:px-12 lg:min-h-dvh lg:py-12">
-        {/* Progress: thin segments, one per step. */}
-        <ol className="flex gap-1.5" aria-label={t("progress", { n: index + 1, total: STEPS.length })}>
-          {STEPS.map((s, i) => (
-            <li
-              key={s}
-              className={cn(
-                "h-0.5 flex-1 rounded-full transition-colors duration-500",
-                i <= index ? "bg-accent" : "bg-border",
-              )}
-            />
-          ))}
-        </ol>
+        {/* Progress: thin segments, one per step; "Passer" goes straight to the end. */}
+        <div className="flex items-center gap-4">
+          <ol className="flex flex-1 gap-1.5" aria-label={t("progress", { n: index + 1, total: STEPS.length })}>
+            {STEPS.map((s, i) => (
+              <li
+                key={s}
+                className={cn(
+                  "h-0.5 flex-1 rounded-full transition-colors duration-500",
+                  i <= index ? "bg-accent" : "bg-border",
+                )}
+              />
+            ))}
+          </ol>
+          {step !== "welcome" && step !== "ready" ? (
+            <button
+              type="button"
+              onClick={() => go("ready")}
+              className="text-muted hover:text-text -my-2 h-11 shrink-0 px-2 text-sm"
+            >
+              {t("skip")}
+            </button>
+          ) : null}
+        </div>
 
         <div key={step} className="animate-rise flex flex-1 flex-col justify-center py-10 lg:py-16">
           {step === "welcome" ? (
@@ -180,6 +190,15 @@ export function WelcomeFlow({
                 <p className="eyebrow">{t("name.eyebrow")}</p>
                 <h1 className="mt-4 text-4xl leading-tight font-light tracking-tight sm:text-5xl">{t("name.title")}</h1>
                 <p className="text-muted mt-4 font-light">{t("name.body")}</p>
+              </div>
+              {/* The face first: the team will recognize them. A photo is optional. */}
+              <div className="flex items-center gap-5">
+                <AvatarPicker
+                  initialImage={avatar}
+                  initials={`${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase()}
+                  onSaved={setAvatar}
+                  size="md"
+                />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field
@@ -218,30 +237,6 @@ export function WelcomeFlow({
               </fieldset>
               <Nav onBack={back} pending={pending} submit label={t("continue")} backLabel={t("back")} />
             </form>
-          ) : null}
-
-          {step === "photo" ? (
-            <div className="flex max-w-md flex-col gap-8">
-              <div>
-                <p className="eyebrow">{t("photo.eyebrow")}</p>
-                <h1 className="mt-4 text-4xl leading-tight font-light tracking-tight sm:text-5xl">
-                  {t("photo.title")}
-                </h1>
-                <p className="text-muted mt-4 font-light">{t("photo.body")}</p>
-              </div>
-              <AvatarPicker
-                initialImage={avatar}
-                initials={`${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase()}
-                onSaved={setAvatar}
-              />
-              <Nav
-                onBack={back}
-                onNext={next}
-                label={avatar ? t("continue") : t("photo.later")}
-                backLabel={t("back")}
-                quiet={!avatar}
-              />
-            </div>
           ) : null}
 
           {step === "tour" ? (
@@ -320,7 +315,14 @@ export function WelcomeFlow({
                   {aircraft ? t("ready.bodyAircraft", { registration: aircraft.registration }) : t("ready.body")}
                 </p>
               </div>
-              <EnterButton label={t("ready.enter")} />
+              <div className="flex flex-wrap items-center gap-3">
+                <EnterButton label={t("ready.enter")} />
+                {aircraft ? (
+                  <Button type="submit" name="then" value="request" variant="secondary" size="lg">
+                    {t("ready.request")}
+                  </Button>
+                ) : null}
+              </div>
             </form>
           ) : null}
         </div>

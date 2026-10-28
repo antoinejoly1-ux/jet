@@ -45,10 +45,12 @@ export async function removeAvatarAction(): Promise<FormState> {
 }
 
 /** The last step of the welcome tour. */
-export async function finishWelcomeAction() {
+export async function finishWelcomeAction(formData?: FormData) {
   const viewer = await requireViewer();
   assertNotViewingAs(viewer);
   await completeOnboarding(db, viewer);
   // Straight to the destination: redirecting an action to the /start route handler leaves /start in the address bar.
-  redirect(await landingPath(viewer));
+  const to = await landingPath(viewer);
+  // "Faire une première demande de vol": Home opens the request sheet.
+  redirect(formData?.get("then") === "request" && to === "/" ? "/?request=1" : to);
 }

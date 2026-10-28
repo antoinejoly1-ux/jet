@@ -1,6 +1,7 @@
 import { Eye } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
 import { exitViewAsAction } from "@/app/actions/view-as";
 import type { ReactNode } from "react";
 import { financeOwnerIds } from "@/lib/auth/policy";
@@ -12,7 +13,7 @@ import { NotificationBell } from "./bell";
 import { Logo, Star } from "@/components/brand/logo";
 import { TeamReach } from "@/components/brand/team";
 import { env } from "@/lib/env";
-import { BottomTabs, FloatingAction, Rail, type Fab, type Side } from "./nav";
+import { BottomTabs, RAIL_COOKIE, Sidebar, type Fab, type Side } from "./nav";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
 import { telHref } from "@/lib/phone";
@@ -51,9 +52,10 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
       ? viewer.staffRole === "dispatcher" || viewer.staffRole === "admin"
         ? { kind: "newFlight", href: "/admin/flights/new" }
         : null
-      : phone && !viewer.viewingAs
-        ? { kind: "call", href: telHref(phone) }
-        : null;
+      : viewer.viewingAs
+        ? null
+        : { kind: "request", callHref: phone ? telHref(phone) : null };
+  const expanded = (await cookies()).get(RAIL_COOKIE)?.value === "open";
   return (
     <>
       {viewer.viewingAs ? (
@@ -72,18 +74,27 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
           </form>
         </div>
       ) : null}
-      <div className="min-h-dvh lg:grid lg:grid-cols-[76px_1fr]">
-        <aside className="border-border sticky top-0 hidden h-dvh flex-col items-center justify-between border-r py-6 lg:flex">
-          <Link
-            href={side === "admin" ? "/admin" : "/"}
-            aria-label="Univair Management"
-            className="text-text flex size-11 items-center justify-center"
-          >
-            <Star className="h-3 w-auto" />
-          </Link>
-          <Rail side={side} badges={badges} hidden={hidden} />
-          <div className="flex h-12 items-center">{fab ? <FloatingAction fab={fab} /> : null}</div>
-        </aside>
+      <div
+        data-shell
+        className="min-h-dvh lg:grid lg:grid-cols-[var(--rail)_1fr]"
+        style={{ "--rail": expanded ? "232px" : "76px" } as React.CSSProperties}
+      >
+        <Sidebar
+          side={side}
+          badges={badges}
+          hidden={hidden}
+          fab={fab}
+          expanded={expanded}
+          home={
+            <Link
+              href={side === "admin" ? "/admin" : "/"}
+              aria-label="Univair Management"
+              className="text-text flex size-11 items-center justify-center"
+            >
+              <Star className="h-3 w-auto" />
+            </Link>
+          }
+        />
         <div className="flex min-w-0 flex-col">
           <header className="bg-background/75 sticky top-0 z-30 grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 backdrop-blur-xl sm:px-6 lg:h-[76px] lg:px-10">
             <p className="eyebrow hidden truncate sm:block">{tShell(side === "admin" ? "admin" : "client")}</p>

@@ -28,11 +28,16 @@
     },
     "tabs": {
       "dashboard": "Dashboard",
-      "availability": "Calendar"
+      "availability": "Calendar",
+      "request": "Request",
+      "owners": "Clients"
     },
     "unread": "{count} unread",
     "fabCall": "Call the team",
-    "fabNewFlight": "New flight"
+    "fabNewFlight": "New flight",
+    "fabRequest": "Request a flight",
+    "expand": "Show labels",
+    "collapse": "Collapse"
   },
   "toggle": {
     "label": "Switch view",
@@ -59,8 +64,8 @@
     "signIn": "Sign in",
     "sending": "Sending…",
     "emailMeALink": "Email me a sign-in link",
-    "noAccount": "No account yet?",
-    "createAccount": "Create an account",
+    "noAccount": "Received an invitation?",
+    "createAccount": "Create my account",
     "magicLinkSent": "A sign-in link was sent to {email}.",
     "continueWithGoogle": "Continue with Google",
     "signUpTitle": "Create an account",
@@ -170,7 +175,9 @@
   },
   "pending": {
     "title": "Your access is being set up",
-    "body": "Your account ({email}) exists but isn't linked to an aircraft yet. Our team has been notified and will turn on your access shortly."
+    "body": "Your account ({email}) exists but isn't linked to an aircraft yet. Our team has been notified and will turn on your access shortly.",
+    "delay": "It's usually done within one business day.",
+    "refresh": "Check my access"
   },
   "home": {
     "greeting": "Hello, {name}",
@@ -186,7 +193,7 @@
     },
     "shareOf": "{percent} share",
     "hoursRemaining": "Hours remaining",
-    "ofAnnual": "of {hours} per year",
+    "ofAnnual": "of {hours} this year",
     "budget": "{year} budget",
     "ofPlanned": "spent of {amount} planned",
     "budgetEmpty": "This year's budget will be published by our team.",
@@ -204,7 +211,8 @@
       "hoursPace": "At this year's pace, your remaining hours will last about {months} months, until {until}.",
       "hoursUnused": "You haven't flown yet this year: all your hours are available.",
       "budgetOnTrack": "You've spent {spent} of the budget with {year} of the year gone: on track.",
-      "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned."
+      "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned.",
+      "details": "See details"
     },
     "maintenanceStarts": "From {date}",
     "maintenanceEnds": "Until {date}",
@@ -237,7 +245,11 @@
       "maintenanceUntil": "until {date}",
       "waiting": "Your {model} is waiting for you",
       "waitingAt": "in {city}, ready for your next departure",
-      "follow": "Follow live"
+      "follow": "Follow live",
+      "nextDeparture": "next departure {date} · {route}",
+      "seeOnMap": "See on the map",
+      "factHours": "{hours} left",
+      "factFree": "Free {count} of {days} days"
     },
     "flownCaption": "since January 1",
     "legendFree": "Free",
@@ -1058,7 +1070,7 @@
   },
   "availability": {
     "title": "Calendar",
-    "subtitle": "Your aircraft's free days. Your flights are in blue.",
+    "subtitle": "Your aircraft's free days. Tap a free day to request a flight.",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "legendLabel": "Legend",
@@ -1074,9 +1086,9 @@
     "noAircraftTitle": "No aircraft",
     "noAircraftBody": "The calendar will appear once your share is recorded.",
     "chooseAircraft": "Choose the aircraft",
-    "callToBook": "Call to book",
-    "bookingHint": "To book a flight, call our team: we'll confirm availability with you.",
-    "bookingHintNoPhone": "To book a flight, message our team: we'll confirm availability with you.",
+    "callToBook": "Call",
+    "bookingHint": "Tap a free day or “Request a flight”: the team confirms availability with you. In a hurry? Call us.",
+    "bookingHintNoPhone": "Tap a free day or “Request a flight”: the team confirms availability with you.",
     "blockTitle": "Block a period",
     "blockBody": "For lending the aircraft out or a known outage.",
     "blockAdded": "Period blocked.",
@@ -1085,7 +1097,8 @@
     "blockKind": "Shown as",
     "addBlock": "Block",
     "removeQuestion": "Remove this block?",
-    "remove": "Remove"
+    "remove": "Remove",
+    "requestOn": "Request a flight on {date}"
   },
   "ownerFlights": {
     "title": "Your flights",
@@ -1140,7 +1153,7 @@
     "ownerPlaceholder": "Write your message…",
     "staffPlaceholder": "Reply…",
     "viewAsReadOnly": "You're viewing the portal as this owner: sending is turned off.",
-    "responseHint": "We answer during business hours, usually within an hour.",
+    "responseHint": "The team usually replies within the hour.",
     "noOwner": "Messages will be available once your account is linked to an owner.",
     "today": "Today",
     "dispatchName": "Dispatch · {name}",
@@ -1178,7 +1191,8 @@
     "me": "{name} (me)",
     "resolve": "Mark resolved",
     "reopen": "Reopen",
-    "readOnlyMember": "Your access is read-only: call or text the team with any request."
+    "readOnlyMember": "Your access is read-only: call or text the team with any request.",
+    "responseHintClosed": "Outside office hours: we'll reply from 7 a.m. Urgent? Call us."
   },
   "notifications": {
     "title": "Notifications",
@@ -1516,7 +1530,10 @@
     "fleetSubtitle": "Every aircraft, where it is now.",
     "whereIs": "Where is {registration}",
     "inDuration": "{hours, plural, =0 {in {minutes} min} other {in # h {minutes} min}}",
-    "airborneCount": "{count, plural, =0 {Nothing in the air} one {# in the air} other {# in the air}} of {total}"
+    "airborneCount": "{count, plural, =0 {Nothing in the air} one {# in the air} other {# in the air}} of {total}",
+    "unknownBody": "We're not receiving its position right now.",
+    "askTeam": "Ask the team",
+    "staleBody": "Last position received {minutes} min ago. That's common at low altitude or over water; it comes back on its own."
   },
   "shell": {
     "client": "Owner portal",
@@ -1567,24 +1584,18 @@
       "eyebrow": "Univair Management",
       "title": "Welcome to Univair, {name}.",
       "body": "Your aircraft, your hours, your flights and your team: everything is here, at hand, wherever you are.",
-      "time": "Two minutes to get acquainted.",
+      "time": "Less than a minute to get acquainted.",
       "start": "Begin"
     },
     "name": {
-      "eyebrow": "Let's get acquainted",
-      "title": "What should we call you?",
-      "body": "Your name appears in your conversations with the team and on your documents.",
+      "eyebrow": "Your profile",
+      "title": "Let's get acquainted.",
+      "body": "Your photo and name, as the Univair team will see them. The photo is optional.",
       "first": "First name",
       "last": "Last name",
       "language": "Language",
       "required": "Enter your first name.",
       "failed": "Couldn't save. Try again."
-    },
-    "photo": {
-      "eyebrow": "Your photo",
-      "title": "A face to the name.",
-      "body": "Your team will recognize you at a glance. You can change it whenever you like.",
-      "later": "Later"
     },
     "tour": {
       "eyebrow": "What you'll find here",
@@ -1629,8 +1640,10 @@
       "title": "Welcome aboard, {name}.",
       "body": "Your space is waiting.",
       "bodyAircraft": "{registration} is waiting for you.",
-      "enter": "Enter my space"
-    }
+      "enter": "Enter my space",
+      "request": "Request my first flight"
+    },
+    "skip": "Skip"
   },
   "avatar": {
     "choose": "Choose a photo",

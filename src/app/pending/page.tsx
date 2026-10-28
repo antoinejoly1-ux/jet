@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { AuthFrame } from "@/components/auth/auth-frame";
@@ -20,6 +21,12 @@ export default async function PendingPage() {
           <p className="text-muted mt-3 text-sm leading-relaxed">{t("body", { email: viewer.email })}</p>
         </div>
         <ContactButtons />
+        <p className="text-muted text-xs">
+          {t("delay")}{" "}
+          <Link href="/start" className="text-white underline-offset-4 hover:underline">
+            {t("refresh")}
+          </Link>
+        </p>
       </div>
     </AuthFrame>
   );

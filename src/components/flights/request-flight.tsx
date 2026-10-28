@@ -45,6 +45,14 @@ export function RequestFlightProvider({ shares, children }: { shares: Requestabl
     setSession((s) => ({ key: s.key + 1, date: opts?.date }));
     dialog.current?.showModal();
   };
+  // Arriving with ?request=1 (from the welcome tour) opens the sheet right away.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("request") !== "1" || !shares.length) return;
+    url.searchParams.delete("request");
+    window.history.replaceState(null, "", url);
+    dialog.current?.showModal();
+  }, [shares.length]);
   return (
     <RequestFlightContext.Provider value={shares.length ? open : null}>
       {children}

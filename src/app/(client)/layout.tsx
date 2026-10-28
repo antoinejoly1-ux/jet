@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { RequestFlightProvider, type RequestableShare } from "@/components/flights/request-flight";
 import { AppShell } from "@/components/shell/app-shell";
+import { airportLabel } from "@/lib/airport-label";
 import { airport } from "@/lib/airports";
 import { actingOwnerIds } from "@/lib/auth/policy";
 import { requireAccess } from "@/lib/auth/session";
@@ -20,7 +21,7 @@ export default async function ClientLayout({ children }: { children: ReactNode }
         id: p.shareId,
         label: `${p.registration} · ${p.model}`,
         homeBase: p.homeBase,
-        homeBaseLabel: base ? `${base.city || base.name} · ${base.name}` : "",
+        homeBaseLabel: base ? airportLabel(base) : "",
       };
     });
   return (

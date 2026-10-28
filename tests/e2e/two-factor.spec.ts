@@ -93,7 +93,7 @@ test("a newly invited staff member is guided through setup before reaching Admin
   await staff.getByRole("link", { name: /Créer mon compte|Create my account/ }).click();
   await staff.getByLabel(/Nom complet|Full name/).fill("Nouvelle Répartitrice");
   await staff.getByLabel(/^(Mot de passe|Password)$/).fill(PASSWORD);
-  await staff.getByRole("button", { name: /Créer un compte|Create an account/ }).click();
+  await staff.getByRole("button", { name: /Créer mon compte|Create my account/ }).click();
   await expect(staff.getByRole("heading", { name: /Vérifiez vos courriels|Check your email/ })).toBeVisible();
   await staff.goto(latestLink(email));
   await staff.getByRole("button", { name: /Accepter l'invitation|Accept the invitation/ }).click();

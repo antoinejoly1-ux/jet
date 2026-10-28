@@ -155,6 +155,10 @@ async function ShareSection({
         greeting={first}
         showOwner={showOwner}
         firstName={viewer.name.split(" ")[0] ?? ""}
+        facts={[
+          t("hero.factHours", { hours: formatHours(s.minutesRemaining, locale) }),
+          t("hero.factFree", { count: freeDays, days: AHEAD }),
+        ]}
       />
 
       {/* The instrument strip: four readings, hairlines between, no boxes. */}
@@ -223,7 +227,7 @@ async function ShareSection({
             {ahead.map((d) => (
               <li key={d.day} className="flex flex-col items-center gap-2">
                 <span className={cn("h-10 w-full rounded-full", DOT[d.status])} title={d.day} />
-                <span className="text-muted text-[10px]">
+                <span className="text-muted text-xs">
                   {format.dateTime(new Date(`${d.day}T12:00:00`), { day: "numeric" })}
                 </span>
               </li>
@@ -272,12 +276,15 @@ async function Hero({
   greeting,
   showOwner,
   firstName,
+  facts,
 }: {
   summary: ShareSummary;
   live: AircraftLive;
   greeting: boolean;
   showOwner: boolean;
   firstName: string;
+  /** The two answers owners look for first, shown in the hero on phones. */
+  facts: string[];
 }) {
   const t = await getTranslations("home");
   const tr = await getTranslations("requestFlight");
@@ -286,7 +293,9 @@ async function Hero({
   const now = new Date();
   const model = shortModel(s.aircraft.model);
   const today = format.dateTime(now, { weekday: "long", day: "numeric", month: "long", timeZone: OPERATOR_TIME_ZONE });
-  const time = (iso: string) => format.dateTime(new Date(iso), { hour: "numeric", minute: "2-digit" });
+  // With the zone (« 22 h 13 HAE »): owners travel, and an arrival time means nothing without it.
+  const time = (iso: string) =>
+    format.dateTime(new Date(iso), { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
 
   const [headline, subline] =
     live.state === "in_flight"
@@ -312,12 +321,28 @@ async function Hero({
           ]
         : [
             t("hero.waiting", { model }),
-            live.place ? t("hero.waitingAt", { city: live.place.city || live.place.icao }) : null,
+            live.nextFlight
+              ? t("hero.nextDeparture", {
+                  date: format.dateTime(new Date(live.nextFlight.departsAt), {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  }),
+                  route: `${live.nextFlight.fromCode} → ${live.nextFlight.toCode}`,
+                })
+              : live.place
+                ? t("hero.waitingAt", { city: live.place.city || live.place.icao })
+                : null,
           ];
+  // One h1 per page: the first aircraft's headline; any others are section headings.
+  const Heading = greeting ? "h1" : "h2";
 
   return (
     <header className="theme-dark relative isolate -mx-4 overflow-hidden sm:mx-0 sm:rounded-[28px]">
-      <div className="relative h-[78vh] min-h-[540px] sm:h-[68vh] sm:max-h-[700px]">
+      {/* Phones: the content sets the height (it never runs under the chips); wider screens: a fixed cinematic frame. */}
+      <div className="relative flex min-h-[64vh] flex-col justify-end sm:block sm:h-[68vh] sm:max-h-[700px] sm:min-h-0">
         <Image
           src={heroPhoto(s.aircraft.model)}
           alt=""
@@ -341,17 +366,31 @@ async function Hero({
           </p>
         </div>
 
-        <div className="animate-rise absolute inset-x-5 bottom-7 sm:inset-x-10 sm:bottom-10">
+        <div className="animate-rise relative px-5 pt-24 pb-7 sm:absolute sm:inset-x-10 sm:bottom-10 sm:p-0">
           {greeting ? (
             <p className="eyebrow mb-4 text-white/70">
               {t(`greetings.${partOfDay(now)}`, { name: firstName })} ·{" "}
               <span className="first-letter:uppercase">{today}</span>
             </p>
           ) : null}
-          <h1 className="max-w-3xl text-[2.6rem] leading-[1.02] font-light tracking-[-0.03em] text-white sm:text-7xl">
+          <Heading className="max-w-3xl text-[2.4rem] leading-[1.02] font-light tracking-[-0.03em] text-white sm:text-7xl">
             {headline}
-          </h1>
-          {subline ? <p className="mt-4 max-w-2xl text-lg font-light text-white/80 sm:text-2xl">{subline}</p> : null}
+          </Heading>
+          {subline ? (
+            <p className="mt-4 max-w-2xl text-lg text-white/85 first-letter:uppercase sm:text-2xl sm:font-light">
+              {subline}
+            </p>
+          ) : null}
+          <p className="mt-5 flex flex-wrap gap-2 sm:hidden">
+            {facts.map((f) => (
+              <span
+                key={f}
+                className="border-glass-line bg-glass rounded-full border px-3.5 py-1.5 text-sm text-white backdrop-blur-md"
+              >
+                {f}
+              </span>
+            ))}
+          </p>
 
           {live.state === "in_flight" && live.leg ? (
             <div className="mt-8 max-w-xl">
@@ -382,7 +421,7 @@ async function Hero({
             <Button asChild variant="glass">
               <a href="#live">
                 <LiveDot tone={live.state === "in_flight" ? "live" : "muted"} />
-                {t("hero.follow")}
+                {live.state === "in_flight" ? t("hero.follow") : t("hero.seeOnMap")}
               </a>
             </Button>
             <div className="[&_a]:border-glass-line [&_a]:bg-white/10 [&_a]:text-white [&_a]:backdrop-blur-md [&_a:first-child]:bg-white/10">
@@ -433,7 +472,7 @@ async function UpcomingFlights({
           {requests.map((r) => (
             <li key={r.id} className="flex items-center gap-5 py-5">
               <div className="border-warning/50 text-warning flex w-14 shrink-0 flex-col items-center rounded-[14px] border border-dashed py-2">
-                <span className="text-[10px] font-medium tracking-[0.16em] uppercase">
+                <span className="text-[11px] font-medium tracking-[0.12em] uppercase">
                   {format.dateTime(new Date(`${r.date}T12:00:00`), { month: "short" }).replace(".", "")}
                 </span>
                 <span className="tabular text-2xl font-light">
@@ -458,7 +497,7 @@ async function UpcomingFlights({
             return (
               <li key={f.id} className="flex items-center gap-5 py-5">
                 <div className="border-border flex w-14 shrink-0 flex-col items-center rounded-[14px] border py-2">
-                  <span className="text-muted text-[10px] font-medium tracking-[0.16em] uppercase">
+                  <span className="text-muted text-xs font-medium tracking-[0.16em] uppercase">
                     {format.dateTime(f.departsAt, { month: "short" }).replace(".", "")}
                   </span>
                   <span className="tabular text-2xl font-light">
@@ -483,7 +522,12 @@ async function UpcomingFlights({
                         <LiveDot className="size-2" /> {t("inTheAir")}
                       </span>
                     ) : (
-                      format.dateTime(f.departsAt, { weekday: "long", hour: "numeric", minute: "2-digit" })
+                      format.dateTime(f.departsAt, {
+                        weekday: "long",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        timeZoneName: "short",
+                      })
                     )}
                     {" · "}
                     {f.registration}
@@ -496,7 +540,7 @@ async function UpcomingFlights({
       )}
       {/* An invitation, not an empty space: planning the next flight is one call away. */}
       <div className="border-border mt-auto flex flex-wrap items-center justify-between gap-4 border-t pt-6">
-        <p className="text-muted max-w-xs text-sm font-light">{t("planNext")}</p>
+        <p className="text-muted max-w-xs text-sm">{t("planNext")}</p>
         <div className="flex flex-wrap items-center gap-2">
           <RequestFlightButton variant="accent" size="sm">
             {tr("open")}
@@ -517,7 +561,7 @@ async function TeamPanel() {
   const t = await getTranslations("home");
   const tt = await getTranslations("teamReach");
   return (
-    <section className="theme-dark relative isolate flex min-h-[420px] flex-col justify-end overflow-hidden rounded-[22px]">
+    <section className="theme-dark relative isolate flex min-h-[340px] flex-col justify-end overflow-hidden rounded-[22px]">
       <Image
         src={scenes.toast}
         alt=""
@@ -546,6 +590,7 @@ const NOTICE_ICON: Record<string, [LucideIcon, IconMotion]> = {
   "hours.low": [Clock3, "pulse"],
   "maintenance.planned": [Wrench, "twist"],
   "message.from_dispatch": [MessageSquare, "wiggle"],
+  "flight.confirmed": [PlaneTakeoff, "plane"],
 };
 
 /** "Activité": what happened lately, as a quiet hairline list. */
@@ -647,15 +692,35 @@ async function InsightLine({ items }: { items: Insight[] }) {
             year: pct(i.yearShare),
           });
   return (
-    <ul aria-label={t("label")} className="-mt-4 flex flex-col gap-2">
-      {items.map((i) => (
-        <li
-          key={i.kind}
-          className={cn("text-[15px] font-light italic", i.tone === "warning" ? "text-warning" : "text-muted")}
-        >
-          {text(i)}
-        </li>
-      ))}
+    <ul aria-label={t("label")} className="-mt-4 grid gap-3 md:grid-cols-2">
+      {items.map((i) => {
+        const money = i.kind === "budgetPace";
+        return (
+          <li
+            key={i.kind}
+            className={cn(
+              "flex items-start gap-3 rounded-[18px] border px-4 py-3.5 text-sm leading-relaxed",
+              i.tone === "warning" ? "border-warning/40 bg-warning/5" : "border-border",
+            )}
+          >
+            <Icon
+              icon={money ? Wallet : Clock3}
+              className={cn("mt-0.5 size-4 shrink-0", i.tone === "warning" ? "text-warning" : "text-muted")}
+            />
+            <span className="flex-1">
+              {text(i)}
+              {money ? (
+                <>
+                  {" "}
+                  <Link href="/finances" className="text-accent font-medium whitespace-nowrap hover:underline">
+                    {t("details")}
+                  </Link>
+                </>
+              ) : null}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { airportLabel } from "@/lib/airport-label";
 import { cn } from "@/lib/utils";
 
 type Suggestion = { icao: string; name: string; city: string };
@@ -65,7 +66,7 @@ export function AirportField({
   const choose = (s: Suggestion) => {
     setText(s.icao);
     setCode(s.icao);
-    setChosen(`${s.city || s.name} · ${s.name}`);
+    setChosen(airportLabel(s));
     setOpen(false);
   };
 

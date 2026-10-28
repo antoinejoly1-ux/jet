@@ -3,6 +3,7 @@
 import { Gauge, MapPin, Mountain, Navigation, PlaneLanding, PlaneTakeoff, Wrench } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image, { type StaticImageData } from "next/image";
+import Link from "next/link";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/ui/icon";
@@ -85,7 +86,8 @@ export function LiveAircraft({
   const flying = live.state === "in_flight";
   const seenAgo = live.position ? Math.max(0, Math.round((now - Date.parse(live.position.seenAt)) / 1000)) : null;
   const eta = live.leg?.eta ? Date.parse(live.leg.eta) : null;
-  const time = (ms: number) => format.dateTime(new Date(ms), { hour: "numeric", minute: "2-digit" });
+  const time = (ms: number) =>
+    format.dateTime(new Date(ms), { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const inMinutes = eta ? Math.max(0, Math.round((eta - now) / 60_000)) : null;
 
   const headline = flying
@@ -220,12 +222,30 @@ export function LiveAircraft({
             <Wrench className="size-4" aria-hidden />
             {t("maintenanceBody")}
           </p>
+        ) : live.state === "unknown" ? (
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-muted flex items-center gap-2 text-sm">
+              <MapPin className="size-4" aria-hidden />
+              {t("unknownBody")}
+            </p>
+            {side === "client" ? (
+              <Link href="/messages" className="text-accent text-sm font-medium underline-offset-4 hover:underline">
+                {t("askTeam")}
+              </Link>
+            ) : null}
+          </div>
         ) : (
           <p className="text-muted flex items-center gap-2 text-sm">
             <MapPin className="size-4" aria-hidden />
             {t("parkedBody")}
           </p>
         )}
+
+        {flying && live.stale && seenAgo != null ? (
+          <p role="status" className="border-warning/40 text-warning rounded-[14px] border px-3.5 py-2.5 text-sm">
+            {t("staleBody", { minutes: Math.max(1, Math.round(seenAgo / 60)) })}
+          </p>
+        ) : null}
 
         <p className="text-muted mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 text-xs" aria-live="off">
           {seenAgo != null ? (

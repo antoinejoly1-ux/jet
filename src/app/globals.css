@@ -189,9 +189,10 @@
 
 /* Small uppercase labels, widely spaced, as on univairaviation.com. */
 @utility eyebrow {
-  font-size: 0.65625rem;
+  /* 11.5px: the smallest size that stays legible in capitals on dark, outdoors. */
+  font-size: 0.71875rem;
   font-weight: 500;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
