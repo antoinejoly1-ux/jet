@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CodeInput } from "@/components/ui/code-input";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth/auth-client";
+import { PasswordField } from "./password-field";
 import { fullPageLoad } from "@/lib/full-page-load";
 
 /**
@@ -64,8 +65,10 @@ export function TwoFactorChallenge({ next }: { next: string }) {
         <ShieldCheck className="size-5" aria-hidden />
       </div>
       <div>
-        <h1 className="text-3xl font-light tracking-tight">{t("verifyTitle")}</h1>
-        <p className="text-muted mt-1 text-sm">{mode === "app" ? t("verifyBody") : t("backupBody")}</p>
+        <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("verifyTitle")}</h1>
+        <p className="text-muted mt-2 text-[15px] leading-relaxed">
+          {mode === "app" ? t("verifyBody") : t("backupBody")}
+        </p>
       </div>
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {mode === "app" ? (
@@ -196,8 +199,10 @@ export function TwoFactorSetup({
       {step === "intro" ? (
         <>
           <div>
-            <h1 className="text-3xl font-light tracking-tight">{t("setupTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{required ? t("setupRequiredBody") : t("setupBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("setupTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">
+              {required ? t("setupRequiredBody") : t("setupBody")}
+            </p>
           </div>
           <ul className="text-muted flex flex-col gap-2 text-sm">
             <li className="flex gap-2">
@@ -211,10 +216,9 @@ export function TwoFactorSetup({
           </ul>
           {hasPassword ? (
             <form onSubmit={start} className="flex flex-col gap-4" noValidate>
-              <Field
+              <PasswordField
                 id="password"
                 name="password"
-                type="password"
                 autoComplete="current-password"
                 label={t("confirmPassword")}
                 autoFocus
@@ -235,8 +239,8 @@ export function TwoFactorSetup({
       {step === "scan" ? (
         <>
           <div>
-            <h1 className="text-3xl font-light tracking-tight">{t("scanTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{t("scanBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("scanTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("scanBody")}</p>
           </div>
           <div className="flex justify-center">
             {qr ? (
@@ -277,8 +281,8 @@ export function TwoFactorSetup({
       {step === "confirm" ? (
         <>
           <div>
-            <h1 className="text-3xl font-light tracking-tight">{t("confirmTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{t("confirmBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("confirmTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("confirmBody")}</p>
           </div>
           <CodeInput
             key={attempt}
@@ -300,8 +304,8 @@ export function TwoFactorSetup({
       {step === "codes" ? (
         <>
           <div>
-            <h1 className="text-3xl font-light tracking-tight">{t("codesTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{t("codesBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("codesTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("codesBody")}</p>
           </div>
           <ul
             data-testid="backup-codes"

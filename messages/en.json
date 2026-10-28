@@ -57,7 +57,7 @@
   },
   "auth": {
     "signInTitle": "Sign in",
-    "signInSubtitle": "Access your owner portal.",
+    "signInSubtitle": "Welcome back. Sign in to follow your aircraft, flights and invoices.",
     "or": "or",
     "email": "Email",
     "password": "Password",
@@ -66,12 +66,12 @@
     "signIn": "Sign in",
     "sending": "Sending…",
     "emailMeALink": "Email me a sign-in link",
-    "noAccount": "Received an invitation?",
+    "noAccount": "Got an invitation from Univair?",
     "createAccount": "Create my account",
     "magicLinkSent": "A sign-in link was sent to {email}.",
     "continueWithGoogle": "Continue with Google",
-    "signUpTitle": "Create an account",
-    "signUpSubtitle": "Your access turns on once your invitation is linked to the account.",
+    "signUpTitle": "Create your account",
+    "signUpSubtitle": "The portal is for Univair's owners and team.",
     "name": "Full name",
     "passwordHint": "At least 10 characters.",
     "creating": "Creating…",
@@ -95,8 +95,18 @@
       "generic": "Something went wrong. Try again.",
       "passwordTooShort": "Your password needs at least 10 characters.",
       "emailTaken": "An account already exists for this email. Sign in instead.",
-      "invalidLink": "This link is invalid or expired. Ask for a new one."
-    }
+      "invalidLink": "This link is invalid or expired. Ask for a new one.",
+      "fillBoth": "Enter your email and password.",
+      "fillAll": "Enter your name and email."
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "magicLinkHint": "No password to remember: we email you a link that signs you in with one click.",
+    "signUpSubtitleInvited": "Choose a password. Your invitation will be linked to this account as soon as you confirm your email.",
+    "inviteOnlyTitle": "Access is by invitation",
+    "inviteOnlyBody": "Use the email your invitation was sent to. Without one, your account waits until the team links it to your aircraft.",
+    "emailHint": "The same email as your invitation.",
+    "callTeam": "Call the team · {phone}"
   },
   "twoFactor": {
     "invalidCode": "Invalid code. Try again.",

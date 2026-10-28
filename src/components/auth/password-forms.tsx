@@ -7,6 +7,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth/auth-client";
+import { PasswordField } from "./password-field";
 
 export function ForgotPasswordForm() {
   const t = useTranslations("auth");
@@ -26,15 +27,15 @@ export function ForgotPasswordForm() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-3xl font-light tracking-tight">{t("forgotTitle")}</h1>
-        <p className="text-muted mt-1 text-sm">{t("forgotSubtitle")}</p>
+        <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("forgotTitle")}</h1>
+        <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("forgotSubtitle")}</p>
       </div>
       {sent ? (
         <Alert tone="success">{t("resetSent")}</Alert>
       ) : (
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
           <Field id="email" name="email" type="email" autoComplete="email" label={t("email")} required />
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" size="lg" disabled={pending}>
             {pending ? t("sending") : t("sendResetLink")}
           </Button>
         </form>
@@ -69,7 +70,7 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <h1 className="text-3xl font-light tracking-tight">{t("resetTitle")}</h1>
+      <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("resetTitle")}</h1>
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {done ? (
         <>
@@ -80,16 +81,15 @@ export function ResetPasswordForm({ token }: { token: string | null }) {
         </>
       ) : (
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-          <Field
+          <PasswordField
             id="password"
             name="password"
-            type="password"
             autoComplete="new-password"
             label={t("newPassword")}
             hint={t("passwordHint")}
             required
           />
-          <Button type="submit" disabled={pending || !token}>
+          <Button type="submit" size="lg" disabled={pending || !token}>
             {pending ? t("saving") : t("savePassword")}
           </Button>
         </form>

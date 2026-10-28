@@ -57,7 +57,7 @@
   },
   "auth": {
     "signInTitle": "Connexion",
-    "signInSubtitle": "Accédez à votre portail de propriétaire.",
+    "signInSubtitle": "Content de vous revoir. Connectez-vous pour suivre votre appareil, vos vols et vos factures.",
     "or": "ou",
     "email": "Courriel",
     "password": "Mot de passe",
@@ -66,12 +66,12 @@
     "signIn": "Se connecter",
     "sending": "Envoi…",
     "emailMeALink": "M'envoyer un lien de connexion",
-    "noAccount": "Vous avez reçu une invitation?",
+    "noAccount": "Vous avez reçu une invitation d'Univair?",
     "createAccount": "Créer mon compte",
     "magicLinkSent": "Un lien de connexion a été envoyé à {email}.",
     "continueWithGoogle": "Continuer avec Google",
-    "signUpTitle": "Créer un compte",
-    "signUpSubtitle": "Votre accès sera activé dès que votre invitation sera liée au compte.",
+    "signUpTitle": "Créer votre compte",
+    "signUpSubtitle": "Le portail est réservé aux propriétaires et à l'équipe d'Univair.",
     "name": "Nom complet",
     "passwordHint": "Au moins 10 caractères.",
     "creating": "Création…",
@@ -95,8 +95,18 @@
       "generic": "Une erreur est survenue. Réessayez.",
       "passwordTooShort": "Le mot de passe doit contenir au moins 10 caractères.",
       "emailTaken": "Un compte existe déjà pour ce courriel. Connectez-vous plutôt.",
-      "invalidLink": "Ce lien est invalide ou expiré. Demandez-en un nouveau."
-    }
+      "invalidLink": "Ce lien est invalide ou expiré. Demandez-en un nouveau.",
+      "fillBoth": "Entrez votre courriel et votre mot de passe.",
+      "fillAll": "Entrez votre nom et votre courriel."
+    },
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "magicLinkHint": "Pas de mot de passe à retenir : on vous envoie un lien qui vous connecte d'un clic.",
+    "signUpSubtitleInvited": "Choisissez un mot de passe. Votre invitation sera liée à ce compte dès que vous aurez confirmé votre courriel.",
+    "inviteOnlyTitle": "L'accès se fait sur invitation",
+    "inviteOnlyBody": "Utilisez le courriel où vous avez reçu votre invitation. Sans invitation, votre compte attendra que l'équipe le relie à votre appareil.",
+    "emailHint": "Le même courriel que votre invitation.",
+    "callTeam": "Appeler l'équipe · {phone}"
   },
   "twoFactor": {
     "invalidCode": "Code invalide. Réessayez.",

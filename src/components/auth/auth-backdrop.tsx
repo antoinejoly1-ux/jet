@@ -4,6 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { scenes, type Scene } from "@/lib/imagery";
+import { cn } from "@/lib/utils";
 
 /** Each account screen has its own photograph and line, like the pages of a brochure. */
 const SCENE: [prefix: string, scene: Scene, line: string][] = [
@@ -17,33 +18,44 @@ const SCENE: [prefix: string, scene: Scene, line: string][] = [
   ["/sign-in", "hangar", "signIn"],
 ];
 
-export function AuthBackdrop() {
+/**
+ * The screen's photograph: a rounded panel filling the right half on a
+ * desktop with its line at the foot, or (`band`) a short strip above the form
+ * on a phone.
+ */
+export function AuthPhoto({ band = false }: { band?: boolean }) {
   const t = useTranslations("authFrame");
   const pathname = usePathname();
   const [, scene, line] = SCENE.find(([p]) => pathname.startsWith(p)) ?? SCENE[SCENE.length - 1]!;
   return (
-    <>
-      <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
+    <div
+      className={cn(band ? "h-36 p-2 sm:h-44 lg:hidden" : "sticky top-0 hidden h-dvh p-3 lg:block")}
+      aria-hidden={band}
+    >
+      <div className="relative isolate h-full overflow-hidden rounded-[22px] lg:rounded-[28px]">
         <Image
           key={scene}
           src={scenes[scene]}
           alt=""
           fill
-          priority
-          sizes="100vw"
+          priority={!band}
+          sizes={band ? "100vw" : "55vw"}
           placeholder="blur"
           className="animate-ken-burns object-cover"
         />
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/30 to-black/5" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        {band ? null : (
+          <div
+            className="animate-rise absolute inset-x-10 bottom-10 max-w-md text-white xl:inset-x-14 xl:bottom-14"
+            key={line}
+          >
+            <p className="eyebrow text-white/75">{t(`${line}.eyebrow`)}</p>
+            <p className="mt-3 text-4xl leading-[1.08] font-light tracking-[-0.03em] xl:text-5xl">
+              {t(`${line}.light`)} <span className="font-normal">{t(`${line}.strong`)}</span>
+            </p>
+          </div>
+        )}
       </div>
-      <aside className="animate-rise hidden max-w-md text-right lg:block" key={line}>
-        <p className="eyebrow text-white/65">{t(`${line}.eyebrow`)}</p>
-        <p className="mt-4 text-5xl leading-[1.05] font-light tracking-[-0.03em] text-white">
-          {t(`${line}.light`)} <span className="font-normal">{t(`${line}.strong`)}</span>
-        </p>
-      </aside>
-    </>
+    </div>
   );
 }

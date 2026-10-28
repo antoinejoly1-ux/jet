@@ -17,13 +17,13 @@ export default async function PendingPage() {
       <div className="flex flex-col gap-6">
         <TeamFaces />
         <div>
-          <h1 className="text-3xl font-light tracking-tight">{t("title")}</h1>
+          <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("title")}</h1>
           <p className="text-muted mt-3 text-sm leading-relaxed">{t("body", { email: viewer.email })}</p>
         </div>
         <ContactButtons />
         <p className="text-muted text-xs">
           {t("delay")}{" "}
-          <Link href="/start" className="text-white underline-offset-4 hover:underline">
+          <Link href="/start" className="text-accent font-medium underline-offset-4 hover:underline">
             {t("refresh")}
           </Link>
         </p>

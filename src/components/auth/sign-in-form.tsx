@@ -1,15 +1,19 @@
 "use client";
 
-import { Mail } from "lucide-react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth/auth-client";
 import { fullPageLoad } from "@/lib/full-page-load";
 import { GoogleButton } from "./google-button";
+import { PasswordField } from "./password-field";
+
+/** The address last used to sign in on this device, so returning people only type their password. */
+const LAST_EMAIL = "um:last-email";
 
 export function SignInForm({
   next,
@@ -21,22 +25,43 @@ export function SignInForm({
   defaultEmail?: string;
 }) {
   const t = useTranslations("auth");
-  const [email, setEmail] = useState(defaultEmail ?? "");
+  const emailInput = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState<"password" | "link" | null>(null);
 
+  useEffect(() => {
+    if (defaultEmail) return;
+    try {
+      const last = localStorage.getItem(LAST_EMAIL);
+      if (last && emailInput.current && !emailInput.current.value) emailInput.current.value = last;
+    } catch {}
+  }, [defaultEmail]);
+  const typedEmail = () => emailInput.current?.value.trim() ?? "";
+  const remember = (email: string) => {
+    try {
+      localStorage.setItem(LAST_EMAIL, email);
+    } catch {}
+  };
+
   async function onPassword(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const password = String(new FormData(e.currentTarget).get("password") ?? "");
+    const email = typedEmail();
+    if (!email || !password) {
+      setError(t("errors.fillBoth"));
+      return;
+    }
     setPending("password");
     setError(null);
+    setNotice(null);
     const { data, error } = await authClient.signIn.email({ email, password, callbackURL: next });
     setPending(null);
     if (error) {
       setError(error.status === 403 ? t("errors.unverified") : t("errors.invalidCredentials"));
       return;
     }
+    remember(email);
     // Accounts with 2FA continue to the code screen, then to where they were going.
     if (data && "twoFactorRedirect" in data && data.twoFactorRedirect) {
       fullPageLoad(`/two-factor?next=${encodeURIComponent(next)}`);
@@ -46,8 +71,10 @@ export function SignInForm({
   }
 
   async function onMagicLink() {
+    const email = typedEmail();
     if (!email) {
       setError(t("errors.emailRequired"));
+      emailInput.current?.focus();
       return;
     }
     setPending("link");
@@ -55,60 +82,68 @@ export function SignInForm({
     const { error } = await authClient.signIn.magicLink({ email, callbackURL: next });
     setPending(null);
     if (error) setError(t("errors.generic"));
-    else setNotice(t("magicLinkSent", { email }));
+    else {
+      remember(email);
+      setNotice(t("magicLinkSent", { email }));
+    }
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-7">
       <div>
-        <h1 className="text-3xl font-light tracking-tight">{t("signInTitle")}</h1>
-        <p className="text-muted mt-1 text-sm">{t("signInSubtitle")}</p>
+        <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("signInTitle")}</h1>
+        <p className="text-muted mt-2 text-[15px]">{t("signInSubtitle")}</p>
       </div>
-      {googleEnabled ? (
-        <>
-          <GoogleButton callbackURL={next} />
-          <div className="text-muted flex items-center gap-3 text-xs">
-            <span className="bg-border h-px flex-1" />
-            {t("or")}
-            <span className="bg-border h-px flex-1" />
-          </div>
-        </>
-      ) : null}
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {notice ? <Alert tone="success">{notice}</Alert> : null}
-      <form onSubmit={onPassword} className="flex flex-col gap-4" noValidate>
+      <form onSubmit={onPassword} className="flex flex-col gap-5" noValidate>
         <Field
           id="email"
           name="email"
           type="email"
           autoComplete="email"
+          inputMode="email"
           label={t("email")}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          ref={emailInput}
+          defaultValue={defaultEmail}
           required
         />
-        <div className="flex flex-col gap-1.5">
-          <Field
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            label={t("password")}
-            required
-          />
-          <Link href="/forgot-password" className="text-accent self-end text-xs font-medium hover:underline">
-            {t("forgotPassword")}
-          </Link>
-        </div>
-        <Button type="submit" disabled={pending !== null}>
+        <PasswordField
+          id="password"
+          name="password"
+          autoComplete="current-password"
+          label={t("password")}
+          required
+          aside={
+            <Link href="/forgot-password" className="text-accent text-xs font-medium hover:underline">
+              {t("forgotPassword")}
+            </Link>
+          }
+        />
+        <Button type="submit" size="lg" disabled={pending !== null}>
           {pending === "password" ? t("signingIn") : t("signIn")}
         </Button>
       </form>
-      <Button type="button" variant="secondary" onClick={onMagicLink} disabled={pending !== null}>
-        <Mail aria-hidden />
-        {pending === "link" ? t("sending") : t("emailMeALink")}
-      </Button>
-      <p className="text-muted text-center text-sm">
+      <div className="text-muted flex items-center gap-3 text-xs">
+        <span className="bg-border h-px flex-1" />
+        {t("or")}
+        <span className="bg-border h-px flex-1" />
+      </div>
+      <div className="flex flex-col gap-3">
+        <Button
+          type="button"
+          variant="secondary"
+          className="ai-trigger"
+          onClick={onMagicLink}
+          disabled={pending !== null}
+        >
+          <AnimatedIcon name="mail" size={18} />
+          {pending === "link" ? t("sending") : t("emailMeALink")}
+        </Button>
+        {googleEnabled ? <GoogleButton callbackURL={next} /> : null}
+        <p className="text-muted text-xs leading-relaxed">{t("magicLinkHint")}</p>
+      </div>
+      <p className="border-border text-muted border-t pt-6 text-sm">
         {t("noAccount")}{" "}
         <Link href={`/sign-up?next=${encodeURIComponent(next)}`} className="text-accent font-semibold hover:underline">
           {t("createAccount")}
