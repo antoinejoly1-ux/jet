@@ -29,6 +29,8 @@ export const UPLOAD_RULES = {
   avatar: { types: ["image/webp", "image/jpeg", "image/png"], maxBytes: 5 * MB },
   /** Receipt photos from a pilot's phone (made JPEG and resized in the browser) or PDFs. */
   receipt: { types: ["image/jpeg", "image/png", "image/webp", "application/pdf"], maxBytes: 15 * MB },
+  /** An aircraft's photo, resized to 1600px WebP in the browser. */
+  photo: { types: ["image/webp", "image/jpeg", "image/png"], maxBytes: 10 * MB },
 } as const;
 export type UploadPurpose = keyof typeof UPLOAD_RULES;
 
@@ -43,7 +45,7 @@ const EXTENSIONS: Record<string, string> = {
 };
 
 const uploadRequest = z.object({
-  purpose: z.enum(["invoice", "import", "message", "avatar", "receipt"]),
+  purpose: z.enum(["invoice", "import", "message", "avatar", "receipt", "photo"]),
   filename: z.string().trim().min(1).max(255),
   contentType: z.string(),
   sizeBytes: z.number().int().positive(),
@@ -61,6 +63,7 @@ function authorizeUpload(actor: Actor, purpose: UploadPurpose) {
   if (purpose === "avatar") return;
   // Pilots attach receipts to their reports; finance may add one while reviewing.
   if (purpose === "receipt") return can(actor, "finance:write") ? undefined : authorize(actor, "reports:file");
+  if (purpose === "photo") return authorize(actor, "fleet:write");
   if (purpose !== "message") return authorize(actor, "finance:write");
   if (can(actor, "messages:reply")) return;
   authorize(actor, "messages:send", { ownerIds: actingOwnerIds(actor) });
@@ -166,6 +169,9 @@ export async function fileDownloadUrl(db: Db, actor: Actor, fileId: string, opts
   else if (receipt) {
     // A receipt: finance, and the pilot who filed it.
     if (receipt.pilotUserId !== actor.id) authorize(actor, "finance:read");
+  } else if (file.storageKey.startsWith("photos/")) {
+    // Aircraft photos: the team sees them here; owners through /aircraft-photos/[id].
+    authorize(actor, "fleet:read");
   } else if (file.uploadedByUserId === actor.id && file.storageKey.startsWith("receipts/")) {
     // The pilot seeing the receipt they just photographed, before the report is sent.
   } else if (attachment) {

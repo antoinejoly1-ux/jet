@@ -20,7 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const STATUS_TONE = { available: "success", flying: "accent", maintenance: "warning", inactive: "neutral" } as const;
-const JOB_TONE = { planned: "accent", in_progress: "warning", done: "success", cancelled: "neutral" } as const;
+const JOB_TONE = {
+  planned: "accent",
+  in_progress: "warning",
+  review: "warning",
+  done: "success",
+  cancelled: "neutral",
+} as const;
 
 export default async function OwnerAircraftPage() {
   const viewer = await requireAccess();

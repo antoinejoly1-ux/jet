@@ -111,7 +111,7 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
           .where(
             and(
               eq(maintenanceEvents.aircraftId, r.aircraftId),
-              inArray(maintenanceEvents.status, ["planned", "in_progress"]),
+              inArray(maintenanceEvents.status, ["planned", "in_progress", "review"]),
               isNotNull(maintenanceEvents.startsAt),
             ),
           )
@@ -348,7 +348,7 @@ export async function getAdminQueue(db: Db, actor: Actor, now = new Date()) {
       ? db
           .select({ n: count() })
           .from(maintenanceEvents)
-          .where(and(eq(maintenanceEvents.status, "in_progress"), lt(maintenanceEvents.endsAt, now)))
+          .where(and(inArray(maintenanceEvents.status, ["in_progress", "review"]), lt(maintenanceEvents.endsAt, now)))
       : zero,
     // Active shares at or under 10% of their yearly hours.
     db

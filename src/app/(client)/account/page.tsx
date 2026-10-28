@@ -116,20 +116,8 @@ export default async function AccountPage() {
         <div className="flex max-w-3xl min-w-0 flex-col gap-14">
           <Section id="profile" title={t("sections.profile")} body={t("profileBody")} bare>
             <div className="border-border bg-surface overflow-hidden rounded-lg border">
-              <div className="relative h-32 sm:h-40">
-                <Image
-                  src={scenes.cabinWindow}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 768px, 100vw"
-                  placeholder="blur"
-                  className="object-cover opacity-80"
-                />
-                <div className="from-surface absolute inset-0 bg-gradient-to-t to-transparent" aria-hidden />
-              </div>
-              <div className="-mt-20 flex flex-col gap-8 px-6 pb-7 sm:-mt-24 sm:flex-row sm:items-start sm:px-7">
-                {/* The circle sits half over the cover photo: a solid backing keeps it crisp. */}
-                <div className="[&>div>button:first-child]:bg-surface [&>div>button:first-child]:ring-surface relative [&>div>button:first-child]:ring-4">
+              <div className="flex flex-col gap-8 px-6 py-7 sm:flex-row sm:items-start sm:px-7">
+                <div className="relative">
                   {readOnly ? (
                     <div className="border-border bg-surface-muted flex size-28 items-center justify-center rounded-full border text-3xl font-light">
                       {initials(viewer.name)}
@@ -138,7 +126,7 @@ export default async function AccountPage() {
                     <AvatarPicker initialImage={viewer.image} initials={initials(viewer.name)} size="md" />
                   )}
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-6 sm:pt-24">
+                <div className="flex min-w-0 flex-1 flex-col gap-6">
                   <ProfileForm firstName={first} lastName={rest.join(" ")} disabled={readOnly} />
                   <dl className="border-border grid gap-x-6 gap-y-3 border-t pt-5 text-sm sm:grid-cols-[120px_1fr]">
                     <dt className="text-muted">{t("email")}</dt>

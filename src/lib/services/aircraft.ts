@@ -1,9 +1,10 @@
 import "server-only";
 import { and, asc, desc, eq, gt, isNull, or, sql } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
-import { aircraft, auditLog, holdingCompanies, owners, shares, user } from "@/lib/db/schema";
+import { aircraft, auditLog, files, holdingCompanies, owners, shares, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { aircraftInput, endShareInput, shareInput, type AircraftInput, type ShareInput } from "@/lib/validation/admin";
+import { storage } from "@/lib/storage";
 import { recordAudit } from "./audit";
 import { assertHoldingCompany } from "./holding-companies";
 import { ConflictError, NotFoundError } from "./errors";
@@ -22,6 +23,8 @@ export async function listAircraft(db: Db, actor: Actor) {
       model: aircraft.model,
       homeBase: aircraft.homeBase,
       status: aircraft.status,
+      photoFileId: aircraft.photoFileId,
+      holdingCompanyId: aircraft.holdingCompanyId,
       holdingCompanyName: holdingCompanies.legalName,
       assignedBp: sql<number>`coalesce(sum(${shares.percentageBp}) filter (where ${shares.endsOn} is null or ${shares.endsOn} > current_date), 0)::int`,
       owners: sql<number>`count(${shares.id}) filter (where ${shares.endsOn} is null or ${shares.endsOn} > current_date)::int`,
@@ -32,6 +35,53 @@ export async function listAircraft(db: Db, actor: Actor) {
     .where(isNull(aircraft.deletedAt))
     .groupBy(aircraft.id, holdingCompanies.legalName)
     .orderBy(asc(aircraft.registration));
+}
+
+/** An owner's face: the photo of one of their logins (the owner's own first), or null for initials. */
+const ownerImage = sql<string | null>`(select u.image from owner_members m join users u on u.id = m.user_id
+  where m.owner_id = ${owners.id} and u.image is not null order by (m.role = 'owner') desc limit 1)`;
+
+/**
+ * The fleet as cards: each aircraft with its photo, its company and the faces
+ * of its current owners, largest share first.
+ */
+export async function listFleetCards(db: Db, actor: Actor) {
+  const planes = await listAircraft(db, actor);
+  const holders = await db
+    .select({
+      aircraftId: shares.aircraftId,
+      ownerId: owners.id,
+      name: owners.legalName,
+      image: ownerImage,
+      percentageBp: shares.percentageBp,
+    })
+    .from(shares)
+    .innerJoin(owners, eq(owners.id, shares.ownerId))
+    .where(and(activeShare(), isNull(owners.deletedAt)))
+    .orderBy(desc(shares.percentageBp), asc(owners.legalName));
+  return planes.map((p) => ({ ...p, holders: holders.filter((h) => h.aircraftId === p.id) }));
+}
+
+/** The team sets the photo of an aircraft from an uploaded image. */
+export async function setAircraftPhoto(db: Db, actor: Actor, id: string, fileId: string | null) {
+  authorize(actor, "fleet:write");
+  return db.transaction(async (tx) => {
+    const [before] = await tx.select({ photoFileId: aircraft.photoFileId }).from(aircraft).where(eq(aircraft.id, id));
+    if (!before) throw new NotFoundError("aircraft");
+    if (fileId) {
+      const [file] = await tx.select({ key: files.storageKey }).from(files).where(eq(files.id, fileId));
+      if (!file?.key.startsWith("photos/")) throw new ConflictError("invalid_file");
+    }
+    await tx.update(aircraft).set({ photoFileId: fileId }).where(eq(aircraft.id, id));
+    await recordAudit(tx, {
+      actorUserId: actor.id,
+      action: "aircraft.photo",
+      entityType: "aircraft",
+      entityId: id,
+      before,
+      after: { photoFileId: fileId },
+    });
+  });
 }
 
 export async function getAircraft(db: Db, actor: Actor, id: string) {
@@ -49,6 +99,9 @@ export async function getAircraft(db: Db, actor: Actor, id: string) {
         id: shares.id,
         ownerId: owners.id,
         ownerName: owners.legalName,
+        ownerImage,
+        ownerEmail: owners.email,
+        logins: sql<number>`(select count(*) from owner_members m where m.owner_id = ${owners.id})::int`,
         percentageBp: shares.percentageBp,
         annualHoursMinutes: shares.annualHoursMinutes,
         startsOn: shares.startsOn,
@@ -213,4 +266,23 @@ export async function endShare(db: Db, actor: Actor, shareId: string, raw: { end
       after: change,
     });
   });
+}
+
+/**
+ * A signed link to an aircraft's photo: for the team, and for the owners who
+ * hold a share in it.
+ */
+export async function aircraftPhotoDownload(db: Db, actor: Actor, aircraftId: string) {
+  const holders = await db
+    .selectDistinct({ ownerId: shares.ownerId })
+    .from(shares)
+    .where(and(eq(shares.aircraftId, aircraftId), activeShare()));
+  authorize(actor, "fleet:read", { ownerIds: holders.map((h) => h.ownerId) });
+  const [row] = await db
+    .select({ key: files.storageKey, contentType: files.contentType })
+    .from(aircraft)
+    .innerJoin(files, eq(files.id, aircraft.photoFileId))
+    .where(eq(aircraft.id, aircraftId));
+  if (!row) throw new NotFoundError("photo");
+  return storage().presignDownload(row.key, { filename: "photo", contentType: row.contentType, inline: true });
 }

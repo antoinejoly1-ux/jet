@@ -479,7 +479,8 @@
     "write": "Écrire",
     "memberRoleFor": "Rôle de {name}",
     "seesFinances": "Voit les finances",
-    "saveAccess": "Enregistrer"
+    "saveAccess": "Enregistrer",
+    "loginsCount": "{count, plural, =0 {Aucun accès} one {# accès} other {# accès}}"
   },
   "invitations": {
     "title": "Invitations",
@@ -686,7 +687,7 @@
   },
   "aircraft": {
     "title": "Appareils",
-    "subtitle": "La flotte et la répartition des parts.",
+    "subtitle": "Chaque appareil, sa société, ses propriétaires, ses vols et son entretien, au même endroit.",
     "new": "Nouvel appareil",
     "emptyTitle": "Aucun appareil",
     "emptyBody": "Ajoutez le premier appareil de la flotte.",
@@ -736,7 +737,9 @@
     "endShare": "Clôturer la part",
     "holdingCompany": "Société de portefeuille",
     "noHoldingCompany": "Aucune société",
-    "ownedBy": "Propriété de"
+    "ownedBy": "Propriété de",
+    "assignedWarning": "Parts attribuées : {percent} (pas 100 %)",
+    "owners": "Propriétaires"
   },
   "team": {
     "settingsTitle": "Paramètres",
@@ -1097,7 +1100,8 @@
       "planned": "Prévue",
       "in_progress": "En cours",
       "done": "Terminée",
-      "cancelled": "Annulée"
+      "cancelled": "Annulée",
+      "review": "En vérification"
     },
     "synced": "Synchronisée",
     "types": {
@@ -1127,7 +1131,24 @@
     "finish": "Terminer",
     "edit": "Modifier",
     "cancelQuestion": "Annuler ces travaux?",
-    "cancelJob": "Annuler les travaux"
+    "cancelJob": "Annuler les travaux",
+    "next": {
+      "start": "Commencer",
+      "review": "Envoyer en vérification",
+      "done": "Approuver"
+    },
+    "moreActions": "Autres actions",
+    "sendBack": "Renvoyer en cours",
+    "columns": {
+      "planned": "Planifié",
+      "in_progress": "En cours",
+      "review": "En vérification",
+      "done": "Terminé"
+    },
+    "columnEmpty": "Rien ici.",
+    "boardSubtitle": "Chaque travail avance d'une colonne à l'autre, de la planification à l'approbation.",
+    "syncedFromCamp": "CAMP",
+    "cancelledCount": "{count, plural, one {# travail annulé} other {# travaux annulés}}"
   },
   "availability": {
     "title": "Calendrier",
@@ -2167,5 +2188,54 @@
     "noReport": "Le pilote n'a pas encore envoyé son rapport.",
     "noReportCancelled": "Vol annulé : aucun rapport.",
     "filedBy": "Envoyé par {pilot} le {date}"
+  },
+  "fleet": {
+    "changePhoto": "Changer la photo",
+    "photoUploading": "Envoi…",
+    "photoFailed": "La photo n'a pas pu être enregistrée."
+  },
+  "aircraftHub": {
+    "sectionsLabel": "Sections de l'appareil",
+    "sections": {
+      "owners": "Propriétaires",
+      "company": "Société",
+      "rate": "Tarif et réserves",
+      "flights": "Vols",
+      "maintenance": "Entretien",
+      "availability": "Disponibilités",
+      "history": "Historique"
+    },
+    "ownersBody": "Qui détient l'appareil, leur part, leurs heures et leur accès au portail.",
+    "invite": "Inviter au portail",
+    "logins": "{count, plural, one {# accès au portail} other {# accès au portail}}",
+    "budget": "Budget et heures",
+    "companyBody": "La société qui détient l'appareil et émet les factures à ses propriétaires.",
+    "taxesRegistered": "Inscrite à la TPS/TVQ",
+    "taxesNotRegistered": "Non inscrite aux taxes",
+    "managers": "{count, plural, =0 {aucun gestionnaire} one {# gestionnaire} other {# gestionnaires}}",
+    "alsoOwns": "Détient aussi : {list}",
+    "results": "Résultats",
+    "companyPage": "Facturation et gestionnaires",
+    "chooseCompany": "Choisir la société",
+    "flights": {
+      "upcoming": "À venir",
+      "recent": "Derniers vols",
+      "upcomingEmpty": "Aucun vol prévu dans les 60 prochains jours.",
+      "recentEmpty": "Aucun vol dans les 60 derniers jours."
+    },
+    "noJobs": "Aucun entretien prévu ou en cours.",
+    "allMaintenance": "Tout l'entretien"
+  },
+  "teamInvite": {
+    "title": "Inviter dans l'équipe",
+    "body": "Un membre de l'équipe Univair. Les propriétaires s'invitent depuis leur appareil.",
+    "email": "Courriel",
+    "role": "Rôle",
+    "send": "Envoyer l'invitation",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "sent": "Invitation envoyée à {email}.",
+    "invalid": "Vérifiez le courriel.",
+    "forbidden": "Vous ne pouvez pas inviter dans l'équipe."
   }
 }

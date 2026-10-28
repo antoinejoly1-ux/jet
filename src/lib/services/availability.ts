@@ -92,7 +92,7 @@ export async function getAvailability(
       .where(
         and(
           eq(maintenanceEvents.aircraftId, aircraftId),
-          inArray(maintenanceEvents.status, ["planned", "in_progress", "done"]),
+          inArray(maintenanceEvents.status, ["planned", "in_progress", "review", "done"]),
           lt(maintenanceEvents.startsAt, to),
           or(isNull(maintenanceEvents.endsAt), gt(maintenanceEvents.endsAt, from)),
         ),
@@ -133,7 +133,9 @@ export async function getAvailability(
   }
   for (const j of jobs) {
     // An open job with no end yet keeps the aircraft unavailable through the window.
-    const endsAt = j.endsAt ?? (j.status === "in_progress" ? to : new Date(j.startsAt!.getTime() + 24 * HOUR));
+    const endsAt =
+      j.endsAt ??
+      (j.status === "in_progress" || j.status === "review" ? to : new Date(j.startsAt!.getTime() + 24 * HOUR));
     if (endsAt <= from) continue;
     periods.push({
       kind: "maintenance",

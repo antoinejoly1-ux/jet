@@ -178,6 +178,8 @@ export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "wai
         id: conversations.id,
         ownerId: conversations.ownerId,
         ownerName: owners.legalName,
+        ownerImage: sql<string | null>`(select u.image from owner_members m join users u on u.id = m.user_id
+          where m.owner_id = ${owners.id} and u.image is not null order by (m.role = 'owner') desc limit 1)`,
         assignedToUserId: conversations.assignedToUserId,
         assignedToName: assignee.name,
         resolvedAt: conversations.resolvedAt,

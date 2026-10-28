@@ -77,7 +77,14 @@ export default async function FlightDetailPage({ params }: PageProps<"/admin/fli
       <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center gap-5">
           <span className="relative size-20 shrink-0 overflow-hidden rounded-[18px]">
-            <Image src={photoUrl ?? aircraftPhoto(flight.model)} alt="" fill sizes="80px" className="object-cover" />
+            <Image
+              src={photoUrl ?? aircraftPhoto(flight.model)}
+              unoptimized={Boolean(photoUrl)}
+              alt=""
+              fill
+              sizes="80px"
+              className="object-cover"
+            />
           </span>
           <div className="min-w-0">
             <p className="eyebrow flex flex-wrap items-center gap-2">

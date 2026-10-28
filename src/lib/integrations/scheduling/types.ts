@@ -25,7 +25,7 @@ export type ExternalMaintenance = {
   title: string;
   startsAt: Date | null;
   endsAt: Date | null;
-  status: "planned" | "in_progress" | "done" | "cancelled";
+  status: "planned" | "in_progress" | "review" | "done" | "cancelled";
 };
 
 export type ExternalBlock = {

@@ -1,10 +1,10 @@
-import { ChevronRight, Code, MailPlus, ScrollText, Settings, ShieldAlert, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronRight, Code, ScrollText, Settings, ShieldAlert, ShieldCheck, UserRound } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { TeamInviteDialog } from "@/components/admin/team-invite-dialog";
 import { StaffRoleForm } from "@/components/admin/staff-role-form";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
@@ -56,12 +56,7 @@ export default async function SettingsPage() {
               </h2>
               <p className="text-muted mt-1 text-sm">{t("members", { count: staff.length })}</p>
             </div>
-            <Button asChild size="sm" variant="secondary">
-              <Link href="/admin/invitations">
-                <MailPlus aria-hidden />
-                {t("invite")}
-              </Link>
-            </Button>
+            <TeamInviteDialog />
           </div>
           <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
             {staff.map((s) => (

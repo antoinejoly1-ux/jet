@@ -176,6 +176,27 @@ describe("maintenance", () => {
   });
 });
 
+describe("maintenance review", () => {
+  it("a job goes through review before it's done; the aircraft stays in maintenance during review", async () => {
+    const job = await planMaintenance(db, dispatcher, {
+      aircraftId: planeId,
+      type: "inspection",
+      title: "Remplacement de pneus",
+      startsAt: "2026-11-20T08:00",
+      endsAt: "2026-11-21T17:00",
+    });
+    const status = async () => (await db.select().from(aircraft).where(eq(aircraft.id, planeId)))[0]!.status;
+    await setMaintenanceStatus(db, dispatcher, job.id, "in_progress");
+    await setMaintenanceStatus(db, dispatcher, job.id, "review");
+    expect(await status()).toBe("maintenance");
+    // Sent back, then approved.
+    await setMaintenanceStatus(db, dispatcher, job.id, "in_progress");
+    await setMaintenanceStatus(db, dispatcher, job.id, "review");
+    await setMaintenanceStatus(db, dispatcher, job.id, "done");
+    expect(await status()).toBe("available");
+  });
+});
+
 describe("availability", () => {
   const from = new Date("2026-11-01T04:00:00Z");
   const to = new Date("2026-12-01T05:00:00Z");

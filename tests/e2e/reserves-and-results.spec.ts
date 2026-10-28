@@ -36,6 +36,7 @@ test("finance records a company expense and pays a job from a reserve", async ({
     .getByRole("link", { name: /C-GJTA/ })
     .first()
     .click();
+  await page.getByText("Payer des travaux depuis une réserve").click();
   const pay = page.locator("form", { has: page.getByRole("button", { name: "Payer depuis la réserve" }) });
   await pay.getByLabel("Réserve").selectOption("propeller");
   await pay.getByLabel("Montant ($)").fill("4 000");

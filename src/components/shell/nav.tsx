@@ -1,8 +1,6 @@
 "use client";
 
 import {
-  BarChart3,
-  Building2,
   ClipboardCheck,
   CalendarDays,
   ClipboardList,
@@ -11,7 +9,6 @@ import {
   Home,
   Inbox,
   Menu,
-  MailPlus,
   PanelLeftClose,
   PanelLeftOpen,
   Phone,
@@ -90,17 +87,12 @@ const ADMIN: Group[] = [
   },
   {
     key: "clients",
-    items: [
-      { href: "/admin/owners", key: "owners", icon: Users, anim: "bounce", mobile: true },
-      { href: "/admin/holding-companies", key: "holdingCompanies", icon: Building2, anim: "settle" },
-      { href: "/admin/invitations", key: "invitations", icon: MailPlus, anim: "slide" },
-    ],
+    items: [{ href: "/admin/owners", key: "owners", icon: Users, anim: "bounce", mobile: true }],
   },
   {
     key: "finance",
     items: [
       { href: "/admin/flight-reports", key: "flightReports", icon: ClipboardCheck, anim: "bounce" },
-      { href: "/admin/budgets", key: "budgets", icon: BarChart3, anim: "bounce" },
       { href: "/admin/transactions", key: "transactions", icon: ClipboardList, anim: "slide" },
       { href: "/admin/invoices", key: "invoices", icon: FileText, anim: "slide" },
       { href: "/admin/imports", key: "imports", icon: Upload, anim: "drop" },
@@ -372,7 +364,7 @@ export function BottomTabs({
       ) : null}
       <nav
         aria-label={t("label")}
-        className="border-border bg-background/80 fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
+        className="border-border bg-background fixed inset-x-0 bottom-0 z-50 border-t pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <ul
           className="grid"

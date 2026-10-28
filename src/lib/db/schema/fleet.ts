@@ -21,7 +21,14 @@ import { files } from "./platform";
 export const aircraftStatus = pgEnum("aircraft_status", ["available", "flying", "maintenance", "inactive"]);
 export const flightStatus = pgEnum("flight_status", ["scheduled", "completed", "cancelled"]);
 export const availabilityKind = pgEnum("availability_kind", ["available", "booked", "maintenance"]);
-export const maintenanceStatus = pgEnum("maintenance_status", ["planned", "in_progress", "done", "cancelled"]);
+/** planned → in_progress → review (work signed off) → done, or cancelled. */
+export const maintenanceStatus = pgEnum("maintenance_status", [
+  "planned",
+  "in_progress",
+  "review",
+  "done",
+  "cancelled",
+]);
 
 export const aircraft = pgTable(
   "aircraft",

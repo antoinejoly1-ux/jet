@@ -21,6 +21,8 @@ export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}
       aircraft: sql<string[]>`coalesce(array_agg(${aircraft.registration} order by ${aircraft.registration})
         filter (where ${aircraft.id} is not null and (${shares.endsOn} is null or ${shares.endsOn} > current_date)), '{}')`,
       members: sql<number>`(select count(*)::int from owner_members m where m.owner_id = ${owners.id})`,
+      image: sql<string | null>`(select u.image from owner_members m join users u on u.id = m.user_id
+        where m.owner_id = ${owners.id} and u.image is not null order by (m.role = 'owner') desc limit 1)`,
     })
     .from(owners)
     .leftJoin(shares, eq(shares.ownerId, owners.id))

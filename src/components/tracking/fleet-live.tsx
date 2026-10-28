@@ -75,7 +75,14 @@ export function FleetLive({ initial }: { initial: AircraftLive[] }) {
                 className="group hover:bg-surface-muted -mx-2 flex items-center gap-3 rounded-[14px] px-2 py-2"
               >
                 <span className="relative size-12 shrink-0 overflow-hidden rounded-[12px]">
-                  <Image src={a.photoUrl ?? aircraftPhoto(a.model)} alt="" fill sizes="48px" className="object-cover" />
+                  <Image
+                    src={a.photoUrl ?? aircraftPhoto(a.model)}
+                    unoptimized={Boolean(a.photoUrl)}
+                    alt=""
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
                   <span
                     className={cn(
                       "ring-surface absolute right-1 bottom-1 size-2.5 rounded-full ring-2",

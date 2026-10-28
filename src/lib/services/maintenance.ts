@@ -1,7 +1,9 @@
 /**
- * Maintenance events. Planned → in progress → done, or cancelled. Starting
- * work puts the aircraft in maintenance; finishing or cancelling the last
- * open job makes it available again. Planned windows block availability.
+ * Maintenance events. Planned → in progress → in review (the work is checked
+ * and signed off) → done, or cancelled. Starting work puts the aircraft in
+ * maintenance, and it stays there through the review; finishing or
+ * cancelling the last open job makes it available again. Planned windows
+ * block availability.
  */
 import "server-only";
 import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
@@ -21,7 +23,8 @@ export type MaintenanceStatus = (typeof maintenanceEvents.$inferSelect)["status"
 /** Which status each status may move to. */
 export const NEXT_STATUS: Record<MaintenanceStatus, readonly MaintenanceStatus[]> = {
   planned: ["in_progress", "cancelled"],
-  in_progress: ["done", "cancelled"],
+  in_progress: ["review", "done", "cancelled"],
+  review: ["done", "in_progress", "cancelled"],
   done: [],
   cancelled: [],
 };
@@ -30,6 +33,8 @@ const columns = {
   id: maintenanceEvents.id,
   aircraftId: maintenanceEvents.aircraftId,
   registration: aircraft.registration,
+  model: aircraft.model,
+  photoFileId: aircraft.photoFileId,
   type: maintenanceEvents.type,
   title: maintenanceEvents.title,
   dueOn: maintenanceEvents.dueOn,
@@ -53,7 +58,7 @@ export async function listMaintenance(db: Db, actor: Actor, opts: { aircraftId?:
     db.select(columns).from(maintenanceEvents).innerJoin(aircraft, eq(aircraft.id, maintenanceEvents.aircraftId));
   const [open, closed] = await Promise.all([
     q()
-      .where(and(scope, inArray(maintenanceEvents.status, ["planned", "in_progress"])))
+      .where(and(scope, inArray(maintenanceEvents.status, ["planned", "in_progress", "review"])))
       .orderBy(soonestFirst),
     q()
       .where(and(scope, inArray(maintenanceEvents.status, ["done", "cancelled"])))
@@ -212,7 +217,9 @@ export async function syncAircraftStatus(tx: Tx, aircraftId: string) {
   const [open] = await tx
     .select({ id: maintenanceEvents.id })
     .from(maintenanceEvents)
-    .where(and(eq(maintenanceEvents.aircraftId, aircraftId), eq(maintenanceEvents.status, "in_progress")))
+    .where(
+      and(eq(maintenanceEvents.aircraftId, aircraftId), inArray(maintenanceEvents.status, ["in_progress", "review"])),
+    )
     .limit(1);
   if (open && plane.status !== "maintenance")
     await tx.update(aircraft).set({ status: "maintenance" }).where(eq(aircraft.id, aircraftId));

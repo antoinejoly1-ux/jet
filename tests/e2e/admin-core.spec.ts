@@ -44,27 +44,29 @@ test("shares on one aircraft can never exceed 100%", async ({ page }) => {
   await page.getByRole("button", { name: "Enregistrer" }).click();
   await expect(page.getByRole("heading", { level: 1, name: reg })).toBeVisible();
 
-  await page.getByLabel("Propriétaire").selectOption({ label: "Luc Bergeron" });
-  await page.getByLabel("Part (%)").fill("60");
-  await page.getByRole("button", { name: "Ajouter la part" }).click();
-  await expect(page.getByText("60 % attribués")).toBeVisible();
-  await expect(page.getByText("Les parts doivent totaliser 100 %.")).toBeVisible();
+  // Adding an owner sits behind « Ajouter une part » on the aircraft page.
+  const addShare = async (owner: string, percent: string) => {
+    const form = page.locator("details").filter({ hasText: "Ajouter une part" });
+    if (!(await form.evaluate((d) => (d as HTMLDetailsElement).open))) await form.locator("summary").click();
+    await form.getByLabel("Propriétaire", { exact: true }).selectOption({ label: owner });
+    await form.getByLabel("Part (%)").fill(percent);
+    await form.getByRole("button", { name: "Ajouter la part" }).click();
+  };
+  await addShare("Luc Bergeron", "60");
+  await expect(page.getByText("Parts attribuées : 60 % (pas 100 %)")).toBeVisible();
 
-  await page.getByLabel("Propriétaire").selectOption({ label: "Nadia Pelletier" });
-  await page.getByLabel("Part (%)").fill("50");
-  await page.getByRole("button", { name: "Ajouter la part" }).click();
+  await addShare("Nadia Pelletier", "50");
   await expect(page.getByText("dépasseraient 100 %")).toBeVisible();
 
-  await page.getByLabel("Part (%)").fill("40");
-  await page.getByRole("button", { name: "Ajouter la part" }).click();
-  await expect(page.getByText("100 % attribués")).toBeVisible();
-  await expect(page.getByText("L'appareil est attribué à 100 %.")).toBeVisible();
+  await addShare("Nadia Pelletier", "40");
+  await expect(page.getByRole("link", { name: "Nadia Pelletier" })).toBeVisible();
+  await expect(page.getByText(/Parts attribuées/)).toHaveCount(0);
 
   // Ending a share frees its percentage (shares are ended, never deleted).
   const luc = page.getByRole("listitem").filter({ hasText: "Luc Bergeron" });
   await luc.getByRole("button", { name: "Clôturer la part" }).click();
   await luc.getByRole("button", { name: "Confirmer" }).click();
-  await expect(page.getByText("40 % attribués")).toBeVisible();
+  await expect(page.getByText("Parts attribuées : 40 % (pas 100 %)")).toBeVisible();
   await expect(page.getByText("1 ancien propriétaire")).toBeVisible();
 });
 

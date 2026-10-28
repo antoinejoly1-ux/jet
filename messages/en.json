@@ -479,7 +479,8 @@
     "write": "Message",
     "memberRoleFor": "{name}'s role",
     "seesFinances": "Sees finances",
-    "saveAccess": "Save"
+    "saveAccess": "Save",
+    "loginsCount": "{count, plural, =0 {No access} one {# login} other {# logins}}"
   },
   "invitations": {
     "title": "Invitations",
@@ -686,7 +687,7 @@
   },
   "aircraft": {
     "title": "Aircraft",
-    "subtitle": "The fleet and how each aircraft's shares are split.",
+    "subtitle": "Each aircraft, its company, owners, flights and maintenance, in one place.",
     "new": "New aircraft",
     "emptyTitle": "No aircraft yet",
     "emptyBody": "Add the first aircraft in the fleet.",
@@ -736,7 +737,9 @@
     "endShare": "Close the share",
     "holdingCompany": "Holding company",
     "noHoldingCompany": "No company",
-    "ownedBy": "Owned by"
+    "ownedBy": "Owned by",
+    "assignedWarning": "Shares assigned: {percent} (not 100%)",
+    "owners": "Owners"
   },
   "team": {
     "settingsTitle": "Settings",
@@ -1097,7 +1100,8 @@
       "planned": "Planned",
       "in_progress": "In progress",
       "done": "Done",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "review": "In review"
     },
     "synced": "Synced",
     "types": {
@@ -1127,7 +1131,24 @@
     "finish": "Finish",
     "edit": "Edit",
     "cancelQuestion": "Cancel this work?",
-    "cancelJob": "Cancel work"
+    "cancelJob": "Cancel work",
+    "next": {
+      "start": "Start",
+      "review": "Send for review",
+      "done": "Approve"
+    },
+    "moreActions": "More actions",
+    "sendBack": "Send back to in progress",
+    "columns": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "review": "In review",
+      "done": "Done"
+    },
+    "columnEmpty": "Nothing here.",
+    "boardSubtitle": "Each job moves from column to column, from planning to sign-off.",
+    "syncedFromCamp": "CAMP",
+    "cancelledCount": "{count, plural, one {# cancelled job} other {# cancelled jobs}}"
   },
   "availability": {
     "title": "Calendar",
@@ -2167,5 +2188,54 @@
     "noReport": "The pilot hasn't sent their report yet.",
     "noReportCancelled": "Flight cancelled: no report.",
     "filedBy": "Sent by {pilot} on {date}"
+  },
+  "fleet": {
+    "changePhoto": "Change photo",
+    "photoUploading": "Uploading…",
+    "photoFailed": "The photo couldn't be saved."
+  },
+  "aircraftHub": {
+    "sectionsLabel": "Aircraft sections",
+    "sections": {
+      "owners": "Owners",
+      "company": "Company",
+      "rate": "Rate and reserves",
+      "flights": "Flights",
+      "maintenance": "Maintenance",
+      "availability": "Availability",
+      "history": "History"
+    },
+    "ownersBody": "Who holds the aircraft, their share, their hours and their portal access.",
+    "invite": "Invite to the portal",
+    "logins": "{count, plural, one {# portal login} other {# portal logins}}",
+    "budget": "Budget and hours",
+    "companyBody": "The company that holds the aircraft and invoices its owners.",
+    "taxesRegistered": "Registered for GST/QST",
+    "taxesNotRegistered": "Not registered for taxes",
+    "managers": "{count, plural, =0 {no managers} one {# manager} other {# managers}}",
+    "alsoOwns": "Also holds: {list}",
+    "results": "Results",
+    "companyPage": "Billing and managers",
+    "chooseCompany": "Choose the company",
+    "flights": {
+      "upcoming": "Upcoming",
+      "recent": "Recent flights",
+      "upcomingEmpty": "No flights planned in the next 60 days.",
+      "recentEmpty": "No flights in the last 60 days."
+    },
+    "noJobs": "No maintenance planned or under way.",
+    "allMaintenance": "All maintenance"
+  },
+  "teamInvite": {
+    "title": "Invite to the team",
+    "body": "Someone on the Univair team. Owners are invited from their aircraft.",
+    "email": "Email",
+    "role": "Role",
+    "send": "Send the invitation",
+    "cancel": "Cancel",
+    "close": "Close",
+    "sent": "Invitation sent to {email}.",
+    "invalid": "Check the email.",
+    "forbidden": "You can't invite to the team."
   }
 }

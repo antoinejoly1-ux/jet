@@ -1,7 +1,8 @@
-import { ChevronRight, Plus, Search, Users } from "lucide-react";
+import { Plus, Search, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -61,64 +62,34 @@ export default async function OwnersPage({ searchParams }: PageProps<"/admin/own
           body={query ? t("noResultsBody") : t("emptyBody")}
         />
       ) : (
-        <>
-          <ul className="flex flex-col gap-3 md:hidden">
-            {rows.map((o) => (
-              <li key={o.id}>
-                <Link
-                  href={`/admin/owners/${o.id}`}
-                  className="bg-surface border-border flex items-center gap-3 rounded-lg border p-4"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold">{o.legalName}</p>
-                    <p className="text-muted truncate text-sm">{o.email ?? "—"}</p>
-                    <p className="mt-2 text-sm">{o.aircraft.join(", ") || t("noAircraft")}</p>
-                  </div>
-                  <ChevronRight className="text-muted size-4" aria-hidden />
-                </Link>
-              </li>
-            ))}
-          </ul>
-          <div className="bg-surface border-border hidden overflow-hidden rounded-lg border md:block">
-            <table className="w-full text-left text-sm">
-              <thead className="border-border bg-surface-muted text-muted border-b text-xs font-semibold">
-                <tr>
-                  <th scope="col" className="px-4 py-3">
-                    {t("name")}
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    {t("type")}
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    {t("email")}
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    {t("aircraft")}
-                  </th>
-                  <th scope="col" className="px-4 py-3 text-right">
-                    {t("logins")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-border divide-y">
-                {rows.map((o) => (
-                  <tr key={o.id} className="hover:bg-surface-muted relative">
-                    <td className="px-4 py-3 font-medium">
-                      {/* The link covers the whole row. */}
-                      <Link href={`/admin/owners/${o.id}`} className="after:absolute after:inset-0">
-                        {o.legalName}
-                      </Link>
-                    </td>
-                    <td className="text-muted px-4 py-3">{t(`types.${o.type}`)}</td>
-                    <td className="text-muted px-4 py-3">{o.email ?? "—"}</td>
-                    <td className="px-4 py-3">{o.aircraft.join(", ") || "—"}</td>
-                    <td className="tabular px-4 py-3 text-right">{o.members}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {rows.map((o) => (
+            <li key={o.id}>
+              <Link
+                href={`/admin/owners/${o.id}`}
+                className="group bg-surface border-border hover:border-text/30 flex h-full items-start gap-4 rounded-lg border p-5 transition-colors"
+              >
+                <Avatar name={o.legalName} image={o.image} className="size-12 text-sm" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium group-hover:underline">{o.legalName}</p>
+                  <p className="text-muted truncate text-sm">{o.email ?? t(`types.${o.type}`)}</p>
+                  <p className="mt-3 flex flex-wrap gap-1.5">
+                    {o.aircraft.length ? (
+                      o.aircraft.map((r) => (
+                        <span key={r} className="bg-surface-muted rounded-full px-2.5 py-0.5 text-xs font-medium">
+                          {r}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-muted text-xs">{t("noAircraft")}</span>
+                    )}
+                  </p>
+                </div>
+                <span className="text-muted text-xs whitespace-nowrap">{t("loginsCount", { count: o.members })}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
       )}
     </>
   );

@@ -120,15 +120,18 @@ test("starting and finishing maintenance takes the aircraft out of service and b
   await page.getByRole("button", { name: "Enregistrer", exact: true }).click();
   await expect(page.getByText("Maintenance enregistrée.")).toBeVisible();
 
-  const row = page.getByRole("listitem").filter({ hasText: title });
-  await row.getByRole("button", { name: "Commencer" }).click();
-  await expect(row).toContainText("En cours");
+  // The board: each job moves one column at a time.
+  const card = () => page.getByRole("listitem").filter({ hasText: title });
+  await card().getByRole("button", { name: "Commencer" }).click();
+  await expect(page.getByRole("region", { name: /^En cours/ })).toContainText(title);
   await page.goto("/admin/aircraft");
   await expect(page.getByRole("listitem").filter({ hasText: "C-GJTC" })).toContainText("En maintenance");
 
   await page.goto("/admin/maintenance");
-  await page.getByRole("listitem").filter({ hasText: title }).getByRole("button", { name: "Terminer" }).click();
-  await expect(page.getByRole("region", { name: "Terminées et annulées" })).toContainText(title);
+  await card().getByRole("button", { name: "Envoyer en vérification" }).click();
+  await expect(page.getByRole("region", { name: /^En vérification/ })).toContainText(title);
+  await card().getByRole("button", { name: "Approuver" }).click();
+  await expect(page.getByRole("region", { name: /^Terminé/ })).toContainText(title);
   await page.goto("/admin/aircraft");
   await expect(page.getByRole("listitem").filter({ hasText: "C-GJTC" })).toContainText("Disponible");
 });
