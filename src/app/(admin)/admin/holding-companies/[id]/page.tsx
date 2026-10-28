@@ -13,7 +13,14 @@ import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { NotFoundError } from "@/lib/services/errors";
 import { getHoldingCompany } from "@/lib/services/holding-companies";
-import { archiveHoldingCompanyAction } from "../actions";
+import {
+  addManagerAction,
+  archiveHoldingCompanyAction,
+  removeManagerAction,
+  saveBillingProfileAction,
+} from "../actions";
+import { AddManagerForm, BillingProfileForm } from "@/components/billing/billing-profile-form";
+import { defaultPrefix, listManagers } from "@/lib/services/billing";
 
 export async function generateMetadata({ params }: PageProps<"/admin/holding-companies/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -31,6 +38,9 @@ export default async function HoldingCompanyPage({ params }: PageProps<"/admin/h
     e instanceof NotFoundError ? notFound() : Promise.reject(e),
   );
   const canWrite = can(viewer, "owners:write");
+  const canBill = can(viewer, "finance:write");
+  const tb = await getTranslations("billingProfile");
+  const managers = await listManagers(db, viewer, company.id);
 
   return (
     <>
@@ -104,6 +114,57 @@ export default async function HoldingCompanyPage({ params }: PageProps<"/admin/h
               ))}
             </ul>
           )}
+        </Card>
+
+        <Card className="lg:col-span-2" id="billing">
+          <CardTitle className="mb-1">{tb("title")}</CardTitle>
+          <p className="text-muted mb-5 text-sm">{tb("body")}</p>
+          {canBill ? (
+            <BillingProfileForm
+              action={saveBillingProfileAction.bind(null, company.id)}
+              profile={company}
+              suggestedPrefix={defaultPrefix(company.legalName)}
+            />
+          ) : (
+            <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
+              <dt className="text-muted">{tb("gstNumber")}</dt>
+              <dd>{company.gstNumber ?? tb("notRegistered")}</dd>
+              <dt className="text-muted">{tb("qstNumber")}</dt>
+              <dd>{company.qstNumber ?? tb("notRegistered")}</dd>
+            </dl>
+          )}
+        </Card>
+
+        <Card>
+          <CardTitle className="mb-1">{tb("managersTitle")}</CardTitle>
+          <p className="text-muted mb-4 text-sm">{tb("managersBody")}</p>
+          {managers.length ? (
+            <ul className="divide-border mb-4 divide-y">
+              {managers.map((m) => (
+                <li key={m.id} className="flex items-center gap-3 py-2.5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{m.name}</p>
+                    <p className="text-muted truncate text-xs">{m.email}</p>
+                  </div>
+                  {canBill ? (
+                    <form action={removeManagerAction.bind(null, company.id, m.id)}>
+                      <Button
+                        type="submit"
+                        size="sm"
+                        variant="ghost"
+                        aria-label={tb("removeManager", { name: m.name })}
+                      >
+                        {tb("remove")}
+                      </Button>
+                    </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted mb-4 text-sm">{tb("noManagers")}</p>
+          )}
+          {canBill ? <AddManagerForm action={addManagerAction.bind(null, company.id)} /> : null}
         </Card>
 
         <Card>

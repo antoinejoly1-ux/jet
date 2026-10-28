@@ -22,6 +22,8 @@ export const FLASHES = [
   "reportApproved",
   "reportReturned",
   "rateSaved",
+  "invoiceIssued",
+  "billingSaved",
 ] as const;
 export type Flash = (typeof FLASHES)[number];
 

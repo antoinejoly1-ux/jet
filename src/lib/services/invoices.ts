@@ -21,6 +21,8 @@ const columns = {
   voidReason: invoices.voidReason,
   fileId: invoices.fileId,
   fileName: files.originalName,
+  /** Set when the portal generated it: it has lines, a detail page and a PDF drawn on demand. */
+  holdingCompanyId: invoices.holdingCompanyId,
   shareId: shares.id,
   ownerId: owners.id,
   ownerName: owners.legalName,

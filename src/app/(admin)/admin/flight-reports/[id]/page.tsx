@@ -14,7 +14,11 @@ import { formatHours, formatMoney } from "@/lib/format";
 import { NotFoundError } from "@/lib/services/errors";
 import { getReportForReview } from "@/lib/services/flight-reports";
 import { OPERATOR_TIME_ZONE } from "@/lib/time";
-import { approveReportAction, returnReportAction } from "../actions";
+import { approveReportAction, issueInvoiceAction, returnReportAction } from "../actions";
+import { InvoicePreview } from "@/components/billing/invoice-preview";
+import { Button } from "@/components/ui/button";
+import { canIssueInvoicesFor } from "@/lib/auth/policy";
+import { previewInvoice } from "@/lib/services/billing";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("flightReports"))("detailTitle") };
@@ -34,6 +38,11 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
     e instanceof NotFoundError ? notFound() : Promise.reject(e),
   );
   const cad = (c: number) => formatMoney(c, "CAD", viewer.locale);
+  // Once approved, the invoice it becomes (or the one it became).
+  const draft =
+    report.status === "approved" && !report.invoiceId
+      ? await previewInvoice(db, viewer, report.id).catch(() => null)
+      : null;
   const expensesTotal = expenses.reduce((s, e) => s + e.amountCents, 0);
   const pct = (bp: number) => format.number(bp / 10000, { style: "percent", maximumFractionDigits: 2 });
 
@@ -165,25 +174,57 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
           </Card>
         </div>
 
-        <Card className="h-fit">
-          <CardTitle className="mb-4">{t("decision")}</CardTitle>
-          {report.status === "submitted" && can(viewer, "finance:write") ? (
-            <ReviewForms
-              approve={approveReportAction.bind(null, report.id)}
-              sendBack={returnReportAction.bind(null, report.id)}
-              shareId={report.shareId}
-              shares={shareOptions.map((s) => ({ id: s.id, label: `${s.ownerName} · ${pct(s.percentageBp)}` }))}
-            />
-          ) : (
-            <p className="text-muted text-sm">
-              {report.status === "approved"
-                ? t("approvedFor", { owner: report.ownerName ?? "—" })
-                : report.status === "returned"
-                  ? t("returnedToPilot")
-                  : t("readOnly")}
-            </p>
-          )}
-        </Card>
+        <div className="flex flex-col gap-4">
+          <Card className="h-fit">
+            <CardTitle className="mb-4">{t("decision")}</CardTitle>
+            {report.status === "submitted" && can(viewer, "finance:write") ? (
+              <ReviewForms
+                approve={approveReportAction.bind(null, report.id)}
+                sendBack={returnReportAction.bind(null, report.id)}
+                shareId={report.shareId}
+                shares={shareOptions.map((s) => ({ id: s.id, label: `${s.ownerName} · ${pct(s.percentageBp)}` }))}
+              />
+            ) : (
+              <p className="text-muted text-sm">
+                {report.status === "approved"
+                  ? t("approvedFor", { owner: report.ownerName ?? "—" })
+                  : report.status === "returned"
+                    ? t("returnedToPilot")
+                    : t("readOnly")}
+              </p>
+            )}
+          </Card>
+          {report.invoiceId ? (
+            <Card className="h-fit">
+              <CardTitle className="mb-3">{t("invoiceTitle")}</CardTitle>
+              <Button asChild variant="secondary">
+                <Link href={`/admin/invoices/${report.invoiceId}`}>{t("openInvoice")}</Link>
+              </Button>
+            </Card>
+          ) : report.status === "approved" ? (
+            <Card className="h-fit">
+              <CardTitle className="mb-3">{t("invoiceTitle")}</CardTitle>
+              {draft ? (
+                <InvoicePreview
+                  draft={draft}
+                  locale={viewer.locale}
+                  issue={
+                    draft.company && canIssueInvoicesFor(viewer, draft.company.id)
+                      ? issueInvoiceAction.bind(null, report.id)
+                      : null
+                  }
+                />
+              ) : (
+                <p className="text-warning text-sm">
+                  {t("noCompany")}{" "}
+                  <Link href={`/admin/aircraft/${report.aircraftId}/edit`} className="underline underline-offset-4">
+                    {t("setCompany")}
+                  </Link>
+                </p>
+              )}
+            </Card>
+          ) : null}
+        </div>
       </div>
     </>
   );

@@ -4,7 +4,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { db } from "@/lib/db";
-import { ownerMembers, owners } from "@/lib/db/schema";
+import { holdingCompanyManagers, ownerMembers, owners } from "@/lib/db/schema";
 import type { Locale, StaffRole } from "@/lib/db/schema/_shared";
 import { env } from "@/lib/env";
 import { auth } from "./auth";
@@ -59,16 +59,23 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
     }
   }
 
-  const memberships = await db
-    .select({ ownerId: ownerMembers.ownerId, role: ownerMembers.role, canSeeFinances: ownerMembers.canSeeFinances })
-    .from(ownerMembers)
-    .where(eq(ownerMembers.userId, u.id));
+  const [memberships, managed] = await Promise.all([
+    db
+      .select({ ownerId: ownerMembers.ownerId, role: ownerMembers.role, canSeeFinances: ownerMembers.canSeeFinances })
+      .from(ownerMembers)
+      .where(eq(ownerMembers.userId, u.id)),
+    db
+      .select({ id: holdingCompanyManagers.holdingCompanyId })
+      .from(holdingCompanyManagers)
+      .where(eq(holdingCompanyManagers.userId, u.id)),
+  ]);
   const access = memberships.map((m) => ({ ownerId: m.ownerId, ...memberAccess(m.role, m.canSeeFinances) }));
   return {
     ...base,
     ownerIds: access.map((m) => m.ownerId),
     financeOwnerIds: access.filter((m) => m.finances).map((m) => m.ownerId),
     actingOwnerIds: access.filter((m) => m.acts).map((m) => m.ownerId),
+    managedCompanyIds: managed.map((m) => m.id),
     viewingAs: null,
   };
 });
@@ -84,7 +91,7 @@ export async function requireAccess(): Promise<Viewer> {
   const viewer = await requireViewer();
   if (needsWelcome(viewer)) redirect("/welcome");
   if (viewer.staffRole === "pilot") redirect("/pilot");
-  if (!viewer.staffRole && viewer.ownerIds.length === 0) redirect("/pending");
+  if (!viewer.staffRole && viewer.ownerIds.length === 0 && !viewer.managedCompanyIds?.length) redirect("/pending");
   return viewer;
 }
 
@@ -122,8 +129,9 @@ export const needsWelcome = (viewer: Viewer) =>
   (Boolean(viewer.staffRole) || viewer.ownerIds.length > 0);
 
 /** Where a signed-in person lands: the side staff used last, Home for owners, or the waiting screen. */
-export async function landingPath(viewer: Viewer): Promise<"/" | "/admin" | "/pending" | "/pilot"> {
+export async function landingPath(viewer: Viewer): Promise<"/" | "/admin" | "/pending" | "/pilot" | "/billing"> {
   if (viewer.staffRole === "pilot") return "/pilot";
   if (viewer.staffRole) return (await cookies()).get(SIDE_COOKIE)?.value === "client" ? "/" : "/admin";
-  return viewer.ownerIds.length === 0 ? "/pending" : "/";
+  if (viewer.ownerIds.length === 0) return viewer.managedCompanyIds?.length ? "/billing" : "/pending";
+  return "/";
 }

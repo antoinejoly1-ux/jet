@@ -1,5 +1,6 @@
 import { Download, Eye, FileText } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,21 @@ export default async function OwnerInvoicesPage() {
                           </Button>
                           <Button asChild size="sm" variant="ghost">
                             <a href={`/files/${r.fileId}`} aria-label={t("downloadNumber", { number: r.number })}>
+                              <Download aria-hidden />
+                              {t("download")}
+                            </a>
+                          </Button>
+                        </div>
+                      ) : r.holdingCompanyId ? (
+                        <div className="-ml-3 flex gap-1 sm:ml-0">
+                          <Button asChild size="sm" variant="ghost">
+                            <Link href={`/invoices/${r.id}`} aria-label={t("viewNumber", { number: r.number })}>
+                              <Eye aria-hidden />
+                              {t("view")}
+                            </Link>
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <a href={`/invoices/${r.id}/pdf`} aria-label={t("downloadNumber", { number: r.number })}>
                               <Download aria-hidden />
                               {t("download")}
                             </a>

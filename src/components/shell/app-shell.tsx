@@ -23,6 +23,7 @@ import { telHref } from "@/lib/phone";
 import { Toast } from "@/components/ui/toast";
 
 const FINANCE_PAGES = ["finances", "invoices"];
+const OWNER_PAGES = ["home", "availability", "flights", "messages", "aircraft"];
 
 /** The Univair wordmark, centered at the top of every signed-in page. */
 function CenterLogo({ side }: { side: Side }) {
@@ -50,14 +51,23 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
   const reports = side === "admin" ? await countReportsWaiting(db, viewer) : 0;
   const badges = { messages, flightReports: reports };
   // Members who don't see any owner's finances don't get the finance pages.
-  const hidden = side === "client" && !viewer.staffRole && financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : [];
+  const hidden =
+    side !== "client"
+      ? []
+      : [
+          ...(!viewer.staffRole && financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : []),
+          // Invoicing is for the people who run a holding company's books.
+          ...(viewer.managedCompanyIds?.length ? [] : ["billing"]),
+          // Someone who only runs a company's books has no aircraft of their own to show.
+          ...(!viewer.staffRole && viewer.ownerIds.length === 0 ? OWNER_PAGES : []),
+        ];
   const phone = env.OPERATOR_PHONE;
   const fab: Fab | null =
     side === "admin"
       ? viewer.staffRole === "dispatcher" || viewer.staffRole === "admin"
         ? { kind: "newFlight", href: "/admin/flights/new" }
         : null
-      : viewer.viewingAs
+      : viewer.viewingAs || (!viewer.staffRole && viewer.ownerIds.length === 0)
         ? null
         : { kind: "request", callHref: phone ? telHref(phone) : null };
   const expanded = (await cookies()).get(RAIL_COOKIE)?.value === "open";

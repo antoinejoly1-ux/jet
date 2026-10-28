@@ -294,6 +294,7 @@ const reviewColumns = {
   flightMinutes: flightReports.flightMinutes,
   submittedAt: flightReports.submittedAt,
   reviewedAt: flightReports.reviewedAt,
+  invoiceId: flightReports.invoiceId,
   flightId: flights.id,
   aircraftId: flights.aircraftId,
   registration: aircraft.registration,

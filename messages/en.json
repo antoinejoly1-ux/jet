@@ -25,7 +25,8 @@
       "imports": "Imports",
       "settings": "Settings",
       "holdingCompanies": "Holding companies",
-      "flightReports": "Flight reports"
+      "flightReports": "Flight reports",
+      "billing": "Billing"
     },
     "tabs": {
       "dashboard": "Dashboard",
@@ -415,7 +416,8 @@
       "maintenanceSoon": "{count, plural, one {maintenance starting within 48 h} other {maintenance jobs starting within 48 h}}",
       "lowHours": "{count, plural, one {share under 10% of its hours} other {shares under 10% of their hours}}",
       "ownersNeverInvited": "{count, plural, one {owner never invited} other {owners never invited}}",
-      "flightReports": "{count, plural, one {flight report to check} other {flight reports to check}}"
+      "flightReports": "{count, plural, one {flight report to check} other {flight reports to check}}",
+      "toInvoice": "{count, plural, one {approved flight to invoice} other {approved flights to invoice}}"
     }
   },
   "owners": {
@@ -615,7 +617,13 @@
       "airframe": "Invalid amount.",
       "avionics": "Invalid amount.",
       "pilot": "Invalid amount.",
-      "flightId": "Flight not found."
+      "flightId": "Flight not found.",
+      "address": "Address too long.",
+      "gstNumber": "Number too long.",
+      "qstNumber": "Number too long.",
+      "invoicePrefix": "2 to 8 letters or digits, e.g. UNI.",
+      "paymentTermsDays": "Between 0 and 120 days.",
+      "paymentInstructions": "Text too long."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -663,7 +671,15 @@
     "report_already_filed": "Another pilot already sent the report for this flight.",
     "invalid_receipt": "One of the receipts is invalid. Take the photo again.",
     "report_not_waiting": "This report was already handled.",
-    "rate_empty": "Enter at least one amount."
+    "rate_empty": "Enter at least one amount.",
+    "no_holding_company": "The aircraft belongs to no company.",
+    "no_rate": "The aircraft has no hourly rate for the flight's date.",
+    "share_required": "Choose who flew before invoicing.",
+    "report_not_approved": "The report needs approving first.",
+    "report_already_invoiced": "This flight is already invoiced.",
+    "prefix_taken": "Another company already uses this prefix.",
+    "no_account_for_email": "No account with this email. Ask the person to sign up first.",
+    "staff_already_has_access": "This person is on the Univair team: they already have access."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -852,7 +868,8 @@
     "saving": "Issuing…",
     "issue": "Issue invoice",
     "cancel": "Cancel",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "viewDetail": "View"
   },
   "ownerInvoices": {
     "title": "Invoices",
@@ -1816,7 +1833,9 @@
     "reportSent": "Report sent to finance.",
     "reportApproved": "Report approved.",
     "reportReturned": "Report sent back to the pilot.",
-    "rateSaved": "Rate saved."
+    "rateSaved": "Rate saved.",
+    "invoiceIssued": "Invoice issued and sent to the owner.",
+    "billingSaved": "Billing profile saved."
   },
   "search": {
     "open": "Search",
@@ -1957,6 +1976,85 @@
     "returnNotePlaceholder": "E.g. the fuel receipt at KTEB is missing.",
     "sendBack": "Send back to the pilot",
     "cancel": "Cancel",
-    "sendBackOpen": "Send back to the pilot with a note"
+    "sendBackOpen": "Send back to the pilot with a note",
+    "toInvoice": "To invoice ({count})",
+    "noCompanyShort": "No company",
+    "toInvoiceCta": "Invoice",
+    "invoiceTitle": "Invoice",
+    "openInvoice": "Open the invoice",
+    "noCompany": "The aircraft belongs to no company: there's nobody to issue the invoice.",
+    "setCompany": "Choose the company"
+  },
+  "invoiceDetail": {
+    "title": "Invoice",
+    "back": "Invoices",
+    "issuedOn": "Issued {date}",
+    "dueOn": "due by {date}",
+    "downloadPdf": "Download PDF",
+    "from": "Issued by",
+    "to": "Billed to",
+    "gst": "GST",
+    "qst": "QST",
+    "notRegistered": "Company not registered for GST and QST: no tax charged.",
+    "atCost": "at cost",
+    "subtotal": "Subtotal",
+    "gstLine": "GST (5%)",
+    "qstLine": "QST (9.975%)",
+    "total": "Total",
+    "howToPay": "Payment:",
+    "voided": "Invoice voided: {reason}",
+    "pdfTitle": "Invoice",
+    "number": "No.",
+    "date": "Date",
+    "due": "Due",
+    "flight": "Flight",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "managedBy": "Managed by Univair Management",
+    "previewFrom": "Issued in the name of {company}, to {owner}.",
+    "notCharged": "not charged",
+    "noTaxNumbers": "No GST or QST number in the company's profile: the invoice will have no taxes.",
+    "needsRate": "The aircraft has no hourly rate: set it before issuing.",
+    "issue": "Issue the invoice",
+    "issueConfirm": "The invoice gets its number and goes to the owner. It can't be changed afterwards, only voided.",
+    "issueYes": "Yes, issue",
+    "issuing": "Issuing…",
+    "cancel": "Cancel"
+  },
+  "billingProfile": {
+    "title": "Billing",
+    "body": "What the company's invoices say: address, tax numbers and numbering. Without a GST or QST number, that tax isn't charged.",
+    "address": "Address",
+    "gstNumber": "GST number",
+    "qstNumber": "QST number",
+    "taxHint": "Leave empty if the company isn't registered.",
+    "prefix": "Invoice prefix",
+    "prefixHint": "Example: {example}",
+    "terms": "Payment terms (days)",
+    "instructions": "Payment instructions",
+    "instructionsPlaceholder": "Interac e-Transfer to invoices@example.ca, or a cheque to the company.",
+    "save": "Save",
+    "notRegistered": "Not registered",
+    "managersTitle": "Company managers",
+    "managersBody": "The assistants or technicians who keep the company's books: they issue its invoices from the portal.",
+    "noManagers": "Nobody yet.",
+    "managerEmail": "Email",
+    "managerHint": "The person needs to have created their account first.",
+    "addManager": "Add",
+    "remove": "Remove",
+    "removeManager": "Remove {name}"
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Flights approved by Univair, ready to invoice in the company's name, and the invoices already issued.",
+    "toInvoice": "To invoice ({count})",
+    "emptyTitle": "Nothing to invoice",
+    "emptyBody": "Flights approved by Univair show up here, ready to invoice.",
+    "prepare": "Prepare the invoice",
+    "issued": "Issued invoices",
+    "prepareTitle": "Prepare the invoice",
+    "prepareBody": "Check the lines and taxes, then issue the invoice in the company's name."
   }
 }

@@ -9,6 +9,7 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours, formatMoney } from "@/lib/format";
+import { listToInvoice } from "@/lib/services/billing";
 import { listReportsForReview } from "@/lib/services/flight-reports";
 import { OPERATOR_TIME_ZONE } from "@/lib/time";
 
@@ -30,7 +31,10 @@ export default async function FlightReportsPage() {
       </>
     );
   const format = await getFormatter();
-  const { waiting, decided } = await listReportsForReview(db, viewer);
+  const [{ waiting, decided }, toInvoice] = await Promise.all([
+    listReportsForReview(db, viewer),
+    listToInvoice(db, viewer),
+  ]);
   const when = (d: Date) => format.dateTime(d, { dateStyle: "medium", timeZone: OPERATOR_TIME_ZONE });
 
   const Row = ({ r }: { r: (typeof waiting)[number] }) => (
@@ -81,6 +85,36 @@ export default async function FlightReportsPage() {
           </ul>
         )}
       </section>
+      {toInvoice.length ? (
+        <section aria-labelledby="to-invoice" className="mt-12 flex flex-col gap-3">
+          <h2 id="to-invoice" className="eyebrow">
+            {t("toInvoice", { count: toInvoice.length })}
+          </h2>
+          <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+            {toInvoice.map((r) => (
+              <li key={r.id}>
+                <Link
+                  href={`/admin/flight-reports/${r.id}`}
+                  className="hover:bg-surface-muted flex flex-col gap-1 px-5 py-4 sm:flex-row sm:items-center sm:gap-6"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium">
+                      {r.registration} · {r.fromAirport} → {r.toAirport}
+                    </p>
+                    <p className="text-muted text-sm">
+                      {when(r.departsAt)} · {r.ownerName ?? t("noOwner")} · {r.companyName ?? t("noCompanyShort")}
+                    </p>
+                  </div>
+                  <span className="text-accent flex items-center gap-1 text-sm font-medium">
+                    {t("toInvoiceCta")}
+                    <ChevronRight className="size-4" aria-hidden />
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       {decided.length ? (
         <section aria-labelledby="decided" className="mt-12 flex flex-col gap-3">
           <h2 id="decided" className="eyebrow">

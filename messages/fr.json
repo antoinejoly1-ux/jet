@@ -25,7 +25,8 @@
       "imports": "Importations",
       "settings": "Paramètres",
       "holdingCompanies": "Sociétés",
-      "flightReports": "Rapports de vol"
+      "flightReports": "Rapports de vol",
+      "billing": "Facturation"
     },
     "tabs": {
       "dashboard": "Tableau",
@@ -415,7 +416,8 @@
       "maintenanceSoon": "{count, plural, one {maintenance commence d'ici 48 h} other {maintenances commencent d'ici 48 h}}",
       "lowHours": "{count, plural, one {part sous 10 % de ses heures} other {parts sous 10 % de leurs heures}}",
       "ownersNeverInvited": "{count, plural, one {propriétaire jamais invité} other {propriétaires jamais invités}}",
-      "flightReports": "{count, plural, one {rapport de vol à vérifier} other {rapports de vol à vérifier}}"
+      "flightReports": "{count, plural, one {rapport de vol à vérifier} other {rapports de vol à vérifier}}",
+      "toInvoice": "{count, plural, one {vol approuvé à facturer} other {vols approuvés à facturer}}"
     }
   },
   "owners": {
@@ -615,7 +617,13 @@
       "airframe": "Montant invalide.",
       "avionics": "Montant invalide.",
       "pilot": "Montant invalide.",
-      "flightId": "Vol introuvable."
+      "flightId": "Vol introuvable.",
+      "address": "Adresse trop longue.",
+      "gstNumber": "Numéro trop long.",
+      "qstNumber": "Numéro trop long.",
+      "invoicePrefix": "De 2 à 8 lettres ou chiffres, ex. UNI.",
+      "paymentTermsDays": "Entre 0 et 120 jours.",
+      "paymentInstructions": "Texte trop long."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -663,7 +671,15 @@
     "report_already_filed": "Un autre pilote a déjà envoyé le rapport de ce vol.",
     "invalid_receipt": "Un des reçus est invalide. Reprenez la photo.",
     "report_not_waiting": "Ce rapport a déjà été traité.",
-    "rate_empty": "Entrez au moins un montant."
+    "rate_empty": "Entrez au moins un montant.",
+    "no_holding_company": "L'appareil n'appartient à aucune société.",
+    "no_rate": "L'appareil n'a pas de tarif horaire pour la date du vol.",
+    "share_required": "Choisissez qui a volé avant de facturer.",
+    "report_not_approved": "Le rapport doit d'abord être approuvé.",
+    "report_already_invoiced": "Ce vol est déjà facturé.",
+    "prefix_taken": "Ce préfixe est déjà utilisé par une autre société.",
+    "no_account_for_email": "Aucun compte avec ce courriel. Demandez à la personne de s'inscrire d'abord.",
+    "staff_already_has_access": "Cette personne fait partie de l'équipe Univair : elle a déjà accès."
   },
   "aircraft": {
     "title": "Appareils",
@@ -852,7 +868,8 @@
     "saving": "Émission…",
     "issue": "Émettre la facture",
     "cancel": "Annuler",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Exporter (CSV)",
+    "viewDetail": "Voir"
   },
   "ownerInvoices": {
     "title": "Factures",
@@ -1816,7 +1833,9 @@
     "reportSent": "Rapport envoyé aux finances.",
     "reportApproved": "Rapport approuvé.",
     "reportReturned": "Rapport renvoyé au pilote.",
-    "rateSaved": "Tarif enregistré."
+    "rateSaved": "Tarif enregistré.",
+    "invoiceIssued": "Facture émise et envoyée au propriétaire.",
+    "billingSaved": "Profil de facturation enregistré."
   },
   "search": {
     "open": "Rechercher",
@@ -1957,6 +1976,85 @@
     "returnNotePlaceholder": "Ex. : il manque le reçu du carburant à KTEB.",
     "sendBack": "Renvoyer au pilote",
     "cancel": "Annuler",
-    "sendBackOpen": "Renvoyer au pilote avec une note"
+    "sendBackOpen": "Renvoyer au pilote avec une note",
+    "toInvoice": "À facturer ({count})",
+    "noCompanyShort": "Sans société",
+    "toInvoiceCta": "Facturer",
+    "invoiceTitle": "Facture",
+    "openInvoice": "Voir la facture",
+    "noCompany": "L'appareil n'appartient à aucune société : impossible d'émettre une facture à son nom.",
+    "setCompany": "Choisir la société"
+  },
+  "invoiceDetail": {
+    "title": "Facture",
+    "back": "Factures",
+    "issuedOn": "Émise le {date}",
+    "dueOn": "payable au plus tard le {date}",
+    "downloadPdf": "Télécharger le PDF",
+    "from": "Émise par",
+    "to": "Facturée à",
+    "gst": "TPS",
+    "qst": "TVQ",
+    "notRegistered": "Société non inscrite aux fichiers de la TPS et de la TVQ : aucune taxe facturée.",
+    "atCost": "au coût",
+    "subtotal": "Sous-total",
+    "gstLine": "TPS (5 %)",
+    "qstLine": "TVQ (9,975 %)",
+    "total": "Total",
+    "howToPay": "Paiement :",
+    "voided": "Facture annulée : {reason}",
+    "pdfTitle": "Facture",
+    "number": "N°",
+    "date": "Date",
+    "due": "Échéance",
+    "flight": "Vol",
+    "description": "Description",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "amount": "Montant",
+    "managedBy": "Gérée par Univair Management",
+    "previewFrom": "Émise au nom de {company}, à {owner}.",
+    "notCharged": "non facturée",
+    "noTaxNumbers": "Aucun numéro de TPS ni de TVQ dans le profil de la société : la facture sera sans taxes.",
+    "needsRate": "L'appareil n'a pas de tarif horaire : fixez-le avant d'émettre.",
+    "issue": "Émettre la facture",
+    "issueConfirm": "La facture sera numérotée et envoyée au propriétaire. Elle ne pourra plus être modifiée, seulement annulée.",
+    "issueYes": "Oui, émettre",
+    "issuing": "Émission…",
+    "cancel": "Annuler"
+  },
+  "billingProfile": {
+    "title": "Facturation",
+    "body": "Ce qui figure sur les factures de la société : adresse, numéros de taxes et numérotation. Sans numéro de TPS ou de TVQ, cette taxe n'est pas facturée.",
+    "address": "Adresse",
+    "gstNumber": "Numéro de TPS",
+    "qstNumber": "Numéro de TVQ",
+    "taxHint": "Laissez vide si la société n’est pas inscrite.",
+    "prefix": "Préfixe des factures",
+    "prefixHint": "Exemple : {example}",
+    "terms": "Délai de paiement (jours)",
+    "instructions": "Instructions de paiement",
+    "instructionsPlaceholder": "Virement Interac à factures@exemple.ca, ou chèque à l’ordre de la société.",
+    "save": "Enregistrer",
+    "notRegistered": "Non inscrite",
+    "managersTitle": "Gestionnaires de la société",
+    "managersBody": "Les adjointes ou techniciens qui tiennent les livres de la société : ils émettent ses factures depuis le portail.",
+    "noManagers": "Personne pour l’instant.",
+    "managerEmail": "Courriel",
+    "managerHint": "La personne doit d’abord avoir créé son compte.",
+    "addManager": "Ajouter",
+    "remove": "Retirer",
+    "removeManager": "Retirer {name}"
+  },
+  "billing": {
+    "title": "Facturation",
+    "subtitle": "Les vols approuvés par Univair, prêts à facturer au nom de la société, et les factures déjà émises.",
+    "toInvoice": "À facturer ({count})",
+    "emptyTitle": "Rien à facturer",
+    "emptyBody": "Les vols approuvés par Univair apparaissent ici, prêts à facturer.",
+    "prepare": "Préparer la facture",
+    "issued": "Factures émises",
+    "prepareTitle": "Préparer la facture",
+    "prepareBody": "Vérifiez les lignes et les taxes, puis émettez la facture au nom de la société."
   }
 }

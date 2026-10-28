@@ -151,7 +151,19 @@ async function main() {
   const companies = await db
     .insert(s.holdingCompanies)
     .values([
-      { legalName: "Gestion Aviation JTA inc.", registrationNumber: "1171234567", email: "jta@example.com" },
+      {
+        legalName: "Gestion Aviation JTA inc.",
+        registrationNumber: "1171234567",
+        email: "jta@example.com",
+        // Registered for GST and QST: its invoices carry both taxes.
+        address: "3300, chemin de l'Aéroport\nLongueuil (Québec) J3Y 8Y9",
+        gstNumber: "741852963 RT0001",
+        qstNumber: "1234567890 TQ0001",
+        invoicePrefix: "JTA",
+        paymentTermsDays: 30,
+        paymentInstructions:
+          "Virement Interac à comptes@jta.example.com, ou chèque à l'ordre de Gestion Aviation JTA inc.",
+      },
       { legalName: "Altitude PC-12 S.E.C.", registrationNumber: "3372345678" },
       { legalName: "Citation Québec S.E.C.", registrationNumber: "3373456789" },
       { legalName: "King Air Laurentien inc.", registrationNumber: "1174567890" },
@@ -545,6 +557,10 @@ async function main() {
     arrivesAt: new Date(cj4Back.getTime() + 170 * 60_000),
     status: "scheduled",
   });
+
+  // Sophie keeps Gestion Aviation JTA's books: she issues its invoices from the portal.
+  const manager = await createLogin("gestion@jet.test", "Sophie Gagnon", null);
+  await db.insert(s.holdingCompanyManagers).values({ holdingCompanyId: companies[0]!.id, userId: manager.id });
 
   console.log("Demo logins…");
   await createLogin("admin@jet.test", "Alex Admin", "admin", staff2fa);

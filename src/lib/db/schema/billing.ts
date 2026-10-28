@@ -21,6 +21,7 @@ import {
 import { createdAt, currency, id, timestamps } from "./_shared";
 import { user } from "./auth";
 import { aircraft, flights, shares } from "./fleet";
+import { invoices } from "./finance";
 import { files } from "./platform";
 
 /**
@@ -70,6 +71,8 @@ export const flightReports = pgTable(
     reviewNote: text("review_note"),
     reviewedByUserId: uuid("reviewed_by_user_id").references(() => user.id, { onDelete: "set null" }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    /** The holding company's invoice to the owner, once issued. */
+    invoiceId: uuid("invoice_id").references(() => invoices.id, { onDelete: "restrict" }),
     submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
     ...timestamps(),
   },
@@ -111,4 +114,28 @@ export const flightReportExpenses = pgTable(
     index("flight_report_expenses_report_idx").on(t.reportId),
     check("flight_report_expenses_positive", sql`${t.amountCents} > 0`),
   ],
+);
+
+/** hours: flight time at one part of the rate; expense: a cost rebilled at cost. */
+export const invoiceLineKind = pgEnum("invoice_line_kind", ["hours", "expense"]);
+
+/** The lines of a generated invoice, fixed when it's issued. */
+export const invoiceLines = pgTable(
+  "invoice_lines",
+  {
+    id: id(),
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => invoices.id, { onDelete: "restrict" }),
+    kind: invoiceLineKind("kind").notNull(),
+    /** The rate part (fuel, engine, …) or the expense category. */
+    part: text("part").notNull(),
+    description: text("description"),
+    minutes: integer("minutes"),
+    unitCents: bigint("unit_cents", { mode: "number" }),
+    amountCents: bigint("amount_cents", { mode: "number" }).notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: createdAt(),
+  },
+  (t) => [index("invoice_lines_invoice_idx").on(t.invoiceId)],
 );

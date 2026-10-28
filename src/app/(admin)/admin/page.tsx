@@ -1,5 +1,6 @@
 import {
   ClipboardCheck,
+  FileText,
   CalendarClock,
   CheckCircle2,
   Clock3,
@@ -206,6 +207,7 @@ export default async function AdminDashboardPage() {
 
 const QUEUE_ICON: Record<QueueKey, [LucideIcon, IconMotion]> = {
   flightReports: [ClipboardCheck, "bounce"],
+  toInvoice: [FileText, "slide"],
   flightsToClose: [PlaneLanding, "plane"],
   flightRequests: [PlaneTakeoff, "plane"],
   awaitingReply: [MessageSquare, "wiggle"],

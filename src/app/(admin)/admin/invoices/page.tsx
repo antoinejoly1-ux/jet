@@ -139,6 +139,10 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
                       {t("viewPdf")}
                     </a>
                   </Button>
+                ) : r.holdingCompanyId ? (
+                  <Button asChild size="sm" variant="ghost">
+                    <Link href={`/admin/invoices/${r.id}`}>{t("viewDetail")}</Link>
+                  </Button>
                 ) : null}
                 {canWrite ? (
                   <InvoiceRowActions

@@ -1,5 +1,16 @@
 import { sql } from "drizzle-orm";
-import { boolean, check, index, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { deletedAt, id, locale, staffRole, timestamps } from "./_shared";
 import { user } from "./auth";
 
@@ -25,10 +36,44 @@ export const holdingCompanies = pgTable(
     email: text("email"),
     phone: text("phone"),
     notes: text("notes"),
+    /** Billing profile: what its invoices say, and how they're numbered. */
+    address: text("address"),
+    /** GST/HST registration (e.g. 123456789 RT0001). Empty: not registered, no GST charged. */
+    gstNumber: text("gst_number"),
+    /** QST registration (e.g. 1234567890 TQ0001). Empty: not registered, no QST charged. */
+    qstNumber: text("qst_number"),
+    /** Invoices are numbered PREFIX-YEAR-0001, per company, starting over each year. */
+    invoicePrefix: text("invoice_prefix"),
+    invoiceSeqYear: integer("invoice_seq_year"),
+    invoiceSeq: integer("invoice_seq").notNull().default(0),
+    paymentTermsDays: integer("payment_terms_days").notNull().default(30),
+    paymentInstructions: text("payment_instructions"),
     ...timestamps(),
     deletedAt: deletedAt(),
   },
   (t) => [index("holding_companies_legal_name_idx").on(t.legalName)],
+);
+
+/**
+ * People who run a holding company's books for its shareholders (an
+ * assistant or a technician): they issue its invoices from the portal.
+ */
+export const holdingCompanyManagers = pgTable(
+  "holding_company_managers",
+  {
+    id: id(),
+    holdingCompanyId: uuid("holding_company_id")
+      .notNull()
+      .references(() => holdingCompanies.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    ...timestamps(),
+  },
+  (t) => [
+    uniqueIndex("holding_company_managers_uq").on(t.holdingCompanyId, t.userId),
+    index("holding_company_managers_user_idx").on(t.userId),
+  ],
 );
 
 /** The person or company that holds shares. Separate from users (logins). */

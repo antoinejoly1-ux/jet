@@ -15,6 +15,8 @@ export type Actor = {
   financeOwnerIds?: readonly string[];
   /** Of those, the owners they can act for (write to the team, request flights). Defaults to all of `ownerIds`. */
   actingOwnerIds?: readonly string[];
+  /** Holding companies whose books this login runs: they issue those companies' invoices. */
+  managedCompanyIds?: readonly string[];
   /** Set when the request comes with an API key: exactly these permissions, organisation-wide. */
   apiScopes?: readonly Permission[];
 };
@@ -119,6 +121,19 @@ export class ForbiddenError extends Error {
 
 export function authorize(actor: Actor | null, permission: Permission, scope?: Scope): asserts actor is Actor {
   if (!can(actor, permission, scope)) throw new ForbiddenError(permission);
+}
+
+/**
+ * Who may issue a holding company's invoices: finance, and the people who
+ * manage that company's books (Charles's « adjointes ou techniciens »).
+ */
+export function canIssueInvoicesFor(actor: Actor | null, holdingCompanyId: string): boolean {
+  if (!actor || actor.apiScopes) return false;
+  return can(actor, "finance:write") || Boolean(actor.managedCompanyIds?.includes(holdingCompanyId));
+}
+
+export function authorizeInvoicing(actor: Actor | null, holdingCompanyId: string): asserts actor is Actor {
+  if (!canIssueInvoicesFor(actor, holdingCompanyId)) throw new ForbiddenError("finance:write");
 }
 
 export const isStaff = (actor: Pick<Actor, "staffRole"> | null): boolean => Boolean(actor?.staffRole);
