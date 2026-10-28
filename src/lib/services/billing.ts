@@ -6,12 +6,13 @@
  * an invoice's lines and issuer never change; a mistake is voided and reissued.
  */
 import "server-only";
-import { and, asc, desc, eq, inArray, isNotNull, isNull, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, isNull, ne, sql, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import type { Db, DbOrTx, Tx } from "@/lib/db";
 import {
   aircraft,
   budgetCategories,
+  files,
   flightReportExpenses,
   flightReports,
   flights,
@@ -28,11 +29,15 @@ import {
 import { authorize, authorizeInvoicing, can, type Actor } from "@/lib/auth/policy";
 import { formatMoney } from "@/lib/format";
 import { zonedDay } from "@/lib/time";
+import en from "../../../messages/en.json";
+import fr from "../../../messages/fr.json";
 import { recordAudit } from "./audit";
 import { ConflictError, NotFoundError } from "./errors";
 import { emit } from "./outbox";
 import { notifyOwnerMembers, sendPendingEmails } from "./owner-notifications";
-import { chargesFor, rateOn } from "./rates";
+import { chargesFor, fuelIncludedInRate, rateOn } from "./rates";
+
+export { fuelIncludedInRate };
 import { creditReserves } from "./reserves";
 
 /** Quebec sales taxes on a taxable supply: GST 5 %, QST 9.975 %, each on the subtotal. */
@@ -65,7 +70,7 @@ export function defaultPrefix(legalName: string) {
 }
 
 type Line = {
-  kind: "hours" | "expense";
+  kind: "hours" | "expense" | "included";
   part: string;
   description: string | null;
   minutes: number | null;
@@ -73,8 +78,24 @@ type Line = {
   amountCents: number;
 };
 
+type Locale = "fr" | "en";
+const MESSAGES = { fr, en } as const;
+
+/** Labels written into the owner's ledger, in the owner's language, fixed at issue time. */
+export function ledgerLabel(locale: Locale, line: { kind: string; part: string } | "taxes") {
+  const m = MESSAGES[locale];
+  if (line === "taxes") return m.invoiceDetail.ledgerTaxes;
+  if (line.kind === "hours") return m.rates.parts[line.part as keyof typeof m.rates.parts] ?? line.part;
+  const category = m.pilot.form.categories[line.part as keyof typeof m.pilot.form.categories] ?? line.part;
+  return `${category} (${m.invoiceDetail.atCost})`;
+}
+
+/** An expense in CAD: fixed at approval; a CAD expense not yet approved is its own amount. */
+export const expenseCadCents = (e: { amountCents: number; currency: string; amountCadCents: number | null }) =>
+  e.amountCadCents ?? (e.currency === "CAD" ? e.amountCents : null);
+
 /** Everything an invoice for this report would say, without saving anything. */
-async function draftFor(db: DbOrTx, reportId: string) {
+async function draftFor(db: DbOrTx, reportId: string, { zeroRated = false } = {}) {
   const [row] = await db
     .select({
       report: flightReports,
@@ -83,6 +104,7 @@ async function draftFor(db: DbOrTx, reportId: string) {
       company: holdingCompanies,
       ownerId: shares.ownerId,
       ownerName: owners.legalName,
+      ownerLocale: owners.locale,
     })
     .from(flightReports)
     .innerJoin(flights, eq(flights.id, flightReports.flightId))
@@ -93,11 +115,23 @@ async function draftFor(db: DbOrTx, reportId: string) {
     .where(eq(flightReports.id, reportId));
   if (!row) throw new NotFoundError("flight_report");
   const day = zonedDay(row.flight.departsAt);
+  const locale: Locale = row.ownerLocale === "en" ? "en" : "fr";
   const [rate, expenses] = await Promise.all([
     rateOn(db, row.flight.aircraftId, day),
     db
-      .select()
+      .select({
+        id: flightReportExpenses.id,
+        category: flightReportExpenses.category,
+        amountCents: flightReportExpenses.amountCents,
+        currency: flightReportExpenses.currency,
+        amountCadCents: flightReportExpenses.amountCadCents,
+        paidBy: flightReportExpenses.paidBy,
+        note: flightReportExpenses.note,
+        receiptFileId: flightReportExpenses.receiptFileId,
+        receiptType: files.contentType,
+      })
       .from(flightReportExpenses)
+      .leftJoin(files, eq(files.id, flightReportExpenses.receiptFileId))
       .where(eq(flightReportExpenses.reportId, reportId))
       .orderBy(asc(flightReportExpenses.createdAt)),
   ]);
@@ -113,20 +147,41 @@ async function draftFor(db: DbOrTx, reportId: string) {
           unitCents: l.perHourCents,
           amountCents: l.cents,
         });
-  for (const e of expenses)
+  const fuelIncluded = fuelIncludedInRate(rate);
+  let needsFxRate = false;
+  for (const e of expenses) {
+    if (e.category === "fuel" && fuelIncluded) {
+      lines.push({
+        kind: "included",
+        part: e.category,
+        description: e.note,
+        minutes: null,
+        unitCents: null,
+        amountCents: 0,
+      });
+      continue;
+    }
+    const cad = expenseCadCents(e);
+    if (cad === null) needsFxRate = true;
+    const converted =
+      e.currency !== "CAD" && cad !== null && row.report.usdCadRate
+        ? `${formatMoney(e.amountCents, e.currency, locale)} × ${Number(row.report.usdCadRate).toLocaleString(locale === "en" ? "en-CA" : "fr-CA", { maximumFractionDigits: 6 })}`
+        : null;
     lines.push({
       kind: "expense",
       part: e.category,
-      description: e.note,
+      description: [e.note, converted].filter(Boolean).join(" · ") || null,
       minutes: null,
       unitCents: null,
-      amountCents: e.amountCents,
+      amountCents: cad ?? 0,
     });
+  }
   const subtotalCents = lines.reduce((s, l) => s + l.amountCents, 0);
-  const taxes = row.company
-    ? taxesFor(subtotalCents, row.company)
-    : { gstCents: 0, qstCents: 0, totalCents: subtotalCents };
-  return { ...row, day, rate, lines, subtotalCents, ...taxes };
+  const taxes =
+    row.company && !zeroRated
+      ? taxesFor(subtotalCents, row.company)
+      : { gstCents: 0, qstCents: 0, totalCents: subtotalCents };
+  return { ...row, day, locale, rate, expenses, fuelIncluded, needsFxRate, lines, subtotalCents, ...taxes };
 }
 
 /** What a report's invoice would look like, for whoever may issue it. */
@@ -187,18 +242,37 @@ async function categoryIds(tx: Tx) {
 /**
  * Issues the invoice for an approved report: numbered in the company's
  * sequence, lines fixed, the owner's statement updated, the owner notified.
+ *
+ * The invoice is the one source of a flight's costs in the owner's ledger: a
+ * flight that already has a live invoice (issued here or uploaded) is refused,
+ * so its costs are never booked twice.
+ *
+ * `zeroRated`: finance marks an international flight as zero-rated (no GST or
+ * QST). Stored on the invoice and in the audit; taxed by default.
  */
-export async function issueInvoice(db: Db, actor: Actor, reportId: string, now = new Date()) {
+export async function issueInvoice(
+  db: Db,
+  actor: Actor,
+  reportId: string,
+  { zeroRated = false, now = new Date() }: { zeroRated?: boolean; now?: Date } = {},
+) {
   const { invoice, emails } = await db.transaction(async (tx) => {
     const [locked] = await tx.select().from(flightReports).where(eq(flightReports.id, reportId)).for("update");
     if (!locked) throw new NotFoundError("flight_report");
     if (locked.status !== "approved") throw new ConflictError("report_not_approved");
     if (locked.invoiceId) throw new ConflictError("report_already_invoiced");
-    const draft = await draftFor(tx, reportId);
+    const draft = await draftFor(tx, reportId, { zeroRated });
     if (!draft.company) throw new ConflictError("no_holding_company");
     authorizeInvoicing(actor, draft.company.id);
     if (!draft.rate) throw new ConflictError("no_rate");
     if (!draft.ownerId || !locked.shareId) throw new ConflictError("share_required");
+    if (draft.needsFxRate) throw new ConflictError("fx_rate_missing");
+    const [live] = await tx
+      .select({ id: invoices.id })
+      .from(invoices)
+      .where(and(eq(invoices.flightId, locked.flightId), ne(invoices.status, "void")))
+      .limit(1);
+    if (live) throw new ConflictError("flight_already_invoiced");
 
     // The company row is the lock that keeps numbers unique and gapless.
     const [company] = await tx
@@ -239,6 +313,7 @@ export async function issueInvoice(db: Db, actor: Actor, reportId: string, now =
         subtotalCents: draft.subtotalCents,
         gstCents: draft.gstCents,
         qstCents: draft.qstCents,
+        zeroRated,
         holdingCompanyId: company!.id,
         issuer,
       })
@@ -252,20 +327,22 @@ export async function issueInvoice(db: Db, actor: Actor, reportId: string, now =
       draft.lines,
     );
 
-    // The owner's ledger: one cost per line, plus the taxes.
+    // The owner's ledger: one cost per billed line, plus the taxes, labelled in the owner's language.
     const cats = await categoryIds(tx);
     const occurredOn = draft.day;
     await tx.insert(transactions).values([
-      ...draft.lines.map((l) => ({
-        shareId: locked.shareId!,
-        occurredOn,
-        categoryId: cats[l.part] ?? null,
-        kind: "cost" as const,
-        amountCents: l.amountCents,
-        invoiceId: invoice!.id,
-        description: `${number} · ${l.part}`,
-        createdByUserId: actor.id,
-      })),
+      ...draft.lines
+        .filter((l) => l.amountCents !== 0)
+        .map((l) => ({
+          shareId: locked.shareId!,
+          occurredOn,
+          categoryId: cats[l.part] ?? null,
+          kind: "cost" as const,
+          amountCents: l.amountCents,
+          invoiceId: invoice!.id,
+          description: `${number} · ${ledgerLabel(draft.locale, l)}`,
+          createdByUserId: actor.id,
+        })),
       ...(draft.gstCents + draft.qstCents > 0
         ? [
             {
@@ -275,7 +352,7 @@ export async function issueInvoice(db: Db, actor: Actor, reportId: string, now =
               kind: "cost" as const,
               amountCents: draft.gstCents + draft.qstCents,
               invoiceId: invoice!.id,
-              description: `${number} · taxes`,
+              description: `${number} · ${ledgerLabel(draft.locale, "taxes")}`,
               createdByUserId: actor.id,
             },
           ]
@@ -287,7 +364,14 @@ export async function issueInvoice(db: Db, actor: Actor, reportId: string, now =
       action: "invoice.issue",
       entityType: "invoice",
       entityId: invoice!.id,
-      after: { number, reportId, totalCents: draft.totalCents, gstCents: draft.gstCents, qstCents: draft.qstCents },
+      after: {
+        number,
+        reportId,
+        totalCents: draft.totalCents,
+        gstCents: draft.gstCents,
+        qstCents: draft.qstCents,
+        zeroRated,
+      },
     });
     await emit(tx, "invoice.issued", {
       invoiceId: invoice!.id,
@@ -345,7 +429,8 @@ export async function getInvoiceDetail(db: Db, actor: Actor, id: string) {
       .from(flightReports)
       .innerJoin(flights, eq(flights.id, flightReports.flightId))
       .leftJoin(user, eq(user.id, flightReports.pilotUserId))
-      .where(eq(flightReports.invoiceId, id)),
+      // By the invoice's flight, so a voided invoice (its report unlinked to be reissued) keeps its flight.
+      .where(invoice.invoice.flightId ? eq(flightReports.flightId, invoice.invoice.flightId) : sql`false`),
   ]);
   return { ...invoice, lines, report: report ?? null };
 }
@@ -359,7 +444,9 @@ export async function listManagedInvoices(db: Db, actor: Actor) {
       id: invoices.id,
       number: invoices.number,
       issuedOn: invoices.issuedOn,
+      dueOn: invoices.dueOn,
       totalCents: invoices.totalCents,
+      currency: invoices.currency,
       status: invoices.status,
       ownerName: owners.legalName,
       registration: aircraft.registration,

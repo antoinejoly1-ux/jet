@@ -28,9 +28,10 @@ export async function ReserveBars({
     <ul className="flex flex-col gap-5">
       {components.map((c) => (
         <li key={c.component}>
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          {/* Name and amount stack on a phone (every row the same, whatever the name's length), side by side above. */}
+          <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
             <p className="text-sm font-medium">{t(`components.${c.component}`)}</p>
-            <p className="tabular text-sm">
+            <p className="tabular text-sm sm:text-right">
               {cad(c.balanceCents)}
               {shareBp ? (
                 <span className="text-muted ml-2 text-xs">

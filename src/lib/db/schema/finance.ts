@@ -6,6 +6,7 @@
 import { sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
   check,
   date,
   index,
@@ -134,6 +135,13 @@ export const invoices = pgTable(
     currency: currency("currency").notNull().default("CAD"),
     status: invoiceStatus("status").notNull().default("issued"),
     voidReason: text("void_reason"),
+    /** The day it was voided (operator's time zone): the date of every reversing entry it made. */
+    voidedOn: date("voided_on"),
+    /** When finance recorded the payment, and how (cheque number, transfer reference…). */
+    paidOn: date("paid_on"),
+    paymentReference: text("payment_reference"),
+    /** Zero-rated international flight: issued without GST/QST, as finance decided when issuing. */
+    zeroRated: boolean("zero_rated").notNull().default(false),
     fileId: uuid("file_id").references(() => files.id, { onDelete: "restrict" }),
     source: dataSource("source").notNull().default("manual"),
     accountingId: text("accounting_id"),

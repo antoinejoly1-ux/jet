@@ -57,7 +57,9 @@ export default async function FlightReportsPage() {
             {r.expenseCount
               ? t("expensesSummary", {
                   count: r.expenseCount,
-                  total: formatMoney(r.expensesCents, "CAD", viewer.locale),
+                  total: r.usdCents
+                    ? `${formatMoney(r.expensesCents, "CAD", viewer.locale)} + ${formatMoney(r.usdCents, "USD", viewer.locale)}`
+                    : formatMoney(r.expensesCents, "CAD", viewer.locale),
                 })
               : t("noExpenses")}
           </span>

@@ -13,7 +13,7 @@ import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { zonedDay } from "@/lib/time";
 import { money } from "@/lib/validation/finance";
 import { recordAudit } from "./audit";
-import { NotFoundError } from "./errors";
+import { ConflictError, NotFoundError } from "./errors";
 import { RESERVE_PARTS, type ReservePart } from "./rates";
 
 export { RESERVE_PARTS };
@@ -39,7 +39,13 @@ export async function creditReserves(
 }
 
 /** A voided invoice gives back what it set aside: an opposite entry for each, never a deletion. */
-export async function reverseReservesOf(tx: Tx, invoiceId: string, actorUserId: string, note: string) {
+export async function reverseReservesOf(
+  tx: Tx,
+  invoiceId: string,
+  actorUserId: string,
+  note: string,
+  occurredOn = zonedDay(new Date()),
+) {
   const entries = await tx.select().from(reserveLedger).where(eq(reserveLedger.invoiceId, invoiceId));
   const net = new Map<string, { aircraftId: string; component: ReservePart; cents: number }>();
   for (const e of entries) {
@@ -55,7 +61,7 @@ export async function reverseReservesOf(tx: Tx, invoiceId: string, actorUserId: 
       component: n.component,
       kind: "adjustment" as const,
       amountCents: -n.cents,
-      occurredOn: zonedDay(new Date()),
+      occurredOn,
       invoiceId,
       note,
       createdByUserId: actorUserId,
@@ -166,6 +172,11 @@ export const reserveWorkInput = z.object({
   amount: money.refine((c) => c > 0, { message: "invalid_amount" }),
   occurredOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   note: z.string().trim().min(2).max(300),
+  /** Pay more than the reserve holds anyway (it goes negative), after being told. */
+  override: z
+    .union([z.boolean(), z.literal("on"), z.literal("true"), z.literal("")])
+    .optional()
+    .transform((v) => v === true || v === "on" || v === "true"),
 });
 export type ReserveWorkInput = z.input<typeof reserveWorkInput>;
 
@@ -174,8 +185,18 @@ export async function payFromReserve(db: Db, actor: Actor, aircraftId: string, r
   authorize(actor, "finance:write");
   const input = reserveWorkInput.parse(raw);
   return db.transaction(async (tx) => {
-    const [plane] = await tx.select({ id: aircraft.id }).from(aircraft).where(eq(aircraft.id, aircraftId));
+    const [plane] = await tx
+      .select({ id: aircraft.id })
+      .from(aircraft)
+      .where(eq(aircraft.id, aircraftId))
+      .for("update");
     if (!plane) throw new NotFoundError("aircraft");
+    const [held] = await tx
+      .select({ cents: sql<number>`coalesce(sum(${reserveLedger.amountCents}), 0)`.mapWith(Number) })
+      .from(reserveLedger)
+      .where(and(eq(reserveLedger.aircraftId, aircraftId), eq(reserveLedger.component, input.component)));
+    const balanceCents = held?.cents ?? 0;
+    if (input.amount > balanceCents && !input.override) throw new ConflictError("reserve_insufficient");
     const [row] = await tx
       .insert(reserveLedger)
       .values({
@@ -193,7 +214,13 @@ export async function payFromReserve(db: Db, actor: Actor, aircraftId: string, r
       action: "reserve.work",
       entityType: "aircraft",
       entityId: aircraftId,
-      after: { component: input.component, amountCents: input.amount, note: input.note },
+      after: {
+        component: input.component,
+        amountCents: input.amount,
+        note: input.note,
+        balanceBeforeCents: balanceCents,
+        override: input.amount > balanceCents,
+      },
     });
     return row!;
   });

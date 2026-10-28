@@ -4,10 +4,12 @@ import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 import type { Db } from "@/lib/db";
 import {
+  aircraft,
   conversations,
   files,
   flightReportExpenses,
   flightReports,
+  flights,
   imports,
   invoices,
   messages,
@@ -160,15 +162,18 @@ export async function fileDownloadUrl(db: Db, actor: Actor, fileId: string, opts
     invoice || attachment
       ? []
       : await db
-          .select({ pilotUserId: flightReports.pilotUserId })
+          .select({ pilotUserId: flightReports.pilotUserId, companyId: aircraft.holdingCompanyId })
           .from(flightReportExpenses)
           .innerJoin(flightReports, eq(flightReports.id, flightReportExpenses.reportId))
+          .innerJoin(flights, eq(flights.id, flightReports.flightId))
+          .innerJoin(aircraft, eq(aircraft.id, flights.aircraftId))
           .where(eq(flightReportExpenses.receiptFileId, fileId))
           .limit(1);
   if (invoice) authorize(actor, "finance:read", { ownerIds: [invoice.ownerId] });
   else if (receipt) {
-    // A receipt: finance, and the pilot who filed it.
-    if (receipt.pilotUserId !== actor.id) authorize(actor, "finance:read");
+    // A receipt: finance, the pilot who filed it, and the managers of the company that bills it.
+    const manages = !!receipt.companyId && !!actor.managedCompanyIds?.includes(receipt.companyId);
+    if (receipt.pilotUserId !== actor.id && !manages) authorize(actor, "finance:read");
   } else if (file.storageKey.startsWith("photos/")) {
     // Aircraft photos: the team sees them here; owners through /aircraft-photos/[id].
     authorize(actor, "fleet:read");

@@ -39,7 +39,8 @@
     "fabNewFlight": "Schedule a flight",
     "fabRequest": "Request a flight",
     "expand": "Show labels",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "pending": "{count, plural, one {# to handle} other {# to handle}}"
   },
   "toggle": {
     "label": "Switch view",
@@ -668,7 +669,8 @@
       "paymentInstructions": "Text too long.",
       "category": "Choose a type.",
       "target": "Invalid amount (e.g. 200,000).",
-      "component": "Choose a reserve."
+      "component": "Choose a reserve.",
+      "usdRate": "Enter the rate, e.g. 1.3850."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -725,7 +727,12 @@
     "prefix_taken": "Another company already uses this prefix.",
     "no_account_for_email": "No account with this email. Ask the person to sign up first.",
     "staff_already_has_access": "This person is on the Univair team: they already have access.",
-    "maintenance_self_review": "You sent this work to review: someone else on the team has to approve it."
+    "maintenance_self_review": "You sent this work to review: someone else on the team has to approve it.",
+    "fx_rate_missing": "Some US-dollar receipts have no exchange rate yet.",
+    "flight_already_invoiced": "This flight already has a live invoice: void it before issuing another.",
+    "invoice_paid": "A paid invoice can't be voided: issue a credit or a refund instead.",
+    "paid_in_future": "The payment date can't be in the future.",
+    "reserve_insufficient": "The reserve doesn't hold that much. Check the amount or tick 'Pay anyway'."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -989,7 +996,26 @@
     "issue": "Issue invoice",
     "cancel": "Cancel",
     "exportCsv": "Export (CSV)",
-    "viewDetail": "View"
+    "viewDetail": "View",
+    "overdue": "Overdue",
+    "receivable": "Receivable",
+    "openCount": "{count, plural, =0 {No invoices} one {# invoice} other {# invoices}}",
+    "overdueTotal": "Overdue",
+    "noneOverdue": "Nothing overdue",
+    "dueShort": "due {date}",
+    "paidShort": "paid {date}",
+    "open": "Open",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "paidOn": "Payment date",
+    "paymentReference": "Reference (optional)",
+    "paymentReferencePlaceholder": "Cheque or transfer number",
+    "recordPayment": "Record payment",
+    "close": "Close",
+    "voidHint": "The invoice stays visible, marked voided, and its entries are reversed.",
+    "keepInvoice": "Keep the invoice"
   },
   "ownerInvoices": {
     "title": "Invoices",
@@ -1128,7 +1154,14 @@
       "invalid_kind": "Unknown type (cost, revenue or payment)",
       "invalid_amount": "Unreadable or zero amount",
       "unknown_category": "Unknown category"
-    }
+    },
+    "dateOrderTitle": "Which order are the dates in?",
+    "dateOrderBody": "A date like {example} reads two ways, and no row in the file settles it.",
+    "dateOrders": {
+      "dmy": "Day/month/year (31/01/2026)",
+      "mdy": "Month/day/year (01/31/2026)"
+    },
+    "sampleCaption": "The first {count} rows, as they'll be imported"
   },
   "finances": {
     "title": "Finances",
@@ -1144,7 +1177,10 @@
     "byMonth": "Spending by month",
     "peak": "Highest month: {amount}",
     "exportCsv": "Download for Excel",
-    "statementPdf": "{year} statement (PDF)"
+    "statementPdf": "{year} statement (PDF)",
+    "billed": "Invoiced",
+    "billedHint": "Invoices issued in {year}, taxes included",
+    "reconcile": "“Spent” counts your costs before taxes, including {amount} entered directly without an invoice (hangar, insurance…). “Invoiced” counts the invoices issued, taxes included."
   },
   "flights": {
     "title": "Flights",
@@ -2118,7 +2154,7 @@
     "body": "After each flight: the flight time, the fuel and your expenses, with a photo of each receipt. The report goes to finance, who bill the right owner.",
     "toReport": "Flights to report",
     "nothingToReport": "All reported",
-    "nothingToReportBody": "Flights from the last 14 days show up here once they depart.",
+    "nothingToReportBody": "Flights from the last 14 days show up here once they've landed.",
     "returnedNote": "Sent back by finance:",
     "fix": "Fix",
     "report": "Fill in",
@@ -2132,7 +2168,7 @@
     "back": "Flight reports",
     "form": {
       "flightTime": "Flight time",
-      "flightTimeHint": "For example 2:15 or 2.25",
+      "flightTimeHint": "1:35 or 1h35",
       "fuelLitres": "Fuel added (litres)",
       "expenses": "Expenses",
       "expensesBody": "One line per receipt. Take a photo of the receipt: it's attached to the report.",
@@ -2153,7 +2189,7 @@
         "catering": "Catering",
         "other": "Other"
       },
-      "amount": "Amount ($)",
+      "amount": "Amount",
       "paidBy": "Paid by",
       "payers": {
         "company_card": "Company card",
@@ -2164,8 +2200,11 @@
       "receiptAttached": "Receipt attached",
       "addReceipt": "Receipt photo",
       "viewReceipt": "View",
-      "uploadFailed": "The photo couldn't be sent. Try again."
-    }
+      "uploadFailed": "The photo couldn't be sent. Try again.",
+      "flightTimeEcho": "= {time}",
+      "currency": "Currency"
+    },
+    "toFix": "To fix ({count})"
   },
   "rates": {
     "title": "Hourly rate",
@@ -2199,7 +2238,7 @@
     "expensesSummary": "{count, plural, one {# expense} other {# expenses}} · {total}",
     "noExpenses": "No expenses",
     "statuses": {
-      "submitted": "Sent",
+      "submitted": "To check",
       "returned": "To fix",
       "approved": "Approved"
     },
@@ -2215,7 +2254,7 @@
     "openReceipt": "Open the receipt: {category}",
     "noReceipt": "No receipt",
     "chargesTitle": "What the flight comes to",
-    "chargesBody": "The flight time at the aircraft's rate on the day of the flight, plus expenses rebilled at cost.",
+    "chargesBody": "Flight time at the aircraft's rate on the day, plus expenses rebilled at cost (in Canadian dollars).",
     "expensesAtCost": "Expenses rebilled at cost",
     "beforeTaxes": "Total before taxes",
     "noRate": "This aircraft has no hourly rate yet.",
@@ -2238,7 +2277,18 @@
     "invoiceTitle": "Invoice",
     "openInvoice": "Open the invoice",
     "noCompany": "The aircraft belongs to no company: there's nobody to issue the invoice.",
-    "setCompany": "Choose the company"
+    "setCompany": "Choose the company",
+    "payers": {
+      "company_card": "Company card",
+      "pilot": "Paid by the pilot, to reimburse"
+    },
+    "fuelIncluded": "Fuel included in the hourly rate",
+    "fuelIncludedBody": "The aircraft's rate includes fuel: this receipt is the company's cost and isn't billed again.",
+    "notBilled": "not billed",
+    "usdAtApproval": "US-dollar receipts are converted at the rate entered on approval.",
+    "usdRate": "Exchange rate USD → CAD",
+    "usdRateHint": "Canadian dollars for US$1, from the card statement. E.g. 1.3850",
+    "approvedRate": "USD → CAD rate: {rate}."
   },
   "invoiceDetail": {
     "title": "Invoice",
@@ -2268,7 +2318,7 @@
     "unitPrice": "Unit price",
     "amount": "Amount",
     "managedBy": "Managed by Univair Management",
-    "previewFrom": "Issued in the name of {company}, to {owner}.",
+    "previewFrom": "Will be issued in the name of {company}, to {owner}.",
     "notCharged": "not charged",
     "noTaxNumbers": "No GST or QST number in the company's profile: the invoice will have no taxes.",
     "needsRate": "The aircraft has no hourly rate: set it before issuing.",
@@ -2276,7 +2326,20 @@
     "issueConfirm": "The invoice gets its number and goes to the owner. It can't be changed afterwards, only voided.",
     "issueYes": "Yes, issue",
     "issuing": "Issuing…",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "ledgerTaxes": "GST/QST",
+    "fuelIncluded": "Fuel included in the hourly rate",
+    "notBilled": "not billed",
+    "receipts": "Receipts",
+    "needsFxRate": "Some US-dollar receipts have no exchange rate: finance must approve the report with the rate.",
+    "zeroRated": "International flight: zero-rated",
+    "zeroRatedHint": "No GST or QST. Confirm with your accountant before ticking.",
+    "issueConfirmZeroRated": "The invoice will be numbered, without GST or QST (zero-rated international flight), and sent to the owner. It can't be changed afterwards, only voided.",
+    "notYet": "Not now",
+    "voidBanner": "Voided on {date}",
+    "voidBannerNoDate": "Voided",
+    "paidOn": "paid on {date}",
+    "zeroRatedLine": "Zero-rated international flight: GST and QST"
   },
   "billingProfile": {
     "title": "Billing",
@@ -2312,7 +2375,13 @@
     "issued": "Issued invoices",
     "prepareTitle": "Prepare the invoice",
     "prepareBody": "Check the lines and taxes, then issue the invoice in the company's name.",
-    "results": "Company results"
+    "results": "Company results",
+    "groups": {
+      "issued": "Awaiting payment ({count})",
+      "paid": "Paid ({count})",
+      "void": "Voided ({count})"
+    },
+    "back": "Billing"
   },
   "pnl": {
     "title": "Company results",
@@ -2358,10 +2427,10 @@
     "exportCsv": "Export (CSV)",
     "year": "Year",
     "companyExpenses": "Company expenses",
-    "companyExpensesBody": "What the company pays outside the flights: pilots, insurance, the hangar… A mistake is cancelled with an opposite entry.",
+    "companyExpensesBody": "What the company pays outside flights: pilots, insurance, hangar… A mistake is reversed with an opposite entry.",
     "noCompanyExpenses": "No expenses recorded this year.",
     "reversal": "reversal",
-    "reverse": "Cancel",
+    "reverse": "Reverse",
     "addExpenseTitle": "Record an expense",
     "category": "Type",
     "amount": "Amount ($)",
@@ -2369,7 +2438,8 @@
     "description": "Description (optional)",
     "addExpense": "Record",
     "section": "Section",
-    "line": "Line"
+    "line": "Line",
+    "taxesIncluded": "(taxes included)"
   },
   "reserves": {
     "title": "Maintenance reserves",
@@ -2399,7 +2469,11 @@
     "totalWithPart": "{total} in reserve · your part: {part}",
     "companiesTitle": "Company results",
     "companiesBody": "What the owning company billed and paid this year: does it balance?",
-    "companyResults": "{name} results"
+    "companyResults": "{name} results",
+    "payConfirm": "The amount comes out of the chosen reserve. A mistake is corrected by a reversing entry, never an edit.",
+    "payYes": "Yes, pay from the reserve",
+    "notYet": "Not now",
+    "payAnyway": "Pay anyway: the reserve will go below zero."
   },
   "flightDetail": {
     "title": "Flight",

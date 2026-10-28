@@ -34,16 +34,28 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
   const tr = await getTranslations("rates");
   const tp = await getTranslations("pilot.form");
   const format = await getFormatter();
-  const { report, expenses, rate, charges, shareOptions } = await getReportForReview(db, viewer, id).catch((e) =>
-    e instanceof NotFoundError ? notFound() : Promise.reject(e),
-  );
+  const { report, expenses, rate, charges, fuelIncluded, shareOptions } = await getReportForReview(
+    db,
+    viewer,
+    id,
+  ).catch((e) => (e instanceof NotFoundError ? notFound() : Promise.reject(e)));
   const cad = (c: number) => formatMoney(c, "CAD", viewer.locale);
   // Once approved, the invoice it becomes (or the one it became).
   const draft =
     report.status === "approved" && !report.invoiceId
       ? await previewInvoice(db, viewer, report.id).catch(() => null)
       : null;
-  const expensesTotal = expenses.reduce((s, e) => s + e.amountCents, 0);
+  const money = (c: number, currency: "CAD" | "USD") => formatMoney(c, currency, viewer.locale);
+  // In CAD: fixed at approval; until then CAD receipts count and USD ones are shown apart.
+  const cadOf = (e: (typeof expenses)[number]) => e.amountCadCents ?? (e.currency === "CAD" ? e.amountCents : null);
+  const declaredCad = expenses.reduce((s, e) => s + (cadOf(e) ?? 0), 0);
+  const pendingUsd = expenses.filter((e) => cadOf(e) === null).reduce((s, e) => s + e.amountCents, 0);
+  const isIncluded = (e: (typeof expenses)[number]) => fuelIncluded && e.category === "fuel";
+  const billedExpenses = expenses.filter((e) => !isIncluded(e));
+  const billedCad = billedExpenses.reduce((s, e) => s + (cadOf(e) ?? 0), 0);
+  const billedUsdPending = billedExpenses.filter((e) => cadOf(e) === null).reduce((s, e) => s + e.amountCents, 0);
+  const includedFuel = expenses.filter(isIncluded);
+  const hasUsd = expenses.some((e) => e.currency === "USD");
   const pct = (bp: number) => format.number(bp / 10000, { style: "percent", maximumFractionDigits: 2 });
 
   return (
@@ -64,9 +76,14 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
         title={`${report.fromAirport} → ${report.toAirport}`}
         description={t("filedBy", {
           pilot: report.pilotName ?? t("unknownPilot"),
+          // Same shape as everywhere else: « mercredi 28 octobre 2026, 9 h 00 ».
           date: format.dateTime(report.departsAt, {
-            dateStyle: "full",
-            timeStyle: "short",
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
             timeZone: OPERATOR_TIME_ZONE,
           }),
         })}
@@ -87,7 +104,10 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
               </div>
               <div>
                 <dt className="text-muted text-xs">{t("expensesLabel")}</dt>
-                <dd className="tabular mt-1 text-2xl font-light">{cad(expensesTotal)}</dd>
+                <dd className="tabular mt-1 text-2xl font-light">
+                  {cad(declaredCad)}
+                  {pendingUsd ? <span className="text-muted block text-sm">+ {money(pendingUsd, "USD")}</span> : null}
+                </dd>
               </div>
             </dl>
             {report.notes ? <p className="text-muted mt-5 text-sm whitespace-pre-line">{report.notes}</p> : null}
@@ -130,11 +150,17 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
                     <div className="min-w-0 flex-1">
                       <p className="font-medium">{tp(`categories.${e.category}`)}</p>
                       <p className="text-muted text-sm">
-                        {tp(`payers.${e.paidBy}`)}
+                        {t(`payers.${e.paidBy}`)}
                         {e.note ? ` · ${e.note}` : ""}
                       </p>
+                      {isIncluded(e) ? <p className="text-muted text-xs">{t("fuelIncluded")}</p> : null}
                     </div>
-                    <span className="tabular font-medium">{cad(e.amountCents)}</span>
+                    <span className="tabular text-right font-medium">
+                      {money(e.amountCents, e.currency)}
+                      {e.currency !== "CAD" && e.amountCadCents != null ? (
+                        <span className="text-muted block text-xs font-normal">= {cad(e.amountCadCents)}</span>
+                      ) : null}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -154,14 +180,29 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
                     <dd className="tabular">{cad(l.cents)}</dd>
                   </div>
                 ))}
+                {includedFuel.length ? (
+                  <div className="flex justify-between gap-4 py-2.5">
+                    <dt className="text-muted">
+                      {t("fuelIncluded")}
+                      <span className="text-muted/80 block text-xs">{t("fuelIncludedBody")}</span>
+                    </dt>
+                    <dd className="tabular text-muted">{t("notBilled")}</dd>
+                  </div>
+                ) : null}
                 <div className="flex justify-between gap-4 py-2.5">
                   <dt className="text-muted">{t("expensesAtCost")}</dt>
-                  <dd className="tabular">{cad(expensesTotal)}</dd>
+                  <dd className="tabular text-right">
+                    {cad(billedCad)}
+                    {billedUsdPending ? (
+                      <span className="text-muted block text-xs">+ {money(billedUsdPending, "USD")}</span>
+                    ) : null}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4 pt-3 text-base">
                   <dt className="font-medium">{t("beforeTaxes")}</dt>
-                  <dd className="tabular font-semibold">{cad(charges.totalCents + expensesTotal)}</dd>
+                  <dd className="tabular font-semibold">{cad(charges.totalCents + billedCad)}</dd>
                 </div>
+                {billedUsdPending ? <p className="text-muted pt-2 text-xs">{t("usdAtApproval")}</p> : null}
               </dl>
             ) : (
               <p className="text-warning text-sm">
@@ -182,12 +223,15 @@ export default async function FlightReportPage({ params }: PageProps<"/admin/fli
                 approve={approveReportAction.bind(null, report.id)}
                 sendBack={returnReportAction.bind(null, report.id)}
                 shareId={report.shareId}
+                needsUsdRate={hasUsd}
                 shares={shareOptions.map((s) => ({ id: s.id, label: `${s.ownerName} · ${pct(s.percentageBp)}` }))}
               />
             ) : (
               <p className="text-muted text-sm">
                 {report.status === "approved"
-                  ? t("approvedFor", { owner: report.ownerName ?? "—" })
+                  ? report.usdCadRate
+                    ? `${t("approvedFor", { owner: report.ownerName ?? "—" })} ${t("approvedRate", { rate: format.number(Number(report.usdCadRate), { maximumFractionDigits: 6 }) })}`
+                    : t("approvedFor", { owner: report.ownerName ?? "—" })
                   : report.status === "returned"
                     ? t("returnedToPilot")
                     : t("readOnly")}

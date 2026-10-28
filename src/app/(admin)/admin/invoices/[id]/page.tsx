@@ -5,11 +5,14 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { InvoiceDetail } from "@/components/billing/invoice-detail";
 import { PageHeader } from "@/components/ui/page-header";
-import { ForbiddenError } from "@/lib/auth/policy";
+import { InvoiceRowActions } from "@/components/admin/invoice-row-actions";
+import { can, ForbiddenError } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getInvoiceDetail } from "@/lib/services/billing";
 import { NotFoundError } from "@/lib/services/errors";
+import { zonedDay } from "@/lib/time";
+import { markPaidAction, voidInvoiceAction } from "../actions";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("invoiceDetail"))("title") };
@@ -33,7 +36,20 @@ export default async function AdminInvoicePage({ params }: PageProps<"/admin/inv
         {t("back")}
       </Link>
       <PageHeader eyebrow={detail.invoice.issuer?.legalName} title={detail.invoice.number} />
-      <InvoiceDetail detail={detail} locale={viewer.locale} />
+      <InvoiceDetail
+        detail={detail}
+        locale={viewer.locale}
+        actions={
+          can(viewer, "finance:write") ? (
+            <InvoiceRowActions
+              status={detail.invoice.status}
+              today={zonedDay(new Date())}
+              markPaid={markPaidAction.bind(null, id)}
+              voidAction={voidInvoiceAction.bind(null, id)}
+            />
+          ) : null
+        }
+      />
     </>
   );
 }

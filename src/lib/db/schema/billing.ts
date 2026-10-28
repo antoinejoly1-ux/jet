@@ -11,6 +11,7 @@ import {
   date,
   index,
   integer,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -71,6 +72,8 @@ export const flightReports = pgTable(
     /** The share billed for the flight: the flight's, unless finance corrects it. */
     shareId: uuid("share_id").references(() => shares.id, { onDelete: "restrict" }),
     reviewNote: text("review_note"),
+    /** CAD per USD that finance entered at approval, when the pilot paid in US dollars. */
+    usdCadRate: numeric("usd_cad_rate", { precision: 10, scale: 6 }),
     reviewedByUserId: uuid("reviewed_by_user_id").references(() => user.id, { onDelete: "set null" }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
     /** The holding company's invoice to the owner, once issued. */
@@ -107,6 +110,8 @@ export const flightReportExpenses = pgTable(
     category: expenseCategory("category").notNull(),
     amountCents: bigint("amount_cents", { mode: "number" }).notNull(),
     currency: currency("currency").notNull().default("CAD"),
+    /** The amount in CAD, fixed at approval (converted at the report's rate when paid in USD). */
+    amountCadCents: bigint("amount_cad_cents", { mode: "number" }),
     paidBy: expensePayer("paid_by").notNull().default("company_card"),
     receiptFileId: uuid("receipt_file_id").references(() => files.id, { onDelete: "restrict" }),
     note: text("note"),
@@ -118,8 +123,11 @@ export const flightReportExpenses = pgTable(
   ],
 );
 
-/** hours: flight time at one part of the rate; expense: a cost rebilled at cost. */
-export const invoiceLineKind = pgEnum("invoice_line_kind", ["hours", "expense"]);
+/**
+ * hours: flight time at one part of the rate; expense: a cost rebilled at cost;
+ * included: a receipt the hourly rate already covers (fuel), shown with nothing billed.
+ */
+export const invoiceLineKind = pgEnum("invoice_line_kind", ["hours", "expense", "included"]);
 
 /** The lines of a generated invoice, fixed when it's issued. */
 export const invoiceLines = pgTable(

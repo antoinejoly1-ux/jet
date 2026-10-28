@@ -29,7 +29,7 @@ import { ConflictError, NotFoundError } from "./errors";
 import { applyCompletion, lockFlight } from "./flights";
 import { alertIfHoursLow } from "./hour-alerts";
 import { sendPendingEmails } from "./owner-notifications";
-import { chargesFor, rateOn } from "./rates";
+import { chargesFor, fuelIncludedInRate, rateOn } from "./rates";
 
 export const EXPENSE_CATEGORIES = [
   "fuel",
@@ -48,6 +48,8 @@ export const REPORT_WINDOW_DAYS = 14;
 const expenseInput = z.object({
   category: z.enum(EXPENSE_CATEGORIES),
   amount: money.refine((c) => c > 0, { message: "invalid_amount" }),
+  /** Receipts abroad are in US dollars: kept as paid, converted by finance at approval. */
+  currency: z.enum(["CAD", "USD"]).default("CAD"),
   paidBy: z.enum(["pilot", "company_card"]).default("company_card"),
   receiptFileId: z
     .string()
@@ -86,26 +88,34 @@ export type ReportInput = z.input<typeof reportInput>;
 const pilot = alias(user, "pilot");
 
 /**
- * What a pilot sees: the fleet's recent flights still to report (or sent back
- * to them), and the reports they've filed. No owner names, no money.
+ * What a pilot sees: their reports sent back to fix (first, whatever their
+ * age), the fleet's recent flights that have landed and have no report yet,
+ * and the reports they've filed. No owner names, no money.
  */
 export async function listPilotFlights(db: Db, actor: Actor, now = new Date()) {
   authorize(actor, "reports:file");
   const since = new Date(now.getTime() - REPORT_WINDOW_DAYS * 86_400_000);
-  const soon = new Date(now.getTime() + 12 * 3_600_000);
-  const [toReport, mine] = await Promise.all([
+  const columns = {
+    id: flights.id,
+    registration: aircraft.registration,
+    model: aircraft.model,
+    fromAirport: flights.fromAirport,
+    toAirport: flights.toAirport,
+    departsAt: flights.departsAt,
+    status: flights.status,
+    reportStatus: flightReports.status,
+    reviewNote: flightReports.reviewNote,
+  };
+  const [toFix, toReport, mine] = await Promise.all([
     db
-      .select({
-        id: flights.id,
-        registration: aircraft.registration,
-        model: aircraft.model,
-        fromAirport: flights.fromAirport,
-        toAirport: flights.toAirport,
-        departsAt: flights.departsAt,
-        status: flights.status,
-        reportStatus: flightReports.status,
-        reviewNote: flightReports.reviewNote,
-      })
+      .select(columns)
+      .from(flightReports)
+      .innerJoin(flights, eq(flights.id, flightReports.flightId))
+      .innerJoin(aircraft, eq(aircraft.id, flights.aircraftId))
+      .where(and(eq(flightReports.status, "returned"), eq(flightReports.pilotUserId, actor.id)))
+      .orderBy(desc(flights.departsAt)),
+    db
+      .select(columns)
       .from(flights)
       .innerJoin(aircraft, eq(aircraft.id, flights.aircraftId))
       .leftJoin(flightReports, eq(flightReports.flightId, flights.id))
@@ -113,9 +123,10 @@ export async function listPilotFlights(db: Db, actor: Actor, now = new Date()) {
         and(
           ne(flights.status, "cancelled"),
           gte(flights.departsAt, since),
-          lte(flights.departsAt, soon),
+          // Landed: past its arrival (or its departure, when no arrival was planned).
+          sql`coalesce(${flights.arrivesAt}, ${flights.departsAt}) <= ${now}`,
           isNull(aircraft.deletedAt),
-          or(isNull(flightReports.id), eq(flightReports.status, "returned")),
+          isNull(flightReports.id),
         ),
       )
       .orderBy(desc(flights.departsAt)),
@@ -138,7 +149,7 @@ export async function listPilotFlights(db: Db, actor: Actor, now = new Date()) {
       .orderBy(desc(flightReports.submittedAt))
       .limit(30),
   ]);
-  return { toReport, mine };
+  return { toFix, toReport, mine };
 }
 
 /** One flight as the pilot reports it, with the report so far when it's being corrected. */
@@ -171,6 +182,8 @@ const expensesOf = (db: Db | Tx, reportId: string) =>
       id: flightReportExpenses.id,
       category: flightReportExpenses.category,
       amountCents: flightReportExpenses.amountCents,
+      currency: flightReportExpenses.currency,
+      amountCadCents: flightReportExpenses.amountCadCents,
       paidBy: flightReportExpenses.paidBy,
       note: flightReportExpenses.note,
       receiptFileId: flightReportExpenses.receiptFileId,
@@ -246,6 +259,7 @@ export async function submitReport(db: Db, actor: Actor, raw: ReportInput, now =
           reportId: report!.id,
           category: e.category,
           amountCents: e.amount,
+          currency: e.currency,
           paidBy: e.paidBy,
           receiptFileId: e.receiptFileId ?? null,
           note: e.note || null,
@@ -304,8 +318,14 @@ const reviewColumns = {
   pilotName: pilot.name,
   shareId: flightReports.shareId,
   ownerName: owners.legalName,
+  /** In CAD: converted amounts once approved, CAD receipts as they are. */
   expensesCents:
-    sql<number>`coalesce((select sum(e.amount_cents) from flight_report_expenses e where e.report_id = ${flightReports.id}), 0)`.mapWith(
+    sql<number>`coalesce((select sum(coalesce(e.amount_cad_cents, case when e.currency = 'CAD' then e.amount_cents end)) from flight_report_expenses e where e.report_id = ${flightReports.id}), 0)`.mapWith(
+      Number,
+    ),
+  /** US-dollar receipts not converted yet (until approval), kept apart rather than added to CAD. */
+  usdCents:
+    sql<number>`coalesce((select sum(e.amount_cents) from flight_report_expenses e where e.report_id = ${flightReports.id} and e.currency = 'USD' and e.amount_cad_cents is null), 0)`.mapWith(
       Number,
     ),
   expenseCount:
@@ -351,6 +371,7 @@ export async function getReportForReview(db: Db, actor: Actor, id: string) {
       fuelLitres: flightReports.fuelLitres,
       notes: flightReports.notes,
       reviewNote: flightReports.reviewNote,
+      usdCadRate: flightReports.usdCadRate,
     })
     .from(flightReports)
     .where(eq(flightReports.id, id));
@@ -376,6 +397,8 @@ export async function getReportForReview(db: Db, actor: Actor, id: string) {
     expenses,
     rate,
     charges: rate ? chargesFor(rate, report.flightMinutes) : null,
+    /** Fuel receipts are covered by the rate (not billed again) when it has a fuel part. */
+    fuelIncluded: fuelIncludedInRate(rate),
     shareOptions,
   };
 }
@@ -387,10 +410,26 @@ const lockReport = async (tx: Tx, id: string) => {
   return row;
 };
 
-/** Finance confirms the report and who flew (the share billed). */
-export async function approveReport(db: Db, actor: Actor, id: string, raw: { shareId: string }) {
+/** "1,3850" or "1.385" → 1.385: CAD for one USD, as finance reads it off the bank or card statement. */
+export function parseFxRate(input: string | undefined): number | null {
+  const v = (input ?? "").trim().replace(",", ".");
+  if (!/^\d{1,2}(\.\d{1,6})?$/.test(v)) return null;
+  const n = Number(v);
+  return n >= 0.5 && n <= 3 ? n : null;
+}
+
+/** Converts at a rate held to six decimals, in integer arithmetic. */
+export const convertCents = (cents: number, rate: number) => Math.round((cents * Math.round(rate * 1e6)) / 1e6);
+
+/**
+ * Finance confirms the report and who flew (the share billed). Every expense
+ * is fixed in CAD here: CAD receipts as they are, USD receipts at the rate
+ * finance enters (required when there are any), so billing never adds US
+ * dollars to Canadian ones.
+ */
+export async function approveReport(db: Db, actor: Actor, id: string, raw: { shareId: string; usdRate?: string }) {
   authorize(actor, "finance:write");
-  const { shareId } = z.object({ shareId: z.string().uuid() }).parse(raw);
+  const { shareId, usdRate } = z.object({ shareId: z.string().uuid(), usdRate: z.string().optional() }).parse(raw);
   return db.transaction(async (tx) => {
     const report = await lockReport(tx, id);
     const [flight] = await tx.select().from(flights).where(eq(flights.id, report.flightId));
@@ -399,9 +438,26 @@ export async function approveReport(db: Db, actor: Actor, id: string, raw: { sha
       .from(shares)
       .where(and(eq(shares.id, shareId), eq(shares.aircraftId, flight!.aircraftId)));
     if (!share) throw new ConflictError("share_not_on_aircraft");
+    const expenses = await tx.select().from(flightReportExpenses).where(eq(flightReportExpenses.reportId, id));
+    const foreign = expenses.some((e) => e.currency !== "CAD");
+    const rate = foreign ? parseFxRate(usdRate) : null;
+    if (foreign && rate === null)
+      throw new z.ZodError([{ code: "custom", path: ["usdRate"], message: "fx_rate_required", input: usdRate }]);
+    for (const e of expenses)
+      await tx
+        .update(flightReportExpenses)
+        .set({ amountCadCents: e.currency === "CAD" ? e.amountCents : convertCents(e.amountCents, rate!) })
+        .where(eq(flightReportExpenses.id, e.id));
     const [row] = await tx
       .update(flightReports)
-      .set({ status: "approved", shareId, reviewedByUserId: actor.id, reviewedAt: new Date(), reviewNote: null })
+      .set({
+        status: "approved",
+        shareId,
+        reviewedByUserId: actor.id,
+        reviewedAt: new Date(),
+        reviewNote: null,
+        usdCadRate: rate === null ? null : rate.toFixed(6),
+      })
       .where(eq(flightReports.id, id))
       .returning();
     await recordAudit(tx, {
@@ -410,7 +466,7 @@ export async function approveReport(db: Db, actor: Actor, id: string, raw: { sha
       entityType: "flight_report",
       entityId: id,
       before: { shareId: report.shareId },
-      after: { shareId },
+      after: { shareId, ...(rate === null ? {} : { usdCadRate: rate }) },
     });
     return row!;
   });

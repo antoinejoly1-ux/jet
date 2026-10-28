@@ -34,7 +34,16 @@ export async function GET(request: NextRequest, { params }: RouteContext<"/invoi
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "long" });
   const issuer = invoice.issuer;
 
+  const voided = invoice.status === "void";
   const bytes = await renderInvoicePdf({
+    banner: voided
+      ? [
+          (invoice.voidedOn ? t("voidBanner", { date: day(invoice.voidedOn) }) : t("voidBannerNoDate")).toUpperCase(),
+          invoice.voidReason,
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : null,
     issuer: {
       name: issuer?.legalName ?? "",
       lines: [
@@ -51,29 +60,37 @@ export async function GET(request: NextRequest, { params }: RouteContext<"/invoi
     ],
     billTo: { label: t("to"), lines: [detail.ownerName, `${detail.registration} · ${detail.model}`] },
     flight: report
-      ? `${t("flight")} ${report.fromAirport} -> ${report.toAirport} · ${format.dateTime(report.departsAt, { dateStyle: "medium", timeZone: OPERATOR_TIME_ZONE })} · ${formatHours(report.flightMinutes, locale)}`
+      ? `${t("flight")} ${report.fromAirport} → ${report.toAirport} · ${format.dateTime(report.departsAt, { dateStyle: "medium", timeZone: OPERATOR_TIME_ZONE })} · ${formatHours(report.flightMinutes, locale)}`
       : null,
     columns: [t("description"), t("quantity"), t("unitPrice"), t("amount")],
     rows: lines.map((l) =>
       l.kind === "hours"
-        ? [tr(`parts.${l.part}`), formatHours(l.minutes ?? 0, locale), cad(l.unitCents ?? 0), cad(l.amountCents)]
-        : [
-            `${tp(`categories.${l.part}`)} (${t("atCost")})${l.description ? ` · ${l.description}` : ""}`,
-            "",
-            "",
+        ? [
+            tr(`parts.${l.part}`),
+            formatHours(l.minutes ?? 0, locale),
+            `${cad(l.unitCents ?? 0)} ${tr("perHourShort")}`,
             cad(l.amountCents),
-          ],
+          ]
+        : l.kind === "included"
+          ? [`${t("fuelIncluded")}${l.description ? ` · ${l.description}` : ""}`, "", "", t("notBilled")]
+          : [
+              `${tp(`categories.${l.part}`)} (${t("atCost")})${l.description ? ` · ${l.description}` : ""}`,
+              "",
+              "",
+              cad(l.amountCents),
+            ],
     ),
     totals: [
       [t("subtotal"), cad(invoice.subtotalCents ?? invoice.totalCents)],
       ...(invoice.gstCents ? ([[t("gstLine"), cad(invoice.gstCents)]] as [string, string][]) : []),
       ...(invoice.qstCents ? ([[t("qstLine"), cad(invoice.qstCents)]] as [string, string][]) : []),
+      ...(invoice.zeroRated ? ([[t("zeroRatedLine"), cad(0)]] as [string, string][]) : []),
     ],
     grandTotal: [t("total"), cad(invoice.totalCents)],
     notes: [
-      ...(issuer?.paymentInstructions ? [`${t("howToPay")} ${issuer.paymentInstructions}`] : []),
+      // A voided invoice isn't to be paid: no payment instructions; the banner says why.
+      ...(issuer?.paymentInstructions && !voided ? [`${t("howToPay")} ${issuer.paymentInstructions}`] : []),
       ...(!issuer?.gstNumber && !issuer?.qstNumber ? [t("notRegistered")] : []),
-      ...(invoice.status === "void" ? [t("voided", { reason: invoice.voidReason ?? "" })] : []),
     ],
     footer: `${issuer?.legalName ?? ""} · ${invoice.number} · ${t("managedBy")}`,
   });

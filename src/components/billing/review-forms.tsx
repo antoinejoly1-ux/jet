@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Field } from "@/components/ui/field";
 import { FormAlert } from "@/components/ui/form-alert";
 import { SelectField } from "@/components/ui/select";
 import { TextareaField } from "@/components/ui/textarea";
@@ -16,13 +17,17 @@ export function ReviewForms({
   sendBack,
   shares,
   shareId,
+  needsUsdRate = false,
 }: {
   approve: Action;
   sendBack: Action;
   shares: { id: string; label: string }[];
   shareId: string | null;
+  /** Some receipts are in USD: finance enters the rate that turns them into CAD. */
+  needsUsdRate?: boolean;
 }) {
   const t = useTranslations("flightReports");
+  const tf = useTranslations("formErrors");
   const [approveState, approveAction, approving] = useActionState(approve, idle);
   const [returnState, returnAction, returning] = useActionState(sendBack, idle);
   const [returningOpen, setReturningOpen] = useState(returnState.status === "error");
@@ -46,6 +51,19 @@ export function ReviewForms({
             </option>
           ))}
         </SelectField>
+        {needsUsdRate ? (
+          <Field
+            id="review-usd-rate"
+            name="usdRate"
+            label={t("usdRate")}
+            hint={t("usdRateHint")}
+            inputMode="decimal"
+            placeholder="1,3850"
+            defaultValue={submitted(approveState, "usdRate")}
+            error={approveState.status === "error" && approveState.fields?.usdRate ? tf("fields.usdRate") : undefined}
+            required
+          />
+        ) : null}
         <Button type="submit" disabled={approving || shares.length === 0}>
           {t("approve")}
         </Button>

@@ -9,12 +9,12 @@ import { formError, type FormState } from "@/lib/forms";
 import { issueInvoice } from "@/lib/services/billing";
 
 /** A holding company's manager issues the invoice for an approved flight report. */
-export async function issueInvoiceAction(reportId: string, _prev: FormState): Promise<FormState> {
+export async function issueInvoiceAction(reportId: string, _prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await requireAccess();
   let id: string;
   try {
     assertNotViewingAs(viewer);
-    id = (await issueInvoice(db, viewer, reportId)).id;
+    id = (await issueInvoice(db, viewer, reportId, { zeroRated: formData.get("zeroRated") === "on" })).id;
   } catch (err) {
     return formError(err);
   }

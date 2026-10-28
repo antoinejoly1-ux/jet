@@ -13,8 +13,11 @@ const M = 54;
 const INK = rgb(0.043, 0.071, 0.125);
 const MUTED = rgb(0.357, 0.392, 0.459);
 const RULE = rgb(0.886, 0.898, 0.918);
+const DANGER = rgb(0.631, 0.192, 0.122);
 
 export type InvoicePdf = {
+  /** « ANNULÉE le 28 octobre 2026 · motif », across the top of a voided invoice. */
+  banner: string | null;
   issuer: { name: string; lines: string[] };
   title: string;
   meta: [string, string][];
@@ -43,6 +46,34 @@ export async function renderInvoicePdf(doc: InvoicePdf): Promise<Uint8Array> {
   const right = (s: string, xRight: number, size = 10, b = false, color = INK) =>
     text(s, xRight - width(s, size, b), size, b, color);
   const rule = () => page.drawLine({ start: { x: M, y }, end: { x: W - M, y }, thickness: 0.5, color: RULE });
+  /** Text with « → » drawn as a small arrow: Helvetica (WinAnsi) has no arrow glyph. */
+  const withArrows = (s: string, x: number, size: number, color = INK) => {
+    let at = x;
+    s.split("→").forEach((part, i) => {
+      if (i > 0) {
+        const mid = y + size * 0.33;
+        const len = size * 0.9;
+        page.drawLine({ start: { x: at + 1, y: mid }, end: { x: at + len, y: mid }, thickness: 0.7, color });
+        page.drawLine({
+          start: { x: at + len - 2.5, y: mid + 2 },
+          end: { x: at + len, y: mid },
+          thickness: 0.7,
+          color,
+        });
+        page.drawLine({
+          start: { x: at + len - 2.5, y: mid - 2 },
+          end: { x: at + len, y: mid },
+          thickness: 0.7,
+          color,
+        });
+        at += len + 1;
+      }
+      if (part) {
+        text(part, at, size, false, color);
+        at += width(part, size);
+      }
+    });
+  };
   const footer = () => page.drawText(pdfSafe(doc.footer), { x: M, y: M / 2, size: 8, font, color: MUTED });
   const ensure = (h: number) => {
     if (y - h > M + 20) return;
@@ -50,6 +81,22 @@ export async function renderInvoicePdf(doc: InvoicePdf): Promise<Uint8Array> {
     page = pdf.addPage([W, H]);
     y = H - M;
   };
+
+  if (doc.banner) {
+    // A voided invoice says so first, in a box across the page.
+    const h = 26;
+    page.drawRectangle({
+      x: M,
+      y: y - h + 10,
+      width: W - 2 * M,
+      height: h,
+      borderColor: DANGER,
+      borderWidth: 1,
+      color: rgb(0.99, 0.95, 0.94),
+    });
+    text(doc.banner, M + 10, 11, true, DANGER);
+    y -= h + 14;
+  }
 
   // Issuer, top left; the invoice's number and dates, top right.
   text(doc.issuer.name, M, 14, true);
@@ -77,7 +124,7 @@ export async function renderInvoicePdf(doc: InvoicePdf): Promise<Uint8Array> {
   }
   if (doc.flight) {
     y -= 6;
-    text(doc.flight, M, 9, false, MUTED);
+    withArrows(doc.flight, M, 9, MUTED);
     y -= 13;
   }
   y -= 14;

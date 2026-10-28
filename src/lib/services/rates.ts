@@ -50,6 +50,14 @@ export function chargesFor(rate: AircraftRate, minutes: number) {
   return { lines, totalCents: lines.reduce((s, l) => s + l.cents, 0) };
 }
 
+/**
+ * Whether a fuel receipt is billed to the owner. Fuel is part of the hourly
+ * rate: when the rate in force has a fuel part, the fuel the pilot bought is
+ * the company's cost, already paid by the rate, and is not billed again. With
+ * no fuel in the rate, fuel receipts are rebilled at cost like any expense.
+ */
+export const fuelIncludedInRate = (rate: AircraftRate | null) => !!rate && perHour(rate, "fuel") > 0;
+
 const nonNegative = money.refine((c) => c >= 0, { message: "invalid_amount" });
 
 export const rateInput = z.object({
