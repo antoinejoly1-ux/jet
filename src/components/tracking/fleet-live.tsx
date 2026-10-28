@@ -39,13 +39,18 @@ export function FleetLive({ initial, header }: { initial: AircraftLive[]; header
   }, []);
 
   const airborne = fleet.filter((a) => a.state === "in_flight").length;
+  // What's moving first, then what's unavailable, then what's parked, then what we can't see.
+  const ORDER = { in_flight: 0, maintenance: 1, on_ground: 2, unknown: 3 } as const;
+  const sorted = [...fleet].sort(
+    (a, b) => ORDER[a.state] - ORDER[b.state] || a.registration.localeCompare(b.registration),
+  );
 
   return (
     <section
       aria-labelledby="fleet-live"
       className="theme-dark border-border bg-background relative overflow-hidden rounded-[28px] border"
     >
-      <div className="relative h-80 sm:h-[28rem] lg:h-[660px]">
+      <div className="relative h-56 sm:h-[28rem] lg:h-[660px]">
         <MapCanvas
           aircraft={fleet}
           locale={locale}
@@ -70,8 +75,8 @@ export function FleetLive({ initial, header }: { initial: AircraftLive[]; header
               {t("airborneCount", { count: airborne, total: fleet.length })}
             </p>
           </div>
-          <ul className="divide-border mt-3 min-h-0 divide-y overflow-y-auto lg:-mr-3 lg:pr-3">
-            {fleet.map((a) => (
+          <ul className="divide-border mt-3 min-h-0 divide-y overflow-y-auto [mask-image:linear-gradient(to_bottom,black_88%,transparent)] lg:-mr-3 lg:pr-3 lg:pb-6">
+            {sorted.map((a) => (
               <li key={a.aircraftId}>
                 <Link
                   href={`/admin/aircraft/${a.aircraftId}`}

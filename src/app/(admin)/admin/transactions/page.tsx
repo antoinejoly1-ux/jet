@@ -100,7 +100,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
           {rows.length === 0 ? (
             <EmptyState icon={ClipboardList} title={t("emptyTitle")} body={t("emptyBody")} />
           ) : (
-            <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
+            <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
               {rows.map((r) => (
                 <li key={r.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
                   <div className="min-w-0 flex-1">

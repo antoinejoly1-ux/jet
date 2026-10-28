@@ -38,7 +38,7 @@ export default async function HoldingCompaniesPage() {
       {rows.length === 0 ? (
         <EmptyState icon={Building2} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
-        <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
+        <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
           {rows.map((c) => (
             <li key={c.id}>
               <Link

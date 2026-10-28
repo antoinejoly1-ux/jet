@@ -11,14 +11,17 @@ import type { CompleteFlightInput, FlightInput } from "@/lib/validation/operatio
 
 export async function scheduleFlightAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await requireStaff();
+  let flight: { id: string };
   try {
     const requestId = String(formData.get("requestId") ?? "") || undefined;
-    await scheduleFlight(db, viewer, formValues(formData) as unknown as FlightInput, { requestId });
+    flight = await scheduleFlight(db, viewer, formValues(formData) as unknown as FlightInput, { requestId });
   } catch (err) {
     return formError(err, formValues(formData));
   }
   await flash("flightScheduled");
   revalidatePath("/admin/flights");
+  // "Enregistrer et planifier le retour": the same form, reversed.
+  if (formData.get("then") === "return") redirect(`/admin/flights/new?returnOf=${flight.id}`);
   redirect("/admin/flights");
 }
 

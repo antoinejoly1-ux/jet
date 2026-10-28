@@ -12,9 +12,12 @@ import { idle, submitted, type FormState } from "@/lib/forms";
 export function Composer({
   action,
   placeholder,
+  resolveLabel,
 }: {
   action: (s: FormState, d: FormData) => Promise<FormState>;
   placeholder: string;
+  /** Staff: a second button that sends and marks the conversation resolved. */
+  resolveLabel?: string;
 }) {
   const t = useTranslations("messages");
   const tf = useTranslations("formErrors");
@@ -97,7 +100,14 @@ export function Composer({
           <span className="sr-only sm:not-sr-only">{uploading ? t("uploading") : t("send")}</span>
         </Button>
       </div>
-      <p className="text-muted hidden text-xs sm:block">{t("enterHint")}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-muted hidden text-xs sm:block">{t("enterHint")}</p>
+        {resolveLabel ? (
+          <Button type="submit" name="then" value="resolve" size="sm" variant="ghost" disabled={pending || uploading}>
+            {resolveLabel}
+          </Button>
+        ) : null}
+      </div>
     </form>
   );
 }

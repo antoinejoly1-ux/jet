@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AirportField } from "@/components/flights/airport-field";
 import { Field } from "@/components/ui/field";
 import { FormAlert } from "@/components/ui/form-alert";
 import { SelectField } from "@/components/ui/select";
@@ -26,6 +27,7 @@ export function FlightForm({
   shares,
   defaults,
   requestId,
+  allowReturn = false,
 }: {
   action: (s: FormState, d: FormData) => Promise<FormState>;
   aircraft: AircraftOption[];
@@ -33,6 +35,8 @@ export function FlightForm({
   defaults?: FlightDefaults;
   /** Planning an owner's request: saving closes it and tells the owner. */
   requestId?: string;
+  /** New flights offer "Enregistrer et planifier le retour". */
+  allowReturn?: boolean;
 }) {
   const t = useTranslations("flights");
   const tf = useTranslations("formErrors");
@@ -69,7 +73,12 @@ export function FlightForm({
           id="shareId"
           name="shareId"
           label={t("share")}
-          defaultValue={submitted(state, "shareId", defaults?.shareId)}
+          // One share on the aircraft: it's the one.
+          defaultValue={submitted(
+            state,
+            "shareId",
+            defaults?.shareId ?? (planeShares.length === 1 ? planeShares[0]!.id : ""),
+          )}
           error={err("shareId")}
           disabled={!aircraftId}
         >
@@ -80,21 +89,16 @@ export function FlightForm({
             </option>
           ))}
         </SelectField>
-        <Field
-          id="fromAirport"
+        <AirportField
           name="fromAirport"
           label={t("from")}
-          hint={t("airportHint")}
-          autoCapitalize="characters"
           defaultValue={submitted(state, "fromAirport", defaults?.fromAirport)}
           error={err("fromAirport")}
           required
         />
-        <Field
-          id="toAirport"
+        <AirportField
           name="toAirport"
           label={t("to")}
-          autoCapitalize="characters"
           defaultValue={submitted(state, "toAirport", defaults?.toAirport)}
           error={err("toAirport")}
           required
@@ -122,6 +126,12 @@ export function FlightForm({
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}
         </Button>
+        {/* Most trips come back: save this leg and open the return, reversed and ready. */}
+        {allowReturn ? (
+          <Button type="submit" name="then" value="return" variant="secondary" disabled={pending}>
+            {t("saveAndReturn")}
+          </Button>
+        ) : null}
         <Button asChild variant="ghost">
           <Link href="/admin/flights">{t("cancel")}</Link>
         </Button>

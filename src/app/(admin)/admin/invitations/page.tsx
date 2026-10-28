@@ -85,7 +85,7 @@ export default async function InvitationsPage({ searchParams }: PageProps<"/admi
         {rows.length === 0 ? (
           <EmptyState icon={MailPlus} title={t("emptyTitle")} body={t("emptyBody")} />
         ) : (
-          <ul className="divide-border bg-surface shadow-card flex flex-col divide-y self-start rounded-lg border border-(--card-border)">
+          <ul className="divide-border bg-surface border-border flex flex-col divide-y self-start rounded-lg border">
             {rows.map((r) => (
               <li key={r.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
                 <div className="min-w-0 flex-1">

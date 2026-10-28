@@ -47,7 +47,7 @@ export default async function OwnerAircraftPage() {
       <div className="flex flex-col gap-8">
         {fleet.map((a) => (
           <section key={a.shareId} aria-labelledby={`plane-${a.shareId}`} className="grid gap-4 lg:grid-cols-3">
-            <div className="bg-primary shadow-card relative h-64 overflow-hidden rounded-lg sm:h-80 lg:col-span-3">
+            <div className="bg-primary relative h-64 overflow-hidden rounded-lg sm:h-80 lg:col-span-3">
               <Image
                 src={aircraftPhoto(a.model)}
                 alt=""

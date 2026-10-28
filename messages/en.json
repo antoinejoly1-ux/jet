@@ -388,11 +388,11 @@
     "owners": "Owners",
     "aircraft": "Aircraft",
     "pendingInvitations": "Pending invitations",
-    "accountsWaiting": "Accounts without access",
+    "accountsWaiting": "Accounts created, no access",
     "flightsToday": "Flights today",
     "flightsThisWeek": "Flights this week",
     "inMaintenance": "Aircraft in maintenance",
-    "ownersWithoutAccess": "Owners without access",
+    "ownersWithoutAccess": "Owners never invited",
     "hello": "Hello, {name}",
     "heroLight": "Operations,",
     "heroNow": "right now",
@@ -1016,7 +1016,7 @@
     "airportHint": "ICAO code, e.g. CYUL.",
     "departsAt": "Departure time",
     "arrivesAt": "Arrival time (optional)",
-    "localTimeHint": "Montreal time.",
+    "localTimeHint": "Montréal time (EDT/EST).",
     "saving": "Saving…",
     "save": "Save",
     "cancel": "Cancel",
@@ -1036,7 +1036,10 @@
     "flightTimeReadOwner": "= {hours} · charged to {owner}",
     "flightTimeInvalid": "E.g. 2:15, 2h15 or 2.25",
     "toCloseTitle": "To close",
-    "toCloseBody": "These flights have landed: enter the flight time to charge it to the hour bank."
+    "toCloseBody": "These flights have landed: enter the flight time to charge it to the hour bank.",
+    "saveAndReturn": "Save and plan the return",
+    "returnTitle": "The return · {route}",
+    "returnSubtitle": "Same aircraft, same owner, airports swapped. Only the time is left to choose."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1187,6 +1190,7 @@
     "inboxSubtitle": "Conversations with owners.",
     "filters": "Filter conversations",
     "filterNames": {
+      "waiting": "Waiting",
       "open": "Open",
       "mine": "Mine",
       "resolved": "Resolved"
@@ -1194,7 +1198,8 @@
     "emptyFilter": {
       "open": "No open conversations.",
       "mine": "No conversations are assigned to you.",
-      "resolved": "No resolved conversations."
+      "resolved": "No resolved conversations.",
+      "waiting": "Nobody is waiting for a reply. Nice work."
     },
     "unassigned": "Unassigned",
     "unreadSuffix": "unread",
@@ -1209,7 +1214,8 @@
     "resolve": "Mark resolved",
     "reopen": "Reopen",
     "readOnlyMember": "Your access is read-only: call or text the team with any request.",
-    "responseHintClosed": "Outside office hours: we'll reply from 7 a.m. Urgent? Call us."
+    "responseHintClosed": "Outside office hours: we'll reply from 7 a.m. Urgent? Call us.",
+    "replyAndResolve": "Reply and resolve"
   },
   "notifications": {
     "title": "Notifications",
@@ -1786,5 +1792,24 @@
     "invitationRevoked": "Invitation revoked.",
     "profileSaved": "Profile saved.",
     "close": "Close"
+  },
+  "search": {
+    "open": "Search",
+    "placeholder": "Owner, registration, company, invoice…",
+    "actionsTitle": "Quick actions",
+    "resultsTitle": "Results",
+    "empty": "No results.",
+    "actions": {
+      "newFlight": "Plan a flight",
+      "newOwner": "New owner",
+      "invite": "Invite an owner"
+    },
+    "kinds": {
+      "owner": "Owner",
+      "company": "Company",
+      "aircraft": "Aircraft",
+      "invoice": "Invoice",
+      "conversation": "Conversation"
+    }
   }
 }

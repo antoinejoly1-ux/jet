@@ -14,6 +14,7 @@ import { Logo, Star } from "@/components/brand/logo";
 import { TeamReach } from "@/components/brand/team";
 import { env } from "@/lib/env";
 import { BottomTabs, RAIL_COOKIE, Sidebar, type Fab, type Side } from "./nav";
+import { CommandPalette } from "./command-palette";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
 import { readFlash } from "@/lib/flash";
@@ -106,6 +107,7 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
               <CenterLogo side={side} />
             </div>
             <div className="col-start-3 flex items-center justify-end gap-2 sm:gap-3">
+              {viewer.staffRole && side === "admin" ? <CommandPalette /> : null}
               {viewer.staffRole ? <SideToggle current={side} /> : null}
               <NotificationBell side={side} unread={notifications} />
               <UserMenu name={viewer.name} email={viewer.email} image={viewer.image} />

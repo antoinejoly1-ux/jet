@@ -154,18 +154,23 @@ export async function postOwnerMessage(
 
 /* ---------- Staff side ---------- */
 
-export type InboxFilter = "open" | "mine" | "resolved";
+export type InboxFilter = "waiting" | "open" | "mine" | "resolved";
 
 /** Conversations for the back office, most recent activity first, with unread counts. */
-export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "open") {
+export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "waiting") {
   authorize(actor, "messages:reply");
   const assignee = alias(user, "assignee");
+  // "En attente": open threads whose latest message is the owner's, i.e. someone is waiting for us.
+  const ownerWrote = sql`(select u.staff_role from messages m left join users u on u.id = m.sender_user_id
+    where m.conversation_id = ${conversations.id} order by m.created_at desc limit 1) is null`;
   const where =
     filter === "resolved"
       ? isNotNull(conversations.resolvedAt)
       : filter === "mine"
         ? and(isNull(conversations.resolvedAt), eq(conversations.assignedToUserId, actor.id))
-        : isNull(conversations.resolvedAt);
+        : filter === "waiting"
+          ? and(isNull(conversations.resolvedAt), ownerWrote)
+          : isNull(conversations.resolvedAt);
   const lastAt = sql<Date | null>`(select max(m.created_at) from messages m where m.conversation_id = ${conversations.id})`;
   return (
     db
@@ -188,7 +193,8 @@ export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "ope
       .leftJoin(assignee, eq(assignee.id, conversations.assignedToUserId))
       // Threads opened from an owner's page but never written in stay out of the inbox.
       .where(and(where, sql`${lastAt} is not null`))
-      .orderBy(desc(lastAt))
+      // Waiting: longest wait first. Everything else: latest activity first.
+      .orderBy(filter === "waiting" ? asc(lastAt) : desc(lastAt))
       .limit(200)
   );
 }

@@ -110,3 +110,14 @@ test("the last admin can't be demoted, and the audit log records the team's acti
   await page.getByRole("navigation", { name: "Filtres" }).getByRole("link", { name: "Propriétaires" }).click();
   await expect(page).toHaveURL(/action=owner\./);
 });
+
+test("staff find anything with ⌘K and see what needs doing", async ({ page }) => {
+  await signIn(page, "dispatch@jet.test");
+  await expect(page.getByRole("heading", { name: "À traiter" })).toBeVisible();
+  await page.getByRole("button", { name: "Rechercher" }).click();
+  await page.getByRole("combobox", { name: "Rechercher" }).fill("gjta");
+  await expect(page.getByRole("option", { name: /C-GJTA/ })).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/\/admin\/aircraft\/[0-9a-f-]+$/);
+  await expect(page.getByRole("heading", { level: 1, name: "C-GJTA" })).toBeVisible();
+});

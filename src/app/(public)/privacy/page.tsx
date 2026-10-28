@@ -28,10 +28,7 @@ export default async function PrivacyPage() {
         <p className="mt-4 leading-relaxed">{t("intro", { operator })}</p>
       </header>
 
-      <section
-        aria-labelledby="officer"
-        className="bg-surface shadow-card rounded-lg border border-(--card-border) p-5"
-      >
+      <section aria-labelledby="officer" className="bg-surface border-border rounded-lg border p-5">
         <h2 id="officer" className="font-semibold">
           {t("officerTitle")}
         </h2>

@@ -388,11 +388,11 @@
     "owners": "Propriétaires",
     "aircraft": "Appareils",
     "pendingInvitations": "Invitations en attente",
-    "accountsWaiting": "Comptes sans accès",
+    "accountsWaiting": "Comptes créés, sans accès",
     "flightsToday": "Vols aujourd'hui",
     "flightsThisWeek": "Vols cette semaine",
     "inMaintenance": "Appareils en maintenance",
-    "ownersWithoutAccess": "Propriétaires sans accès",
+    "ownersWithoutAccess": "Propriétaires jamais invités",
     "hello": "Bonjour, {name}",
     "heroLight": "Les opérations,",
     "heroNow": "en ce moment",
@@ -1016,7 +1016,7 @@
     "airportHint": "Code OACI, ex. CYUL.",
     "departsAt": "Heure de départ",
     "arrivesAt": "Heure d'arrivée (facultatif)",
-    "localTimeHint": "Heure de Montréal.",
+    "localTimeHint": "Heure de Montréal (HAE/HNE).",
     "saving": "Enregistrement…",
     "save": "Enregistrer",
     "cancel": "Annuler",
@@ -1036,7 +1036,10 @@
     "flightTimeReadOwner": "= {hours} · débité à {owner}",
     "flightTimeInvalid": "Ex. 2:15, 2h15 ou 2,25",
     "toCloseTitle": "À clôturer",
-    "toCloseBody": "Ces vols ont atterri : inscrivez le temps de vol pour le débiter de la banque d'heures."
+    "toCloseBody": "Ces vols ont atterri : inscrivez le temps de vol pour le débiter de la banque d'heures.",
+    "saveAndReturn": "Enregistrer et planifier le retour",
+    "returnTitle": "Le retour · {route}",
+    "returnSubtitle": "Même appareil, même propriétaire, les aéroports inversés. Il reste l'heure à choisir."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1187,6 +1190,7 @@
     "inboxSubtitle": "Les conversations avec les propriétaires.",
     "filters": "Filtrer les conversations",
     "filterNames": {
+      "waiting": "En attente",
       "open": "Ouvertes",
       "mine": "Les miennes",
       "resolved": "Résolues"
@@ -1194,7 +1198,8 @@
     "emptyFilter": {
       "open": "Aucune conversation ouverte.",
       "mine": "Aucune conversation ne vous est assignée.",
-      "resolved": "Aucune conversation résolue."
+      "resolved": "Aucune conversation résolue.",
+      "waiting": "Personne n'attend de réponse. Bravo."
     },
     "unassigned": "Non assignée",
     "unreadSuffix": "non lus",
@@ -1209,7 +1214,8 @@
     "resolve": "Marquer comme résolue",
     "reopen": "Rouvrir",
     "readOnlyMember": "Votre accès est en lecture seule : appelez ou textez l'équipe pour toute demande.",
-    "responseHintClosed": "Hors des heures de bureau : réponse dès 7 h. Une urgence? Appelez-nous."
+    "responseHintClosed": "Hors des heures de bureau : réponse dès 7 h. Une urgence? Appelez-nous.",
+    "replyAndResolve": "Répondre et résoudre"
   },
   "notifications": {
     "title": "Notifications",
@@ -1786,5 +1792,24 @@
     "invitationRevoked": "Invitation révoquée.",
     "profileSaved": "Profil enregistré.",
     "close": "Fermer"
+  },
+  "search": {
+    "open": "Rechercher",
+    "placeholder": "Propriétaire, immatriculation, société, facture…",
+    "actionsTitle": "Actions rapides",
+    "resultsTitle": "Résultats",
+    "empty": "Aucun résultat.",
+    "actions": {
+      "newFlight": "Planifier un vol",
+      "newOwner": "Nouveau propriétaire",
+      "invite": "Inviter un propriétaire"
+    },
+    "kinds": {
+      "owner": "Propriétaire",
+      "company": "Société",
+      "aircraft": "Appareil",
+      "invoice": "Facture",
+      "conversation": "Conversation"
+    }
   }
 }

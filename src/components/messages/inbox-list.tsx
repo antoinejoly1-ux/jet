@@ -26,12 +26,12 @@ export async function InboxList({ rows, filter, activeId }: { rows: Row[]; filte
       : format.dateTime(d, { day: "numeric", month: "short" });
   };
   const href = (f: InboxFilter, id?: string) =>
-    `/admin/messages${id ? `/${id}` : ""}${f === "open" ? "" : `?filter=${f}`}` as Route;
+    `/admin/messages${id ? `/${id}` : ""}${f === "waiting" ? "" : `?filter=${f}`}` as Route;
 
   return (
     <div className="flex min-h-0 flex-col">
-      <nav aria-label={t("filters")} className="border-border flex gap-1 border-b p-2">
-        {(["open", "mine", "resolved"] as const).map((f) => (
+      <nav aria-label={t("filters")} className="border-border flex gap-1 overflow-x-auto border-b p-2">
+        {(["waiting", "open", "mine", "resolved"] as const).map((f) => (
           <Link
             key={f}
             href={href(f)}
@@ -58,7 +58,14 @@ export async function InboxList({ rows, filter, activeId }: { rows: Row[]; filte
                     {r.ownerName}
                   </span>
                   {r.lastMessageAt ? (
-                    <span className="text-muted tabular shrink-0 text-xs">{when(r.lastMessageAt)}</span>
+                    <span
+                      className={cn(
+                        "tabular shrink-0 text-xs",
+                        filter === "waiting" ? "text-warning font-medium" : "text-muted",
+                      )}
+                    >
+                      {filter === "waiting" ? format.relativeTime(new Date(r.lastMessageAt)) : when(r.lastMessageAt)}
+                    </span>
                   ) : null}
                 </span>
                 <span className="flex items-center gap-2">
@@ -82,4 +89,5 @@ export async function InboxList({ rows, filter, activeId }: { rows: Row[]; filte
   );
 }
 
-export const inboxFilter = (value: unknown): InboxFilter => (value === "mine" || value === "resolved" ? value : "open");
+export const inboxFilter = (value: unknown): InboxFilter =>
+  value === "open" || value === "mine" || value === "resolved" ? value : "waiting";

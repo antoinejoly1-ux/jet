@@ -37,7 +37,7 @@ export default async function ConversationPage({ params, searchParams }: PagePro
     <>
       <h1 className="sr-only">{t("conversationWith", { name: conversation.ownerName })}</h1>
       <AutoRefresh />
-      <div className="bg-surface shadow-card grid overflow-hidden rounded-lg border border-(--card-border) lg:h-[calc(100dvh-10rem)] lg:grid-cols-[320px_1fr]">
+      <div className="bg-surface border-border grid overflow-hidden rounded-lg border lg:h-[calc(100dvh-10rem)] lg:grid-cols-[320px_1fr]">
         <div className="lg:border-border hidden min-h-0 lg:flex lg:flex-col lg:border-r">
           <InboxList rows={rows} filter={filter} activeId={id} />
         </div>
@@ -80,7 +80,11 @@ export default async function ConversationPage({ params, searchParams }: PagePro
             <Thread messages={messages} perspective="staff" empty={t("staffEmpty")} />
           </div>
           <div className="border-border border-t p-3 sm:p-4">
-            <Composer action={replyAction.bind(null, id)} placeholder={t("staffPlaceholder")} />
+            <Composer
+              action={replyAction.bind(null, id)}
+              placeholder={t("staffPlaceholder")}
+              resolveLabel={t("replyAndResolve")}
+            />
           </div>
         </section>
       </div>

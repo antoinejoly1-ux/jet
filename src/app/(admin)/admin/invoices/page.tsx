@@ -114,7 +114,7 @@ export default async function AdminInvoicesPage({ searchParams }: PageProps<"/ad
       {rows.length === 0 ? (
         <EmptyState icon={FileText} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
-        <ul className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
+        <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
           {rows.map((r) => (
             <li key={r.id} className="flex flex-col gap-2 px-4 py-3 md:flex-row md:items-center md:gap-4">
               <div className="min-w-0 flex-1">

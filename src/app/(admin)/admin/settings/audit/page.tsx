@@ -66,7 +66,7 @@ export default async function AuditPage({ searchParams }: PageProps<"/admin/sett
       {rows.length === 0 ? (
         <EmptyState icon={ScrollText} title={t("emptyTitle")} body={t("empty")} />
       ) : (
-        <ol className="bg-surface shadow-card divide-border divide-y rounded-lg border border-(--card-border)">
+        <ol className="bg-surface divide-border border-border divide-y rounded-lg border">
           {rows.map((r) => {
             const key = `actions.${r.action.replace(/\./g, "_")}`;
             return (

@@ -23,7 +23,7 @@ export function SideToggle({ current }: { current: Side }) {
           aria-current={current === side ? "page" : undefined}
           className={cn(
             "text-muted flex h-8 items-center rounded-full px-3.5 text-sm font-semibold transition-colors",
-            current === side && "bg-surface text-text shadow-card",
+            current === side && "bg-surface text-text",
           )}
         >
           {t(side)}
