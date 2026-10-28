@@ -18,7 +18,10 @@ import {
 import { recordAudit } from "./audit";
 import { emit } from "./outbox";
 import { alertIfHoursLow } from "./hour-alerts";
-import { sendPendingEmails } from "./owner-notifications";
+import { notifyOwnerMembers, sendPendingEmails, type PendingEmail } from "./owner-notifications";
+import { markFlightRequestScheduled } from "./flight-requests";
+import { localeTag } from "@/lib/locale";
+import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { ConflictError, NotFoundError } from "./errors";
 
 type Flight = typeof flights.$inferSelect;
@@ -108,10 +111,14 @@ async function assertAircraftAndShare(tx: Tx, aircraftId: string, shareId: strin
   if (share.endsOn && share.endsOn <= at.toISOString().slice(0, 10)) throw new ConflictError("share_ended");
 }
 
-export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput) {
+/**
+ * Puts a flight on the schedule. Planned from an owner's request, it closes
+ * that request and tells the owner's logins their flight is confirmed.
+ */
+export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput, opts: { requestId?: string } = {}) {
   authorize(actor, "operations:write");
   const input = flightInput.parse(raw);
-  return db.transaction(async (tx) => {
+  const { row, emails } = await db.transaction(async (tx) => {
     await assertAircraftAndShare(tx, input.aircraftId, input.shareId, input.departsAt);
     const [row] = await tx.insert(flights).values(input).returning();
     await recordAudit(tx, {
@@ -119,11 +126,44 @@ export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput) {
       action: "flight.schedule",
       entityType: "flight",
       entityId: row.id,
-      after: input,
+      after: { ...input, requestId: opts.requestId },
     });
     await emit(tx, "flight.scheduled", flightPayload(row));
-    return row;
+    const emails: PendingEmail[] = [];
+    if (opts.requestId) {
+      await markFlightRequestScheduled(tx, opts.requestId, row.id);
+      const [share] = input.shareId
+        ? await tx.select({ ownerId: shares.ownerId }).from(shares).where(eq(shares.id, input.shareId))
+        : [];
+      const [plane] = await tx
+        .select({ registration: aircraft.registration })
+        .from(aircraft)
+        .where(eq(aircraft.id, input.aircraftId));
+      if (share)
+        emails.push(
+          ...(await notifyOwnerMembers(
+            tx,
+            share.ownerId,
+            "flight.confirmed",
+            (locale) => ({
+              aircraft: plane?.registration ?? "",
+              route: `${row.fromAirport} → ${row.toAirport}`,
+              when: new Intl.DateTimeFormat(localeTag(locale), {
+                timeZone: OPERATOR_TIME_ZONE,
+                day: "numeric",
+                month: "long",
+                hour: "numeric",
+                minute: "2-digit",
+              }).format(row.departsAt),
+            }),
+            { template: "flightConfirmed", path: "/flights" },
+          )),
+        );
+    }
+    return { row, emails };
   });
+  await sendPendingEmails(db, emails);
+  return row;
 }
 
 /** Changes a scheduled flight. Completed and cancelled flights are history and can't be edited. */

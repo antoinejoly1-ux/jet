@@ -11,7 +11,8 @@ import type { CompleteFlightInput, FlightInput } from "@/lib/validation/operatio
 export async function scheduleFlightAction(_prev: FormState, formData: FormData): Promise<FormState> {
   const viewer = await requireStaff();
   try {
-    await scheduleFlight(db, viewer, formValues(formData) as unknown as FlightInput);
+    const requestId = String(formData.get("requestId") ?? "") || undefined;
+    await scheduleFlight(db, viewer, formValues(formData) as unknown as FlightInput, { requestId });
   } catch (err) {
     return formError(err, formValues(formData));
   }

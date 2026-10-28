@@ -5,6 +5,7 @@ import {
   MessageSquare,
   Plane,
   PlaneLanding,
+  PlaneTakeoff,
   Wallet,
   Wrench,
   type LucideIcon,
@@ -15,6 +16,7 @@ import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { TeamFaces } from "@/components/brand/team";
 import { ContactButtons } from "@/components/common/contact-buttons";
+import { RequestFlightButton } from "@/components/flights/request-flight";
 import { LiveAircraft } from "@/components/tracking/live-aircraft";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -33,6 +35,7 @@ import { scenes } from "@/lib/imagery";
 import { insightsFor, type Insight } from "@/lib/insights";
 import { getAvailability } from "@/lib/services/availability";
 import { getOwnerActivity, getOwnerHome, type ActivityItem, type ShareSummary } from "@/lib/services/dashboard";
+import { listOpenFlightRequests } from "@/lib/services/flight-requests";
 import { listOwnerFlights } from "@/lib/services/flights";
 import { getAircraftLive, type AircraftLive } from "@/lib/services/tracking";
 import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
@@ -66,10 +69,11 @@ const heroPhoto = (model: string): StaticImageData =>
 export default async function HomePage() {
   const viewer = await requireAccess();
   const t = await getTranslations("home");
-  const [summaries, activity, flights] = await Promise.all([
+  const [summaries, activity, flights, requests] = await Promise.all([
     getOwnerHome(db, viewer),
     getOwnerActivity(db, viewer),
     listOwnerFlights(db, viewer),
+    listOpenFlightRequests(db, viewer),
   ]);
 
   if (summaries.length === 0)
@@ -91,7 +95,7 @@ export default async function HomePage() {
       ))}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <UpcomingFlights flights={flights.upcoming.slice(0, 4)} />
+        <UpcomingFlights flights={flights.upcoming.slice(0, 4)} requests={requests} />
         <TeamPanel />
       </div>
 
@@ -276,6 +280,7 @@ async function Hero({
   firstName: string;
 }) {
   const t = await getTranslations("home");
+  const tr = await getTranslations("requestFlight");
   const tl = await getTranslations("live");
   const format = await getFormatter();
   const now = new Date();
@@ -370,8 +375,12 @@ async function Hero({
           ) : null}
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button asChild variant="primary">
-              <a href="#live" className="!bg-white !text-black">
+            <RequestFlightButton className="!bg-white !text-black">
+              <PlaneTakeoff aria-hidden />
+              {tr("open")}
+            </RequestFlightButton>
+            <Button asChild variant="glass">
+              <a href="#live">
                 <LiveDot tone={live.state === "in_flight" ? "live" : "muted"} />
                 {t("hero.follow")}
               </a>
@@ -396,8 +405,15 @@ function Legend({ className, label }: { className: string; label: string }) {
 }
 
 /** Upcoming flights as routes, each with its date set large like a boarding pass. */
-async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof listOwnerFlights>>["upcoming"] }) {
+async function UpcomingFlights({
+  flights,
+  requests,
+}: {
+  flights: Awaited<ReturnType<typeof listOwnerFlights>>["upcoming"];
+  requests: Awaited<ReturnType<typeof listOpenFlightRequests>>;
+}) {
   const t = await getTranslations("home");
+  const tr = await getTranslations("requestFlight");
   const phone = env.OPERATOR_PHONE;
   const format = await getFormatter();
   const now = new Date();
@@ -409,10 +425,34 @@ async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof
           {t("allFlights")}
         </Link>
       </div>
-      {flights.length === 0 ? (
+      {flights.length === 0 && requests.length === 0 ? (
         <p className="text-muted mt-6 text-sm">{t("nextFlightEmpty")}</p>
       ) : (
         <ul className="divide-border mt-4 divide-y">
+          {/* Asked for, not yet confirmed: shown first so the owner knows it was heard. */}
+          {requests.map((r) => (
+            <li key={r.id} className="flex items-center gap-5 py-5">
+              <div className="border-warning/50 text-warning flex w-14 shrink-0 flex-col items-center rounded-[14px] border border-dashed py-2">
+                <span className="text-[10px] font-medium tracking-[0.16em] uppercase">
+                  {format.dateTime(new Date(`${r.date}T12:00:00`), { month: "short" }).replace(".", "")}
+                </span>
+                <span className="tabular text-2xl font-light">
+                  {format.dateTime(new Date(`${r.date}T12:00:00`), { day: "numeric" })}
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 text-lg font-light tracking-wide">
+                  <span>{r.from}</span>
+                  <span className="bg-border relative h-px flex-1" aria-hidden />
+                  <span>{r.to}</span>
+                </div>
+                <p className="text-muted mt-1 text-xs">
+                  <span className="text-warning font-medium">{tr("pending")}</span> · {tr("pendingHint")} ·{" "}
+                  {r.registration}
+                </p>
+              </div>
+            </li>
+          ))}
           {flights.map((f) => {
             const flying = f.status === "scheduled" && f.departsAt <= now;
             return (
@@ -457,11 +497,16 @@ async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof
       {/* An invitation, not an empty space: planning the next flight is one call away. */}
       <div className="border-border mt-auto flex flex-wrap items-center justify-between gap-4 border-t pt-6">
         <p className="text-muted max-w-xs text-sm font-light">{t("planNext")}</p>
-        {phone ? (
-          <Button asChild variant="accent" size="sm">
-            <a href={telHref(phone)}>{t("planNextCta")}</a>
-          </Button>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          <RequestFlightButton variant="accent" size="sm">
+            {tr("open")}
+          </RequestFlightButton>
+          {phone ? (
+            <Button asChild variant="ghost" size="sm">
+              <a href={telHref(phone)}>{t("planNextCta")}</a>
+            </Button>
+          ) : null}
+        </div>
       </div>
     </Card>
   );

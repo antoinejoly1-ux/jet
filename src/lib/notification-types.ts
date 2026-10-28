@@ -10,6 +10,7 @@ export const NOTIFICATION_TYPES = {
   "hours.low": { audience: "owner", optionalEmail: true, href: () => "/" },
   "maintenance.planned": { audience: "owner", optionalEmail: true, href: () => "/aircraft" },
   "message.from_dispatch": { audience: "owner", optionalEmail: true, href: () => "/messages" },
+  "flight.confirmed": { audience: "owner", optionalEmail: true, href: () => "/flights" },
   "message.from_owner": {
     audience: "staff",
     optionalEmail: false,

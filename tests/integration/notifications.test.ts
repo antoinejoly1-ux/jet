@@ -74,7 +74,11 @@ describe("email preferences", () => {
     expect((await getEmailPreferences(db, anne.actor)).every((p) => p.email)).toBe(true);
     await saveEmailPreferences(db, anne.actor, { on: ["invoice.issued", "budget.published", "hours.low"] });
     const prefs = await getEmailPreferences(db, anne.actor);
-    expect(prefs.filter((p) => !p.email).map((p) => p.type)).toEqual(["maintenance.planned", "message.from_dispatch"]);
+    expect(prefs.filter((p) => !p.email).map((p) => p.type)).toEqual([
+      "maintenance.planned",
+      "message.from_dispatch",
+      "flight.confirmed",
+    ]);
 
     await planMaintenance(db, dispatcher, {
       aircraftId: planeId,

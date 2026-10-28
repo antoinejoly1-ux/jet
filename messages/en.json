@@ -248,7 +248,7 @@
     "allFlights": "All your flights",
     "inTheAir": "In flight",
     "planNext": "Thinking of your next trip? Tell us where and when; we take care of the rest.",
-    "planNextCta": "Plan a flight"
+    "planNextCta": "Or call us"
   },
   "account": {
     "title": "My account",
@@ -303,6 +303,12 @@
         "from_dispatch": {
           "label": "Messages from the team",
           "hint": "If you haven't read them in the portal after 5 minutes."
+        }
+      },
+      "flight": {
+        "confirmed": {
+          "label": "Confirmed flights",
+          "hint": "When the team schedules a flight you requested."
         }
       }
     },
@@ -566,7 +572,13 @@
       "events": "Choose at least one event.",
       "name": "Enter a name (at least 2 characters).",
       "registrationNumber": "Use 500 characters at most.",
-      "holdingCompanyId": "Choose a company from the list."
+      "holdingCompanyId": "Choose a company from the list.",
+      "from": "Choose the departure airport.",
+      "to": "Choose a destination other than the departure.",
+      "date": "Choose the flight date.",
+      "time": "Enter a valid time, or leave it empty.",
+      "returnDate": "The return must come after the outbound flight.",
+      "passengers": "From 1 to 19 passengers."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -606,7 +618,9 @@
     "webhook_private_address": "This address leads to a private network; use a public one.",
     "webhook_test_failed": "The test wasn't received.",
     "too_many_uploads": "Too many uploads in an hour. Try again later.",
-    "holding_company_has_aircraft": "This company still owns an aircraft. Attach it to another company first."
+    "holding_company_has_aircraft": "This company still owns an aircraft. Attach it to another company first.",
+    "date_in_past": "Choose a date that's still ahead.",
+    "unknown_airport": "We can't find that airport. Pick it from the list."
   },
   "aircraft": {
     "title": "Aircraft",
@@ -991,7 +1005,9 @@
     "cancelCompleted": "Cancel and return hours",
     "edit": "Edit",
     "exportCsv": "Export (CSV)",
-    "flown": "{hours} flown"
+    "flown": "{hours} flown",
+    "planRequestTitle": "Plan the request · {registration}",
+    "planRequestSubtitle": "Everything the owner asked for is filled in. Saving closes the request and sends the owner a confirmation."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1197,6 +1213,9 @@
       },
       "privacy": {
         "request": "Privacy request from {email} ({kind})"
+      },
+      "flight": {
+        "confirmed": "Flight confirmed: {route} on {aircraft}, {when}"
       }
     }
   },
@@ -1680,7 +1699,50 @@
         "subject": "Maintenance planned on {aircraft}",
         "body": "{aircraft} will be in maintenance from {when}. The aircraft won't be available during that time.",
         "cta": "View the aircraft"
+      },
+      "flightConfirmed": {
+        "subject": "Your flight {route} is scheduled",
+        "body": "Your flight {route} on {when} aboard {aircraft} is scheduled. You'll find it in your upcoming flights.",
+        "cta": "View my flights"
       }
     }
+  },
+  "requestFlight": {
+    "open": "Request a flight",
+    "title": "Request a flight",
+    "body": "Tell us where and when: the team confirms the flight and writes to you in Messages.",
+    "aircraft": "Aircraft",
+    "from": "From",
+    "to": "To",
+    "toPlaceholder": "City or code, e.g. Teterboro",
+    "date": "Date",
+    "time": "Preferred time",
+    "timeHint": "Leave empty if you're flexible.",
+    "returnTrip": "Round trip",
+    "returnDate": "Return date",
+    "passengers": "Passengers",
+    "notes": "Details (optional)",
+    "notesPlaceholder": "Catering, ground transport, luggage…",
+    "send": "Send the request",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "sentTitle": "Request sent",
+    "sentBody": "The team will confirm your flight shortly, here and by email. Something urgent? Call us.",
+    "sentMessages": "See it in Messages",
+    "close": "Close",
+    "pending": "Requested",
+    "pendingHint": "Waiting for confirmation",
+    "card": {
+      "title": "Flight request",
+      "return": "Returning {date}",
+      "flexible": "Flexible time",
+      "passengers": "{count, plural, one {# passenger} other {# passengers}}",
+      "plan": "Plan this flight",
+      "scheduled": "Flight scheduled",
+      "viewFlight": "View the flight",
+      "requested": "Waiting"
+    },
+    "fewer": "One passenger fewer",
+    "more": "One more passenger"
   }
 }

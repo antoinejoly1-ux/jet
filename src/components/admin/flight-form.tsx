@@ -25,11 +25,14 @@ export function FlightForm({
   aircraft,
   shares,
   defaults,
+  requestId,
 }: {
   action: (s: FormState, d: FormData) => Promise<FormState>;
   aircraft: AircraftOption[];
   shares: FlightShareOption[];
   defaults?: FlightDefaults;
+  /** Planning an owner's request: saving closes it and tells the owner. */
+  requestId?: string;
 }) {
   const t = useTranslations("flights");
   const tf = useTranslations("formErrors");
@@ -41,6 +44,7 @@ export function FlightForm({
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-5" noValidate>
       <FormAlert state={state} />
+      {requestId ? <input type="hidden" name="requestId" value={requestId} /> : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <SelectField
           id="aircraftId"

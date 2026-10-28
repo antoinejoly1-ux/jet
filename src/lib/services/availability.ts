@@ -176,6 +176,7 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
       homeBase: aircraft.homeBase,
       status: aircraft.status,
       shareId: shares.id,
+      ownerId: shares.ownerId,
       percentageBp: shares.percentageBp,
       annualHoursMinutes: shares.annualHoursMinutes,
       startsOn: shares.startsOn,

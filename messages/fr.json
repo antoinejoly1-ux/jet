@@ -248,7 +248,7 @@
     "allFlights": "Tous vos vols",
     "inTheAir": "En vol",
     "planNext": "Un prochain départ en tête? Dites-nous où et quand, nous nous occupons du reste.",
-    "planNextCta": "Planifier un vol"
+    "planNextCta": "Ou appelez-nous"
   },
   "account": {
     "title": "Mon compte",
@@ -303,6 +303,12 @@
         "from_dispatch": {
           "label": "Messages de l'équipe",
           "hint": "Si vous ne les avez pas lus dans le portail après 5 minutes."
+        }
+      },
+      "flight": {
+        "confirmed": {
+          "label": "Vols confirmés",
+          "hint": "Quand l'équipe planifie un vol que vous avez demandé."
         }
       }
     },
@@ -566,7 +572,13 @@
       "events": "Choisissez au moins un événement.",
       "name": "Entrez un nom (2 caractères minimum).",
       "registrationNumber": "Entrez au plus 500 caractères.",
-      "holdingCompanyId": "Choisissez une société de la liste."
+      "holdingCompanyId": "Choisissez une société de la liste.",
+      "from": "Choisissez l'aéroport de départ.",
+      "to": "Choisissez une destination différente du départ.",
+      "date": "Choisissez la date du vol.",
+      "time": "Entrez une heure valide, ou laissez vide.",
+      "returnDate": "Le retour doit suivre l'aller.",
+      "passengers": "De 1 à 19 passagers."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -606,7 +618,9 @@
     "webhook_private_address": "Cette adresse mène à un réseau privé; utilisez une adresse publique.",
     "webhook_test_failed": "Le test n'a pas été reçu.",
     "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard.",
-    "holding_company_has_aircraft": "Cette société possède encore un appareil. Rattachez-le à une autre société d'abord."
+    "holding_company_has_aircraft": "Cette société possède encore un appareil. Rattachez-le à une autre société d'abord.",
+    "date_in_past": "Choisissez une date à venir.",
+    "unknown_airport": "Nous ne trouvons pas cet aéroport. Choisissez-le dans la liste."
   },
   "aircraft": {
     "title": "Appareils",
@@ -991,7 +1005,9 @@
     "cancelCompleted": "Annuler et rendre les heures",
     "edit": "Modifier",
     "exportCsv": "Exporter (CSV)",
-    "flown": "{hours} de vol"
+    "flown": "{hours} de vol",
+    "planRequestTitle": "Planifier la demande · {registration}",
+    "planRequestSubtitle": "Tout ce que le propriétaire a demandé est déjà inscrit. À l'enregistrement, la demande est fermée et le propriétaire reçoit la confirmation."
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1197,6 +1213,9 @@
       },
       "privacy": {
         "request": "Demande Loi 25 de {email} ({kind})"
+      },
+      "flight": {
+        "confirmed": "Vol confirmé : {route} sur {aircraft}, le {when}"
       }
     }
   },
@@ -1680,7 +1699,50 @@
         "subject": "Maintenance prévue sur {aircraft}",
         "body": "{aircraft} sera en maintenance à partir du {when}. L'appareil ne sera pas disponible pendant ce temps.",
         "cta": "Voir l'appareil"
+      },
+      "flightConfirmed": {
+        "subject": "Votre vol {route} est planifié",
+        "body": "Votre vol {route} du {when} sur {aircraft} est planifié. Vous le retrouverez dans vos prochains vols.",
+        "cta": "Voir mes vols"
       }
     }
+  },
+  "requestFlight": {
+    "open": "Demander un vol",
+    "title": "Demander un vol",
+    "body": "Dites-nous où et quand : l'équipe confirme le vol et vous écrit dans Messages.",
+    "aircraft": "Appareil",
+    "from": "Départ",
+    "to": "Destination",
+    "toPlaceholder": "Ville ou code, ex. Teterboro",
+    "date": "Date",
+    "time": "Heure souhaitée",
+    "timeHint": "Laissez vide si vous êtes flexible.",
+    "returnTrip": "Aller-retour",
+    "returnDate": "Date du retour",
+    "passengers": "Passagers",
+    "notes": "Précisions (facultatif)",
+    "notesPlaceholder": "Traiteur, transport au sol, bagages…",
+    "send": "Envoyer la demande",
+    "sending": "Envoi…",
+    "cancel": "Annuler",
+    "sentTitle": "Demande envoyée",
+    "sentBody": "L'équipe vous confirme le vol sous peu, ici et par courriel. Un imprévu? Appelez-nous.",
+    "sentMessages": "Voir dans Messages",
+    "close": "Fermer",
+    "pending": "Demandé",
+    "pendingHint": "En attente de confirmation",
+    "card": {
+      "title": "Demande de vol",
+      "return": "Retour le {date}",
+      "flexible": "Heure flexible",
+      "passengers": "{count, plural, one {# passager} other {# passagers}}",
+      "plan": "Planifier ce vol",
+      "scheduled": "Vol planifié",
+      "viewFlight": "Voir le vol",
+      "requested": "En attente"
+    },
+    "fewer": "Un passager de moins",
+    "more": "Un passager de plus"
   }
 }

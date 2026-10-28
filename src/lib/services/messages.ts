@@ -8,7 +8,16 @@ import { and, asc, count, desc, eq, inArray, isNotNull, isNull, or, sql } from "
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import type { Db, Tx } from "@/lib/db";
-import { conversations, files, messages, notifications, ownerMembers, owners, user } from "@/lib/db/schema";
+import {
+  conversations,
+  files,
+  messages,
+  notifications,
+  ownerMembers,
+  owners,
+  user,
+  type MessageMeta,
+} from "@/lib/db/schema";
 import { authorize, can, type Actor } from "@/lib/auth/policy";
 import { recordAudit } from "./audit";
 import { ConflictError, NotFoundError } from "./errors";
@@ -42,6 +51,7 @@ const threadColumns = {
   fromStaff: sql<boolean>`${sender.staffRole} is not null`,
   attachmentFileId: messages.attachmentFileId,
   attachmentName: files.originalName,
+  meta: messages.meta,
 };
 
 async function readThread(db: Db, conversationId: string) {
@@ -89,43 +99,57 @@ export async function sendOwnerMessage(db: Db, actor: Actor, ownerId: string, ra
   const input = parse(raw);
   return db.transaction(async (tx) => {
     await assertOwnAttachment(tx, actor, input.attachmentFileId);
-    const conversation = await conversationFor(tx, ownerId);
-    const [message] = await tx
-      .insert(messages)
-      .values({
-        conversationId: conversation.id,
-        senderUserId: actor.id,
-        body: input.body,
-        attachmentFileId: input.attachmentFileId ?? null,
-      })
-      .returning();
-    if (conversation.resolvedAt)
-      await tx.update(conversations).set({ resolvedAt: null }).where(eq(conversations.id, conversation.id));
-    else await tx.update(conversations).set({ updatedAt: new Date() }).where(eq(conversations.id, conversation.id));
-
-    // The assigned dispatcher hears about it; with nobody assigned, everyone who can answer does.
-    const [owner] = await tx.select({ name: owners.legalName }).from(owners).where(eq(owners.id, ownerId));
-    const recipients = conversation.assignedToUserId
-      ? [{ id: conversation.assignedToUserId }]
-      : await tx
-          .select({ id: user.id })
-          .from(user)
-          .where(inArray(user.staffRole, ["admin", "dispatcher"]));
-    if (recipients.length)
-      await tx.insert(notifications).values(
-        recipients.map((r) => ({
-          userId: r.id,
-          type: "message.from_owner",
-          data: {
-            conversationId: conversation.id,
-            messageId: message!.id,
-            ownerName: owner?.name ?? "",
-            preview: preview(input.body),
-          },
-        })),
-      );
-    return message!;
+    return postOwnerMessage(tx, actor, ownerId, { body: input.body, attachmentFileId: input.attachmentFileId });
   });
+}
+
+/**
+ * Writes an owner's message in their thread (reopening it if resolved) and
+ * tells dispatch. The caller has already authorized and runs the transaction.
+ */
+export async function postOwnerMessage(
+  tx: Tx,
+  actor: Actor,
+  ownerId: string,
+  content: { body: string; attachmentFileId?: string; meta?: MessageMeta },
+) {
+  const conversation = await conversationFor(tx, ownerId);
+  const [message] = await tx
+    .insert(messages)
+    .values({
+      conversationId: conversation.id,
+      senderUserId: actor.id,
+      body: content.body,
+      attachmentFileId: content.attachmentFileId ?? null,
+      meta: content.meta ?? null,
+    })
+    .returning();
+  if (conversation.resolvedAt)
+    await tx.update(conversations).set({ resolvedAt: null }).where(eq(conversations.id, conversation.id));
+  else await tx.update(conversations).set({ updatedAt: new Date() }).where(eq(conversations.id, conversation.id));
+
+  // The assigned dispatcher hears about it; with nobody assigned, everyone who can answer does.
+  const [owner] = await tx.select({ name: owners.legalName }).from(owners).where(eq(owners.id, ownerId));
+  const recipients = conversation.assignedToUserId
+    ? [{ id: conversation.assignedToUserId }]
+    : await tx
+        .select({ id: user.id })
+        .from(user)
+        .where(inArray(user.staffRole, ["admin", "dispatcher"]));
+  if (recipients.length)
+    await tx.insert(notifications).values(
+      recipients.map((r) => ({
+        userId: r.id,
+        type: "message.from_owner",
+        data: {
+          conversationId: conversation.id,
+          messageId: message!.id,
+          ownerName: owner?.name ?? "",
+          preview: preview(content.body),
+        },
+      })),
+    );
+  return message!;
 }
 
 /* ---------- Staff side ---------- */

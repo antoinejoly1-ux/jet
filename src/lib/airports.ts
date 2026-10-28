@@ -41,3 +41,39 @@ export function nearestAirport(lat: number, lon: number, maxKm = 6): Airport | n
   }
   return best;
 }
+
+const fold = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+/**
+ * Airports matching what someone typed: an ICAO code, a city or a name,
+ * accents ignored ("montreal" finds Montréal). Best matches first; North
+ * American airports (C…, K…) win ties, since that's where Univair flies.
+ */
+export function searchAirports(query: string, limit = 8): Airport[] {
+  const q = fold(query.trim());
+  if (q.length < 2) return [];
+  const code = q.toUpperCase();
+  const scored: { a: Airport; score: number }[] = [];
+  for (const a of index().values()) {
+    const city = fold(a.city);
+    const name = fold(a.name);
+    const score =
+      a.icao === code
+        ? 0
+        : a.icao.startsWith(code)
+          ? 1
+          : city.startsWith(q)
+            ? 2
+            : name.startsWith(q) || name.includes(` ${q}`)
+              ? 3
+              : city.includes(q) || name.includes(q)
+                ? 4
+                : -1;
+    if (score < 0) continue;
+    scored.push({ a, score: score + (/^[CK]/.test(a.icao) ? 0 : 0.5) });
+  }
+  return scored
+    .sort((x, y) => x.score - y.score || x.a.icao.localeCompare(y.a.icao))
+    .slice(0, limit)
+    .map((s) => s.a);
+}
