@@ -38,7 +38,9 @@ export function AuthPhoto({ band = false }: { band?: boolean }) {
           src={scenes[scene]}
           alt=""
           fill
-          priority={!band}
+          // Both are in the page and CSS hides one, so neither is preloaded (a
+          // preload would fetch the hidden one too); the visible one jumps the queue.
+          fetchPriority="high"
           sizes={band ? "100vw" : "55vw"}
           placeholder="blur"
           className="animate-ken-burns object-cover"

@@ -29,7 +29,7 @@ describe("great circles", () => {
 
 describe("airports", () => {
   it("are found by code and by position", () => {
-    expect(airport("cyhu")).toMatchObject({ icao: "CYHU", city: expect.stringContaining("Montr") });
+    expect(airport("cyhu")).toMatchObject({ icao: "CYHU", city: "Saint-Hubert" });
     expect(airport("ZZZZ")).toBeNull();
     expect(nearestAirport(45.52, -73.42)?.icao).toBe("CYHU");
     expect(nearestAirport(47.5, -60)).toBeNull();

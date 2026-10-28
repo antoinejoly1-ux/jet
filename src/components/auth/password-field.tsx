@@ -6,16 +6,24 @@ import { useState, type ComponentProps } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-/** A password input with a button to show what was typed, and an optional hint. */
+/** A password input with a button to show what was typed, an optional hint, and an error under it. */
 export function PasswordField({
   id,
   label,
   hint,
+  error,
   aside,
   ...props
-}: Omit<ComponentProps<typeof Input>, "type"> & { id: string; label: string; hint?: string; aside?: React.ReactNode }) {
+}: Omit<ComponentProps<typeof Input>, "type"> & {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  aside?: React.ReactNode;
+}) {
   const t = useTranslations("auth");
   const [shown, setShown] = useState(false);
+  const describedBy = [hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(" ") || undefined;
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-baseline justify-between gap-3">
@@ -26,7 +34,8 @@ export function PasswordField({
         <Input
           id={id}
           type={shown ? "text" : "password"}
-          aria-describedby={hint ? `${id}-hint` : undefined}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
           className="pr-12"
           {...props}
         />
@@ -48,6 +57,11 @@ export function PasswordField({
       {hint ? (
         <p id={`${id}-hint`} className="text-muted text-xs">
           {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={`${id}-error`} role="alert" className="text-danger text-xs font-medium">
+          {error}
         </p>
       ) : null}
     </div>

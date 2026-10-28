@@ -14,12 +14,15 @@ export function UserMenu({
   email,
   image,
   settings = true,
+  tour = true,
 }: {
   name: string;
   email: string;
   image?: string | null;
   /** Pilots have no Settings page: the menu then only signs out. */
   settings?: boolean;
+  /** People still waiting for access have no tour to replay. */
+  tour?: boolean;
 }) {
   const t = useTranslations("userMenu");
   const router = useRouter();
@@ -77,16 +80,18 @@ export function UserMenu({
               {t("account")}
             </Link>
           ) : null}
-          <form action={replayTourAction}>
-            <button
-              role="menuitem"
-              type="submit"
-              className="ai-trigger hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
-            >
-              <AnimatedIcon name="bulb" size={18} />
-              {t("tour")}
-            </button>
-          </form>
+          {tour ? (
+            <form action={replayTourAction}>
+              <button
+                role="menuitem"
+                type="submit"
+                className="ai-trigger hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
+              >
+                <AnimatedIcon name="bulb" size={18} />
+                {t("tour")}
+              </button>
+            </form>
+          ) : null}
           <button
             role="menuitem"
             type="button"

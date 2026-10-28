@@ -35,11 +35,14 @@ export function AvatarPicker({
   initials,
   onSaved,
   size = "lg",
+  align = "center",
 }: {
   initialImage: string | null;
   initials: string;
   onSaved?: (url: string | null) => void;
   size?: "md" | "lg";
+  /** `start` lines it up with a left-aligned form. */
+  align?: "center" | "start";
 }) {
   const t = useTranslations("avatar");
   const input = useRef<HTMLInputElement>(null);
@@ -96,7 +99,7 @@ export function AvatarPicker({
   const dim = size === "lg" ? "size-44 sm:size-52" : "size-28";
 
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div className={cn("flex flex-col gap-5", align === "start" ? "items-start" : "items-center")}>
       <button
         type="button"
         onClick={() => input.current?.click()}
@@ -146,7 +149,7 @@ export function AvatarPicker({
       />
 
       {file ? (
-        <div className="flex w-full max-w-xs flex-col items-center gap-4">
+        <div className={cn("flex w-full max-w-xs flex-col gap-4", align === "start" ? "items-start" : "items-center")}>
           <label className="text-muted flex w-full items-center gap-3 text-xs">
             {t("zoom")}
             <input
@@ -175,7 +178,11 @@ export function AvatarPicker({
           </Button>
         </div>
       ) : (
-        <p className="text-muted text-center text-sm">{t("hint")}</p>
+        // Drag and drop only exists with a mouse; a touch screen gets its own line (CSS only, same HTML).
+        <p className={cn("text-muted text-sm", align === "center" && "text-center")}>
+          <span className="pointer-coarse:hidden">{t("hint")}</span>
+          <span className="hidden pointer-coarse:inline">{t("hintTouch")}</span>
+        </p>
       )}
       {error ? (
         <p role="alert" className="text-danger text-sm">
