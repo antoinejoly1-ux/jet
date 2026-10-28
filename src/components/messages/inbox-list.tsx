@@ -22,7 +22,7 @@ export async function InboxList({ rows, filter, activeId }: { rows: Row[]; filte
   const when = (value: Date | string) => {
     const d = new Date(value);
     return zonedDay(d) === today
-      ? format.dateTime(d, { hour: "2-digit", minute: "2-digit" })
+      ? format.dateTime(d, { hour: "numeric", minute: "2-digit" })
       : format.dateTime(d, { day: "numeric", month: "short" });
   };
   const href = (f: InboxFilter, id?: string) =>

@@ -89,7 +89,7 @@ test("a blocked period shows to the owner as booked, and co-owners' flights by n
   const owner = await (await browser.newContext()).newPage();
   await signIn(owner, "owner@jet.test");
   await owner.goto(`/availability?month=${month}`);
-  await expect(owner.getByRole("heading", { name: "Disponibilité" })).toBeVisible();
+  await expect(owner.getByRole("heading", { name: "Calendrier" })).toBeVisible();
   const taken = owner.getByRole("region", { name: "Périodes occupées" });
   await expect(taken).toContainText("Réservé");
   // Co-owners know each other: their flights on C-GJTA show as booked with their name.

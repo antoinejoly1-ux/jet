@@ -33,7 +33,7 @@ test("an owner and dispatch talk in the portal", async ({ page, browser }) => {
   await expect(owner.getByText(/Répartition · /).last()).toBeVisible();
 
   // Resolving moves it out of the open list.
-  await page.getByRole("button", { name: "Résolue" }).click();
+  await page.getByRole("button", { name: "Marquer comme résolue" }).click();
   await page.waitForURL(/\/admin\/messages$/);
   await page.getByRole("link", { name: "Résolues" }).click();
   await expect(page.getByRole("link", { name: /Jean Tremblay/ })).toBeVisible();

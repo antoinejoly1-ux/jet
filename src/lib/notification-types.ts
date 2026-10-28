@@ -36,3 +36,7 @@ export const OPTIONAL_EMAIL_TYPES = (Object.keys(NOTIFICATION_TYPES) as Notifica
 );
 
 export const isNotificationType = (t: string): t is NotificationType => t in NOTIFICATION_TYPES;
+
+/** Stored values are text; whole numbers go back to numbers so messages can pluralize on them. */
+export const notificationValues = (data: Record<string, string>) =>
+  Object.fromEntries(Object.entries(data).map(([k, v]) => [k, /^\d+$/.test(v) ? Number(v) : v]));

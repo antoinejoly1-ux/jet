@@ -20,7 +20,7 @@ test("the look chosen in Settings sticks across visits", async ({ page }) => {
 test("Settings shows every section, with the team a call away", async ({ page }) => {
   await signIn(page, "owner@jet.test");
   await page.goto("/account");
-  const sections = page.getByRole("navigation", { name: "Sections des réglages" });
+  const sections = page.getByRole("navigation", { name: "Sections des paramètres" });
   for (const name of ["Profil", "Apparence et langue", "Sécurité", "Notifications", "Confidentialité", "Votre équipe"])
     await expect(sections.getByRole("link", { name })).toBeVisible();
   await expect(page.getByLabel("Prénom")).toHaveValue("Jean");

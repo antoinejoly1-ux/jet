@@ -5,6 +5,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { listNotifications } from "@/lib/services/notification-center";
 import { cn } from "@/lib/utils";
+import { notificationValues } from "@/lib/notification-types";
 
 type Item = Awaited<ReturnType<typeof listNotifications>>[number];
 
@@ -27,7 +28,7 @@ export async function NotificationList({ items }: { items: Item[] }) {
             />
             <span className="min-w-0 flex-1">
               <span className={cn("block text-sm", !n.readAt && "font-semibold")}>
-                {t(`types.${n.type}`, n.data)}
+                {t(`types.${n.type}`, notificationValues(n.data))}
                 {!n.readAt ? <span className="sr-only"> ({t("unread")})</span> : null}
               </span>
               <span className="text-muted text-xs">{format.relativeTime(n.createdAt)}</span>

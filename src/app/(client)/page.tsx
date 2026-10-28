@@ -37,6 +37,8 @@ import { listOwnerFlights } from "@/lib/services/flights";
 import { getAircraftLive, type AircraftLive } from "@/lib/services/tracking";
 import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { telHref } from "@/lib/phone";
+import { notificationValues } from "@/lib/notification-types";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("home") };
@@ -279,7 +281,7 @@ async function Hero({
   const now = new Date();
   const model = shortModel(s.aircraft.model);
   const today = format.dateTime(now, { weekday: "long", day: "numeric", month: "long", timeZone: OPERATOR_TIME_ZONE });
-  const time = (iso: string) => format.dateTime(new Date(iso), { hour: "2-digit", minute: "2-digit" });
+  const time = (iso: string) => format.dateTime(new Date(iso), { hour: "numeric", minute: "2-digit" });
 
   const [headline, subline] =
     live.state === "in_flight"
@@ -396,7 +398,7 @@ function Legend({ className, label }: { className: string; label: string }) {
 /** Upcoming flights as routes, each with its date set large like a boarding pass. */
 async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof listOwnerFlights>>["upcoming"] }) {
   const t = await getTranslations("home");
-  const phone = env.OPERATOR_PHONE.replace(/[^\d+]/g, "");
+  const phone = env.OPERATOR_PHONE;
   const format = await getFormatter();
   const now = new Date();
   return (
@@ -441,7 +443,7 @@ async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof
                         <LiveDot className="size-2" /> {t("inTheAir")}
                       </span>
                     ) : (
-                      format.dateTime(f.departsAt, { weekday: "long", hour: "2-digit", minute: "2-digit" })
+                      format.dateTime(f.departsAt, { weekday: "long", hour: "numeric", minute: "2-digit" })
                     )}
                     {" · "}
                     {f.registration}
@@ -457,7 +459,7 @@ async function UpcomingFlights({ flights }: { flights: Awaited<ReturnType<typeof
         <p className="text-muted max-w-xs text-sm font-light">{t("planNext")}</p>
         {phone ? (
           <Button asChild variant="accent" size="sm">
-            <a href={`tel:${phone}`}>{t("planNextCta")}</a>
+            <a href={telHref(phone)}>{t("planNextCta")}</a>
           </Button>
         ) : null}
       </div>
@@ -541,7 +543,9 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
                   </span>
                 </>
               ) : (
-                <span className={cn(item.unread && "text-text")}>{tn(`types.${item.type}`, item.data)}</span>
+                <span className={cn(item.unread && "text-text")}>
+                  {tn(`types.${item.type}`, notificationValues(item.data))}
+                </span>
               );
             const row = (
               <>

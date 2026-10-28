@@ -10,9 +10,10 @@ import { formatHours, formatMoney } from "@/lib/format";
 import { renderStatementPdf, type Section } from "@/lib/pdf/statement";
 import type { AnnualStatement } from "@/lib/services/statements";
 import { utcToZonedLocal } from "@/lib/time";
+import { lang } from "@/lib/locale";
 
 async function context() {
-  const locale = ((await getLocale()) === "en" ? "en" : "fr") as CsvLocale;
+  const locale: CsvLocale = lang(await getLocale());
   const t = await getTranslations("exports");
   return { locale, t };
 }

@@ -15,6 +15,7 @@ import { env } from "@/lib/env";
 import { BottomTabs, FloatingAction, Rail, type Fab, type Side } from "./nav";
 import { SideToggle } from "./side-toggle";
 import { UserMenu } from "./user-menu";
+import { telHref } from "@/lib/phone";
 
 const FINANCE_PAGES = ["finances", "invoices"];
 
@@ -44,14 +45,14 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
   const badges = { messages };
   // Members who don't see any owner's finances don't get the finance pages.
   const hidden = side === "client" && !viewer.staffRole && financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : [];
-  const phone = env.OPERATOR_PHONE.replace(/[^\d+]/g, "");
+  const phone = env.OPERATOR_PHONE;
   const fab: Fab | null =
     side === "admin"
       ? viewer.staffRole === "dispatcher" || viewer.staffRole === "admin"
         ? { kind: "newFlight", href: "/admin/flights/new" }
         : null
       : phone && !viewer.viewingAs
-        ? { kind: "call", href: `tel:${phone}` }
+        ? { kind: "call", href: telHref(phone) }
         : null;
   return (
     <>

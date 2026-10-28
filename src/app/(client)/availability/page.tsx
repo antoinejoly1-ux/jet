@@ -13,6 +13,7 @@ import { env } from "@/lib/env";
 import { getAvailability, listOwnerAircraft } from "@/lib/services/availability";
 import { zonedDay } from "@/lib/time";
 import { scenes } from "@/lib/imagery";
+import { telHref } from "@/lib/phone";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("availability") };
@@ -48,7 +49,7 @@ export default async function OwnerAvailabilityPage({ searchParams }: PageProps<
         actions={
           phone ? (
             <Button asChild size="sm">
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>
+              <a href={telHref(phone)}>
                 <Phone aria-hidden />
                 {t("callToBook")}
               </a>

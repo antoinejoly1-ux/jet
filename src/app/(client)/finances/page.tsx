@@ -13,6 +13,7 @@ import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { getOwnerFinances } from "@/lib/services/budgets";
 import { scenes } from "@/lib/imagery";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("finances") };
@@ -21,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FinancesPage({ searchParams }: PageProps<"/finances">) {
   const viewer = await requireAccess();
   const t = await getTranslations("finances");
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const { year: yearParam } = await searchParams;
   const thisYear = new Date().getFullYear();

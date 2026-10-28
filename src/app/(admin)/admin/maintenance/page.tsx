@@ -32,7 +32,7 @@ export default async function AdminMaintenancePage({ searchParams }: PageProps<"
   const sp = await searchParams;
   const { open, closed } = await listMaintenance(db, viewer);
   const canWrite = can(viewer, "operations:write");
-  const dt = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  const dt = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
   type Row = (typeof open)[number];
   const when = (r: Row) =>

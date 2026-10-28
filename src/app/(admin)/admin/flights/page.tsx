@@ -66,7 +66,7 @@ export default async function AdminFlightsPage({ searchParams }: PageProps<"/adm
     });
     return key === todayKey ? `${t("today")} · ${label}` : label;
   };
-  const time = (d: Date) => format.dateTime(d, { hour: "2-digit", minute: "2-digit" });
+  const time = (d: Date) => format.dateTime(d, { hour: "numeric", minute: "2-digit" });
   const tab = (v: "upcoming" | "past") => {
     const q = new URLSearchParams({ view: v, ...(aircraftId ? { aircraft: aircraftId } : {}) });
     return `/admin/flights?${q}`;

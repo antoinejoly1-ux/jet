@@ -18,6 +18,7 @@ import { formatHours, formatMoney } from "@/lib/format";
 import { getBudget, listBudgetStatuses } from "@/lib/services/budgets";
 import { listHours } from "@/lib/services/ledger";
 import { addHoursAction, copyBudgetAction, saveBudgetAction } from "./actions";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("budgets") };
@@ -36,7 +37,7 @@ export default async function BudgetsPage({ searchParams }: PageProps<"/admin/bu
       </>
     );
   }
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const sp = await searchParams;
   const thisYear = new Date().getFullYear();

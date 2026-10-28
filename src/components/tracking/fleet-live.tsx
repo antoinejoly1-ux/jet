@@ -9,6 +9,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { LiveDot } from "@/components/ui/live-dot";
 import type { AircraftLive } from "@/lib/services/tracking";
 import { cn } from "@/lib/utils";
+import { lang } from "@/lib/locale";
 
 const MapCanvas = dynamic(() => import("./map-canvas"), { ssr: false });
 const POLL_MS = 20_000;
@@ -19,7 +20,7 @@ const POLL_MS = 20_000;
  */
 export function FleetLive({ initial, header }: { initial: AircraftLive[]; header?: ReactNode }) {
   const t = useTranslations("live");
-  const locale = useLocale();
+  const locale = lang(useLocale());
   const router = useRouter();
   const [fleet, setFleet] = useState(initial);
 

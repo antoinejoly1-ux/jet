@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ContactButtons } from "@/components/common/contact-buttons";
 import { team } from "@/lib/imagery";
 import { cn } from "@/lib/utils";
+import { lang } from "@/lib/locale";
 
 /** The team's portraits, overlapping: the people who pick up when an owner calls. */
 export function TeamFaces({ count = 4, size = 44, className }: { count?: number; size?: number; className?: string }) {
@@ -40,7 +41,7 @@ export async function TeamReach({ className }: { className?: string }) {
 
 /** The team as a row of portrait cards with names and roles (onboarding, settings). */
 export async function TeamGallery({ count = 4, className }: { count?: number; className?: string }) {
-  const locale = (await getLocale()) === "en" ? "en" : "fr";
+  const locale = lang(await getLocale());
   return (
     <ul className={cn("grid grid-cols-2 gap-3 sm:grid-cols-4", className)}>
       {team.slice(0, count).map((m) => (

@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import { scenes } from "@/lib/imagery";
 import { listOwnerAircraft } from "@/lib/services/availability";
 import { WelcomeFlow } from "./welcome-flow";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("welcome"))("metaTitle") };
@@ -26,7 +27,7 @@ export default async function WelcomePage() {
     <WelcomeFlow
       firstName={first ?? ""}
       lastName={rest.join(" ")}
-      locale={(await getLocale()) === "en" ? "en" : "fr"}
+      locale={lang(await getLocale())}
       image={viewer.image}
       seesFinances={Boolean(viewer.staffRole) || financeOwnerIds(viewer).length > 0}
       aircraft={plane ? { registration: plane.registration, model: plane.model } : null}

@@ -27,7 +27,7 @@ export default async function OwnerFlightsPage() {
   const { upcoming, past } = await listOwnerFlights(db, viewer);
   const now = new Date();
   const when = (d: Date) =>
-    format.dateTime(d, { weekday: "short", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+    format.dateTime(d, { weekday: "short", day: "numeric", month: "long", hour: "numeric", minute: "2-digit" });
 
   type Row = (typeof upcoming)[number];
   const list = (rows: Row[]) => (

@@ -16,6 +16,7 @@ import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import { listCategories, listTransactions, TRANSACTIONS_SHOWN } from "@/lib/services/ledger";
 import { addTransactionAction, reverseTransactionAction } from "./actions";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("transactions") };
@@ -32,7 +33,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
       </>
     );
   }
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const sp = await searchParams;
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");

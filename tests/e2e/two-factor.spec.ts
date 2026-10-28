@@ -84,7 +84,7 @@ test("a newly invited staff member is guided through setup before reaching Admin
   await signIn(page, "admin@jet.test");
   await page.goto("/admin/invitations");
   await page.getByLabel(/^(Courriel|Email)$/).fill(email);
-  await page.getByLabel(/^(Accès|Access)$/).selectOption({ label: "Répartiteur" });
+  await page.getByLabel(/^(Accès|Access)$/).selectOption({ label: "Répartition" });
   await page.getByRole("button", { name: /Envoyer l'invitation|Send invitation/ }).click();
   await expect(page.getByRole("status")).toContainText(email);
 

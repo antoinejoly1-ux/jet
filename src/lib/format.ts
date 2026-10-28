@@ -1,6 +1,6 @@
 /** Display helpers. Money is integer cents, durations are integer minutes. */
 
-const localeTag = (locale: string) => (locale === "en" ? "en-CA" : "fr-CA");
+import { localeTag } from "./locale";
 
 export function formatMoney(cents: number, currency: "CAD" | "USD", locale: string): string {
   return new Intl.NumberFormat(localeTag(locale), { style: "currency", currency }).format(cents / 100);

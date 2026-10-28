@@ -127,7 +127,7 @@ export default async function AdminDashboardPage() {
                   />
                   <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
                     <span className="tabular w-16 text-2xl font-light">
-                      {format.dateTime(f.departsAt, { hour: "2-digit", minute: "2-digit" })}
+                      {format.dateTime(f.departsAt, { hour: "numeric", minute: "2-digit" })}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium">

@@ -11,7 +11,7 @@
     "items": {
       "home": "Home",
       "flights": "Flights",
-      "availability": "Availability",
+      "availability": "Calendar",
       "finances": "Finances",
       "invoices": "Invoices",
       "aircraft": "Aircraft",
@@ -196,7 +196,7 @@
     "nextMaintenanceEmpty": "No maintenance planned.",
     "latestInvoice": "Latest invoice",
     "latestInvoiceEmpty": "Your first invoice will appear here after your first flight.",
-    "availability": "Availability",
+    "availability": "Calendar",
     "freeDays": "{count, plural, =0 {No free days} one {# free day} other {# free days}} in the next {days}",
     "seeCalendar": "See the calendar",
     "insights": {
@@ -315,7 +315,7 @@
     "privacySent": "Request sent. We'll answer here and by email.",
     "privacyKinds": {
       "correction": "Correct some information",
-      "access": "Know what you hold",
+      "access": "Access my information",
       "deletion": "Delete information",
       "portability": "Receive my data"
     },
@@ -460,9 +460,9 @@
     "ownersGroup": "Owner",
     "staffGroup": "Team",
     "staffRoles": {
-      "admin": "Admin",
+      "admin": "Administration",
       "finance": "Finance",
-      "dispatcher": "Dispatcher"
+      "dispatcher": "Dispatch"
     },
     "sending": "Sending…",
     "send": "Send invitation",
@@ -478,7 +478,7 @@
       "revoked": "Cancelled",
       "not_found": "Not found"
     },
-    "revoke": "Cancel",
+    "revoke": "Revoke",
     "withoutAccessTitle": "{count, plural, one {# owner without access} other {# owners without access}}",
     "withoutAccessBody": "No login linked and no open invitation. Launch is complete when this list is empty.",
     "noEmail": "no email",
@@ -610,7 +610,7 @@
   },
   "aircraft": {
     "title": "Aircraft",
-    "subtitle": "The fleet and how each plane's shares are split.",
+    "subtitle": "The fleet and how each aircraft's shares are split.",
     "new": "New aircraft",
     "emptyTitle": "No aircraft yet",
     "emptyBody": "Add the first aircraft in the fleet.",
@@ -670,17 +670,17 @@
     "title": "Team",
     "invite": "Invite a member",
     "you": "You",
-    "twoFactorOn": "2-step on",
-    "twoFactorOff": "2-step not set up",
+    "twoFactorOn": "Two-step verification: on",
+    "twoFactorOff": "Two-step verification: not set up",
     "lastSignIn": "Last signed in {date}",
     "neverSignedIn": "Never signed in",
     "auditTitle": "Audit log",
     "auditBody": "Who did what, and when.",
     "roleFor": "Role for {name}",
     "roles": {
-      "admin": "Admin",
+      "admin": "Administration",
       "finance": "Finance",
-      "dispatcher": "Dispatcher"
+      "dispatcher": "Dispatch"
     },
     "removeFromTeam": "Remove from team",
     "save": "Save",
@@ -777,7 +777,7 @@
     },
     "viewPdf": "View PDF",
     "markPaid": "Mark paid",
-    "void": "Void",
+    "void": "Void invoice",
     "voidReason": "Reason for voiding",
     "noAccessTitle": "Restricted",
     "noAccessBody": "Invoices are for finance and admins.",
@@ -991,7 +991,7 @@
     "cancelCompleted": "Cancel and return hours",
     "edit": "Edit",
     "exportCsv": "Export (CSV)",
-    "flown": "{hours} de volk"
+    "flown": "{hours} flown"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -1041,7 +1041,7 @@
     "cancelJob": "Cancel work"
   },
   "availability": {
-    "title": "Availability",
+    "title": "Calendar",
     "subtitle": "Your aircraft's free days. Your flights are in blue.",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
@@ -1160,7 +1160,7 @@
     "backToInbox": "Back to messages",
     "assignTo": "Assign to",
     "me": "{name} (me)",
-    "resolve": "Resolved",
+    "resolve": "Mark resolved",
     "reopen": "Reopen",
     "readOnlyMember": "Your access is read-only: call or text the team with any request."
   },
@@ -1193,7 +1193,7 @@
         "uninvited_sign_up": "{email} signed up without an invitation"
       },
       "sync": {
-        "failed": "The scheduling software sync had {failed} error(s)"
+        "failed": "The scheduling software sync had {failed, plural, one {# error} other {# errors}}"
       },
       "privacy": {
         "request": "Privacy request from {email} ({kind})"
@@ -1243,7 +1243,7 @@
     },
     "statement": {
       "title": "{year} annual statement",
-      "generated": "Produced on {date}",
+      "generated": "Prepared on {date}",
       "footer": "Statement produced by the owner portal. Amounts reflect your ledger as of the production date.",
       "summary": "Summary",
       "planned": "Planned",
@@ -1268,7 +1268,7 @@
   "privacyPolicy": {
     "title": "Privacy policy",
     "updated": "Last updated: {date}",
-    "intro": "{operator} manages aircraft for their owners. This portal gives owners access to their flights, hours, finances and invoices. This policy explains what personal information we collect, why, where it is kept and how to exercise your rights, under Quebec's Act respecting the protection of personal information in the private sector.",
+    "intro": "{operator} manages aircraft for their owners. This portal gives owners access to their flights, hours, finances and invoices. This policy explains what personal information we collect, why, where it is kept and how to exercise your rights, under Québec's Act respecting the protection of personal information in the private sector.",
     "officerTitle": "Person in charge of protecting personal information",
     "officerBody": "For any question or request: {officer}, <mail>{email}</mail>.",
     "officerMissing": "Our privacy officer's contact details will be published here before the portal opens.",
@@ -1288,7 +1288,7 @@
         "items": [
           "To manage your aircraft share, schedule your flights and keep your accounts.",
           "To invoice you and send you budgets, statements and notices.",
-          "To protect your account: two-factor authentication for our team, attempt limits, an audit log.",
+          "To protect your account: two-step verification for our team, attempt limits, an audit log.",
           "To meet our legal and tax obligations.",
           "We don't use your information for advertising and we don't sell it."
         ]
@@ -1299,13 +1299,13 @@
           "The database and files (invoices, attachments) are hosted in Canada, in Amazon Web Services' Montreal region, encrypted at rest.",
           "The portal itself is served by Vercel; pages are built on servers in the United States, which process your information while showing a page without keeping it.",
           "Emails (notices, sign-in links) are sent by Resend, in the United States, which receives your email address and the message content.",
-          "Before communicating information outside Quebec, we assess the privacy factors and bind these providers by contract."
+          "Before communicating information outside Québec, we assess the privacy factors and bind these providers by contract."
         ]
       },
       {
         "title": "Who can see it",
         "items": [
-          "You, and the other people authorised on your owner account.",
+          "You, and the other people authorized on your owner account.",
           "Our team, according to their role (dispatch, finance, administration). Every “view as owner” session and every change is logged.",
           "Co-owners of the same aircraft never see your flights or finances: only that the aircraft is booked."
         ]
@@ -1315,7 +1315,7 @@
         "items": [
           "Financial records (entries, invoices, budgets) are kept at least six years after the end of the tax year, as tax law requires.",
           "Expired sessions and sign-in links are deleted automatically; unused invitations after 90 days; read notices after a year.",
-          "When our relationship ends, other information is deleted or anonymised once legal periods have passed."
+          "When our relationship ends, other information is deleted or anonymized once legal periods have passed."
         ]
       },
       {
@@ -1325,7 +1325,7 @@
           "Have inaccurate information corrected.",
           "Ask us to delete information that is no longer needed, subject to our legal obligations.",
           "Withdraw consent to optional emails from My account.",
-          "File a complaint with Quebec's Commission d'accès à l'information.",
+          "File a complaint with Québec's Commission d'accès à l'information.",
           "We answer every request within 30 days."
         ]
       },
@@ -1349,7 +1349,7 @@
     "markDone": "Mark handled",
     "refuse": "Refuse",
     "newIncident": "Record an incident",
-    "newIncidentBody": "Any unauthorised access, use, disclosure or loss of personal information must be recorded, even a minor one.",
+    "newIncidentBody": "Any unauthorized access, use, disclosure or loss of personal information must be recorded, even a minor one.",
     "incidentSaved": "Incident recorded.",
     "occurredOn": "Occurred on",
     "discoveredOn": "Discovered on",
@@ -1401,7 +1401,7 @@
     "active": "Active",
     "disabled": "Disabled",
     "delivered": "delivered",
-    "retrying": "retrying ({attempts} failed)",
+    "retrying": "retrying ({attempts, plural, one {# failure} other {# failures}})",
     "gaveUp": "gave up",
     "sendTest": "Send a test",
     "testOk": "Test received ({status}).",
@@ -1457,7 +1457,8 @@
     "footer": "Univair · Saint-Hubert, Québec",
     "eyebrow": "Aircraft management · Univair",
     "taglineLight": "Your aircraft,",
-    "taglineBold": "wherever it is."
+    "taglineBold": "wherever it is.",
+    "description": "The Univair owner portal"
   },
   "live": {
     "states": {
@@ -1472,7 +1473,7 @@
     "onGroundAt": "On the ground in {city}",
     "unknown": "Position unknown",
     "signalLost": "Signal lost",
-    "progress": "Flight {percent}% complete",
+    "progress": "{percent}% of the way there",
     "altitude": "Altitude",
     "speed": "Speed",
     "heading": "Heading",
@@ -1499,11 +1500,11 @@
     "airborneCount": "{count, plural, =0 {Nothing in the air} one {# in the air} other {# in the air}} of {total}"
   },
   "shell": {
-    "client": "Owner space",
+    "client": "Owner portal",
     "admin": "Administration"
   },
   "authFrame": {
-    "footer": "Univair · Saint-Hubert Airport, Quebec",
+    "footer": "Univair · Saint-Hubert Airport, Québec",
     "help": "Need help? {phone}",
     "privacy": "Privacy",
     "signIn": {
@@ -1563,7 +1564,7 @@
     "photo": {
       "eyebrow": "Your photo",
       "title": "A face to the name.",
-      "body": "Your team will recognise you at a glance. You can change it whenever you like.",
+      "body": "Your team will recognize you at a glance. You can change it whenever you like.",
       "later": "Later"
     },
     "tour": {
@@ -1577,7 +1578,7 @@
         "b": "Every flight drawn on the map, from departure to arrival"
       },
       "hours": {
-        "caption": "Your hours, no maths.",
+        "caption": "Your hours, no math.",
         "title": "Your hours and availability",
         "body": "The hours you have left, the ones flown, and the days the aircraft is free.",
         "a": "The next 14 days at a glance",
@@ -1626,5 +1627,60 @@
   "teamReach": {
     "title": "Always here for you",
     "body": "A call or a text, 7 days a week. We take care of the rest."
+  },
+  "emails": {
+    "greeting": "Hello,",
+    "signature": "The Univair team",
+    "help": "Questions? Call or text us at {phone}.",
+    "preferences": "You're receiving this email based on your preferences. Change them in the portal.",
+    "preferencesLink": "Manage my emails",
+    "linkFallback": "Button not working? Copy this link:",
+    "templates": {
+      "verify": {
+        "subject": "Confirm your email address",
+        "body": "Confirm your address to activate your account.",
+        "cta": "Confirm my address"
+      },
+      "reset": {
+        "subject": "Reset your password",
+        "body": "You asked for a new password. This link expires in one hour.",
+        "cta": "Choose a new password"
+      },
+      "magicLink": {
+        "subject": "Your sign-in link",
+        "body": "Use this link to sign in. It expires in 10 minutes.",
+        "cta": "Sign me in"
+      },
+      "invitation": {
+        "subject": "Your access to the owner portal",
+        "body": "Univair is opening your access to the owner portal. This link expires in 7 days.",
+        "cta": "Accept the invitation"
+      },
+      "invoiceIssued": {
+        "subject": "New invoice {number}",
+        "body": "A new invoice for {amount} for {aircraft} is ready in your portal.",
+        "cta": "View the invoice"
+      },
+      "budgetPublished": {
+        "subject": "Your {year} budget is ready",
+        "body": "The {year} budget for {aircraft} has been published. You can review it in your portal.",
+        "cta": "View my finances"
+      },
+      "newMessage": {
+        "subject": "New message from our team",
+        "body": "Our team replied: “{preview}”",
+        "cta": "Read and reply"
+      },
+      "hoursLow": {
+        "subject": "{hours} left on {aircraft}",
+        "body": "Your hours on {aircraft} are below 10% of your annual allotment: {hours} remain.",
+        "cta": "See my balance"
+      },
+      "maintenancePlanned": {
+        "subject": "Maintenance planned on {aircraft}",
+        "body": "{aircraft} will be in maintenance from {when}. The aircraft won't be available during that time.",
+        "cta": "View the aircraft"
+      }
+    }
   }
 }

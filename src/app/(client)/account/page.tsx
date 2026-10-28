@@ -27,6 +27,7 @@ import { listMyPrivacyRequests, RESPONSE_DAYS } from "@/lib/services/privacy";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import { privacyRequestAction, saveEmailPreferencesAction, setLocaleAction, setThemeAction } from "./actions";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("account"))("settingsTitle") };
@@ -86,7 +87,7 @@ function Row({
 export default async function AccountPage() {
   const viewer = await requireViewer();
   const t = await getTranslations("account");
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   const readOnly = Boolean(viewer.viewingAs);

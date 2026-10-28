@@ -92,7 +92,7 @@ export async function Thread({
                 ) : null}
               </div>
               <span className="text-muted px-1 text-[11px]">
-                {format.dateTime(m.createdAt, { hour: "2-digit", minute: "2-digit" })}
+                {format.dateTime(m.createdAt, { hour: "numeric", minute: "2-digit" })}
                 {mine && m.id === lastMine?.id && m.readAt ? ` · ${t("read")}` : ""}
               </span>
             </div>

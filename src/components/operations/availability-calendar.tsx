@@ -43,7 +43,7 @@ export async function AvailabilityCalendar({
   );
   const today = zonedDay(new Date());
   const range = (p: Period) =>
-    `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+    `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "numeric", minute: "2-digit" } : { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}`;
   const describe = (p: Period) => {
     if (p.kind === "maintenance") return p.label ? `${t("legend.maintenance")} · ${p.label}` : t("legend.maintenance");
     if (p.kind === "booked") return [t("legend.booked"), p.ownerName].filter(Boolean).join(" · ");

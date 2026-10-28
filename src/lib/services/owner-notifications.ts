@@ -17,6 +17,9 @@ export type PendingEmail = {
   vars: Record<string, string>;
 };
 
+/** Values for a notification, or a function giving them in each recipient's language (dates, for instance). */
+export type NotificationData = Record<string, string> | ((locale: "fr" | "en") => Record<string, string>);
+
 /**
  * Records an in-app notification for every login of an owner, inside the
  * caller's transaction, and returns the emails to send once it commits.
@@ -25,7 +28,7 @@ export async function notifyOwnerMembers(
   tx: DbOrTx,
   ownerId: string,
   type: string,
-  data: Record<string, string>,
+  data: NotificationData,
   email: { template: TemplateName; path: string },
 ): Promise<PendingEmail[]> {
   const rows = await tx
@@ -43,7 +46,8 @@ export async function notifyOwnerMembers(
   const aboutMoney = isNotificationType(type) && "finance" in NOTIFICATION_TYPES[type];
   const members = rows.filter((m) => !aboutMoney || memberAccess(m.role, m.canSeeFinances).finances);
   if (members.length === 0) return [];
-  await tx.insert(notifications).values(members.map((m) => ({ userId: m.userId, type, data })));
+  const dataFor = (locale: "fr" | "en") => (typeof data === "function" ? data(locale) : data);
+  await tx.insert(notifications).values(members.map((m) => ({ userId: m.userId, type, data: dataFor(m.locale) })));
   // Everyone sees it in the app; the email only goes to those who haven't turned it off.
   const off = await emailOffFor(
     tx,
@@ -56,7 +60,7 @@ export async function notifyOwnerMembers(
       to: m.email,
       locale: m.locale,
       path: email.path,
-      vars: data,
+      vars: dataFor(m.locale),
     }));
 }
 

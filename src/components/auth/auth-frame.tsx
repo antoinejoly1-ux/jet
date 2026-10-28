@@ -1,9 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Logo } from "@/components/brand/logo";
 import { env } from "@/lib/env";
 import { AuthBackdrop } from "./auth-backdrop";
+import { formatPhone, telHref } from "@/lib/phone";
 
 /**
  * Sign-in, sign-up and every account screen: a full-screen photograph, the
@@ -34,8 +35,8 @@ export async function AuthFrame({ children, corner }: { children: ReactNode; cor
         <p>{t("footer")}</p>
         <p className="flex items-center gap-4">
           {phone ? (
-            <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className="hover:text-white">
-              {t("help", { phone })}
+            <a href={telHref(phone)} className="hover:text-white">
+              {t("help", { phone: formatPhone(phone, await getLocale()) })}
             </a>
           ) : null}
           <Link href="/privacy" className="hover:text-white">

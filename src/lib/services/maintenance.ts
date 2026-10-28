@@ -14,6 +14,7 @@ import { recordAudit } from "./audit";
 import { emit } from "./outbox";
 import { notifyOwnerMembers, sendPendingEmails, type PendingEmail } from "./owner-notifications";
 import { ConflictError, NotFoundError } from "./errors";
+import { localeTag } from "@/lib/locale";
 
 export type MaintenanceStatus = (typeof maintenanceEvents.$inferSelect)["status"];
 
@@ -106,17 +107,19 @@ export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInpu
         .selectDistinct({ ownerId: shares.ownerId })
         .from(shares)
         .where(and(eq(shares.aircraftId, input.aircraftId), activeShare()));
-      const when = new Intl.DateTimeFormat("fr-CA", {
-        timeZone: OPERATOR_TIME_ZONE,
-        dateStyle: "long",
-      }).format(input.startsAt);
+      const startsAt = input.startsAt;
+      // Each owner reads the date in their own language.
+      const when = (locale: "fr" | "en") =>
+        new Intl.DateTimeFormat(localeTag(locale), { timeZone: OPERATOR_TIME_ZONE, dateStyle: "long" }).format(
+          startsAt,
+        );
       for (const h of holders)
         emails.push(
           ...(await notifyOwnerMembers(
             tx,
             h.ownerId,
             "maintenance.planned",
-            { aircraft: plane.registration, when },
+            (locale) => ({ aircraft: plane.registration, when: when(locale) }),
             { template: "maintenancePlanned", path: "/aircraft" },
           )),
         );

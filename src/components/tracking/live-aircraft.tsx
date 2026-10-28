@@ -9,6 +9,7 @@ import { Icon } from "@/components/ui/icon";
 import { LiveDot } from "@/components/ui/live-dot";
 import type { AircraftLive } from "@/lib/services/tracking";
 import { cn } from "@/lib/utils";
+import { lang } from "@/lib/locale";
 
 /** How often the card asks where the aircraft is. The server answers from a 20 s cache. */
 const POLL_MS = 15_000;
@@ -79,12 +80,12 @@ export function LiveAircraft({
 }) {
   const t = useTranslations("live");
   const format = useFormatter();
-  const locale = useLocale();
+  const locale = lang(useLocale());
   const { live, now } = useLive(initial, side);
   const flying = live.state === "in_flight";
   const seenAgo = live.position ? Math.max(0, Math.round((now - Date.parse(live.position.seenAt)) / 1000)) : null;
   const eta = live.leg?.eta ? Date.parse(live.leg.eta) : null;
-  const time = (ms: number) => format.dateTime(new Date(ms), { hour: "2-digit", minute: "2-digit" });
+  const time = (ms: number) => format.dateTime(new Date(ms), { hour: "numeric", minute: "2-digit" });
   const inMinutes = eta ? Math.max(0, Math.round((eta - now) / 60_000)) : null;
 
   const headline = flying
@@ -209,7 +210,7 @@ export function LiveAircraft({
                 weekday: "long",
                 day: "numeric",
                 month: "long",
-                hour: "2-digit",
+                hour: "numeric",
                 minute: "2-digit",
               })}
             </p>
