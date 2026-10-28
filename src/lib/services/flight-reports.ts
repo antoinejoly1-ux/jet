@@ -327,6 +327,8 @@ const reviewColumns = {
   toAirport: flights.toAirport,
   departsAt: flights.departsAt,
   pilotName: pilot.name,
+  pilotId: pilot.id,
+  pilotImage: pilot.image,
   shareId: flightReports.shareId,
   ownerName: owners.legalName,
   /** In CAD: converted amounts once approved, CAD receipts as they are. */

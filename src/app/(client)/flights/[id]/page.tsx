@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LiveDot } from "@/components/ui/live-dot";
+import { Person } from "@/components/ui/person";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
 import { airport } from "@/lib/airports";
 import { requireAccess } from "@/lib/auth/session";
@@ -34,11 +35,10 @@ export default async function OwnerFlightPage({ params }: PageProps<"/flights/[i
   const tf = await getTranslations("flights");
   const format = await getFormatter();
   const locale = await getLocale();
-  const { flight, photoUrl, route, inAir, pilotName, reportedMinutes, invoiceId } = await getOwnerFlightDetail(
-    db,
-    viewer,
-    id,
-  ).catch((e) => (e instanceof NotFoundError ? notFound() : Promise.reject(e)));
+  const { flight, photoUrl, route, inAir, pilotName, pilotImage, reportedMinutes, invoiceId } =
+    await getOwnerFlightDetail(db, viewer, id).catch((e) =>
+      e instanceof NotFoundError ? notFound() : Promise.reject(e),
+    );
   const when = (d: Date) =>
     format.dateTime(d, {
       weekday: "long",
@@ -122,7 +122,7 @@ export default async function OwnerFlightPage({ params }: PageProps<"/flights/[i
             </Fact>
             {pilotName ? (
               <Fact icon={<UserRound className="size-4" />} label={t("pilot")}>
-                {pilotName}
+                <Person name={pilotName} image={pilotImage} />
               </Fact>
             ) : null}
           </dl>

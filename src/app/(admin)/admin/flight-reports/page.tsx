@@ -5,6 +5,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { Person } from "@/components/ui/person";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -48,7 +49,8 @@ export default async function FlightReportsPage() {
             {r.registration} · {r.fromAirport} → {r.toAirport}
           </p>
           <p className="text-muted text-sm">
-            {when(r.departsAt)} · {r.pilotName ?? t("unknownPilot")} · {r.ownerName ?? t("noOwner")}
+            {when(r.departsAt)} · {r.pilotName ? <Person name={r.pilotName} image={r.pilotImage} /> : t("unknownPilot")}{" "}
+            · {r.ownerName ?? t("noOwner")}
           </p>
         </div>
         <div className="flex items-center gap-4 text-sm">
