@@ -1,4 +1,5 @@
 {
   "framework": "nextjs",
-  "regions": ["iad1"]
+  "regions": ["iad1"],
+  "buildCommand": "pnpm db:migrate && if [ \"$SEED_ON_BUILD\" = \"true\" ]; then pnpm db:seed; fi && pnpm build"
 }

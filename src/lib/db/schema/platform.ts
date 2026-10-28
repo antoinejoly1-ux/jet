@@ -1,5 +1,6 @@
 import {
   bigint,
+  customType,
   date,
   index,
   inet,
@@ -292,3 +293,17 @@ export const privacyRequests = pgTable(
   },
   (t) => [index("privacy_requests_status_idx").on(t.status, t.createdAt)],
 );
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
+
+/**
+ * File contents for STORAGE_DRIVER=database: staging and demo deployments
+ * whose servers have no lasting disk and no S3 bucket. Production keeps
+ * files in S3; this table stays empty there.
+ */
+export const storedFiles = pgTable("stored_files", {
+  key: text("key").primaryKey(),
+  contentType: text("content_type").notNull(),
+  bytes: bytea("bytes").notNull(),
+  createdAt: createdAt(),
+});

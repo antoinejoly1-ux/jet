@@ -4,7 +4,8 @@
  *
  *   pnpm db:seed           wipes the domain tables and reseeds
  *
- * Refuses to run when NODE_ENV=production.
+ * Refuses to run against production (NODE_ENV or VERCEL_ENV). On a Vercel preview
+ * with SEED_ON_BUILD=true, every build reseeds the demo database.
  */
 import { createOTP } from "@better-auth/utils/otp";
 import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
@@ -20,7 +21,8 @@ import * as s from "../src/lib/db/schema";
 config({ path: ".env.local" });
 config();
 
-if (process.env.NODE_ENV === "production") throw new Error("Refusing to seed a production database.");
+if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production")
+  throw new Error("Refusing to seed a production database.");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 const db = drizzle(pool, { schema: s, casing: "snake_case" });
@@ -53,8 +55,13 @@ const storageDir = path.resolve(process.env.LOCAL_STORAGE_DIR ?? "tmp/storage");
 
 async function storeDemoFile(name: string, bytes: Buffer) {
   const key = `invoices/${uuidv7()}.pdf`;
-  await mkdir(path.join(storageDir, "invoices"), { recursive: true });
-  await writeFile(path.join(storageDir, key), bytes);
+  // Staging keeps files in the database (no lasting disk on Vercel); elsewhere, the local folder.
+  if (process.env.STORAGE_DRIVER === "database")
+    await db.insert(s.storedFiles).values({ key, contentType: "application/pdf", bytes });
+  else {
+    await mkdir(path.join(storageDir, "invoices"), { recursive: true });
+    await writeFile(path.join(storageDir, key), bytes);
+  }
   const [file] = await db
     .insert(s.files)
     .values({

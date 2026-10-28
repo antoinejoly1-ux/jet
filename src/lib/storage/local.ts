@@ -1,13 +1,13 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { env } from "@/lib/env";
 import { DOWNLOAD_TTL_SECONDS, UPLOAD_TTL_SECONDS, type StorageDriver } from "./shared";
 
 /**
- * Development and test storage: a local folder behind the same signed-URL
- * flow as S3, served by /api/storage/local. Never used in production.
+ * Development, test and staging storage: the same signed-URL flow as S3,
+ * served by /api/storage/local, with the bytes in a local folder or in the
+ * database (see blobs.ts). Never used in production.
  */
 export const LOCAL_ROUTE = "/api/storage/local";
 
@@ -77,7 +77,6 @@ export function localStorageDriver(): StorageDriver {
   return {
     async presignUpload(key, file) {
       localPath(key);
-      await mkdir(path.dirname(localPath(key)), { recursive: true });
       const exp = Date.now() + UPLOAD_TTL_SECONDS * 1000;
       return {
         url: signedUrl({ op: "put", key, exp, type: file.contentType, size: file.sizeBytes }),
@@ -90,11 +89,9 @@ export function localStorageDriver(): StorageDriver {
       return signedUrl({ op: "get", key, exp, type: contentType, name: filename, inline });
     },
     async head(key) {
-      try {
-        return { sizeBytes: (await stat(localPath(key))).size };
-      } catch {
-        return null;
-      }
+      const { blobs } = await import("./blobs");
+      const size = await blobs().size(key);
+      return size == null ? null : { sizeBytes: size };
     },
   };
 }

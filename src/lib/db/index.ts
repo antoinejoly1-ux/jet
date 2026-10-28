@@ -7,7 +7,7 @@ import * as schema from "./schema";
 // Reuse one pool across hot reloads in development.
 const globalForDb = globalThis as unknown as { pool?: Pool };
 
-const pool = globalForDb.pool ?? new Pool({ connectionString: env.DATABASE_URL, max: 10 });
+const pool = globalForDb.pool ?? new Pool({ connectionString: env.DATABASE_URL, max: env.DB_POOL_MAX });
 if (process.env.NODE_ENV !== "production") globalForDb.pool = pool;
 
 export const db = drizzle(pool, { schema, casing: "snake_case" });
