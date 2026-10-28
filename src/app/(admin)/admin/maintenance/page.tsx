@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { MaintenanceBoard, type BoardItem } from "@/components/admin/maintenance-board";
 import { MaintenanceRowActions } from "@/components/admin/maintenance-row-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,6 @@ import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { listMaintenance, sentToReviewByMe } from "@/lib/services/maintenance";
 import { zonedDay } from "@/lib/time";
-import { cn } from "@/lib/utils";
 import { setMaintenanceStatusAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,12 +31,11 @@ export const STATUS_TONE = {
 } as const;
 
 const COLUMNS = ["planned", "in_progress", "review", "done"] as const;
-const DOT = { planned: "bg-accent", in_progress: "bg-warning", review: "bg-bronze", done: "bg-success" } as const;
 
 /**
  * Maintenance as a board: Planifié · En cours · En vérification · Terminé.
- * Each card moves to the next column with one button; cancelled jobs sit
- * below. Jobs synced from CAMP carry its badge.
+ * Each card moves to the next column with one button or by dragging it
+ * (MaintenanceBoard); cancelled jobs sit below. Jobs synced from CAMP carry its badge.
  */
 export default async function AdminMaintenancePage() {
   const viewer = await requireStaff();
@@ -78,12 +77,79 @@ export default async function AdminMaintenancePage() {
   const cancelled = closed.filter((r) => r.status === "cancelled");
   const status = (id: string, s: "in_progress" | "review" | "done" | "cancelled") =>
     setMaintenanceStatusAction.bind(null, id, s);
+  const card = (r: Row, c: (typeof COLUMNS)[number]) => {
+    const photo = aircraftPhotoUrl(r.aircraftId, r.photoFileId);
+    return (
+      <>
+        <div className="flex items-start gap-3">
+          <Link
+            href={`/admin/aircraft/${r.aircraftId}#maintenance`}
+            className="relative size-10 shrink-0 overflow-hidden rounded-[10px]"
+            aria-label={r.registration}
+            draggable={false}
+          >
+            <Image
+              src={photo ?? aircraftPhoto(r.model)}
+              unoptimized={Boolean(photo)}
+              alt=""
+              fill
+              sizes="40px"
+              className="object-cover"
+              draggable={false}
+            />
+          </Link>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm leading-snug font-medium">{r.title}</p>
+            <p className="text-muted mt-0.5 text-xs">
+              {r.registration} · {t.has(`types.${r.type}`) ? t(`types.${r.type}`) : r.type}
+            </p>
+          </div>
+        </div>
+        <p className="text-muted mt-3 text-xs">{when(r)}</p>
+        {r.source === "sync" ? (
+          <div className="mt-2">
+            <Badge>{t("syncedFromCamp")}</Badge>
+          </div>
+        ) : null}
+        {c === "done" ? (
+          // Finished work leads to the aircraft's history, where it's signed off.
+          <div className="border-border mt-3 border-t pt-3">
+            <Link
+              href={`/admin/aircraft/${r.aircraftId}#history`}
+              className="text-muted hover:text-text text-xs font-medium underline-offset-4 hover:underline"
+            >
+              {t("seeHistory")}
+            </Link>
+          </div>
+        ) : null}
+        {canWrite && c !== "done" ? (
+          <div className="border-border mt-3 border-t pt-3">
+            <MaintenanceRowActions
+              id={r.id}
+              status={r.status}
+              awaitingOther={mine.has(r.id)}
+              actions={{
+                start: status(r.id, "in_progress"),
+                review: status(r.id, "review"),
+                done: status(r.id, "done"),
+                back: status(r.id, "in_progress"),
+                cancel: status(r.id, "cancelled"),
+              }}
+            />
+          </div>
+        ) : null}
+      </>
+    );
+  };
+  const items: BoardItem[] = COLUMNS.flatMap((c) =>
+    byColumn(c).map((r) => ({ id: r.id, status: c, title: r.title, awaitingOther: mine.has(r.id), card: card(r, c) })),
+  );
 
   return (
     <>
       <PageHeader
         title={t("title")}
-        description={t("boardSubtitle")}
+        description={canWrite ? t("boardSubtitleDrag") : t("boardSubtitle")}
         actions={
           canWrite ? (
             <Button asChild size="sm">
@@ -98,94 +164,7 @@ export default async function AdminMaintenancePage() {
       {all.length === 0 ? (
         <EmptyState icon={Wrench} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
-        <div className="-mx-4 overflow-x-auto px-4 pb-2 lg:mx-0 lg:px-0">
-          <div className="grid min-w-[1040px] grid-cols-4 gap-4 lg:min-w-0">
-            {COLUMNS.map((c) => {
-              const rows = byColumn(c);
-              return (
-                <section
-                  key={c}
-                  aria-labelledby={`col-${c}`}
-                  className="bg-surface-muted/50 flex min-h-48 flex-col gap-3 rounded-[22px] p-3"
-                >
-                  <h2 id={`col-${c}`} className="flex items-center gap-2 px-2 pt-1 text-sm font-medium">
-                    <span className={cn("size-2 rounded-full", DOT[c])} aria-hidden />
-                    {t(`columns.${c}`)}
-                    <span className="text-muted tabular ml-auto text-xs">{rows.length}</span>
-                  </h2>
-                  {rows.length === 0 ? (
-                    <p className="text-muted px-2 py-6 text-center text-xs">{t("columnEmpty")}</p>
-                  ) : (
-                    <ul className="flex flex-col gap-3">
-                      {rows.map((r) => {
-                        const photo = aircraftPhotoUrl(r.aircraftId, r.photoFileId);
-                        return (
-                          <li key={r.id} className="bg-surface border-border rounded-[16px] border p-4 shadow-sm">
-                            <div className="flex items-start gap-3">
-                              <Link
-                                href={`/admin/aircraft/${r.aircraftId}#maintenance`}
-                                className="relative size-10 shrink-0 overflow-hidden rounded-[10px]"
-                                aria-label={r.registration}
-                              >
-                                <Image
-                                  src={photo ?? aircraftPhoto(r.model)}
-                                  unoptimized={Boolean(photo)}
-                                  alt=""
-                                  fill
-                                  sizes="40px"
-                                  className="object-cover"
-                                />
-                              </Link>
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm leading-snug font-medium">{r.title}</p>
-                                <p className="text-muted mt-0.5 text-xs">
-                                  {r.registration} · {t.has(`types.${r.type}`) ? t(`types.${r.type}`) : r.type}
-                                </p>
-                              </div>
-                            </div>
-                            <p className="text-muted mt-3 text-xs">{when(r)}</p>
-                            {r.source === "sync" ? (
-                              <div className="mt-2">
-                                <Badge>{t("syncedFromCamp")}</Badge>
-                              </div>
-                            ) : null}
-                            {c === "done" ? (
-                              // Finished work leads to the aircraft's history, where it's signed off.
-                              <div className="border-border mt-3 border-t pt-3">
-                                <Link
-                                  href={`/admin/aircraft/${r.aircraftId}#history`}
-                                  className="text-muted hover:text-text text-xs font-medium underline-offset-4 hover:underline"
-                                >
-                                  {t("seeHistory")}
-                                </Link>
-                              </div>
-                            ) : null}
-                            {canWrite && c !== "done" ? (
-                              <div className="border-border mt-3 border-t pt-3">
-                                <MaintenanceRowActions
-                                  id={r.id}
-                                  status={r.status}
-                                  awaitingOther={mine.has(r.id)}
-                                  actions={{
-                                    start: status(r.id, "in_progress"),
-                                    review: status(r.id, "review"),
-                                    done: status(r.id, "done"),
-                                    back: status(r.id, "in_progress"),
-                                    cancel: status(r.id, "cancelled"),
-                                  }}
-                                />
-                              </div>
-                            ) : null}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </section>
-              );
-            })}
-          </div>
-        </div>
+        <MaintenanceBoard canWrite={canWrite} moveAction={setMaintenanceStatusAction} items={items} />
       )}
       {cancelled.length > 0 ? (
         <details className="mt-8">

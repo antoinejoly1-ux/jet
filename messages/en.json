@@ -1310,6 +1310,15 @@
     },
     "columnEmpty": "Nothing here.",
     "boardSubtitle": "Each job moves from column to column, from planning to sign-off.",
+    "boardSubtitleDrag": "Drag a card to the next column, or use its buttons. On a phone, hold it for a moment before dragging.",
+    "board": {
+      "picked": "“{title}” picked up. Drop it in a column, or press Escape to cancel.",
+      "dropped": "“{title}” stays where it was.",
+      "moved": "“{title}” moved to “{column}”.",
+      "reverted": "“{title}” went back to “{column}”. {reason}",
+      "oneStep": "Jobs move one column at a time: go through “{next}” first.",
+      "noWayBack": "This job can't go back to “{column}”."
+    },
     "syncedFromCamp": "CAMP",
     "cancelledCount": "{count, plural, one {# cancelled job} other {# cancelled jobs}}",
     "doneOn": "Completed {date}",

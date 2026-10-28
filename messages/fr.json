@@ -1310,6 +1310,15 @@
     },
     "columnEmpty": "Rien ici.",
     "boardSubtitle": "Chaque travail avance d'une colonne à l'autre, de la planification à l'approbation.",
+    "boardSubtitleDrag": "Glissez une carte vers la colonne suivante, ou utilisez ses boutons. Sur un téléphone, maintenez-la un instant avant de la glisser.",
+    "board": {
+      "picked": "« {title} » saisi. Déposez-le dans une colonne, ou appuyez sur Échap pour annuler.",
+      "dropped": "« {title} » reste à sa place.",
+      "moved": "« {title} » déplacé vers « {column} ».",
+      "reverted": "« {title} » est revenu dans « {column} ». {reason}",
+      "oneStep": "Les travaux avancent d'une colonne à la fois : passez d'abord par « {next} ».",
+      "noWayBack": "Ces travaux ne peuvent pas revenir dans « {column} »."
+    },
     "syncedFromCamp": "CAMP",
     "cancelledCount": "{count, plural, one {# travail annulé} other {# travaux annulés}}",
     "doneOn": "Terminé le {date}",
