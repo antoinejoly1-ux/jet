@@ -8,6 +8,7 @@ import { formError, formValues, type FormState } from "@/lib/forms";
 import { archiveHoldingCompany, createHoldingCompany, updateHoldingCompany } from "@/lib/services/holding-companies";
 import type { HoldingCompanyInput } from "@/lib/validation/admin";
 import { flash } from "@/lib/flash";
+import { addCompanyExpense, reverseCompanyExpense, type CompanyExpenseInput } from "@/lib/services/pnl";
 import { addManager, removeManager, updateBillingProfile, type BillingProfileInput } from "@/lib/services/billing";
 
 export async function createHoldingCompanyAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -73,4 +74,22 @@ export async function removeManagerAction(id: string, managerId: string) {
   const viewer = await requireStaff();
   await removeManager(db, viewer, id, managerId);
   revalidatePath(`/admin/holding-companies/${id}`);
+}
+
+export async function addCompanyExpenseAction(id: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const viewer = await requireStaff();
+  const values = formValues(formData);
+  try {
+    await addCompanyExpense(db, viewer, id, values as unknown as CompanyExpenseInput);
+  } catch (err) {
+    return formError(err, values);
+  }
+  revalidatePath(`/admin/holding-companies/${id}/results`);
+  return { status: "success" };
+}
+
+export async function reverseCompanyExpenseAction(id: string, expenseId: string) {
+  const viewer = await requireStaff();
+  await reverseCompanyExpense(db, viewer, id, expenseId);
+  revalidatePath(`/admin/holding-companies/${id}/results`);
 }

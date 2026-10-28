@@ -1,7 +1,7 @@
 import "server-only";
 import { and, desc, eq, gte, ilike, inArray, isNull, lt, or, type SQL } from "drizzle-orm";
 import type { Db } from "@/lib/db";
-import { aircraft, files, invoices, owners, shares } from "@/lib/db/schema";
+import { aircraft, files, flightReports, invoices, owners, shares, transactions } from "@/lib/db/schema";
 import { authorize, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { formatMoney } from "@/lib/format";
 import { invoiceInput, type InvoiceInput } from "@/lib/validation/finance";
@@ -9,6 +9,7 @@ import { recordAudit } from "./audit";
 import { emit } from "./outbox";
 import { ConflictError, NotFoundError } from "./errors";
 import { notifyOwnerMembers, sendPendingEmails } from "./owner-notifications";
+import { reverseReservesOf } from "./reserves";
 
 const columns = {
   id: invoices.id,
@@ -154,7 +155,10 @@ export async function markInvoicePaid(db: Db, actor: Actor, id: string) {
   });
 }
 
-/** Voids an invoice. It stays visible, with the reason; invoices are never deleted. */
+/**
+ * Voids an invoice. It stays visible, with the reason; invoices are never
+ * deleted. A generated one hands back its reserves and can be reissued.
+ */
 export async function voidInvoice(db: Db, actor: Actor, id: string, reason: string) {
   authorize(actor, "finance:write");
   const text = reason.trim();
@@ -164,8 +168,30 @@ export async function voidInvoice(db: Db, actor: Actor, id: string, reason: stri
       .update(invoices)
       .set({ status: "void", voidReason: text })
       .where(and(eq(invoices.id, id), inArray(invoices.status, ["issued", "paid"])))
-      .returning({ id: invoices.id, number: invoices.number });
+      .returning({ id: invoices.id, number: invoices.number, generated: invoices.holdingCompanyId });
     if (!row) throw new ConflictError("invoice_already_void");
+    if (row.generated) {
+      // A generated invoice wrote the owner's ledger and the reserves: both get opposite entries,
+      // and its flight goes back to "to invoice".
+      const entries = await tx.select().from(transactions).where(eq(transactions.invoiceId, id));
+      if (entries.length)
+        await tx.insert(transactions).values(
+          entries.map((e) => ({
+            shareId: e.shareId,
+            occurredOn: e.occurredOn,
+            categoryId: e.categoryId,
+            kind: e.kind,
+            amountCents: -e.amountCents,
+            currency: e.currency,
+            description: e.description,
+            invoiceId: id,
+            reversesId: e.id,
+            createdByUserId: actor.id,
+          })),
+        );
+      await reverseReservesOf(tx, id, actor.id, text);
+      await tx.update(flightReports).set({ invoiceId: null }).where(eq(flightReports.invoiceId, id));
+    }
     await emit(tx, "invoice.voided", { invoiceId: id, number: row.number, reason: text });
     await recordAudit(tx, {
       actorUserId: actor.id,

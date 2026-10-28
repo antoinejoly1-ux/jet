@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
@@ -35,7 +36,15 @@ export default async function BillingPage() {
 
   return (
     <>
-      <PageHeader title={t("title")} description={t("subtitle")} />
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        actions={viewer.managedCompanyIds.map((id) => (
+          <Button key={id} asChild size="sm" variant="secondary">
+            <Link href={`/results/${id}`}>{t("results")}</Link>
+          </Button>
+        ))}
+      />
       <section aria-labelledby="to-invoice" className="flex flex-col gap-3">
         <h2 id="to-invoice" className="eyebrow">
           {t("toInvoice", { count: toInvoice.length })}

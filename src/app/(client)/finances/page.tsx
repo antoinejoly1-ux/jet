@@ -7,6 +7,10 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
+import { ReserveBars } from "@/components/billing/reserve-bars";
+import { Button } from "@/components/ui/button";
+import { listOwnerReserves } from "@/lib/services/reserves";
+import { listOwnerCompanies } from "@/lib/services/pnl";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
@@ -27,7 +31,12 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
   const { year: yearParam } = await searchParams;
   const thisYear = new Date().getFullYear();
   const year = Number(typeof yearParam === "string" ? yearParam : "") || thisYear;
-  const shares = await getOwnerFinances(db, viewer, year);
+  const [shares, reserves, companies] = await Promise.all([
+    getOwnerFinances(db, viewer, year),
+    listOwnerReserves(db, viewer),
+    listOwnerCompanies(db, viewer),
+  ]);
+  const tres = await getTranslations("reserves");
   const money = (cents: number, currency: "CAD" | "USD" = "CAD") => formatMoney(cents, currency, locale);
   const monthName = (m: number) => format.dateTime(new Date(Date.UTC(year, m - 1, 15)), { month: "short" });
 
@@ -183,6 +192,48 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
           })}
         </div>
       )}
+
+      {reserves.length ? (
+        <section aria-labelledby="reserves-title" className="mt-14">
+          <h2 id="reserves-title" className="text-2xl font-light tracking-tight">
+            {tres("title")}
+          </h2>
+          <p className="text-muted mt-1.5 max-w-2xl text-sm leading-relaxed">{tres("ownerBody")}</p>
+          <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {reserves.map((r) => (
+              <Card key={r.aircraftId}>
+                <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="font-medium">
+                    {r.registration} <span className="text-muted font-normal">· {r.model}</span>
+                  </p>
+                  <p className="text-muted text-sm">
+                    {tres("totalWithPart", { total: money(r.totalCents), part: money(r.mineCents) })}
+                  </p>
+                </div>
+                <ReserveBars components={r.components} locale={locale} shareBp={r.percentageBp} />
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {companies.length ? (
+        <section aria-labelledby="companies-title" className="mt-14">
+          <h2 id="companies-title" className="text-2xl font-light tracking-tight">
+            {tres("companiesTitle")}
+          </h2>
+          <p className="text-muted mt-1.5 max-w-2xl text-sm leading-relaxed">{tres("companiesBody")}</p>
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {companies.map((c) => (
+              <li key={c.id}>
+                <Button asChild variant="secondary">
+                  <Link href={`/results/${c.id}?year=${year}`}>{tres("companyResults", { name: c.legalName })}</Link>
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   );
 }

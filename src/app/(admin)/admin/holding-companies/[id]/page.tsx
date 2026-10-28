@@ -48,14 +48,21 @@ export default async function HoldingCompanyPage({ params }: PageProps<"/admin/h
         title={company.legalName}
         description={company.registrationNumber ? t("neq", { number: company.registrationNumber }) : undefined}
         actions={
-          canWrite ? (
-            <Button asChild size="sm">
-              <Link href={`/admin/holding-companies/${company.id}/edit`}>
-                <Pencil aria-hidden />
-                {t("edit")}
-              </Link>
-            </Button>
-          ) : null
+          <>
+            {can(viewer, "finance:read") ? (
+              <Button asChild size="sm" variant="secondary">
+                <Link href={`/admin/holding-companies/${company.id}/results`}>{tb("results")}</Link>
+              </Button>
+            ) : null}
+            {canWrite ? (
+              <Button asChild size="sm">
+                <Link href={`/admin/holding-companies/${company.id}/edit`}>
+                  <Pencil aria-hidden />
+                  {t("edit")}
+                </Link>
+              </Button>
+            ) : null}
+          </>
         }
       />
 

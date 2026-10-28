@@ -33,6 +33,7 @@ import { ConflictError, NotFoundError } from "./errors";
 import { emit } from "./outbox";
 import { notifyOwnerMembers, sendPendingEmails } from "./owner-notifications";
 import { chargesFor, rateOn } from "./rates";
+import { creditReserves } from "./reserves";
 
 /** Quebec sales taxes on a taxable supply: GST 5 %, QST 9.975 %, each on the subtotal. */
 export const GST_RATE = 0.05;
@@ -244,6 +245,12 @@ export async function issueInvoice(db: Db, actor: Actor, reportId: string, now =
       .returning();
     await tx.insert(invoiceLines).values(draft.lines.map((l, i) => ({ ...l, invoiceId: invoice!.id, sortOrder: i })));
     await tx.update(flightReports).set({ invoiceId: invoice!.id }).where(eq(flightReports.id, reportId));
+    // The reserve part of each hour goes into the aircraft's reserves.
+    await creditReserves(
+      tx,
+      { aircraftId: draft.flight.aircraftId, invoiceId: invoice!.id, occurredOn: draft.day, actorUserId: actor.id },
+      draft.lines,
+    );
 
     // The owner's ledger: one cost per line, plus the taxes.
     const cats = await categoryIds(tx);

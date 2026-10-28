@@ -17,11 +17,13 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { createdAt, currency, id, timestamps } from "./_shared";
 import { user } from "./auth";
 import { aircraft, flights, shares } from "./fleet";
 import { invoices } from "./finance";
+import { holdingCompanies } from "./owners";
 import { files } from "./platform";
 
 /**
@@ -138,4 +140,81 @@ export const invoiceLines = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("invoice_lines_invoice_idx").on(t.invoiceId)],
+);
+
+/** The maintenance reserves kept per hour flown, one balance per component. */
+export const reserveComponent = pgEnum("reserve_component", ["engine", "propeller", "airframe", "avionics"]);
+/** flight: set aside from an invoiced flight; work: paid out for maintenance; adjustment: a correction. */
+export const reserveEntryKind = pgEnum("reserve_entry_kind", ["flight", "work", "adjustment"]);
+
+/**
+ * Append-only: every flight invoiced adds to each component's reserve; paying
+ * for a big job (an overhaul, a propeller) takes from it. Corrections are new
+ * entries, never edits.
+ */
+export const reserveLedger = pgTable(
+  "reserve_ledger",
+  {
+    id: id(),
+    aircraftId: uuid("aircraft_id")
+      .notNull()
+      .references(() => aircraft.id, { onDelete: "restrict" }),
+    component: reserveComponent("component").notNull(),
+    kind: reserveEntryKind("kind").notNull(),
+    amountCents: bigint("amount_cents", { mode: "number" }).notNull(),
+    occurredOn: date("occurred_on").notNull(),
+    invoiceId: uuid("invoice_id").references(() => invoices.id, { onDelete: "restrict" }),
+    note: text("note"),
+    createdByUserId: uuid("created_by_user_id").references(() => user.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("reserve_ledger_aircraft_idx").on(t.aircraftId, t.component)],
+);
+
+/** What each reserve is saving towards, e.g. the propeller overhaul at $200,000. */
+export const reserveTargets = pgTable(
+  "reserve_targets",
+  {
+    id: id(),
+    aircraftId: uuid("aircraft_id")
+      .notNull()
+      .references(() => aircraft.id, { onDelete: "cascade" }),
+    component: reserveComponent("component").notNull(),
+    targetCents: bigint("target_cents", { mode: "number" }).notNull(),
+    label: text("label"),
+    ...timestamps(),
+  },
+  (t) => [uniqueIndex("reserve_targets_aircraft_component_uq").on(t.aircraftId, t.component)],
+);
+
+/**
+ * What a holding company pays that no flight report carries: pilot pay,
+ * insurance, the hangar… Append-only; a mistake is reversed.
+ */
+export const companyExpenseCategory = pgEnum("company_expense_category", [
+  "pilot_pay",
+  "insurance",
+  "hangar",
+  "maintenance",
+  "fuel",
+  "fees",
+  "other",
+]);
+
+export const companyExpenses = pgTable(
+  "company_expenses",
+  {
+    id: id(),
+    holdingCompanyId: uuid("holding_company_id")
+      .notNull()
+      .references(() => holdingCompanies.id, { onDelete: "restrict" }),
+    occurredOn: date("occurred_on").notNull(),
+    category: companyExpenseCategory("category").notNull(),
+    amountCents: bigint("amount_cents", { mode: "number" }).notNull(),
+    description: text("description"),
+    reversesId: uuid("reverses_id").references((): AnyPgColumn => companyExpenses.id, { onDelete: "restrict" }),
+    createdByUserId: uuid("created_by_user_id").references(() => user.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("company_expenses_company_date_idx").on(t.holdingCompanyId, t.occurredOn)],
 );

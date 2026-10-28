@@ -492,6 +492,68 @@ async function main() {
   );
   // On a Vercel preview, testers sign in without an authenticator app (REQUIRE_STAFF_2FA=false there).
   const staff2fa = !process.env.VERCEL;
+  // Reserves carried over from earlier years, what each is saving for, and a job paid from one.
+  const opening = `${year}-01-01`;
+  for (const [i, plane] of fleet.entries()) {
+    const c = (cents: number) => Math.round(cents * scale[i]!);
+    await db.insert(s.reserveLedger).values(
+      (
+        [
+          ["engine", 18_400_000],
+          ["propeller", 12_400_000],
+          ["airframe", 6_100_000],
+          ["avionics", 2_300_000],
+        ] as const
+      ).map(([component, cents]) => ({
+        aircraftId: plane.id,
+        component,
+        kind: "adjustment" as const,
+        amountCents: c(cents),
+        occurredOn: opening,
+        note: "Solde reporté",
+      })),
+    );
+    await db.insert(s.reserveTargets).values([
+      { aircraftId: plane.id, component: "engine", targetCents: c(45_000_000), label: "Révision générale du moteur" },
+      { aircraftId: plane.id, component: "propeller", targetCents: c(20_000_000), label: "Révision de l'hélice" },
+    ]);
+  }
+  await db.insert(s.reserveLedger).values({
+    aircraftId: fleet[0]!.id,
+    component: "avionics",
+    kind: "work",
+    amountCents: -1_850_000,
+    occurredOn: `${year}-03-14`,
+    note: "Mise à jour de la base de données et remplacement d'un écran",
+  });
+  // What Gestion Aviation JTA paid outside the flights, month by month.
+  const months = new Date().getMonth() + 1;
+  for (let m = 1; m <= months; m++) {
+    const on = `${year}-${String(m).padStart(2, "0")}-01`;
+    await db.insert(s.companyExpenses).values([
+      {
+        holdingCompanyId: companies[0]!.id,
+        occurredOn: on,
+        category: "pilot_pay",
+        amountCents: 1_150_000,
+        description: "Pilotes",
+      },
+      {
+        holdingCompanyId: companies[0]!.id,
+        occurredOn: on,
+        category: "hangar",
+        amountCents: 350_000,
+        description: "Hangar CYHU",
+      },
+      {
+        holdingCompanyId: companies[0]!.id,
+        occurredOn: on,
+        category: "insurance",
+        amountCents: 410_000,
+        description: "Assurance coque et responsabilité",
+      },
+    ]);
+  }
   const pilot = await createLogin("pilote@jet.test", "Marc Pilote", "pilot", staff2fa);
   // Jean's trip to Teterboro two days ago: the pilot's report waits for finance, with its receipts.
   const tripDeparts = new Date(now - 2 * 86_400_000);

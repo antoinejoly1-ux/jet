@@ -85,6 +85,13 @@
       "when": 1793192731725,
       "tag": "0011_holding_company_invoices",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793193930972,
+      "tag": "0012_reserves_and_pnl",
+      "breakpoints": true
     }
   ]
 }

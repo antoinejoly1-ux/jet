@@ -23,7 +23,18 @@ import { getAvailability } from "@/lib/services/availability";
 import { NotFoundError } from "@/lib/services/errors";
 import { listOwners } from "@/lib/services/owners";
 import { zonedDay } from "@/lib/time";
-import { addBlockAction, addShareAction, endShareAction, removeBlockAction, setRateAction } from "../actions";
+import {
+  addBlockAction,
+  addShareAction,
+  endShareAction,
+  payFromReserveAction,
+  removeBlockAction,
+  setRateAction,
+  setReserveTargetAction,
+} from "../actions";
+import { ReserveBars } from "@/components/billing/reserve-bars";
+import { ReserveTargetForm, ReserveWorkForm } from "@/components/billing/reserve-forms";
+import { getAircraftReserves } from "@/lib/services/reserves";
 
 export async function generateMetadata({ params }: PageProps<"/admin/aircraft/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -42,6 +53,7 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
   const ta = await getTranslations("availability");
   const t = await getTranslations("aircraft");
   const tr = await getTranslations("rates");
+  const tres = await getTranslations("reserves");
   const format = await getFormatter();
   const {
     aircraft: plane,
@@ -56,7 +68,9 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
   const owners = canWrite ? await listOwners(db, viewer) : [];
   const seesRates = can(viewer, "finance:read");
   const canSetRate = can(viewer, "finance:write");
-  const rates = seesRates ? await listRates(db, viewer, id) : [];
+  const [rates, reserves] = seesRates
+    ? await Promise.all([listRates(db, viewer, id), getAircraftReserves(db, viewer, id)])
+    : [[], null];
   const todayLocal = zonedDay(new Date());
   const current = rates.find((r) => r.effectiveFrom <= todayLocal) ?? null;
   const upcoming = rates.filter((r) => r.effectiveFrom > todayLocal);
@@ -234,6 +248,40 @@ export default async function AircraftDetailPage({ params, searchParams }: PageP
               today={todayLocal}
               defaults={current ? Object.fromEntries(RATE_PARTS.map((p) => [p, dollars(perHour(current, p))])) : {}}
             />
+          </Card>
+        ) : null}
+
+        {reserves ? (
+          <Card className={canSetRate ? "lg:col-span-2" : "lg:col-span-3"} id="reserves">
+            <CardTitle className="mb-1">{tres("title")}</CardTitle>
+            <p className="text-muted mb-5 text-sm">{tres("body")}</p>
+            <ReserveBars components={reserves.components} locale={viewer.locale} />
+            {reserves.history.length ? (
+              <details className="mt-6">
+                <summary className="text-muted cursor-pointer text-sm">{tres("movements")}</summary>
+                <ul className="divide-border mt-2 divide-y text-sm">
+                  {reserves.history.map((h) => (
+                    <li key={h.id} className="flex justify-between gap-4 py-2">
+                      <span className="text-muted">
+                        {day(h.occurredOn)} · {tres(`components.${h.component}`)} · {h.note}
+                      </span>
+                      <span className="tabular">{cad(h.amountCents)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            ) : null}
+          </Card>
+        ) : null}
+
+        {reserves && canSetRate ? (
+          <Card>
+            <CardTitle className="mb-4">{tres("payTitle")}</CardTitle>
+            <ReserveWorkForm action={payFromReserveAction.bind(null, plane.id)} today={todayLocal} />
+            <div className="border-border mt-6 border-t pt-6">
+              <CardTitle className="mb-4">{tres("targetTitle")}</CardTitle>
+              <ReserveTargetForm action={setReserveTargetAction.bind(null, plane.id)} />
+            </div>
           </Card>
         ) : null}
 
