@@ -60,7 +60,11 @@ test("finance approves Jean's Teterboro report, issues the invoice, and Jean ope
   const owner = await (await browser.newContext()).newPage();
   await signIn(owner, "owner@jet.test");
   await owner.goto("/invoices");
-  await owner.getByRole("link", { name: /Voir la facture JTA-/ }).click();
+  // The newest invoice, the one just issued, is listed first.
+  await owner
+    .getByRole("link", { name: /Voir la facture JTA-/ })
+    .first()
+    .click();
   await expect(owner.getByText("Gestion Aviation JTA inc.").first()).toBeVisible();
   await expect(owner.getByText(/CYHU → KTEB/).first()).toBeVisible();
   const download = owner.waitForEvent("download");

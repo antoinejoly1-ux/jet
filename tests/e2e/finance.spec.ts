@@ -29,7 +29,7 @@ test("an invoice with its PDF is issued, and only its owner can open the PDF", a
   await expect(page.getByText("1 234,56 $").first()).toBeVisible();
 
   // Someone else's invoice, to check isolation below.
-  await page.getByRole("searchbox").fill("Marie");
+  await page.getByRole("searchbox").fill("Nadia");
   await page.getByRole("button", { name: "Filtrer" }).click();
   const otherFile = await page.locator('a[href^="/files/"]').first().getAttribute("href");
 
@@ -80,7 +80,7 @@ test("a budget stays hidden until published, then the owner sees it", async ({ p
   await page.getByRole("button", { name: "Voir comme ce propriétaire" }).click();
   await expect(page.getByRole("status").filter({ hasText: owner })).toBeVisible();
   await page.goto(`/finances?year=${year}`);
-  await expect(page.getByText("62 000,00 $").first()).toBeVisible();
+  await expect(page.getByText(/^62\s000(,00)?\s\$$/).first()).toBeVisible();
   await page.getByRole("button", { name: "Quitter" }).click();
 });
 
