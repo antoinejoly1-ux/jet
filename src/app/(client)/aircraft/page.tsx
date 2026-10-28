@@ -12,6 +12,7 @@ import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatHours } from "@/lib/format";
 import { listOwnerAircraft } from "@/lib/services/availability";
+import { getAircraftLive } from "@/lib/services/tracking";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
 import { scenes } from "@/lib/imagery";
 
@@ -36,6 +37,13 @@ export default async function OwnerAircraftPage() {
   const format = await getFormatter();
   const locale = await getLocale();
   const fleet = await listOwnerAircraft(db, viewer);
+  // The badge says what Home says: in the air when tracking shows it flying, whatever the planned status.
+  const airborne = new Set(
+    (await Promise.all(fleet.map((a) => getAircraftLive(db, viewer, a.id, { ownerView: true }).catch(() => null))))
+      .filter((l) => l?.state === "in_flight")
+      .map((l) => l!.aircraftId),
+  );
+  const statusOf = (a: (typeof fleet)[number]) => (airborne.has(a.id) ? "flying" : a.status);
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
   const dt = (d: Date) => format.dateTime(d, { day: "numeric", month: "short", year: "numeric" });
 
@@ -83,7 +91,7 @@ export default async function OwnerAircraftPage() {
                 <h2 id={`plane-${a.shareId}`} className="text-xl font-light tracking-tight">
                   {a.registration}
                 </h2>
-                <Badge tone={STATUS_TONE[a.status]}>{th(`status.${a.status}`)}</Badge>
+                <Badge tone={STATUS_TONE[statusOf(a)]}>{th(`status.${statusOf(a)}`)}</Badge>
               </div>
               <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
                 {a.holdingCompanyName ? (

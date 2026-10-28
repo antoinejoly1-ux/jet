@@ -11,7 +11,7 @@ import { needsWelcome } from "./welcome";
 export { needsWelcome, welcomeAudience, type WelcomeAudience } from "./welcome";
 import { env } from "@/lib/env";
 import { auth } from "./auth";
-import { memberAccess, type Actor } from "./policy";
+import { can, memberAccess, type Actor } from "./policy";
 import { decodeViewAs, VIEW_AS_COOKIE } from "./view-as";
 import { SIDE_COOKIE } from "@/lib/side";
 
@@ -58,7 +58,15 @@ export const getViewer = cache(async (): Promise<Viewer | null> => {
         .select({ id: owners.id, name: owners.legalName })
         .from(owners)
         .where(eq(owners.id, viewAsOwnerId));
-      if (owner) return { ...base, ownerIds: [owner.id], viewingAs: { ownerId: owner.id, ownerName: owner.name } };
+      if (owner)
+        return {
+          ...base,
+          ownerIds: [owner.id],
+          // Their finances only for staff who see money anyway (not dispatch); and never acting for them.
+          financeOwnerIds: can({ ...base, ownerIds: [] }, "finance:read") ? [owner.id] : [],
+          actingOwnerIds: [],
+          viewingAs: { ownerId: owner.id, ownerName: owner.name },
+        };
     }
   }
 

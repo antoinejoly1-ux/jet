@@ -244,7 +244,7 @@
     "freeDaysLabel": "libres sur les {days} prochains",
     "seeInvoices": "Voir les factures",
     "activityTitle": "Activité",
-    "activityAll": "Tout voir",
+    "activityAll": "Historique des vols",
     "activityEmpty": "Les vols, factures et nouvelles de l'équipe apparaîtront ici.",
     "flightCompleted": "Vol terminé",
     "flightLength": "{hours} h {minutes}",
@@ -2341,5 +2341,9 @@
     "sent": "Invitation envoyée à {email}.",
     "invalid": "Vérifiez le courriel.",
     "forbidden": "Vous ne pouvez pas inviter dans l'équipe."
+  },
+  "financeAccess": {
+    "title": "Les finances ne font pas partie de votre accès",
+    "body": "Le propriétaire du compte peut vous y donner accès depuis ses paramètres, ou l'équipe Univair sur demande."
   }
 }

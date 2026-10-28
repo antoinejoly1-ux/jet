@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { listOwnerReserves } from "@/lib/services/reserves";
 import { listOwnerCompanies } from "@/lib/services/pnl";
 import { requireAccess } from "@/lib/auth/session";
+import { lacksFinanceAccess, NoFinanceAccess } from "@/components/billing/no-finance-access";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FinancesPage({ searchParams }: PageProps<"/finances">) {
   const viewer = await requireAccess();
+  if (lacksFinanceAccess(viewer)) return <NoFinanceAccess title={(await getTranslations("nav.items"))("finances")} />;
   const t = await getTranslations("finances");
   const locale = lang(await getLocale());
   const format = await getFormatter();

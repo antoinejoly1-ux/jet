@@ -244,7 +244,7 @@
     "freeDaysLabel": "free in the next {days}",
     "seeInvoices": "See invoices",
     "activityTitle": "Activity",
-    "activityAll": "See all",
+    "activityAll": "Flight history",
     "activityEmpty": "Flights, invoices and news from the team will show up here.",
     "flightCompleted": "Flight completed",
     "flightLength": "{hours} h {minutes}",
@@ -2341,5 +2341,9 @@
     "sent": "Invitation sent to {email}.",
     "invalid": "Check the email.",
     "forbidden": "You can't invite to the team."
+  },
+  "financeAccess": {
+    "title": "Finances aren't part of your access",
+    "body": "The account's owner can give you access from their settings, or the Univair team on request."
   }
 }

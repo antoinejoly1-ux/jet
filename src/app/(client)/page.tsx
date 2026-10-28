@@ -594,7 +594,7 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
           <LiveDot />
           {t("activityTitle")}
         </h2>
-        <Link href="/notifications" className="text-accent text-xs font-medium tracking-[0.04em] hover:underline">
+        <Link href="/flights" className="text-accent text-xs font-medium tracking-[0.04em] hover:underline">
           {t("activityAll")}
         </Link>
       </div>

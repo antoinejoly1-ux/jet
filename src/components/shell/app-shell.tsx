@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import { exitViewAsAction } from "@/app/actions/view-as";
 import type { ReactNode } from "react";
-import { financeOwnerIds } from "@/lib/auth/policy";
+import { can, financeOwnerIds } from "@/lib/auth/policy";
 import type { Viewer } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { unreadMessageCount } from "@/lib/services/messages";
@@ -53,9 +53,14 @@ export async function AppShell({ side, viewer, children }: { side: Side; viewer:
   // Members who don't see any owner's finances don't get the finance pages.
   const hidden =
     side !== "client"
-      ? []
+      ? [
+          // The team only sees the pages their role can use: no dead ends.
+          ...(can(viewer, "finance:read") ? [] : ["flightReports", "transactions", "invoices"]),
+          ...(can(viewer, "finance:write") ? [] : ["imports"]),
+          ...(can(viewer, "team:manage") ? [] : ["settings"]),
+        ]
       : [
-          ...(!viewer.staffRole && financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : []),
+          ...(financeOwnerIds(viewer).length === 0 ? FINANCE_PAGES : []),
           // Invoicing is for the people who run a holding company's books.
           ...(viewer.managedCompanyIds?.length ? [] : ["billing"]),
           // Someone who only runs a company's books has no aircraft of their own to show.

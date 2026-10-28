@@ -79,7 +79,9 @@ const ADMIN: Group[] = [
 
 /** The side's destinations, minus any the viewer has no access to (by item key). */
 const groupsFor = (side: Side, hidden: readonly string[] = []) =>
-  (side === "admin" ? ADMIN : CLIENT).map((g) => ({ ...g, items: g.items.filter((i) => !hidden.includes(i.key)) }));
+  (side === "admin" ? ADMIN : CLIENT)
+    .map((g) => ({ ...g, items: g.items.filter((i) => !hidden.includes(i.key)) }))
+    .filter((g) => g.items.length > 0);
 
 function useIsActive() {
   const pathname = usePathname();

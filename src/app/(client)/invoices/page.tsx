@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
+import { lacksFinanceAccess, NoFinanceAccess } from "@/components/billing/no-finance-access";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import { listOwnerInvoices } from "@/lib/services/invoices";
@@ -21,6 +22,7 @@ const TONE = { issued: "accent", paid: "success", void: "neutral" } as const;
 
 export default async function OwnerInvoicesPage() {
   const viewer = await requireAccess();
+  if (lacksFinanceAccess(viewer)) return <NoFinanceAccess title={(await getTranslations("nav.items"))("invoices")} />;
   const t = await getTranslations("ownerInvoices");
   const ti = await getTranslations("invoices");
   const locale = await getLocale();
