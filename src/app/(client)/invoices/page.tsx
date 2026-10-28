@@ -18,16 +18,19 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("invoices") };
 }
 
-const TONE = { issued: "accent", paid: "success", void: "neutral" } as const;
+const TONE = { issued: "accent", overdue: "warning", paid: "success", void: "neutral" } as const;
 
 export default async function OwnerInvoicesPage() {
   const viewer = await requireAccess();
   if (lacksFinanceAccess(viewer)) return <NoFinanceAccess title={(await getTranslations("nav.items"))("invoices")} />;
   const t = await getTranslations("ownerInvoices");
-  const ti = await getTranslations("invoices");
   const locale = await getLocale();
   const format = await getFormatter();
   const rows = await listOwnerInvoices(db, viewer);
+  const today = new Date().toISOString().slice(0, 10);
+  /** What the owner needs to know: to pay, late, paid or voided. */
+  const shown = (r: (typeof rows)[number]) =>
+    r.status === "issued" && r.dueOn && r.dueOn < today ? "overdue" : r.status;
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
 
   // Grouped by year, newest first.
@@ -58,8 +61,8 @@ export default async function OwnerInvoicesPage() {
                         <div className="min-w-0">
                           <p className="font-semibold whitespace-nowrap">{r.number}</p>
                           <p className="text-muted text-sm">
-                            {r.registration} · {day(r.issuedOn)}
-                            {r.dueOn && r.status === "issued" ? ` · ${t("due", { date: day(r.dueOn) })}` : ""}
+                            <span className="whitespace-nowrap">{r.registration}</span> · {day(r.issuedOn)}
+                            {r.dueOn && r.status === "issued" ? ` · ${t("dueBefore", { date: day(r.dueOn) })}` : ""}
                           </p>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -68,7 +71,7 @@ export default async function OwnerInvoicesPage() {
                           >
                             {formatMoney(r.totalCents, r.currency, locale)}
                           </span>
-                          <Badge tone={TONE[r.status]}>{ti(`statuses.${r.status}`)}</Badge>
+                          <Badge tone={TONE[shown(r)]}>{t(`statuses.${shown(r)}`)}</Badge>
                         </div>
                       </div>
                       {r.fileId ? (

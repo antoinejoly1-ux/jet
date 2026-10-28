@@ -195,7 +195,7 @@ export default async function AccountPage() {
             >
               <Button asChild variant="secondary" size="sm">
                 <Link href="/account/security">
-                  {t("manage")}
+                  {viewer.twoFactorEnabled ? t("manage") : t("enable")}
                   <ChevronRight aria-hidden />
                 </Link>
               </Button>

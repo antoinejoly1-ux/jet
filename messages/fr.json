@@ -294,8 +294,8 @@
       "en": "English"
     },
     "security": "Sécurité",
-    "twoFactorOn": "Vérification en deux étapes activée",
-    "twoFactorOff": "Vérification en deux étapes désactivée",
+    "twoFactorOn": "Activée : un code vous est demandé à chaque nouvel appareil.",
+    "twoFactorOff": "Désactivée — recommandée pour protéger vos finances.",
     "emailsTitle": "Courriels",
     "emailsBody": "Choisissez ce que nous vous envoyons par courriel. Tout reste visible dans le portail.",
     "emailsAlwaysOn": "Les courriels de sécurité (liens de connexion, changement de mot de passe) sont toujours envoyés.",
@@ -341,7 +341,7 @@
     },
     "privacyTitle": "Vos renseignements personnels",
     "privacyBody": "Téléchargez tout ce que le portail conserve sur vous, ou faites une demande : nous répondons en {days} jours au plus. Voir la <policy>politique de confidentialité</policy>.",
-    "downloadData": "Télécharger mes données (JSON)",
+    "downloadData": "Télécharger mes données",
     "privacyKind": "Demande",
     "privacyDetails": "Précisions (facultatif)",
     "privacySend": "Envoyer la demande",
@@ -395,7 +395,8 @@
     "twoFactor": "Vérification en deux étapes",
     "manage": "Gérer",
     "teamBody": "Un vol à planifier, une question, un imprévu : appelez ou textez, 7 jours sur 7.",
-    "readOnly": "Lecture seule pendant l'affichage en tant que propriétaire."
+    "readOnly": "Lecture seule pendant l'affichage en tant que propriétaire.",
+    "enable": "Activer"
   },
   "adminDashboard": {
     "title": "Tableau de bord",
@@ -900,7 +901,14 @@
     "download": "Télécharger",
     "viewNumber": "Voir la facture {number}",
     "downloadNumber": "Télécharger la facture {number}",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Télécharger pour Excel",
+    "statuses": {
+      "issued": "À payer",
+      "overdue": "En retard",
+      "paid": "Payée",
+      "void": "Annulée"
+    },
+    "dueBefore": "à payer avant le {date}"
   },
   "transactions": {
     "title": "Transactions",
@@ -1035,7 +1043,7 @@
     "byCategory": "Par catégorie",
     "byMonth": "Dépenses par mois",
     "peak": "Mois le plus élevé : {amount}",
-    "exportCsv": "Exporter (CSV)",
+    "exportCsv": "Télécharger pour Excel",
     "statementPdf": "Relevé {year} (PDF)"
   },
   "flights": {
@@ -1206,7 +1214,7 @@
     "noUpcomingBody": "Vos prochains vols apparaîtront ici dès qu'ils seront planifiés.",
     "noPastTitle": "Aucun vol passé",
     "noPastBody": "L'historique de vos vols apparaîtra ici.",
-    "exportCsv": "Exporter (CSV)",
+    "exportCsv": "Télécharger pour Excel",
     "inFlight": "En vol"
   },
   "ownerAircraft": {

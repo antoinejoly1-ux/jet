@@ -294,8 +294,8 @@
       "en": "English"
     },
     "security": "Security",
-    "twoFactorOn": "Two-step verification is on",
-    "twoFactorOff": "Two-step verification is off",
+    "twoFactorOn": "On: a code is asked on each new device.",
+    "twoFactorOff": "Off — recommended to protect your finances.",
     "emailsTitle": "Emails",
     "emailsBody": "Choose what we send you by email. Everything stays visible in the portal.",
     "emailsAlwaysOn": "Security emails (sign-in links, password changes) are always sent.",
@@ -341,7 +341,7 @@
     },
     "privacyTitle": "Your personal information",
     "privacyBody": "Download everything the portal keeps about you, or make a request: we answer within {days} days. See the <policy>privacy policy</policy>.",
-    "downloadData": "Download my data (JSON)",
+    "downloadData": "Download my data",
     "privacyKind": "Request",
     "privacyDetails": "Details (optional)",
     "privacySend": "Send the request",
@@ -395,7 +395,8 @@
     "twoFactor": "Two-step verification",
     "manage": "Manage",
     "teamBody": "A flight to plan, a question, something unexpected: call or text, 7 days a week.",
-    "readOnly": "Read-only while viewing as an owner."
+    "readOnly": "Read-only while viewing as an owner.",
+    "enable": "Turn on"
   },
   "adminDashboard": {
     "title": "Dashboard",
@@ -900,7 +901,14 @@
     "download": "Download",
     "viewNumber": "View invoice {number}",
     "downloadNumber": "Download invoice {number}",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Download for Excel",
+    "statuses": {
+      "issued": "To pay",
+      "overdue": "Overdue",
+      "paid": "Paid",
+      "void": "Voided"
+    },
+    "dueBefore": "due by {date}"
   },
   "transactions": {
     "title": "Transactions",
@@ -1035,7 +1043,7 @@
     "byCategory": "By category",
     "byMonth": "Spending by month",
     "peak": "Highest month: {amount}",
-    "exportCsv": "Export (CSV)",
+    "exportCsv": "Download for Excel",
     "statementPdf": "{year} statement (PDF)"
   },
   "flights": {
@@ -1206,7 +1214,7 @@
     "noUpcomingBody": "Your next flights will appear here once they're scheduled.",
     "noPastTitle": "No past flights",
     "noPastBody": "Your flight history will appear here.",
-    "exportCsv": "Export (CSV)",
+    "exportCsv": "Download for Excel",
     "inFlight": "In flight"
   },
   "ownerAircraft": {

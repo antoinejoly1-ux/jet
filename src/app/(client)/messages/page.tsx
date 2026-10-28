@@ -48,12 +48,13 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
       <AutoRefresh />
       <section
         aria-label={t("conversationLabel")}
-        className="bg-surface border-border flex min-h-[50dvh] flex-col rounded-lg border"
+        // On a phone the conversation fills the screen above the tab bar, composer at the bottom.
+        className="bg-surface border-border flex h-[calc(100dvh-17rem)] min-h-[22rem] flex-col rounded-lg border sm:h-auto sm:min-h-[50dvh]"
       >
         {/* Focusable so keyboard users can scroll the thread. */}
         <div
           tabIndex={0}
-          className="focus-visible:ring-ring flex max-h-[50dvh] flex-1 flex-col overflow-y-auto outline-none focus-visible:ring-2 sm:max-h-[60dvh]"
+          className="focus-visible:ring-ring flex min-h-0 flex-1 flex-col overflow-y-auto outline-none focus-visible:ring-2 sm:max-h-[60dvh]"
         >
           <Thread messages={thread.messages} perspective="owner" empty={t("ownerEmpty")} />
         </div>

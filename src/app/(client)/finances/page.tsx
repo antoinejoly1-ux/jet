@@ -172,7 +172,9 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                             style={{ height: `${Math.max(0, (m.costCents / maxMonth) * 100)}%` }}
                             title={`${monthName(m.month)} · ${money(m.costCents, s.currency)}`}
                           />
-                          <span className="text-muted text-center text-[11px]">{monthName(m.month).slice(0, 3)}</span>
+                          <span className="text-muted text-center text-[11px]">
+                            {monthName(m.month).replace(".", "")}
+                          </span>
                         </div>
                       ))}
                     </div>
