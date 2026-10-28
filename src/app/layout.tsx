@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { localeTag } from "@/lib/locale";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import "./globals.css";
+import "@/components/animated-icons/animated-icons.css";
 
 // Montserrat is Univair's brand face; Inter is only the fallback while it loads.
 const montserrat = Montserrat({

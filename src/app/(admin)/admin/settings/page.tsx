@@ -1,4 +1,4 @@
-import { ChevronRight, Code, ScrollText, Settings, ShieldAlert, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronRight, Settings, ShieldAlert, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -7,7 +7,7 @@ import { StaffRoleForm } from "@/components/admin/staff-role-form";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Icon } from "@/components/ui/icon";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 import { PageHeader } from "@/components/ui/page-header";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
@@ -38,10 +38,20 @@ export default async function SettingsPage() {
   const staff = await listStaff(db, viewer);
 
   const links = [
-    { href: "/account" as const, icon: UserRound, title: tn("account"), body: t("profileBody") },
-    { href: "/admin/settings/audit" as const, icon: ScrollText, title: t("auditTitle"), body: t("auditBody") },
-    { href: "/admin/settings/developers" as const, icon: Code, title: t("developersTitle"), body: t("developersBody") },
-    { href: "/admin/settings/privacy" as const, icon: ShieldCheck, title: t("privacyTitle"), body: t("privacyBody") },
+    { href: "/account" as const, icon: "user" as const, title: tn("account"), body: t("profileBody") },
+    { href: "/admin/settings/audit" as const, icon: "list" as const, title: t("auditTitle"), body: t("auditBody") },
+    {
+      href: "/admin/settings/developers" as const,
+      icon: "code" as const,
+      title: t("developersTitle"),
+      body: t("developersBody"),
+    },
+    {
+      href: "/admin/settings/privacy" as const,
+      icon: "shield" as const,
+      title: t("privacyTitle"),
+      body: t("privacyBody"),
+    },
   ];
 
   return (
@@ -100,14 +110,14 @@ export default async function SettingsPage() {
             aria-label={t("settingsTitle")}
             className="border-border bg-surface divide-border divide-y rounded-lg border"
           >
-            {links.map(({ href, icon: LinkIcon, title, body }) => (
+            {links.map(({ href, icon, title, body }) => (
               <Link
                 key={href}
                 href={href}
-                className="group hover:bg-surface-muted/60 flex items-center gap-4 px-6 py-5 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                className="group ai-trigger hover:bg-surface-muted/60 flex items-center gap-4 px-6 py-5 transition-colors first:rounded-t-lg last:rounded-b-lg"
               >
                 <span className="border-border text-muted group-hover:text-text flex size-10 shrink-0 items-center justify-center rounded-full border transition-colors">
-                  <Icon icon={LinkIcon} className="size-4" />
+                  <AnimatedIcon name={icon} size={18} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">{title}</span>

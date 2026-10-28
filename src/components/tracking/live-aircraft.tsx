@@ -6,7 +6,6 @@ import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/ui/icon";
 import { LiveDot } from "@/components/ui/live-dot";
 import type { AircraftLive } from "@/lib/services/tracking";
 import { cn } from "@/lib/utils";
@@ -49,11 +48,21 @@ function useLive(initial: AircraftLive, side: "client" | "admin") {
   return { live, now };
 }
 
-function Metric({ icon, label, value, hint }: { icon: typeof Gauge; label: string; value: string; hint?: string }) {
+function Metric({
+  icon: Glyph,
+  label,
+  value,
+  hint,
+}: {
+  icon: typeof Gauge;
+  label: string;
+  value: string;
+  hint?: string;
+}) {
   return (
-    <div className="group min-w-0">
+    <div className="min-w-0">
       <dt className="text-muted flex items-center gap-1.5 text-xs font-medium">
-        <Icon icon={icon} anim="bounce" className="size-3.5" />
+        <Glyph className="size-3.5" strokeWidth={1.75} aria-hidden />
         {label}
       </dt>
       <dd className="tabular mt-1 truncate text-xl font-light">
@@ -199,9 +208,9 @@ export function LiveAircraft({
             />
           </dl>
         ) : live.nextFlight ? (
-          <div className="group bg-surface-muted rounded-[18px] p-4">
+          <div className="bg-surface-muted rounded-[18px] p-4">
             <p className="text-muted flex items-center gap-1.5 text-xs font-medium">
-              <Icon icon={PlaneTakeoff} anim="plane" className="size-3.5" />
+              <PlaneTakeoff className="size-3.5" strokeWidth={1.75} aria-hidden />
               {t("nextFlight")}
             </p>
             <p className="mt-1 font-semibold">

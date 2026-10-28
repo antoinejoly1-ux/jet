@@ -1,15 +1,4 @@
-import {
-  Bell,
-  Clock3,
-  FileText,
-  MessageSquare,
-  Plane,
-  PlaneLanding,
-  PlaneTakeoff,
-  Wallet,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
+import { Clock3, Plane, PlaneTakeoff, Wallet } from "lucide-react";
 import type { Metadata, Route } from "next";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
@@ -21,7 +10,7 @@ import { LiveAircraft } from "@/components/tracking/live-aircraft";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Icon, type IconMotion } from "@/components/ui/icon";
+import { AnimatedIcon, type AnimatedIconName } from "@/components/animated-icons/AnimatedIcon";
 import { Instrument, InstrumentStrip } from "@/components/ui/instrument";
 import { LiveDot } from "@/components/ui/live-dot";
 import { aircraftPhoto } from "@/lib/aircraft-photos";
@@ -584,13 +573,13 @@ async function TeamPanel() {
   );
 }
 
-const NOTICE_ICON: Record<string, [LucideIcon, IconMotion]> = {
-  "invoice.issued": [FileText, "slide"],
-  "budget.published": [Wallet, "bounce"],
-  "hours.low": [Clock3, "pulse"],
-  "maintenance.planned": [Wrench, "twist"],
-  "message.from_dispatch": [MessageSquare, "wiggle"],
-  "flight.confirmed": [PlaneTakeoff, "plane"],
+const NOTICE_ICON: Record<string, AnimatedIconName> = {
+  "invoice.issued": "invoice",
+  "budget.published": "wallet",
+  "hours.low": "clock",
+  "maintenance.planned": "wrench",
+  "message.from_dispatch": "chat",
+  "flight.confirmed": "planeTakeoff",
 };
 
 /** "Activité": what happened lately, as a quiet hairline list. */
@@ -614,10 +603,7 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
       ) : (
         <ul className="divide-border border-border divide-y border-t">
           {items.map((item) => {
-            const [glyph, anim] =
-              item.kind === "flight"
-                ? [PlaneLanding, "drop" as IconMotion]
-                : (NOTICE_ICON[item.type] ?? [Bell, "ring" as IconMotion]);
+            const glyph: AnimatedIconName = item.kind === "flight" ? "plane" : (NOTICE_ICON[item.type] ?? "bell");
             const body =
               item.kind === "flight" ? (
                 <>
@@ -640,7 +626,7 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
             const row = (
               <>
                 <span className="border-border relative flex size-10 shrink-0 items-center justify-center rounded-full border">
-                  <Icon icon={glyph} anim={anim} className="size-4" />
+                  <AnimatedIcon name={glyph} size={18} />
                   {item.kind === "notice" && item.unread ? (
                     <span
                       className="bg-accent ring-background absolute -top-0.5 -right-0.5 size-2.5 rounded-full ring-2"
@@ -659,7 +645,7 @@ async function ActivityFeed({ items }: { items: ActivityItem[] }) {
                 {item.kind === "notice" ? (
                   <Link
                     href={item.href as Route}
-                    className="group hover:bg-surface/60 -mx-3 flex items-center gap-4 rounded-[14px] px-3 py-4"
+                    className="ai-trigger hover:bg-surface/60 -mx-3 flex items-center gap-4 rounded-[14px] px-3 py-4"
                   >
                     {row}
                   </Link>
@@ -695,6 +681,7 @@ async function InsightLine({ items }: { items: Insight[] }) {
     <ul aria-label={t("label")} className="-mt-4 grid gap-3 md:grid-cols-2">
       {items.map((i) => {
         const money = i.kind === "budgetPace";
+        const Glyph = money ? Wallet : Clock3;
         return (
           <li
             key={i.kind}
@@ -703,8 +690,9 @@ async function InsightLine({ items }: { items: Insight[] }) {
               i.tone === "warning" ? "border-warning/40 bg-warning/5" : "border-border",
             )}
           >
-            <Icon
-              icon={money ? Wallet : Clock3}
+            <Glyph
+              strokeWidth={1.75}
+              aria-hidden
               className={cn("mt-0.5 size-4 shrink-0", i.tone === "warning" ? "text-warning" : "text-muted")}
             />
             <span className="flex-1">

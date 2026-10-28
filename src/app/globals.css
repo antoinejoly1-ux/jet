@@ -242,46 +242,6 @@
   }
 }
 
-/*
- * Icons draw themselves: when the nearest .group (a link, button or card) is
- * hovered or focused, each stroke of the icon is traced from its start, the
- * way the line icons in polished apps come alive. CSS only: every stroke gets
- * a dash as long as itself (lucide strokes on a 24px grid are shorter than
- * 100 units) whose offset runs from hidden to drawn. `data-anim` marks the
- * svg; its value no longer matters.
- */
-@keyframes ic-draw {
-  from {
-    stroke-dashoffset: 100;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-.group:is(:hover, :focus-visible) [data-anim] > *,
-[data-anim]:hover > * {
-  stroke-dasharray: 100;
-  animation: ic-draw 0.9s var(--ease-out) both;
-}
-.group:is(:hover, :focus-visible) [data-anim] > :nth-child(2),
-[data-anim]:hover > :nth-child(2) {
-  animation-delay: 0.08s;
-}
-.group:is(:hover, :focus-visible) [data-anim] > :nth-child(3),
-[data-anim]:hover > :nth-child(3) {
-  animation-delay: 0.16s;
-}
-.group:is(:hover, :focus-visible) [data-anim] > :nth-child(n + 4),
-[data-anim]:hover > :nth-child(n + 4) {
-  animation-delay: 0.24s;
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-anim] > * {
-    animation: none !important;
-    stroke-dasharray: none !important;
-  }
-}
-
 /* ---------- Live map ---------- */
 .um-map .maplibregl-ctrl-attrib {
   font-size: 10px;

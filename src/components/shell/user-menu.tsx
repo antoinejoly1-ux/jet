@@ -1,12 +1,12 @@
 "use client";
 
-import { LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/auth-client";
 import { Avatar } from "@/components/ui/avatar";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 
 export function UserMenu({
   name,
@@ -70,9 +70,9 @@ export function UserMenu({
               role="menuitem"
               href="/account"
               onClick={() => setOpen(false)}
-              className="hover:bg-surface-muted flex h-11 items-center gap-2 rounded-full px-3 text-sm"
+              className="ai-trigger hover:bg-surface-muted flex h-11 items-center gap-2 rounded-full px-3 text-sm"
             >
-              <UserRound className="size-4" aria-hidden />
+              <AnimatedIcon name="user" size={18} />
               {t("account")}
             </Link>
           ) : null}
@@ -80,9 +80,9 @@ export function UserMenu({
             role="menuitem"
             type="button"
             onClick={signOut}
-            className="hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
+            className="ai-trigger hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
           >
-            <LogOut className="size-4" aria-hidden />
+            <AnimatedIcon name="logout" size={18} />
             {t("signOut")}
           </button>
         </div>

@@ -1,5 +1,5 @@
-import { Bell } from "lucide-react";
 import Link from "next/link";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 import { getTranslations } from "next-intl/server";
 import type { Side } from "./nav";
 
@@ -8,10 +8,10 @@ export async function NotificationBell({ side, unread }: { side: Side; unread: n
   return (
     <Link
       href={side === "admin" ? "/admin/notifications" : "/notifications"}
-      className="group border-border hover:bg-surface-muted relative inline-flex size-11 items-center justify-center rounded-full border"
+      className="ai-trigger border-border hover:bg-surface-muted relative inline-flex size-11 items-center justify-center rounded-full border"
       aria-label={unread ? t("bellUnread", { count: unread }) : t("title")}
     >
-      <Bell className="size-[17px]" strokeWidth={1.5} aria-hidden data-anim="ring" />
+      <AnimatedIcon name="bell" size={19} />
       {unread ? (
         <span
           aria-hidden

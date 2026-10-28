@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import type { Route } from "next";
 import { cn } from "@/lib/utils";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 
 type Hit = {
   kind: "owner" | "company" | "aircraft" | "invoice" | "conversation";
@@ -112,9 +113,9 @@ export function CommandPalette() {
         onClick={open}
         aria-label={t("open")}
         title={`${t("open")} (⌘K)`}
-        className="border-border hover:bg-surface-muted text-muted hover:text-text hidden size-11 items-center justify-center rounded-full border sm:inline-flex"
+        className="ai-trigger border-border hover:bg-surface-muted text-muted hover:text-text hidden size-11 items-center justify-center rounded-full border sm:inline-flex"
       >
-        <Search className="size-4" strokeWidth={1.5} aria-hidden />
+        <AnimatedIcon name="search" size={18} />
       </button>
       <dialog
         ref={dialog}

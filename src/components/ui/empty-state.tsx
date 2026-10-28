@@ -26,7 +26,7 @@ export function EmptyState({
       ) : null}
       <div className="relative flex flex-col items-center">
         <div className="border-border text-accent mb-5 flex size-14 items-center justify-center rounded-full border">
-          <Glyph className="size-5" strokeWidth={1.5} aria-hidden data-anim="bounce" />
+          <Glyph className="size-5" strokeWidth={1.75} aria-hidden />
         </div>
         <h2 className="text-xl font-light tracking-tight">{title}</h2>
         <p className="text-muted mt-2 max-w-sm text-sm leading-relaxed">{body}</p>

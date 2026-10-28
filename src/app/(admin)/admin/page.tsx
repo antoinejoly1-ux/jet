@@ -1,19 +1,4 @@
-import {
-  ClipboardCheck,
-  FileText,
-  CalendarClock,
-  CheckCircle2,
-  Clock3,
-  KeyRound,
-  MailPlus,
-  MessageSquare,
-  PlaneLanding,
-  PlaneTakeoff,
-  UserRoundX,
-  Users,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
@@ -22,7 +7,7 @@ import { FlightRowActions } from "@/components/admin/flight-row-actions";
 import { FleetLive } from "@/components/tracking/fleet-live";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Icon, type IconMotion } from "@/components/ui/icon";
+import { AnimatedIcon, type AnimatedIconName } from "@/components/animated-icons/AnimatedIcon";
 import { Instrument, InstrumentStrip } from "@/components/ui/instrument";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
@@ -62,27 +47,24 @@ export default async function AdminDashboardPage() {
     timeZone: OPERATOR_TIME_ZONE,
   });
 
-  const clients: { key: string; value: number; icon: LucideIcon; anim: IconMotion; href: Route }[] = [
-    { key: "owners", value: stats.owners, icon: Users, anim: "bounce", href: "/admin/owners" },
+  const clients: { key: string; value: number; icon: AnimatedIconName; href: Route }[] = [
+    { key: "owners", value: stats.owners, icon: "people", href: "/admin/owners" },
     {
       key: "pendingInvitations",
       value: stats.pendingInvitations,
-      icon: MailPlus,
-      anim: "slide",
+      icon: "mail",
       href: "/admin/invitations",
     },
     {
       key: "accountsWaiting",
       value: stats.accountsWaiting,
-      icon: UserRoundX,
-      anim: "shake",
+      icon: "user",
       href: "/admin/invitations",
     },
     {
       key: "ownersWithoutAccess",
       value: stats.ownersWithoutAccess,
-      icon: KeyRound,
-      anim: "twist",
+      icon: "key",
       href: "/admin/invitations",
     },
   ];
@@ -111,8 +93,8 @@ export default async function AdminDashboardPage() {
             </h2>
             {can(viewer, "operations:write") ? (
               <Button asChild size="sm" variant="secondary">
-                <Link href="/admin/flights/new">
-                  <PlaneTakeoff aria-hidden />
+                <Link href="/admin/flights/new" className="ai-trigger">
+                  <AnimatedIcon name="planeTakeoff" size={18} />
                   {t("newFlight")}
                 </Link>
               </Button>
@@ -172,14 +154,14 @@ export default async function AdminDashboardPage() {
             {t("clientsTitle")}
           </h2>
           <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
-            {clients.map(({ key, value, icon, anim, href }) => (
+            {clients.map(({ key, value, icon, href }) => (
               <li key={key}>
                 <Link
                   href={href}
-                  className="group hover:bg-surface-muted/60 flex items-center gap-4 px-6 py-4 transition-colors"
+                  className="group ai-trigger hover:bg-surface-muted/60 flex items-center gap-4 px-6 py-4 transition-colors"
                 >
                   <span className="border-border text-muted group-hover:text-text flex size-9 items-center justify-center rounded-full border transition-colors">
-                    <Icon icon={icon} anim={anim} className="size-4" />
+                    <AnimatedIcon name={icon} size={18} />
                   </span>
                   <span className="flex-1 text-sm">{t(key)}</span>
                   <span className="tabular text-2xl font-light">{value}</span>
@@ -202,16 +184,16 @@ export default async function AdminDashboardPage() {
   );
 }
 
-const QUEUE_ICON: Record<QueueKey, [LucideIcon, IconMotion]> = {
-  flightReports: [ClipboardCheck, "bounce"],
-  toInvoice: [FileText, "slide"],
-  flightsToClose: [PlaneLanding, "plane"],
-  flightRequests: [PlaneTakeoff, "plane"],
-  awaitingReply: [MessageSquare, "wiggle"],
-  maintenanceOverdue: [Wrench, "twist"],
-  maintenanceSoon: [CalendarClock, "flip"],
-  lowHours: [Clock3, "pulse"],
-  ownersNeverInvited: [MailPlus, "slide"],
+const QUEUE_ICON: Record<QueueKey, AnimatedIconName> = {
+  flightReports: "clipboard",
+  toInvoice: "invoice",
+  flightsToClose: "plane",
+  flightRequests: "planeTakeoff",
+  awaitingReply: "chat",
+  maintenanceOverdue: "wrench",
+  maintenanceSoon: "calendar",
+  lowHours: "clock",
+  ownersNeverInvited: "mail",
 };
 
 /** "À traiter": what needs someone today, most urgent first, each a count and a way in. */
@@ -230,16 +212,16 @@ async function Queue({ rows }: { rows: { key: QueueKey; count: number; href: str
       ) : (
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map(({ key, count, href }) => {
-            const [icon, anim] = QUEUE_ICON[key];
+            const icon = QUEUE_ICON[key];
             return (
               <li key={key}>
                 <Link
                   href={href as Route}
-                  className="group border-border bg-surface hover:border-text/30 flex h-full items-center gap-4 rounded-lg border px-5 py-4 transition-colors"
+                  className="group ai-trigger border-border bg-surface hover:border-text/30 flex h-full items-center gap-4 rounded-lg border px-5 py-4 transition-colors"
                 >
                   <span className="tabular w-10 text-3xl font-light">{count}</span>
                   <span className="min-w-0 flex-1 text-sm">{t(key, { count })}</span>
-                  <Icon icon={icon} anim={anim} className="text-muted group-hover:text-text size-4" />
+                  <AnimatedIcon name={icon} size={18} className="text-muted group-hover:text-text" />
                 </Link>
               </li>
             );

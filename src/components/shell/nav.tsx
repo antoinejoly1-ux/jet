@@ -1,37 +1,13 @@
 "use client";
 
-import {
-  ClipboardCheck,
-  CalendarDays,
-  ClipboardList,
-  FileText,
-  Gauge,
-  Home,
-  Inbox,
-  Menu,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Phone,
-  Plus,
-  MessageSquare,
-  Plane,
-  PlaneTakeoff,
-  Receipt,
-  Settings,
-  Upload,
-  Users,
-  Wallet,
-  Wrench,
-  X,
-  type LucideIcon,
-} from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Fragment, useEffect, useState } from "react";
 import type { Route } from "next";
 import { useRequestFlight } from "@/components/flights/request-flight";
-import { Icon, type IconMotion } from "@/components/ui/icon";
+import { AnimatedIcon, type AnimatedIconName } from "@/components/animated-icons/AnimatedIcon";
 import { cn } from "@/lib/utils";
 
 export type Side = "client" | "admin";
@@ -54,51 +30,51 @@ function Count({ n, className }: { n: number | undefined; className?: string }) 
   );
 }
 
-type Item = { href: Route; key: string; icon: LucideIcon; anim: IconMotion; mobile?: boolean };
+type Item = { href: Route; key: string; icon: AnimatedIconName; mobile?: boolean };
 type Group = { key: string | null; items: Item[] };
 
 const CLIENT: Group[] = [
   {
     key: null,
     items: [
-      { href: "/", key: "home", icon: Home, anim: "settle", mobile: true },
-      { href: "/availability", key: "availability", icon: CalendarDays, anim: "flip", mobile: true },
-      { href: "/flights", key: "flights", icon: PlaneTakeoff, anim: "plane" },
-      { href: "/messages", key: "messages", icon: MessageSquare, anim: "wiggle", mobile: true },
-      { href: "/finances", key: "finances", icon: Wallet, anim: "bounce" },
-      { href: "/invoices", key: "invoices", icon: FileText, anim: "slide" },
-      { href: "/aircraft", key: "aircraft", icon: Plane, anim: "drop" },
-      { href: "/billing", key: "billing", icon: Receipt, anim: "slide" },
+      { href: "/", key: "home", icon: "home", mobile: true },
+      { href: "/availability", key: "availability", icon: "calendar", mobile: true },
+      { href: "/flights", key: "flights", icon: "planeTakeoff" },
+      { href: "/messages", key: "messages", icon: "chat", mobile: true },
+      { href: "/finances", key: "finances", icon: "wallet" },
+      { href: "/invoices", key: "invoices", icon: "invoice" },
+      { href: "/aircraft", key: "aircraft", icon: "plane" },
+      { href: "/billing", key: "billing", icon: "receipt" },
     ],
   },
-  { key: "settings", items: [{ href: "/account", key: "settings", icon: Settings, anim: "spin" }] },
+  { key: "settings", items: [{ href: "/account", key: "settings", icon: "settings" }] },
 ];
 
 const ADMIN: Group[] = [
   {
     key: "operations",
     items: [
-      { href: "/admin", key: "dashboard", icon: Gauge, anim: "pulse", mobile: true },
-      { href: "/admin/aircraft", key: "aircraft", icon: Plane, anim: "drop" },
-      { href: "/admin/flights", key: "flights", icon: PlaneTakeoff, anim: "plane", mobile: true },
-      { href: "/admin/maintenance", key: "maintenance", icon: Wrench, anim: "twist" },
-      { href: "/admin/messages", key: "messages", icon: Inbox, anim: "wiggle", mobile: true },
+      { href: "/admin", key: "dashboard", icon: "gauge", mobile: true },
+      { href: "/admin/aircraft", key: "aircraft", icon: "plane" },
+      { href: "/admin/flights", key: "flights", icon: "planeTakeoff", mobile: true },
+      { href: "/admin/maintenance", key: "maintenance", icon: "wrench" },
+      { href: "/admin/messages", key: "messages", icon: "inbox", mobile: true },
     ],
   },
   {
     key: "clients",
-    items: [{ href: "/admin/owners", key: "owners", icon: Users, anim: "bounce", mobile: true }],
+    items: [{ href: "/admin/owners", key: "owners", icon: "people", mobile: true }],
   },
   {
     key: "finance",
     items: [
-      { href: "/admin/flight-reports", key: "flightReports", icon: ClipboardCheck, anim: "bounce" },
-      { href: "/admin/transactions", key: "transactions", icon: ClipboardList, anim: "slide" },
-      { href: "/admin/invoices", key: "invoices", icon: FileText, anim: "slide" },
-      { href: "/admin/imports", key: "imports", icon: Upload, anim: "drop" },
+      { href: "/admin/flight-reports", key: "flightReports", icon: "clipboard" },
+      { href: "/admin/transactions", key: "transactions", icon: "ledger" },
+      { href: "/admin/invoices", key: "invoices", icon: "invoice" },
+      { href: "/admin/imports", key: "imports", icon: "upload" },
     ],
   },
-  { key: "settings", items: [{ href: "/admin/settings", key: "settings", icon: Settings, anim: "spin" }] },
+  { key: "settings", items: [{ href: "/admin/settings", key: "settings", icon: "settings" }] },
 ];
 
 /** The side's destinations, minus any the viewer has no access to (by item key). */
@@ -162,18 +138,19 @@ export function Sidebar({
                   <div className="bg-border my-2 h-px w-6" aria-hidden />
                 )
               ) : null}
-              {group.items.map(({ href, key, icon, anim }) => (
+              {group.items.map(({ href, key, icon }) => (
                 <Link
                   key={href}
                   href={href}
                   aria-current={isActive(href) ? "page" : undefined}
                   className={cn(
-                    "group text-muted hover:text-text hover:bg-surface-muted relative flex items-center rounded-full transition-colors duration-300",
+                    "group ai-trigger text-muted hover:text-text hover:bg-surface-muted relative flex items-center rounded-full transition-colors duration-300",
+                    isActive(href) && "is-active",
                     "aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground",
                     expanded ? "h-11 gap-3 px-3.5" : "size-11 justify-center",
                   )}
                 >
-                  <Icon icon={icon} anim={anim} className="size-[19px] shrink-0" />
+                  <AnimatedIcon name={icon} size={20} className="shrink-0" />
                   {expanded ? (
                     <>
                       <span className="flex-1 truncate text-sm">{t(`items.${key}`)}</span>
@@ -235,14 +212,17 @@ function MenuList({ side, badges = {}, hidden }: { side: Side; badges?: Badges; 
         <div key={group.key ?? "main"}>
           {group.key ? <p className="eyebrow mb-2">{t(`groups.${group.key}`)}</p> : null}
           <ul className="divide-border divide-y">
-            {group.items.map(({ href, key, icon, anim }) => (
+            {group.items.map(({ href, key, icon }) => (
               <li key={href}>
                 <Link
                   href={href}
                   aria-current={isActive(href) ? "page" : undefined}
-                  className="group text-muted aria-[current=page]:text-text flex h-14 items-center gap-4 text-lg font-light"
+                  className={cn(
+                    "ai-trigger text-muted aria-[current=page]:text-text flex h-14 items-center gap-4 text-lg font-light",
+                    isActive(href) && "is-active",
+                  )}
                 >
-                  <Icon icon={icon} anim={anim} className="size-5" />
+                  <AnimatedIcon name={icon} size={22} />
                   <span className="flex-1">{t(`items.${key}`)}</span>
                   <Count n={badges[key]} />
                 </Link>
@@ -269,15 +249,11 @@ export function FloatingAction({ fab, expanded = false }: { fab: Fab; expanded?:
   if (!kind) return null;
   const label = kind === "request" ? t("fabRequest") : kind === "call" ? t("fabCall") : t("fabNewFlight");
   const className = cn(
-    "group bg-accent text-accent-foreground shadow-float relative flex items-center justify-center gap-2.5 rounded-full transition-transform duration-300 hover:scale-105",
+    "ai-trigger bg-accent text-accent-foreground shadow-float relative flex items-center justify-center gap-2.5 rounded-full transition-transform duration-300 hover:scale-105",
     expanded ? "h-12 px-5 text-sm font-medium" : "size-12",
   );
   const icon = (
-    <Icon
-      icon={kind === "request" ? PlaneTakeoff : kind === "call" ? Phone : Plus}
-      anim={kind === "request" ? "plane" : kind === "call" ? "shake" : "spin"}
-      className="size-5"
-    />
+    <AnimatedIcon name={kind === "request" ? "planeTakeoff" : kind === "call" ? "phone" : "plus"} size={22} />
   );
   const content = (
     <>
@@ -346,7 +322,7 @@ export function BottomTabs({
   }
 
   const tab =
-    "group flex h-16 w-full flex-col items-center justify-center gap-1 text-[11.5px] font-medium tracking-[0.01em] text-muted aria-[current=page]:text-text";
+    "group ai-trigger flex h-16 w-full flex-col items-center justify-center gap-1 text-[11.5px] font-medium tracking-[0.01em] text-muted aria-[current=page]:text-text";
   const pill =
     "flex h-8 w-14 items-center justify-center rounded-full transition-colors duration-300 group-aria-[current=page]:bg-primary group-aria-[current=page]:text-primary-foreground";
   return (
@@ -370,14 +346,14 @@ export function BottomTabs({
           className="grid"
           style={{ gridTemplateColumns: `repeat(${items.length + (center ? 2 : 1)}, minmax(0, 1fr))` }}
         >
-          {items.map(({ href, key, icon, anim }, i) => (
+          {items.map(({ href, key, icon }, i) => (
             <Fragment key={href}>
               {center && i === 2 ? (
                 <li>
                   {center === "request" ? (
                     <button type="button" onClick={() => request?.()} className={tab}>
                       <span className="bg-accent text-accent-foreground shadow-float flex size-11 items-center justify-center rounded-full">
-                        <Icon icon={PlaneTakeoff} anim="plane" className="size-5" />
+                        <AnimatedIcon name="planeTakeoff" size={22} />
                       </span>
                       <span>{t("tabs.request")}</span>
                     </button>
@@ -385,10 +361,10 @@ export function BottomTabs({
                     <Link
                       href={center.href}
                       aria-current={isActive(center.href) && !moreOpen ? "page" : undefined}
-                      className={tab}
+                      className={cn(tab, isActive(center.href) && !moreOpen && "is-active")}
                     >
                       <span className={pill}>
-                        <Icon icon={center.icon} anim={center.anim} className="size-[19px]" />
+                        <AnimatedIcon name={center.icon} size={20} />
                       </span>
                       <span>{t(`items.${center.key}`)}</span>
                     </Link>
@@ -399,10 +375,10 @@ export function BottomTabs({
                 <Link
                   href={href}
                   aria-current={isActive(href) && !moreOpen ? "page" : undefined}
-                  className={cn(tab, "relative")}
+                  className={cn(tab, "relative", isActive(href) && !moreOpen && "is-active")}
                 >
                   <span className={pill}>
-                    <Icon icon={icon} anim={anim} className="size-[19px]" />
+                    <AnimatedIcon name={icon} size={20} />
                   </span>
                   <Count n={badges[key]} className="absolute top-1.5 left-1/2 ml-2" />
                   <span className="max-w-full truncate px-1">
@@ -420,14 +396,14 @@ export function BottomTabs({
                 setOpenedAt(pathname);
                 setMoreOpen((o) => !o);
               }}
-              className={tab}
+              className={cn(tab, moreOpen && "is-active")}
               aria-current={moreOpen ? "page" : undefined}
             >
               <span className={pill}>
                 {moreOpen ? (
-                  <X className="size-[19px]" strokeWidth={1.5} aria-hidden />
+                  <X className="size-5" strokeWidth={1.75} aria-hidden />
                 ) : (
-                  <Menu className="size-[19px]" strokeWidth={1.5} aria-hidden />
+                  <AnimatedIcon name="menu" size={20} />
                 )}
               </span>
               <span>{t("more")}</span>
