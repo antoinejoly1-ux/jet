@@ -26,12 +26,13 @@ test("an owner who opens /admin is sent back to the Client side", async ({ page 
   await expect(page).toHaveURL("/");
 });
 
-test("staff switch between Client and Admin with the toggle", async ({ page }) => {
+test("staff without a share of their own don't get a Client side to switch to", async ({ page }) => {
   await signIn(page, "admin@jet.test");
   await expect(page).toHaveURL("/admin");
   const toggle = page.getByRole("group", { name: /Changer de vue|Switch view/ });
-  await toggle.getByRole("link", { name: "Client" }).click();
-  await expect(page).toHaveURL("/");
+  await expect(toggle).toHaveCount(0);
+  // Arriving on the client side (as after « Voir comme »), the way back to Admin is there.
+  await page.goto("/");
   await toggle.getByRole("link", { name: "Admin" }).click();
   await expect(page).toHaveURL("/admin");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/Les opérations|Operations/);

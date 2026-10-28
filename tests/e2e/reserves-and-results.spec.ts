@@ -42,6 +42,14 @@ test("finance records a company expense and pays a job from a reserve", async ({
   await pay.getByLabel("Montant ($)").fill("4 000");
   await pay.getByLabel("Travaux").fill("Inspection de l’hélice");
   await pay.getByRole("button", { name: "Payer depuis la réserve" }).click();
+  await pay.getByRole("button", { name: "Oui, payer depuis la réserve" }).click();
+  // A reserve too small for the job asks for an explicit go-ahead.
+  const anyway = pay.getByLabel(/Payer quand même/);
+  if (await anyway.isVisible().catch(() => false)) {
+    await anyway.check();
+    await pay.getByRole("button", { name: "Payer depuis la réserve" }).click();
+    await pay.getByRole("button", { name: "Oui, payer depuis la réserve" }).click();
+  }
   await page.getByText("Travaux payés et corrections").click();
   await expect(page.getByText(/Hélice · Inspection de l’hélice/)).toBeVisible();
 });

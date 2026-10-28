@@ -7,8 +7,8 @@ import { signIn } from "./support";
 
 test("an owner sees where their aircraft is, live", async ({ page }) => {
   await signIn(page, "owner@jet.test");
-  const live = page.getByRole("region", { name: /Montréal → West Palm Beach/ }).first();
-  await expect(page.getByRole("heading", { name: "Montréal → West Palm Beach" })).toBeVisible();
+  const live = page.getByRole("region", { name: /Saint-Hubert → West Palm Beach/ }).first();
+  await expect(page.getByRole("heading", { name: "Saint-Hubert → West Palm Beach" })).toBeVisible();
   await expect(page.locator("p", { hasText: /En vol.*C-GJTA/ }).first()).toBeVisible();
   await expect(page.getByText("Altitude")).toBeVisible();
   // The map itself loads (MapLibre draws into a canvas).
@@ -19,7 +19,7 @@ test("an owner sees where their aircraft is, live", async ({ page }) => {
 
 test("an assistant sees the map too, but no money", async ({ page }) => {
   await signIn(page, "assistant@jet.test");
-  await expect(page.getByRole("heading", { name: "Montréal → West Palm Beach" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Saint-Hubert → West Palm Beach" })).toBeVisible();
   await expect(page.getByText(/Dépensé en \d{4}/)).toHaveCount(0);
 });
 

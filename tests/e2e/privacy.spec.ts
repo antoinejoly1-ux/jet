@@ -14,7 +14,7 @@ test("an owner downloads their data and makes a request that an admin answers", 
   await page.goto("/account");
   const [download] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Télécharger mes données (JSON)" }).click(),
+    page.getByRole("link", { name: "Télécharger mes données" }).click(),
   ]);
   const data = JSON.parse(Buffer.concat(await (await download.createReadStream()).toArray()).toString("utf8"));
   expect(data.account.email).toBe("owner@jet.test");

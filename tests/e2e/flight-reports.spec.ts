@@ -14,7 +14,7 @@ test("a pilot files the CJ4's report from a phone, with a receipt photo", async 
   await page.getByLabel("Temps de vol").fill("2 h 50");
   await page.getByLabel("Carburant ajouté (litres)").fill("1150");
   await page.getByRole("button", { name: "Ajouter une dépense" }).click();
-  await page.getByLabel("Montant ($)").fill("2 310,40");
+  await page.getByLabel("Montant", { exact: true }).fill("2 310,40");
   await page.locator("input[type=file]").setInputFiles({
     name: "recu.webp",
     mimeType: "image/webp",
@@ -41,20 +41,21 @@ test("finance approves Jean's Teterboro report, issues the invoice, and Jean ope
   await page.goto("/admin/flight-reports");
   await page.getByRole("link", { name: /C-GJTA · CYHU → KTEB/ }).click();
   await expect(page.getByRole("heading", { name: "CYHU → KTEB" })).toBeVisible();
-  // 1 h 45 at $1,400/h ($2,450) plus $1,989.60 of expenses at cost.
-  await expect(page.getByText(/4\s439,60\s\$/)).toBeVisible();
+  // 1 h 45 at $1,400/h ($2,450) plus $500 of expenses at cost; the fuel receipt is covered by the rate.
+  await expect(page.getByText(/2\s950,00\s\$/).first()).toBeVisible();
+  await expect(page.getByText(/Carburant inclus au tarif horaire/).first()).toBeVisible();
   await expect(page.getByLabel("Facturé à (qui a volé)")).toHaveValue(/.+/);
   await page.getByRole("button", { name: "Approuver le rapport" }).click();
   await expect(page.getByText("Rapport approuvé.")).toBeVisible();
 
-  // Gestion Aviation JTA is registered: GST and QST on the $4,439.60.
-  await expect(page.getByText(/221,98\s\$/)).toBeVisible();
-  await expect(page.getByText(/442,85\s\$/)).toBeVisible();
+  // Gestion Aviation JTA is registered: GST and QST on the $2,950.
+  await expect(page.getByText(/147,50\s\$/).first()).toBeVisible();
+  await expect(page.getByText(/294,26\s\$/).first()).toBeVisible();
   await page.getByRole("button", { name: "Émettre la facture" }).click();
   await page.getByRole("button", { name: "Oui, émettre" }).click();
   await expect(page).toHaveURL(/\/admin\/invoices\/.+/);
   await expect(page.getByRole("heading", { name: /^JTA-\d{4}-0001$/ })).toBeVisible();
-  await expect(page.getByText(/5\s104,43\s\$/).first()).toBeVisible();
+  await expect(page.getByText(/3\s391,76\s\$/).first()).toBeVisible();
 
   const owner = await (await browser.newContext()).newPage();
   await signIn(owner, "owner@jet.test");

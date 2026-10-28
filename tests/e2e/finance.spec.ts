@@ -26,7 +26,7 @@ test("an invoice with its PDF is issued, and only its owner can open the PDF", a
   await expect(page.getByText("Facture émise. Le propriétaire a été avisé.")).toBeVisible();
   await page.getByRole("searchbox").fill(number);
   await page.getByRole("button", { name: "Filtrer" }).click();
-  await expect(page.getByText("1 234,56 $")).toBeVisible();
+  await expect(page.getByText("1 234,56 $").first()).toBeVisible();
 
   // Someone else's invoice, to check isolation below.
   await page.getByRole("searchbox").fill("Marie");

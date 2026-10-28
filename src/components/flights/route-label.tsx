@@ -10,9 +10,12 @@ export function RouteLabel({ from, to, codes = true }: { from: string; to: strin
     <>
       {placeName(from)} <span className="text-muted">→</span> {placeName(to)}
       {codes ? (
-        <span className="text-muted ml-2 text-[0.75em] font-normal tracking-wide whitespace-nowrap">
-          {from} → {to}
-        </span>
+        <>
+          {" "}
+          <span className="text-muted inline-block text-[0.75em] font-normal tracking-wide whitespace-nowrap">
+            {from} → {to}
+          </span>
+        </>
       ) : null}
     </>
   );

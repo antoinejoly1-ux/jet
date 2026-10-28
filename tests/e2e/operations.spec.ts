@@ -13,7 +13,7 @@ const local = (days: number, time: string) =>
 async function schedule(page: Page, to: string, departsAt: string) {
   await page.goto("/admin/flights/new");
   await page.getByLabel("Appareil").selectOption({ label: "C-GJTA · Pilatus PC-12 NGX" });
-  await page.getByLabel("Heures de").selectOption({ label: "Jean Tremblay (25 %)" });
+  await page.getByLabel("Facturé à", { exact: true }).selectOption({ label: "Jean Tremblay (25 %)" });
   await page.getByLabel("Départ", { exact: true }).fill("cyul");
   await page.getByLabel("Arrivée", { exact: true }).fill(to);
   await page.getByLabel("Heure de départ").fill(departsAt);
@@ -130,6 +130,11 @@ test("starting and finishing maintenance takes the aircraft out of service and b
   await page.goto("/admin/maintenance");
   await card().getByRole("button", { name: "Envoyer en vérification" }).click();
   await expect(page.getByRole("region", { name: /^En vérification/ })).toContainText(title);
+  // Someone else approves: whoever sent the job to review can't sign it off.
+  await expect(card().getByRole("button", { name: "Approuver" })).toHaveCount(0);
+  await page.context().clearCookies();
+  await signIn(page, "admin@jet.test");
+  await page.goto("/admin/maintenance");
   await card().getByRole("button", { name: "Approuver" }).click();
   await expect(page.getByRole("region", { name: /^Terminé/ })).toContainText(title);
   await page.goto("/admin/aircraft");

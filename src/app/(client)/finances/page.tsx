@@ -178,14 +178,17 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                     {/* Bars for sighted users; the same numbers as a table for screen readers. */}
                     <div aria-hidden className="flex h-40 items-end gap-1.5">
                       {s.months.map((m) => (
-                        <div key={m.month} className="flex h-full flex-1 flex-col justify-end gap-1">
+                        <div key={m.month} className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1">
                           <div
                             className="bg-accent/80 rounded-t-sm"
                             style={{ height: `${Math.max(0, (m.costCents / maxMonth) * 100)}%` }}
                             title={`${monthName(m.month)} · ${money(m.costCents, s.currency)}`}
                           />
                           <span className="text-muted text-center text-[11px]">
-                            {monthName(m.month).replace(".", "")}
+                            <span className="sm:hidden">
+                              {format.dateTime(new Date(Date.UTC(year, m.month - 1, 15)), { month: "narrow" })}
+                            </span>
+                            <span className="hidden sm:inline">{monthName(m.month).replace(".", "")}</span>
                           </span>
                         </div>
                       ))}
