@@ -1,8 +1,8 @@
 import { ICONS, type AnimatedIconName } from "./icons";
 
-// React wrapper. Usage: <button className="ai-trigger"><AnimatedIcon name="chat" /> Chat</button>
-// The markup comes from icons.ts (static strings), so innerHTML is safe here. Plain SVG: works in
-// server components with no "use client".
+// One icon: its strokes as separate paths, each with pathLength=1 so the stylesheet can redraw
+// them in turn when the link or button around it is hovered, plus the icon's own small gesture.
+// Plain SVG, so it works in server components.
 export function AnimatedIcon({
   name,
   size = 24,
@@ -16,20 +16,24 @@ export function AnimatedIcon({
 }) {
   return (
     <svg
-      className={`ai ai-${name} ${className}`.trim()}
+      className={`ic ic--${name} ${className}`.trim()}
       width={size}
       height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={1.6}
       strokeLinecap="round"
       strokeLinejoin="round"
       role={title ? "img" : undefined}
       aria-label={title}
       aria-hidden={title ? undefined : true}
-      dangerouslySetInnerHTML={{ __html: ICONS[name] ?? "" }}
-    />
+      focusable="false"
+    >
+      {ICONS[name].map((d, i) => (
+        <path key={i} d={d} pathLength={1} className={`p${i}`} />
+      ))}
+    </svg>
   );
 }
 
