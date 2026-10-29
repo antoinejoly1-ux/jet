@@ -41,7 +41,7 @@ export function MaintenanceForm({
   return (
     <form action={formAction} className="flex max-w-2xl flex-col gap-5" noValidate>
       <FormAlert state={state} />
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {editing ? (
           <input type="hidden" name="aircraftId" value={defaults.aircraftId} />
         ) : (
@@ -122,7 +122,7 @@ export function MaintenanceForm({
           />
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}
         </Button>

@@ -29,11 +29,11 @@ export const toFlightInput = (b: z.infer<typeof apiFlightBody>): FlightInput => 
 });
 
 export const apiCompleteBody = z.object({
-  blockMinutes: z.number().int().min(1).max(1440),
+  flightMinutes: z.number().int().min(1).max(1440),
   arrivesAt: instant.nullable().optional(),
 });
 export const toCompleteInput = (b: z.infer<typeof apiCompleteBody>): CompleteFlightInput => ({
-  blockTime: `${Math.floor(b.blockMinutes / 60)}:${String(b.blockMinutes % 60).padStart(2, "0")}`,
+  flightTime: `${Math.floor(b.flightMinutes / 60)}:${String(b.flightMinutes % 60).padStart(2, "0")}`,
   arrivesAt: b.arrivesAt ? local(b.arrivesAt) : "",
 });
 
@@ -47,7 +47,7 @@ export const apiTransactionBody = z.object({
     .number()
     .int()
     .refine((n) => n !== 0, "must_not_be_zero"),
-  currency: z.enum(["CAD", "USD"]),
+  currency: z.literal("CAD").default("CAD"),
   categoryId: z.uuid().nullable().optional(),
   description: z.string().max(300).nullable().optional(),
 });

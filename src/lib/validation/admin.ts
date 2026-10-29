@@ -33,6 +33,27 @@ export const ownerInput = z.object({
 });
 export type OwnerInput = z.input<typeof ownerInput>;
 
+export const holdingCompanyInput = z.object({
+  legalName: z.string().trim().min(2).max(200),
+  registrationNumber: optionalText,
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .email()
+    .optional()
+    .or(z.literal("").transform(() => undefined))
+    .transform((v) => v ?? null),
+  phone: optionalText,
+  notes: z
+    .string()
+    .trim()
+    .max(4000)
+    .optional()
+    .transform((v) => (v ? v : null)),
+});
+export type HoldingCompanyInput = z.input<typeof holdingCompanyInput>;
+
 /** Canadian marks look like C-GJTA; US N-numbers and others are allowed too. */
 export const aircraftInput = z.object({
   registration: z
@@ -59,6 +80,12 @@ export const aircraftInput = z.object({
     .optional()
     .or(z.literal("").transform(() => undefined))
     .transform((v) => v ?? null),
+  holdingCompanyId: z
+    .string()
+    .uuid()
+    .optional()
+    .or(z.literal("").transform(() => undefined))
+    .transform((v) => v ?? null),
 });
 export type AircraftInput = z.input<typeof aircraftInput>;
 
@@ -76,5 +103,5 @@ export type ShareInput = z.input<typeof shareInput>;
 export const endShareInput = z.object({ endsOn: isoDate });
 
 export const staffRoleInput = z.object({
-  role: z.enum(["admin", "finance", "dispatcher", "none"]),
+  role: z.enum(["admin", "finance", "dispatcher", "pilot", "none"]),
 });

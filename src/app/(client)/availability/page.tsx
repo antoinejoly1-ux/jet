@@ -1,6 +1,7 @@
-import { CalendarDays, Phone } from "lucide-react";
+import { CalendarDays, Phone, PlaneTakeoff } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { RequestFlightButton } from "@/components/flights/request-flight";
 import { AvailabilityCalendar } from "@/components/operations/availability-calendar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,23 +13,34 @@ import { db } from "@/lib/db";
 import { env } from "@/lib/env";
 import { getAvailability, listOwnerAircraft } from "@/lib/services/availability";
 import { zonedDay } from "@/lib/time";
+import { scenes } from "@/lib/imagery";
+import { telHref } from "@/lib/phone";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("availability") };
+}
+
+/** This month, or next month once this one has a week or less left: owners look ahead. */
+function defaultMonth() {
+  const today = zonedDay(new Date());
+  const [y, m, d] = today.split("-").map(Number) as [number, number, number];
+  const daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  if (daysInMonth - d >= 7) return today.slice(0, 7);
+  return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
 }
 
 export default async function OwnerAvailabilityPage({ searchParams }: PageProps<"/availability">) {
   const viewer = await requireAccess();
   const t = await getTranslations("availability");
   const sp = await searchParams;
-  const month = typeof sp.month === "string" && isMonth(sp.month) ? sp.month : zonedDay(new Date()).slice(0, 7);
+  const month = typeof sp.month === "string" && isMonth(sp.month) ? sp.month : defaultMonth();
   const fleet = await listOwnerAircraft(db, viewer);
   const unique = [...new Map(fleet.map((a) => [a.id, a])).values()];
   if (unique.length === 0)
     return (
       <>
         <PageHeader title={t("title")} />
-        <EmptyState icon={CalendarDays} title={t("noAircraftTitle")} body={t("noAircraftBody")} />
+        <EmptyState icon={CalendarDays} image={scenes.hangar} title={t("noAircraftTitle")} body={t("noAircraftBody")} />
       </>
     );
 
@@ -36,6 +48,7 @@ export default async function OwnerAvailabilityPage({ searchParams }: PageProps<
   const { from, to } = monthRange(month);
   const { periods } = await getAvailability(db, viewer, chosen.id, from, to, { ownerView: true });
   const phone = env.OPERATOR_PHONE;
+  const tr = await getTranslations("requestFlight");
   const href = (m: string, aircraft = chosen.id) =>
     `/availability?${new URLSearchParams({ month: m, ...(unique.length > 1 ? { aircraft } : {}) })}`;
 
@@ -45,14 +58,20 @@ export default async function OwnerAvailabilityPage({ searchParams }: PageProps<
         title={t("title")}
         description={t("subtitle")}
         actions={
-          phone ? (
-            <Button asChild size="sm">
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>
-                <Phone aria-hidden />
-                {t("callToBook")}
-              </a>
-            </Button>
-          ) : null
+          <>
+            <RequestFlightButton>
+              <PlaneTakeoff aria-hidden />
+              {tr("open")}
+            </RequestFlightButton>
+            {phone ? (
+              <Button asChild variant="secondary">
+                <a href={telHref(phone)}>
+                  <Phone aria-hidden />
+                  {t("callToBook")}
+                </a>
+              </Button>
+            ) : null}
+          </>
         }
       />
       {unique.length > 1 ? (
@@ -70,7 +89,7 @@ export default async function OwnerAvailabilityPage({ searchParams }: PageProps<
         <p className="text-muted mb-4 text-sm">
           {chosen.registration} · {chosen.model}
         </p>
-        <AvailabilityCalendar month={month} periods={periods} hrefFor={(m) => href(m)} />
+        <AvailabilityCalendar month={month} periods={periods} hrefFor={(m) => href(m)} requestable />
       </Card>
       <p className="text-muted mt-4 text-sm">{phone ? t("bookingHint") : t("bookingHintNoPhone")}</p>
     </>

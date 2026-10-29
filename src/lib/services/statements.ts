@@ -17,7 +17,7 @@ import {
   shares,
   transactions,
 } from "@/lib/db/schema";
-import { authorize, isStaff, type Actor } from "@/lib/auth/policy";
+import { authorize, isStaff, financeOwnerIds, type Actor } from "@/lib/auth/policy";
 import { loadBudget } from "./budgets";
 import { NotFoundError } from "./errors";
 
@@ -142,8 +142,9 @@ export type AnnualStatement = Awaited<ReturnType<typeof getAnnualStatement>>;
 
 /** The signed-in owner's transactions for a year, across their shares, for the CSV export. */
 export async function listOwnerTransactions(db: Db, actor: Actor, year: number) {
-  if (actor.ownerIds.length === 0) return [];
-  authorize(actor, "finance:read", { ownerIds: actor.ownerIds });
+  const ids = financeOwnerIds(actor);
+  if (ids.length === 0) return [];
+  authorize(actor, "finance:read", { ownerIds: ids });
   const { from, to } = yearBounds(year);
   return db
     .select({
@@ -163,7 +164,7 @@ export async function listOwnerTransactions(db: Db, actor: Actor, year: number) 
     .leftJoin(budgetCategories, eq(budgetCategories.id, transactions.categoryId))
     .where(
       and(
-        inArray(shares.ownerId, [...actor.ownerIds]),
+        inArray(shares.ownerId, [...ids]),
         isNull(aircraft.deletedAt),
         gte(transactions.occurredOn, from),
         lt(transactions.occurredOn, to),

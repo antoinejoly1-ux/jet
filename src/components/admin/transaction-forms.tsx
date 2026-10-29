@@ -77,25 +77,19 @@ export function AddTransactionForm({
             </option>
           ))}
         </SelectField>
-        <Field
-          ref={amount}
-          id="amount"
-          name="amount"
-          inputMode="decimal"
-          label={t("amount")}
-          defaultValue={submitted(state, "amount")}
-          error={err("amount")}
-          required
-        />
-        <SelectField
-          id="currency"
-          name="currency"
-          label={t("currency")}
-          defaultValue={submitted(state, "currency", "CAD")}
-        >
-          <option value="CAD">CAD</option>
-          <option value="USD">USD</option>
-        </SelectField>
+        <div className="col-span-2">
+          <Field
+            ref={amount}
+            id="amount"
+            name="amount"
+            inputMode="decimal"
+            label={t("amount")}
+            hint={t("amountHint")}
+            defaultValue={submitted(state, "amount")}
+            error={err("amount")}
+            required
+          />
+        </div>
       </div>
       <SelectField
         id="categoryId"

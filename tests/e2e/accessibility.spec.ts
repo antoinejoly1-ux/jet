@@ -1,10 +1,13 @@
 /**
  * Every main screen passes axe's WCAG 2.1 A and AA checks, on desktop and
- * phone, in light mode. Anything flagged fails the build.
+ * phone, and never scrolls sideways. Anything flagged fails the build.
  */
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { signIn } from "./support";
+
+// Each test audits a dozen pages or more, some with a live map loading tiles.
+test.describe.configure({ timeout: 120_000 });
 
 async function audit(page: Page, path: string) {
   await page.goto(path);
@@ -14,6 +17,11 @@ async function audit(page: Page, path: string) {
     (v) => `${path} ${v.id}: ${v.nodes.map((n) => n.target.join(" ")).join(", ")}`,
   );
   expect(problems, problems.join("\n")).toEqual([]);
+  // Nothing wider than the screen: a sideways-scrolling page is broken on a phone.
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  );
+  expect(overflow, `${path} is ${overflow}px wider than the screen`).toBeLessThanOrEqual(0);
 }
 
 test("public screens", async ({ page }) => {
@@ -41,12 +49,15 @@ test("admin screens", async ({ page }) => {
   for (const path of [
     "/admin",
     "/admin/owners",
+    "/admin/holding-companies",
     "/admin/aircraft",
     "/admin/flights",
     "/admin/flights/new",
+    "/admin/maintenance/new",
     "/admin/maintenance",
     "/admin/messages",
     "/admin/invoices",
+    "/admin/flight-reports",
     "/admin/transactions",
     "/admin/budgets",
     "/admin/imports",
@@ -59,8 +70,17 @@ test("admin screens", async ({ page }) => {
     await audit(page, path);
 });
 
-test("dark mode", async ({ page }) => {
-  await page.emulateMedia({ colorScheme: "dark" });
+test("pilot screens", async ({ page }) => {
+  await signIn(page, "pilote@jet.test");
+  await audit(page, "/pilot");
+  // The report form of the first flight to report.
+  await page.getByRole("link", { name: /→/ }).first().click();
+  await audit(page, new URL(page.url()).pathname);
+});
+
+test("dark mode", async ({ page, baseURL }) => {
+  // Light is the default; "Hangar Night" is chosen in Settings (a cookie).
+  await page.context().addCookies([{ name: "theme", value: "dark", url: baseURL! }]);
   await audit(page, "/sign-in");
   await signIn(page, "admin@jet.test");
   for (const path of ["/", "/availability", "/finances", "/messages", "/admin", "/admin/flights", "/admin/maintenance"])

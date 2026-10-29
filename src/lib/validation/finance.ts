@@ -41,7 +41,7 @@ export const invoiceInput = z.object({
   issuedOn: isoDate,
   dueOn: isoDate.optional().or(z.literal("").transform(() => undefined)),
   total: money.refine((c) => c > 0, "must_be_positive"),
-  currency: z.enum(["CAD", "USD"]),
+  currency: z.literal("CAD").default("CAD"),
   fileId: optionalUuid,
 });
 export type InvoiceInput = z.input<typeof invoiceInput>;
@@ -51,7 +51,7 @@ export const transactionInput = z.object({
   occurredOn: isoDate,
   kind: z.enum(["cost", "revenue", "payment"]),
   amount: money.refine((c) => c !== 0, "must_not_be_zero"),
-  currency: z.enum(["CAD", "USD"]),
+  currency: z.literal("CAD").default("CAD"),
   categoryId: optionalUuid,
   description: z
     .string()

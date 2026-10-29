@@ -18,6 +18,7 @@ import { formatHours, formatMoney } from "@/lib/format";
 import { getBudget, listBudgetStatuses } from "@/lib/services/budgets";
 import { listHours } from "@/lib/services/ledger";
 import { addHoursAction, copyBudgetAction, saveBudgetAction } from "./actions";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("budgets") };
@@ -36,7 +37,7 @@ export default async function BudgetsPage({ searchParams }: PageProps<"/admin/bu
       </>
     );
   }
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const sp = await searchParams;
   const thisYear = new Date().getFullYear();
@@ -73,7 +74,7 @@ export default async function BudgetsPage({ searchParams }: PageProps<"/admin/bu
       </form>
 
       {!selected ? (
-        <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+        <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
           {shares.map((s) => {
             const status = statuses.get(s.id);
             return (
@@ -137,7 +138,7 @@ async function SelectedShare({
   }));
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <Card>
         <div className="mb-4 flex flex-wrap items-center gap-3">
           <CardTitle className="text-text text-base">{t("budgetFor", { year })}</CardTitle>
@@ -147,7 +148,7 @@ async function SelectedShare({
           <span className="text-muted min-w-0 flex-1 text-sm">{label}</span>
           <DownloadLink href={`/admin/statements?share=${shareId}&year=${year}`}>{t("statementPdf")}</DownloadLink>
         </div>
-        <div className="mb-4 grid grid-cols-3 gap-3">
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             [t("planned"), view.totals.plannedCents],
             [t("spent"), view.totals.spentCents],
@@ -187,7 +188,7 @@ async function SelectedShare({
 
       <Card className="self-start">
         <CardTitle className="mb-1">{t("hoursTitle")}</CardTitle>
-        <p className="tabular mb-4 text-2xl font-bold tracking-tight">{formatHours(hours.balanceMinutes, locale)}</p>
+        <p className="tabular mb-4 text-3xl font-light tracking-tight">{formatHours(hours.balanceMinutes, locale)}</p>
         {canWrite ? <AddHoursForm action={addHoursAction.bind(null, shareId)} /> : null}
         <ol className="divide-border mt-4 divide-y text-sm">
           {hours.entries.slice(0, 12).map((e) => (

@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { auditActionKey } from "@/lib/audit-labels";
 import { cn } from "@/lib/utils";
 import { listAudit } from "@/lib/services/team";
 
@@ -21,6 +22,8 @@ const FILTERS = [
   "auth.",
   "owner.",
   "aircraft.",
+  "flight",
+  "maintenance.",
   "share.",
   "invoice.",
   "transaction.",
@@ -59,24 +62,25 @@ export default async function AuditPage({ searchParams }: PageProps<"/admin/sett
                 : "bg-surface text-muted hover:text-text",
             )}
           >
-            {t(`filter.${f ? f.slice(0, -1) : "all"}`)}
+            {t(`filter.${f ? f.replace(/\.$/, "") : "all"}`)}
           </Link>
         ))}
       </nav>
       {rows.length === 0 ? (
         <EmptyState icon={ScrollText} title={t("emptyTitle")} body={t("empty")} />
       ) : (
-        <ol className="border-border bg-surface divide-border divide-y rounded-lg border">
+        <ol className="bg-surface divide-border border-border divide-y rounded-lg border">
           {rows.map((r) => {
-            const key = `actions.${r.action.replace(/\./g, "_")}`;
+            const key = auditActionKey(r.action);
+            const entity = r.entityType ? `entities.${r.entityType}` : null;
             return (
               <li key={r.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-baseline sm:gap-4">
                 <span className="text-muted tabular shrink-0 text-xs sm:w-44">
-                  {format.dateTime(r.createdAt, { dateStyle: "medium", timeStyle: "medium" })}
+                  {format.dateTime(r.createdAt, { dateStyle: "medium", timeStyle: "short" })}
                 </span>
                 <span className="min-w-0 flex-1 text-sm">
                   <span className="font-semibold">{r.actorName ?? t("system")}</span> · {t.has(key) ? t(key) : r.action}
-                  {r.entityType ? <span className="text-muted"> · {r.entityType}</span> : null}
+                  {entity ? <span className="text-muted"> · {t.has(entity) ? t(entity) : r.entityType}</span> : null}
                 </span>
                 {r.ipAddress ? <span className="text-muted tabular text-xs">{r.ipAddress}</span> : null}
               </li>

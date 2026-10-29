@@ -1,12 +1,14 @@
 /**
- * Maintenance events. Planned → in progress → done, or cancelled. Starting
- * work puts the aircraft in maintenance; finishing or cancelling the last
- * open job makes it available again. Planned windows block availability.
+ * Maintenance events. Planned → in progress → in review (the work is checked
+ * and signed off) → done, or cancelled. Starting work puts the aircraft in
+ * maintenance, and it stays there through the review; finishing or
+ * cancelling the last open job makes it available again. Planned windows
+ * block availability.
  */
 import "server-only";
-import { and, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
-import { aircraft, maintenanceEvents, shares } from "@/lib/db/schema";
+import { aircraft, auditLog, maintenanceEvents, shares, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { maintenanceInput, type MaintenanceInput } from "@/lib/validation/operations";
 import { OPERATOR_TIME_ZONE } from "@/lib/time";
@@ -14,13 +16,15 @@ import { recordAudit } from "./audit";
 import { emit } from "./outbox";
 import { notifyOwnerMembers, sendPendingEmails, type PendingEmail } from "./owner-notifications";
 import { ConflictError, NotFoundError } from "./errors";
+import { localeTag } from "@/lib/locale";
 
 export type MaintenanceStatus = (typeof maintenanceEvents.$inferSelect)["status"];
 
 /** Which status each status may move to. */
 export const NEXT_STATUS: Record<MaintenanceStatus, readonly MaintenanceStatus[]> = {
   planned: ["in_progress", "cancelled"],
-  in_progress: ["done", "cancelled"],
+  in_progress: ["review", "done", "cancelled"],
+  review: ["done", "in_progress", "cancelled"],
   done: [],
   cancelled: [],
 };
@@ -29,6 +33,8 @@ const columns = {
   id: maintenanceEvents.id,
   aircraftId: maintenanceEvents.aircraftId,
   registration: aircraft.registration,
+  model: aircraft.model,
+  photoFileId: aircraft.photoFileId,
   type: maintenanceEvents.type,
   title: maintenanceEvents.title,
   dueOn: maintenanceEvents.dueOn,
@@ -52,7 +58,7 @@ export async function listMaintenance(db: Db, actor: Actor, opts: { aircraftId?:
     db.select(columns).from(maintenanceEvents).innerJoin(aircraft, eq(aircraft.id, maintenanceEvents.aircraftId));
   const [open, closed] = await Promise.all([
     q()
-      .where(and(scope, inArray(maintenanceEvents.status, ["planned", "in_progress"])))
+      .where(and(scope, inArray(maintenanceEvents.status, ["planned", "in_progress", "review"])))
       .orderBy(soonestFirst),
     q()
       .where(and(scope, inArray(maintenanceEvents.status, ["done", "cancelled"])))
@@ -99,24 +105,26 @@ export async function planMaintenance(db: Db, actor: Actor, raw: MaintenanceInpu
       endsAt: row.endsAt?.toISOString() ?? null,
       dueOn: row.dueOn,
     });
-    // Owners hear about work that will take their aircraft out of service.
+    // Owners hear when their aircraft will be out of service, not what the work is.
     const emails: PendingEmail[] = [];
     if (input.startsAt) {
       const holders = await tx
         .selectDistinct({ ownerId: shares.ownerId })
         .from(shares)
         .where(and(eq(shares.aircraftId, input.aircraftId), activeShare()));
-      const when = new Intl.DateTimeFormat("fr-CA", {
-        timeZone: OPERATOR_TIME_ZONE,
-        dateStyle: "long",
-      }).format(input.startsAt);
+      const startsAt = input.startsAt;
+      // Each owner reads the date in their own language.
+      const when = (locale: "fr" | "en") =>
+        new Intl.DateTimeFormat(localeTag(locale), { timeZone: OPERATOR_TIME_ZONE, dateStyle: "long" }).format(
+          startsAt,
+        );
       for (const h of holders)
         emails.push(
           ...(await notifyOwnerMembers(
             tx,
             h.ownerId,
             "maintenance.planned",
-            { aircraft: plane.registration, title: input.title, when },
+            (locale) => ({ aircraft: plane.registration, when: when(locale) }),
             { template: "maintenancePlanned", path: "/aircraft" },
           )),
         );
@@ -154,6 +162,7 @@ export async function setMaintenanceStatus(db: Db, actor: Actor, id: string, sta
   authorize(actor, "operations:write");
   return db.transaction(async (tx) => {
     const before = await lock(tx, id);
+    if (before.status === "review" && status === "done") await assertSecondPair(tx, actor, id);
     const row = await applyMaintenanceStatus(tx, before, status);
     await recordAudit(tx, {
       actorUserId: actor.id,
@@ -165,6 +174,61 @@ export async function setMaintenanceStatus(db: Db, actor: Actor, id: string, sta
     });
     return row;
   });
+}
+
+/**
+ * Four eyes: whoever sent the work to review doesn't approve it too, unless
+ * nobody else on the team could (no other admin, finance or dispatch login).
+ */
+async function assertSecondPair(tx: Tx, actor: Actor, id: string) {
+  const [sent] = await tx
+    .select({ by: auditLog.actorUserId })
+    .from(auditLog)
+    .where(
+      and(
+        eq(auditLog.entityType, "maintenance"),
+        eq(auditLog.entityId, id),
+        eq(auditLog.action, "maintenance.status"),
+        sql`${auditLog.after}->>'status' = 'review'`,
+      ),
+    )
+    .orderBy(desc(auditLog.createdAt))
+    .limit(1);
+  if (sent?.by !== actor.id) return;
+  const [other] = await tx
+    .select({ id: user.id })
+    .from(user)
+    .where(and(inArray(user.staffRole, ["admin", "finance", "dispatcher"]), ne(user.id, actor.id)))
+    .limit(1);
+  if (other) throw new ConflictError("maintenance_self_review");
+}
+
+/**
+ * The jobs in review that this person sent there themselves, and so can't
+ * approve (someone else on the team can): the board shows them as waiting.
+ */
+export async function sentToReviewByMe(db: Db, actor: Actor, ids: string[]) {
+  authorize(actor, "fleet:read");
+  if (!ids.length) return new Set<string>();
+  const [other] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(and(inArray(user.staffRole, ["admin", "finance", "dispatcher"]), ne(user.id, actor.id)))
+    .limit(1);
+  if (!other) return new Set<string>();
+  const rows = await db
+    .selectDistinctOn([auditLog.entityId], { id: auditLog.entityId, by: auditLog.actorUserId })
+    .from(auditLog)
+    .where(
+      and(
+        eq(auditLog.entityType, "maintenance"),
+        inArray(auditLog.entityId, ids),
+        eq(auditLog.action, "maintenance.status"),
+        sql`${auditLog.after}->>'status' = 'review'`,
+      ),
+    )
+    .orderBy(auditLog.entityId, desc(auditLog.createdAt));
+  return new Set(rows.filter((r) => r.by === actor.id).map((r) => r.id));
 }
 
 async function lock(tx: Tx, id: string) {
@@ -209,7 +273,9 @@ export async function syncAircraftStatus(tx: Tx, aircraftId: string) {
   const [open] = await tx
     .select({ id: maintenanceEvents.id })
     .from(maintenanceEvents)
-    .where(and(eq(maintenanceEvents.aircraftId, aircraftId), eq(maintenanceEvents.status, "in_progress")))
+    .where(
+      and(eq(maintenanceEvents.aircraftId, aircraftId), inArray(maintenanceEvents.status, ["in_progress", "review"])),
+    )
     .limit(1);
   if (open && plane.status !== "maintenance")
     await tx.update(aircraft).set({ status: "maintenance" }).where(eq(aircraft.id, aircraftId));

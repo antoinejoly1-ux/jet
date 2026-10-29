@@ -6,7 +6,7 @@ import { haveIBeenPwned, magicLink, twoFactor } from "better-auth/plugins";
 import { v7 as uuidv7 } from "uuid";
 import { db } from "@/lib/db";
 import { account, rateLimit, session, twoFactor as twoFactorTable, user, verification } from "@/lib/db/schema";
-import { actionEmail } from "@/lib/email/templates";
+import { actionEmail, firstNameOf } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
 import { env, googleEnabled } from "@/lib/env";
 import { recordAudit } from "@/lib/services/audit";
@@ -16,7 +16,7 @@ import { notifyAdminsOfUninvitedSignUp } from "@/lib/services/notifications";
 const asLocale = (value: unknown) => (value === "en" ? "en" : "fr");
 
 export const auth = betterAuth({
-  appName: "Jet",
+  appName: "Univair Management",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {
@@ -30,6 +30,7 @@ export const auth = betterAuth({
     additionalFields: {
       staffRole: { type: "string", required: false, input: false },
       locale: { type: "string", required: false, defaultValue: "fr", input: false },
+      onboardedAt: { type: "date", required: false, input: false },
     },
   },
   session: {
@@ -43,14 +44,24 @@ export const auth = betterAuth({
     maxPasswordLength: 128,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail(actionEmail("reset", user.email, url, asLocale((user as { locale?: string }).locale)));
+      await sendEmail(
+        actionEmail("reset", user.email, url, asLocale((user as { locale?: string }).locale), {
+          firstName: firstNameOf(user.name),
+        }),
+      );
     },
   },
   emailVerification: {
     sendOnSignUp: true,
+    // Signing in before confirming sends a fresh link: the sign-in screen says so.
+    sendOnSignIn: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail(actionEmail("verify", user.email, url, asLocale((user as { locale?: string }).locale)));
+      await sendEmail(
+        actionEmail("verify", user.email, url, asLocale((user as { locale?: string }).locale), {
+          firstName: firstNameOf(user.name),
+        }),
+      );
     },
   },
   socialProviders: googleEnabled
@@ -113,7 +124,7 @@ export const auth = betterAuth({
       },
     }),
     // Authenticator-app 2FA. Passwordless users (Google, magic link) can enable it too.
-    twoFactor({ issuer: "Jet", allowPasswordless: true }),
+    twoFactor({ issuer: "Univair", allowPasswordless: true }),
     // The plugin above only challenges password sign-ins; this covers magic links,
     // Google and email verification, so 2FA can't be skipped by changing method.
     secondFactorEverywhere(),

@@ -4,4 +4,5 @@ export * from "./owners";
 export * from "./fleet";
 export * from "./finance";
 export * from "./platform";
+export * from "./billing";
 export * from "./relations";

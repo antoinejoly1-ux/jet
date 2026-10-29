@@ -1,11 +1,11 @@
 /**
  * Flights. A flight is scheduled, then completed or cancelled. Completing it
- * deducts its block time from the share's hours in the same transaction;
+ * deducts its flight time from the share's hours in the same transaction;
  * cancelling a completed flight gives those hours back with a reversing
  * entry, so the hour ledger stays append-only.
  */
 import "server-only";
-import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 import type { Db, Tx } from "@/lib/db";
 import { aircraft, flights, hourLedger, owners, shares } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
@@ -18,7 +18,10 @@ import {
 import { recordAudit } from "./audit";
 import { emit } from "./outbox";
 import { alertIfHoursLow } from "./hour-alerts";
-import { sendPendingEmails } from "./owner-notifications";
+import { notifyOwnerMembers, sendPendingEmails, type PendingEmail } from "./owner-notifications";
+import { markFlightRequestScheduled } from "./flight-requests";
+import { localeTag } from "@/lib/locale";
+import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { ConflictError, NotFoundError } from "./errors";
 
 type Flight = typeof flights.$inferSelect;
@@ -33,7 +36,7 @@ const columns = {
   toAirport: flights.toAirport,
   departsAt: flights.departsAt,
   arrivesAt: flights.arrivesAt,
-  blockMinutes: flights.blockMinutes,
+  flightMinutes: flights.flightMinutes,
   status: flights.status,
   source: flights.source,
 };
@@ -50,21 +53,35 @@ const base = (db: Db) =>
 export async function listFlights(
   db: Db,
   actor: Actor,
-  opts: { from: Date; to: Date; aircraftId?: string; status?: string },
+  opts: {
+    from?: Date;
+    to: Date;
+    aircraftId?: string;
+    status?: string;
+    /** Newest first (the "Passés" list, a page at a time). */
+    latestFirst?: boolean;
+    limit?: number;
+  },
 ) {
   authorize(actor, "fleet:read");
-  const filters: SQL[] = [gte(flights.departsAt, opts.from), lt(flights.departsAt, opts.to)];
+  const filters: SQL[] = [lt(flights.departsAt, opts.to)];
+  if (opts.from) filters.push(gte(flights.departsAt, opts.from));
   if (opts.aircraftId) filters.push(eq(flights.aircraftId, opts.aircraftId));
   if (opts.status === "scheduled" || opts.status === "completed" || opts.status === "cancelled")
     filters.push(eq(flights.status, opts.status));
   return base(db)
     .where(and(...filters))
-    .orderBy(asc(flights.departsAt))
-    .limit(1000);
+    .orderBy(opts.latestFirst ? desc(flights.departsAt) : asc(flights.departsAt))
+    .limit(Math.min(opts.limit ?? 1000, 1000));
 }
 
 export async function getFlight(db: Db, actor: Actor, id: string) {
   authorize(actor, "fleet:read");
+  return getFlightUnchecked(db, id);
+}
+
+/** For services that already checked the actor may see this flight (an owner's own). */
+export async function getFlightUnchecked(db: Db, id: string) {
   const [row] = await base(db).where(eq(flights.id, id));
   if (!row) throw new NotFoundError("flight");
   return row;
@@ -76,12 +93,15 @@ export async function listOwnerFlights(db: Db, actor: Actor) {
   authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
   const mine = and(inArray(shares.ownerId, [...actor.ownerIds]), isNull(aircraft.deletedAt));
   const now = new Date();
+  // A flight in the air is still "upcoming" for its owner until it lands.
+  const inProgress = sql`${flights.status} = 'scheduled' and ${flights.departsAt} < ${now}
+    and coalesce(${flights.arrivesAt}, ${flights.departsAt} + interval '2 hours') > ${now}`;
   const [upcoming, past] = await Promise.all([
     base(db)
-      .where(and(mine, gte(flights.departsAt, now)))
+      .where(and(mine, or(gte(flights.departsAt, now), inProgress)))
       .orderBy(asc(flights.departsAt)),
     base(db)
-      .where(and(mine, lt(flights.departsAt, now)))
+      .where(and(mine, lt(flights.departsAt, now), sql`not (${inProgress})`))
       .orderBy(desc(flights.departsAt))
       .limit(200),
   ]);
@@ -105,10 +125,14 @@ async function assertAircraftAndShare(tx: Tx, aircraftId: string, shareId: strin
   if (share.endsOn && share.endsOn <= at.toISOString().slice(0, 10)) throw new ConflictError("share_ended");
 }
 
-export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput) {
+/**
+ * Puts a flight on the schedule. Planned from an owner's request, it closes
+ * that request and tells the owner's logins their flight is confirmed.
+ */
+export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput, opts: { requestId?: string } = {}) {
   authorize(actor, "operations:write");
   const input = flightInput.parse(raw);
-  return db.transaction(async (tx) => {
+  const { row, emails } = await db.transaction(async (tx) => {
     await assertAircraftAndShare(tx, input.aircraftId, input.shareId, input.departsAt);
     const [row] = await tx.insert(flights).values(input).returning();
     await recordAudit(tx, {
@@ -116,11 +140,44 @@ export async function scheduleFlight(db: Db, actor: Actor, raw: FlightInput) {
       action: "flight.schedule",
       entityType: "flight",
       entityId: row.id,
-      after: input,
+      after: { ...input, requestId: opts.requestId },
     });
     await emit(tx, "flight.scheduled", flightPayload(row));
-    return row;
+    const emails: PendingEmail[] = [];
+    if (opts.requestId) {
+      await markFlightRequestScheduled(tx, opts.requestId, row.id);
+      const [share] = input.shareId
+        ? await tx.select({ ownerId: shares.ownerId }).from(shares).where(eq(shares.id, input.shareId))
+        : [];
+      const [plane] = await tx
+        .select({ registration: aircraft.registration })
+        .from(aircraft)
+        .where(eq(aircraft.id, input.aircraftId));
+      if (share)
+        emails.push(
+          ...(await notifyOwnerMembers(
+            tx,
+            share.ownerId,
+            "flight.confirmed",
+            (locale) => ({
+              aircraft: plane?.registration ?? "",
+              route: `${row.fromAirport} → ${row.toAirport}`,
+              when: new Intl.DateTimeFormat(localeTag(locale), {
+                timeZone: OPERATOR_TIME_ZONE,
+                day: "numeric",
+                month: "long",
+                hour: "numeric",
+                minute: "2-digit",
+              }).format(row.departsAt),
+            }),
+            { template: "flightConfirmed", path: "/flights" },
+          )),
+        );
+    }
+    return { row, emails };
   });
+  await sendPendingEmails(db, emails);
+  return row;
 }
 
 /** Changes a scheduled flight. Completed and cancelled flights are history and can't be edited. */
@@ -151,15 +208,15 @@ export async function completeFlight(db: Db, actor: Actor, id: string, raw: Comp
     const flight = await lockFlight(tx, id);
     // Guards against completing the wrong row; the scheduling sync trusts the vendor instead.
     if (flight.status === "scheduled" && flight.departsAt > new Date()) throw new ConflictError("flight_not_departed");
-    const row = await applyCompletion(tx, flight, input.blockTime, input.arrivesAt, actor.id);
+    const row = await applyCompletion(tx, flight, input.flightTime, input.arrivesAt, actor.id);
     await recordAudit(tx, {
       actorUserId: actor.id,
       action: "flight.complete",
       entityType: "flight",
       entityId: id,
-      after: { blockMinutes: input.blockTime },
+      after: { flightMinutes: input.flightTime },
     });
-    const emails = flight.shareId ? await alertIfHoursLow(tx, flight.shareId, input.blockTime) : [];
+    const emails = flight.shareId ? await alertIfHoursLow(tx, flight.shareId, input.flightTime) : [];
     return { row, emails };
   });
   await sendPendingEmails(db, emails);
@@ -176,7 +233,7 @@ export async function cancelFlight(db: Db, actor: Actor, id: string, reason: str
       action: "flight.cancel",
       entityType: "flight",
       entityId: id,
-      before: { status: flight.status, blockMinutes: flight.blockMinutes },
+      before: { status: flight.status, flightMinutes: flight.flightMinutes },
       after: { reason: reason.trim() || null },
     });
     return row;
@@ -191,7 +248,7 @@ const flightPayload = (f: Flight) => ({
   toAirport: f.toAirport,
   departsAt: f.departsAt.toISOString(),
   arrivesAt: f.arrivesAt?.toISOString() ?? null,
-  blockMinutes: f.blockMinutes,
+  flightMinutes: f.flightMinutes,
   status: f.status,
 });
 
@@ -202,22 +259,22 @@ export async function lockFlight(tx: Tx, id: string): Promise<Flight> {
 }
 
 /**
- * Marks a locked, scheduled flight completed and deducts its block time from
+ * Marks a locked, scheduled flight completed and deducts its flight time from
  * the share's hours. Shared by the dispatcher's form and the scheduling sync.
  */
 export async function applyCompletion(
   tx: Tx,
   flight: Flight,
-  blockMinutes: number,
+  flightMinutes: number,
   arrivesAt: Date | null,
   actorUserId: string | null,
 ): Promise<Flight> {
   if (flight.status !== "scheduled") throw new ConflictError("flight_not_scheduled");
-  const arrival = arrivesAt ?? flight.arrivesAt ?? new Date(flight.departsAt.getTime() + blockMinutes * 60_000);
+  const arrival = arrivesAt ?? flight.arrivesAt ?? new Date(flight.departsAt.getTime() + flightMinutes * 60_000);
   if (arrival <= flight.departsAt) throw new ConflictError("arrival_before_departure");
   const [row] = await tx
     .update(flights)
-    .set({ status: "completed", blockMinutes, arrivesAt: arrival })
+    .set({ status: "completed", flightMinutes, arrivesAt: arrival })
     .where(eq(flights.id, flight.id))
     .returning();
   await emit(tx, "flight.completed", flightPayload(row!));
@@ -225,7 +282,7 @@ export async function applyCompletion(
     await tx.insert(hourLedger).values({
       shareId: flight.shareId,
       kind: "flight",
-      minutes: -blockMinutes,
+      minutes: -flightMinutes,
       flightId: flight.id,
       createdByUserId: actorUserId,
     });

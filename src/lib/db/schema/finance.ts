@@ -6,10 +6,12 @@
 import { sql } from "drizzle-orm";
 import {
   bigint,
+  boolean,
   check,
   date,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -21,6 +23,15 @@ import { createdAt, currency, dataSource, id, timestamps } from "./_shared";
 import { user } from "./auth";
 import { flights, shares } from "./fleet";
 import { files } from "./platform";
+import { holdingCompanies } from "./owners";
+
+export type InvoiceIssuer = {
+  legalName: string;
+  address: string | null;
+  gstNumber: string | null;
+  qstNumber: string | null;
+  paymentInstructions: string | null;
+};
 
 export const hourEntryKind = pgEnum("hour_entry_kind", ["purchase", "flight", "adjustment"]);
 export const budgetStatus = pgEnum("budget_status", ["draft", "published"]);
@@ -124,9 +135,23 @@ export const invoices = pgTable(
     currency: currency("currency").notNull().default("CAD"),
     status: invoiceStatus("status").notNull().default("issued"),
     voidReason: text("void_reason"),
+    /** The day it was voided (operator's time zone): the date of every reversing entry it made. */
+    voidedOn: date("voided_on"),
+    /** When finance recorded the payment, and how (cheque number, transfer reference…). */
+    paidOn: date("paid_on"),
+    paymentReference: text("payment_reference"),
+    /** Zero-rated international flight: issued without GST/QST, as finance decided when issuing. */
+    zeroRated: boolean("zero_rated").notNull().default(false),
     fileId: uuid("file_id").references(() => files.id, { onDelete: "restrict" }),
     source: dataSource("source").notNull().default("manual"),
     accountingId: text("accounting_id"),
+    /** Set on invoices the portal generates: the company that issues them, and the breakdown. */
+    holdingCompanyId: uuid("holding_company_id").references(() => holdingCompanies.id, { onDelete: "restrict" }),
+    subtotalCents: bigint("subtotal_cents", { mode: "number" }),
+    gstCents: bigint("gst_cents", { mode: "number" }),
+    qstCents: bigint("qst_cents", { mode: "number" }),
+    /** The issuer as printed on the day, so the invoice never changes after the company's profile does. */
+    issuer: jsonb("issuer").$type<InvoiceIssuer>(),
     ...timestamps(),
   },
   (t) => [

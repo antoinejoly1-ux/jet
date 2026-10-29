@@ -1,26 +1,56 @@
 import { sql } from "drizzle-orm";
-import { check, date, index, integer, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  date,
+  doublePrecision,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  type AnyPgColumn,
+} from "drizzle-orm/pg-core";
 import { dataSource, deletedAt, id, timestamps } from "./_shared";
-import { owners } from "./owners";
+import { holdingCompanies, owners } from "./owners";
+import { files } from "./platform";
 
 export const aircraftStatus = pgEnum("aircraft_status", ["available", "flying", "maintenance", "inactive"]);
 export const flightStatus = pgEnum("flight_status", ["scheduled", "completed", "cancelled"]);
 export const availabilityKind = pgEnum("availability_kind", ["available", "booked", "maintenance"]);
-export const maintenanceStatus = pgEnum("maintenance_status", ["planned", "in_progress", "done", "cancelled"]);
+/** planned → in_progress → review (work signed off) → done, or cancelled. */
+export const maintenanceStatus = pgEnum("maintenance_status", [
+  "planned",
+  "in_progress",
+  "review",
+  "done",
+  "cancelled",
+]);
 
-export const aircraft = pgTable("aircraft", {
-  id: id(),
-  /** Registration mark, e.g. C-GJET. */
-  registration: text("registration").notNull().unique(),
-  model: text("model").notNull(),
-  serialNumber: text("serial_number"),
-  homeBase: text("home_base"),
-  status: aircraftStatus("status").notNull().default("available"),
-  /** ICAO 24-bit address (hex), used by flight-tracking providers. */
-  icaoHex: text("icao_hex"),
-  ...timestamps(),
-  deletedAt: deletedAt(),
-});
+export const aircraft = pgTable(
+  "aircraft",
+  {
+    id: id(),
+    /** Registration mark, e.g. C-GJET. */
+    registration: text("registration").notNull().unique(),
+    model: text("model").notNull(),
+    serialNumber: text("serial_number"),
+    homeBase: text("home_base"),
+    status: aircraftStatus("status").notNull().default("available"),
+    /** ICAO 24-bit address (hex), used by flight-tracking providers. */
+    icaoHex: text("icao_hex"),
+    /** The company that owns it; null while unknown or for an aircraft Univair only operates. */
+    holdingCompanyId: uuid("holding_company_id").references(() => holdingCompanies.id, { onDelete: "restrict" }),
+    /** Its own photo, uploaded by the team; until then, the model's. */
+    photoFileId: uuid("photo_file_id").references((): AnyPgColumn => files.id, { onDelete: "set null" }),
+    ...timestamps(),
+    deletedAt: deletedAt(),
+  },
+  (t) => [index("aircraft_holding_company_id_idx").on(t.holdingCompanyId)],
+);
 
 /** An owner's stake in an aircraft. Percentages are basis points: 2500 = 25%. */
 export const shares = pgTable(
@@ -46,6 +76,31 @@ export const shares = pgTable(
   ],
 );
 
+/**
+ * The latest known position of each aircraft, from the tracking provider.
+ * Kept when the transponder goes quiet, so a parked aircraft still shows
+ * where it was last seen. `fetchedAt` paces calls to the provider. This is
+ * telemetry, refreshed every few seconds, so it isn't audited.
+ */
+export const aircraftPositions = pgTable("aircraft_positions", {
+  aircraftId: uuid("aircraft_id")
+    .primaryKey()
+    .references(() => aircraft.id, { onDelete: "cascade" }),
+  lat: doublePrecision("lat"),
+  lon: doublePrecision("lon"),
+  altitudeFt: integer("altitude_ft"),
+  groundSpeedKt: integer("ground_speed_kt"),
+  headingDeg: integer("heading_deg"),
+  onGround: boolean("on_ground"),
+  callsign: text("callsign"),
+  origin: text("origin"),
+  destination: text("destination"),
+  eta: timestamp("eta", { withTimezone: true }),
+  source: text("source"),
+  seenAt: timestamp("seen_at", { withTimezone: true }),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull(),
+});
+
 export const flights = pgTable(
   "flights",
   {
@@ -59,7 +114,7 @@ export const flights = pgTable(
     toAirport: text("to_airport").notNull(),
     departsAt: timestamp("departs_at", { withTimezone: true }).notNull(),
     arrivesAt: timestamp("arrives_at", { withTimezone: true }),
-    blockMinutes: integer("block_minutes"),
+    flightMinutes: integer("flight_minutes"),
     status: flightStatus("status").notNull().default("scheduled"),
     source: dataSource("source").notNull().default("manual"),
     externalId: text("external_id"),

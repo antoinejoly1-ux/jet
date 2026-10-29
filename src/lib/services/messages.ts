@@ -8,7 +8,16 @@ import { and, asc, count, desc, eq, inArray, isNotNull, isNull, or, sql } from "
 import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import type { Db, Tx } from "@/lib/db";
-import { conversations, files, messages, notifications, ownerMembers, owners, user } from "@/lib/db/schema";
+import {
+  conversations,
+  files,
+  messages,
+  notifications,
+  ownerMembers,
+  owners,
+  user,
+  type MessageMeta,
+} from "@/lib/db/schema";
 import { authorize, can, type Actor } from "@/lib/auth/policy";
 import { recordAudit } from "./audit";
 import { ConflictError, NotFoundError } from "./errors";
@@ -42,6 +51,7 @@ const threadColumns = {
   fromStaff: sql<boolean>`${sender.staffRole} is not null`,
   attachmentFileId: messages.attachmentFileId,
   attachmentName: files.originalName,
+  meta: messages.meta,
 };
 
 async function readThread(db: Db, conversationId: string) {
@@ -76,7 +86,8 @@ async function assertOwnAttachment(tx: Tx, actor: Actor, fileId: string | undefi
 
 /** The owner's thread with dispatch. Opening it marks dispatch's messages read, unless staff are only viewing as. */
 export async function getOwnerThread(db: Db, actor: Actor, ownerId: string, { markRead = true } = {}) {
-  authorize(actor, "messages:send", { ownerIds: [ownerId] });
+  // Reading is open to every member; read-only members just can't write.
+  authorize(actor, "owners:read", { ownerIds: [ownerId] });
   const [conversation] = await db.select().from(conversations).where(eq(conversations.ownerId, ownerId));
   if (!conversation) return { conversationId: null, messages: [] };
   if (markRead) await markRead_(db, conversation.id, "staff");
@@ -88,59 +99,78 @@ export async function sendOwnerMessage(db: Db, actor: Actor, ownerId: string, ra
   const input = parse(raw);
   return db.transaction(async (tx) => {
     await assertOwnAttachment(tx, actor, input.attachmentFileId);
-    const conversation = await conversationFor(tx, ownerId);
-    const [message] = await tx
-      .insert(messages)
-      .values({
-        conversationId: conversation.id,
-        senderUserId: actor.id,
-        body: input.body,
-        attachmentFileId: input.attachmentFileId ?? null,
-      })
-      .returning();
-    if (conversation.resolvedAt)
-      await tx.update(conversations).set({ resolvedAt: null }).where(eq(conversations.id, conversation.id));
-    else await tx.update(conversations).set({ updatedAt: new Date() }).where(eq(conversations.id, conversation.id));
-
-    // The assigned dispatcher hears about it; with nobody assigned, everyone who can answer does.
-    const [owner] = await tx.select({ name: owners.legalName }).from(owners).where(eq(owners.id, ownerId));
-    const recipients = conversation.assignedToUserId
-      ? [{ id: conversation.assignedToUserId }]
-      : await tx
-          .select({ id: user.id })
-          .from(user)
-          .where(inArray(user.staffRole, ["admin", "dispatcher"]));
-    if (recipients.length)
-      await tx.insert(notifications).values(
-        recipients.map((r) => ({
-          userId: r.id,
-          type: "message.from_owner",
-          data: {
-            conversationId: conversation.id,
-            messageId: message!.id,
-            ownerName: owner?.name ?? "",
-            preview: preview(input.body),
-          },
-        })),
-      );
-    return message!;
+    return postOwnerMessage(tx, actor, ownerId, { body: input.body, attachmentFileId: input.attachmentFileId });
   });
+}
+
+/**
+ * Writes an owner's message in their thread (reopening it if resolved) and
+ * tells dispatch. The caller has already authorized and runs the transaction.
+ */
+export async function postOwnerMessage(
+  tx: Tx,
+  actor: Actor,
+  ownerId: string,
+  content: { body: string; attachmentFileId?: string; meta?: MessageMeta },
+) {
+  const conversation = await conversationFor(tx, ownerId);
+  const [message] = await tx
+    .insert(messages)
+    .values({
+      conversationId: conversation.id,
+      senderUserId: actor.id,
+      body: content.body,
+      attachmentFileId: content.attachmentFileId ?? null,
+      meta: content.meta ?? null,
+    })
+    .returning();
+  if (conversation.resolvedAt)
+    await tx.update(conversations).set({ resolvedAt: null }).where(eq(conversations.id, conversation.id));
+  else await tx.update(conversations).set({ updatedAt: new Date() }).where(eq(conversations.id, conversation.id));
+
+  // The assigned dispatcher hears about it; with nobody assigned, everyone who can answer does.
+  const [owner] = await tx.select({ name: owners.legalName }).from(owners).where(eq(owners.id, ownerId));
+  const recipients = conversation.assignedToUserId
+    ? [{ id: conversation.assignedToUserId }]
+    : await tx
+        .select({ id: user.id })
+        .from(user)
+        .where(inArray(user.staffRole, ["admin", "dispatcher"]));
+  if (recipients.length)
+    await tx.insert(notifications).values(
+      recipients.map((r) => ({
+        userId: r.id,
+        type: "message.from_owner",
+        data: {
+          conversationId: conversation.id,
+          messageId: message!.id,
+          ownerName: owner?.name ?? "",
+          preview: preview(content.body),
+        },
+      })),
+    );
+  return message!;
 }
 
 /* ---------- Staff side ---------- */
 
-export type InboxFilter = "open" | "mine" | "resolved";
+export type InboxFilter = "waiting" | "open" | "mine" | "resolved";
 
 /** Conversations for the back office, most recent activity first, with unread counts. */
-export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "open") {
+export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "waiting") {
   authorize(actor, "messages:reply");
   const assignee = alias(user, "assignee");
+  // "En attente": open threads whose latest message is the owner's, i.e. someone is waiting for us.
+  const ownerWrote = sql`(select u.staff_role from messages m left join users u on u.id = m.sender_user_id
+    where m.conversation_id = ${conversations.id} order by m.created_at desc limit 1) is null`;
   const where =
     filter === "resolved"
       ? isNotNull(conversations.resolvedAt)
       : filter === "mine"
         ? and(isNull(conversations.resolvedAt), eq(conversations.assignedToUserId, actor.id))
-        : isNull(conversations.resolvedAt);
+        : filter === "waiting"
+          ? and(isNull(conversations.resolvedAt), ownerWrote)
+          : isNull(conversations.resolvedAt);
   const lastAt = sql<Date | null>`(select max(m.created_at) from messages m where m.conversation_id = ${conversations.id})`;
   return (
     db
@@ -148,6 +178,8 @@ export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "ope
         id: conversations.id,
         ownerId: conversations.ownerId,
         ownerName: owners.legalName,
+        ownerImage: sql<string | null>`(select u.image from owner_members m join users u on u.id = m.user_id
+          where m.owner_id = ${owners.id} and u.image is not null order by (m.role = 'owner') desc limit 1)`,
         assignedToUserId: conversations.assignedToUserId,
         assignedToName: assignee.name,
         resolvedAt: conversations.resolvedAt,
@@ -163,7 +195,8 @@ export async function listInbox(db: Db, actor: Actor, filter: InboxFilter = "ope
       .leftJoin(assignee, eq(assignee.id, conversations.assignedToUserId))
       // Threads opened from an owner's page but never written in stay out of the inbox.
       .where(and(where, sql`${lastAt} is not null`))
-      .orderBy(desc(lastAt))
+      // Waiting: longest wait first. Everything else: latest activity first.
+      .orderBy(filter === "waiting" ? asc(lastAt) : desc(lastAt))
       .limit(200)
   );
 }

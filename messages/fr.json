@@ -6,12 +6,12 @@
       "operations": "Opérations",
       "clients": "Clients",
       "finance": "Finances",
-      "settings": "Réglages"
+      "settings": "Paramètres"
     },
     "items": {
       "home": "Accueil",
       "flights": "Vols",
-      "availability": "Disponibilité",
+      "availability": "Calendrier",
       "finances": "Finances",
       "invoices": "Factures",
       "aircraft": "Appareils",
@@ -23,12 +23,24 @@
       "budgets": "Budgets",
       "transactions": "Transactions",
       "imports": "Importations",
-      "settings": "Réglages"
+      "settings": "Paramètres",
+      "holdingCompanies": "Sociétés",
+      "flightReports": "Rapports de vol",
+      "billing": "Facturation"
     },
     "tabs": {
-      "dashboard": "Tableau"
+      "dashboard": "Tableau",
+      "availability": "Calendrier",
+      "request": "Demander",
+      "owners": "Clients"
     },
-    "unread": "{count, plural, one {# non lu} other {# non lus}}"
+    "unread": "{count, plural, one {# non lu} other {# non lus}}",
+    "fabCall": "Appeler l'équipe",
+    "fabNewFlight": "Planifier un vol",
+    "fabRequest": "Demander un vol",
+    "expand": "Afficher les libellés",
+    "collapse": "Réduire",
+    "pending": "{count, plural, one {# à traiter} other {# à traiter}}"
   },
   "toggle": {
     "label": "Changer de vue",
@@ -38,7 +50,8 @@
   "userMenu": {
     "open": "Ouvrir le menu du compte",
     "account": "Mon compte",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "tour": "Revoir la visite"
   },
   "comingSoon": {
     "title": "Cet écran arrive bientôt",
@@ -46,7 +59,7 @@
   },
   "auth": {
     "signInTitle": "Connexion",
-    "signInSubtitle": "Accédez à votre portail de propriétaire.",
+    "signInSubtitle": "Content de vous revoir. Connectez-vous pour suivre votre appareil, vos vols et vos factures.",
     "or": "ou",
     "email": "Courriel",
     "password": "Mot de passe",
@@ -55,12 +68,12 @@
     "signIn": "Se connecter",
     "sending": "Envoi…",
     "emailMeALink": "M'envoyer un lien de connexion",
-    "noAccount": "Pas encore de compte?",
-    "createAccount": "Créer un compte",
+    "noAccount": "Vous avez reçu une invitation d'Univair?",
+    "createAccount": "Créer mon compte",
     "magicLinkSent": "Un lien de connexion a été envoyé à {email}.",
     "continueWithGoogle": "Continuer avec Google",
-    "signUpTitle": "Créer un compte",
-    "signUpSubtitle": "Votre accès sera activé dès que votre invitation est liée au compte.",
+    "signUpTitle": "Créer votre compte",
+    "signUpSubtitle": "Le portail est réservé aux propriétaires et à l'équipe d'Univair.",
     "name": "Nom complet",
     "passwordHint": "Au moins 10 caractères.",
     "creating": "Création…",
@@ -78,21 +91,39 @@
     "saving": "Enregistrement…",
     "savePassword": "Enregistrer",
     "errors": {
-      "unverified": "Confirmez d'abord votre adresse courriel : un nouveau lien vous a été envoyé.",
+      "unverified": "Confirmez d'abord votre adresse courriel : un nouveau lien vous a été envoyé.",
       "invalidCredentials": "Courriel ou mot de passe incorrect.",
       "emailRequired": "Entrez votre courriel.",
       "generic": "Une erreur est survenue. Réessayez.",
       "passwordTooShort": "Le mot de passe doit contenir au moins 10 caractères.",
       "emailTaken": "Un compte existe déjà pour ce courriel. Connectez-vous plutôt.",
-      "invalidLink": "Ce lien est invalide ou expiré. Demandez-en un nouveau."
-    }
+      "invalidLink": "Ce lien est invalide ou expiré. Demandez-en un nouveau.",
+      "fillBoth": "Entrez votre courriel et votre mot de passe.",
+      "fillAll": "Entrez votre nom et votre courriel.",
+      "linkUsed": "Ce lien a déjà servi ou a expiré. Demandez-en un nouveau ci-dessous.",
+      "linkExpired": "Ce lien a déjà servi ou a expiré. Connectez-vous ci-dessous; au besoin, nous vous enverrons un nouveau lien de confirmation."
+    },
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "magicLinkHint": "Pas de mot de passe à retenir : on vous envoie un lien qui vous connecte d'un clic.",
+    "signUpSubtitleInvited": "Choisissez un mot de passe. Votre invitation sera liée à ce compte dès que vous aurez confirmé votre courriel.",
+    "inviteOnlyTitle": "L'accès se fait sur invitation",
+    "inviteOnlyBody": "Utilisez le courriel où vous avez reçu votre invitation. Sans invitation, votre compte attendra que l'équipe le relie à votre appareil.",
+    "emailHint": "Le même courriel que votre invitation.",
+    "callTeam": "Appeler l'équipe · {phone}",
+    "resetInvalidTitle": "Ce lien ne fonctionne plus",
+    "resetInvalidBody": "Les liens de réinitialisation expirent après une heure et ne servent qu'une fois. Demandez-en un nouveau : ça prend une seconde.",
+    "requestNewLink": "Demander un nouveau lien",
+    "resetSuccess": "Votre mot de passe a été changé. Connectez-vous avec le nouveau.",
+    "wrongAddress": "Mauvaise adresse?",
+    "startOver": "Recommencer"
   },
   "twoFactor": {
     "invalidCode": "Code invalide. Réessayez.",
     "verifyTitle": "Vérification en deux étapes",
     "verifyBody": "Entrez le code à 6 chiffres de votre application d'authentification.",
     "code": "Code",
-    "trustDevice": "Faire confiance à cet appareil pendant 30 jours",
+    "trustDevice": "Faire confiance à cet appareil pendant 30 jours",
     "verify": "Vérifier",
     "confirmPassword": "Confirmez votre mot de passe",
     "start": "Commencer",
@@ -114,30 +145,33 @@
     "stepDone": "Étape terminée",
     "stepCurrent": "Étape en cours",
     "setupTitle": "Protégez votre compte",
-    "setupBody": "Ajoutez une vérification en deux étapes : en plus de votre mot de passe, un code de votre téléphone sera demandé.",
+    "setupBody": "Ajoutez une vérification en deux étapes : en plus de votre mot de passe, un code de votre téléphone sera demandé.",
     "setupRequiredBody": "Les comptes de l'équipe ont accès aux données de tous les clients. Une vérification en deux étapes est requise avant de continuer. Cela prend environ une minute.",
-    "setupNeedApp": "Il vous faut une application d'authentification : Google Authenticator, Microsoft Authenticator, 1Password ou l'app Mots de passe de l'iPhone.",
-    "setupOncePerDevice": "Sur un appareil de confiance, le code ne sera redemandé qu'aux 30 jours.",
+    "setupNeedApp": "Il vous faut une application d'authentification : Google Authenticator, Microsoft Authenticator, 1Password ou l'application Mots de passe de l'iPhone.",
+    "setupOncePerDevice": "Sur un appareil de confiance, le code ne sera redemandé que tous les 30 jours.",
     "scanTitle": "Balayez ce code",
     "scanBody": "Ouvrez votre application d'authentification et balayez ce code QR avec l'appareil photo.",
     "qrAlt": "Code QR à balayer avec votre application d'authentification",
-    "manualKey": "Impossible de balayer? Entrez cette clé dans l'application :",
+    "manualKey": "Impossible de balayer? Entrez cette clé dans l'application :",
     "copyKey": "Copier la clé",
     "next": "Continuer",
     "confirmTitle": "Entrez le code affiché",
-    "confirmBody": "Tapez le code à 6 chiffres que l'application affiche maintenant pour Jet.",
+    "confirmBody": "Tapez le code à 6 chiffres que l'application affiche maintenant pour Univair.",
     "back": "Revenir au code QR",
     "codesTitle": "Gardez vos codes de secours",
     "codesBody": "Si vous perdez votre téléphone, chacun de ces codes permet de vous connecter une fois. Rangez-les dans un gestionnaire de mots de passe.",
     "copyCodes": "Copier",
     "downloadCodes": "Télécharger",
     "codesSaved": "J'ai mis mes codes de secours en lieu sûr",
-    "codesFileHeader": "Codes de secours Jet : chacun fonctionne une seule fois.",
+    "codesFileHeader": "Codes de secours Univair : chacun fonctionne une seule fois.",
     "disabledBody": "Ajoutez un code de votre téléphone à votre mot de passe pour protéger votre compte.",
     "setUp": "Activer",
     "openInApp": "Ouvrir dans l'application d'authentification",
     "enableFailed": "Impossible de démarrer la configuration. Réessayez.",
-    "tooManyAttempts": "Trop d'essais. Reconnectez-vous pour recevoir une nouvelle vérification."
+    "tooManyAttempts": "Trop d'essais. Reconnectez-vous pour recevoir une nouvelle vérification.",
+    "notYou": "Pas vous?",
+    "signOut": "Se déconnecter",
+    "codesFileName": "univair-codes-de-secours.txt"
   },
   "invite": {
     "unavailableTitle": "Invitation non disponible",
@@ -151,7 +185,8 @@
     "staffRoles": {
       "admin": "l'équipe (administrateur)",
       "finance": "l'équipe (finances)",
-      "dispatcher": "l'équipe (répartition)"
+      "dispatcher": "l'équipe (répartition)",
+      "pilot": "l'équipe (pilote)"
     },
     "title": "Vous êtes invité",
     "body": "Cette invitation donne accès à {target} pour {email}.",
@@ -166,7 +201,9 @@
   },
   "pending": {
     "title": "Votre accès est en préparation",
-    "body": "Votre compte ({email}) est créé, mais il n'est pas encore lié à un appareil. Notre équipe a été avisée et activera votre accès sous peu."
+    "body": "Votre compte ({email}) est créé, mais il n'est pas encore lié à un appareil. Notre équipe a été avisée et activera votre accès sous peu.",
+    "delay": "C'est habituellement fait en moins d'un jour ouvrable.",
+    "refresh": "Vérifier mon accès"
   },
   "home": {
     "greeting": "Bonjour, {name}",
@@ -182,27 +219,75 @@
     },
     "shareOf": "Part de {percent}",
     "hoursRemaining": "Heures restantes",
-    "ofAnnual": "sur {hours} par année",
+    "ofAnnual": "sur {hours} cette année",
     "budget": "Budget {year}",
     "ofPlanned": "dépensé sur {amount} prévus",
     "budgetEmpty": "Le budget de l'année sera publié par notre équipe.",
     "nextFlight": "Prochain vol",
     "nextFlightEmpty": "Aucun vol à venir.",
-    "nextMaintenance": "Prochaine maintenance",
+    "nextMaintenance": "Maintenance",
     "nextMaintenanceEmpty": "Aucune maintenance prévue.",
-    "dueOn": "Prévue le {date}",
     "latestInvoice": "Dernière facture",
     "latestInvoiceEmpty": "Votre première facture apparaîtra ici après votre premier vol.",
-    "availability": "Disponibilité",
-    "freeDays": "{count, plural, =0 {Aucun jour libre} one {# jour libre} other {# jours libres}} sur {days}",
+    "availability": "Calendrier",
+    "freeDays": "{count, plural, =0 {Aucun jour libre} one {# jour libre} other {# jours libres}} sur {days}",
     "seeCalendar": "Voir le calendrier",
     "insights": {
       "label": "En bref",
-      "hoursPace": "Au rythme de cette année, vos heures restantes dureront environ {months} mois, soit jusqu'en {until}.",
-      "hoursUnused": "Vous n'avez pas encore volé cette année : toutes vos heures sont disponibles.",
-      "budgetOnTrack": "Vous avez dépensé {spent} du budget, à {year} de l'année : c'est dans le rythme prévu.",
-      "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu."
-    }
+      "hoursPace": "Au rythme de cette année, vos heures restantes dureront environ {months} mois, soit jusqu'en {until}.",
+      "hoursUnused": "Vous n'avez pas encore volé cette année : toutes vos heures sont disponibles.",
+      "budgetOnTrack": "Vous avez dépensé {spent} du budget, à {year} de l'année : c'est dans le rythme prévu.",
+      "budgetAhead": "Vous avez dépensé {spent} du budget alors que {year} de l'année est écoulée : plus vite que prévu.",
+      "details": "Voir le détail"
+    },
+    "maintenanceStarts": "Dès le {date}",
+    "maintenanceEnds": "Jusqu'au {date}",
+    "greetings": {
+      "morning": "Bonjour, {name}",
+      "afternoon": "Bon après-midi, {name}",
+      "evening": "Bonsoir, {name}"
+    },
+    "heroOne": "Votre appareil,",
+    "heroMany": "Vos appareils,",
+    "heroNow": "en ce moment",
+    "flownThisYear": "Volées en {year}",
+    "spentThisYear": "Dépensé en {year}",
+    "freeDaysShort": "{count, plural, one {# jour} other {# jours}}",
+    "freeDaysLabel": "libres sur les {days} prochains",
+    "seeInvoices": "Voir les factures",
+    "activityTitle": "Activité",
+    "activityAll": "Historique des vols",
+    "activityEmpty": "Les vols, factures et nouvelles de l'équipe apparaîtront ici.",
+    "flightCompleted": "Vol terminé",
+    "flightLength": "{hours} h {minutes}",
+    "teamEyebrow": "Votre équipe Univair",
+    "teamTitle": "On s'occupe de tout.",
+    "teamBody": "Un vol à planifier, un hôtel, une question? Appelez ou textez, nous vous répondons.",
+    "ofPlannedShort": "sur {amount} prévus",
+    "hero": {
+      "flying": "Votre {model} est en vol",
+      "flyingTo": "vers {city} · arrivée prévue à {time}",
+      "maintenance": "Votre {model} est en maintenance",
+      "maintenanceUntil": "jusqu'au {date}",
+      "waiting": "Votre {model} vous attend",
+      "waitingAt": "à {city}, prêt pour votre prochain départ",
+      "follow": "Suivre en direct",
+      "nextDeparture": "prochain départ {date} · {route}",
+      "seeOnMap": "Voir sur la carte",
+      "factHours": "{hours} restantes",
+      "factFree": "Libre {count} j sur {days}"
+    },
+    "flownCaption": "depuis le 1er janvier",
+    "legendFree": "Libre",
+    "legendMine": "Votre vol",
+    "legendBooked": "Réservé",
+    "legendMaintenance": "Maintenance",
+    "upcomingTitle": "Vos prochains vols",
+    "allFlights": "Tous vos vols",
+    "inTheAir": "En vol",
+    "planNext": "Un prochain départ en tête? Dites-nous où et quand, nous nous occupons du reste.",
+    "planNextCta": "Ou appelez-nous",
+    "seeInvoice": "Voir la facture"
   },
   "account": {
     "title": "Mon compte",
@@ -221,8 +306,8 @@
       "en": "English"
     },
     "security": "Sécurité",
-    "twoFactorOn": "Vérification en deux étapes activée",
-    "twoFactorOff": "Vérification en deux étapes désactivée",
+    "twoFactorOn": "Activée : un code vous est demandé à chaque nouvel appareil.",
+    "twoFactorOff": "Désactivée — recommandée pour protéger vos finances.",
     "emailsTitle": "Courriels",
     "emailsBody": "Choisissez ce que nous vous envoyons par courriel. Tout reste visible dans le portail.",
     "emailsAlwaysOn": "Les courriels de sécurité (liens de connexion, changement de mot de passe) sont toujours envoyés.",
@@ -243,8 +328,8 @@
       },
       "hours": {
         "low": {
-          "label": "Heures basses",
-          "hint": "Quand il reste moins de 10 % de vos heures."
+          "label": "Solde d'heures bas",
+          "hint": "Quand il reste moins de 10 % de vos heures."
         }
       },
       "maintenance": {
@@ -258,18 +343,24 @@
           "label": "Messages de l'équipe",
           "hint": "Si vous ne les avez pas lus dans le portail après 5 minutes."
         }
+      },
+      "flight": {
+        "confirmed": {
+          "label": "Vols confirmés",
+          "hint": "Quand l'équipe planifie un vol que vous avez demandé."
+        }
       }
     },
     "privacyTitle": "Vos renseignements personnels",
-    "privacyBody": "Téléchargez tout ce que le portail conserve sur vous, ou faites une demande : nous répondons en {days} jours au plus. Voir la <policy>politique de confidentialité</policy>.",
-    "downloadData": "Télécharger mes données (JSON)",
+    "privacyBody": "Téléchargez tout ce que le portail conserve sur vous, ou faites une demande : nous répondons en {days} jours au plus. Voir la <policy>politique de confidentialité</policy>.",
+    "downloadData": "Télécharger mes données",
     "privacyKind": "Demande",
     "privacyDetails": "Précisions (facultatif)",
     "privacySend": "Envoyer la demande",
     "privacySent": "Demande envoyée. Nous vous répondrons ici et par courriel.",
     "privacyKinds": {
       "correction": "Corriger un renseignement",
-      "access": "Savoir ce que vous détenez",
+      "access": "Accéder à mes renseignements",
       "deletion": "Supprimer des renseignements",
       "portability": "Recevoir mes données"
     },
@@ -277,7 +368,47 @@
       "open": "en cours",
       "done": "traitée",
       "refused": "refusée"
-    }
+    },
+    "settingsTitle": "Paramètres",
+    "settingsBody": "Votre profil, l'apparence du portail, votre sécurité et vos préférences.",
+    "sections": {
+      "profile": "Profil",
+      "appearance": "Apparence et langue",
+      "security": "Sécurité",
+      "notifications": "Notifications",
+      "privacy": "Confidentialité",
+      "team": "Votre équipe"
+    },
+    "sectionsLabel": "Sections des paramètres",
+    "profileBody": "Votre nom et votre photo, tels que l'équipe Univair les voit.",
+    "photo": "Photo",
+    "saveProfile": "Enregistrer",
+    "profileSaved": "Profil enregistré.",
+    "appearanceBody": "Le portail s'adapte à vous, le jour comme la nuit.",
+    "theme": "Thème",
+    "themes": {
+      "dark": {
+        "label": "Sombre",
+        "hint": "La signature Univair"
+      },
+      "light": {
+        "label": "Clair",
+        "hint": "Lumineux, pour le jour"
+      },
+      "system": {
+        "label": "Système",
+        "hint": "Suit votre appareil"
+      }
+    },
+    "securityBody": "Protégez l'accès à votre appareil et à vos finances.",
+    "password": "Mot de passe",
+    "passwordHint": "Recevez un lien par courriel pour en choisir un nouveau.",
+    "changePassword": "Changer",
+    "twoFactor": "Vérification en deux étapes",
+    "manage": "Gérer",
+    "teamBody": "Un vol à planifier, une question, un imprévu : appelez ou textez, 7 jours sur 7.",
+    "readOnly": "Lecture seule pendant l'affichage en tant que propriétaire.",
+    "enable": "Activer"
   },
   "adminDashboard": {
     "title": "Tableau de bord",
@@ -285,11 +416,38 @@
     "owners": "Propriétaires",
     "aircraft": "Appareils",
     "pendingInvitations": "Invitations en attente",
-    "accountsWaiting": "Comptes sans accès",
+    "accountsWaiting": "Comptes créés, sans accès",
     "flightsToday": "Vols aujourd'hui",
     "flightsThisWeek": "Vols cette semaine",
     "inMaintenance": "Appareils en maintenance",
-    "ownersWithoutAccess": "Propriétaires sans accès"
+    "ownersWithoutAccess": "Propriétaires jamais invités",
+    "hello": "Bonjour, {name}",
+    "heroLight": "Les opérations,",
+    "heroNow": "en ce moment",
+    "inTheAir": "Appareils en vol",
+    "todayTitle": "Les vols d'aujourd'hui",
+    "todayEmpty": "Aucun vol aujourd'hui.",
+    "newFlight": "Planifier un vol",
+    "ofFleet": "sur {total} appareils",
+    "queue": {
+      "title": "À traiter",
+      "empty": "Rien à traiter pour l'instant. Belle journée.",
+      "flightsToClose": "{count, plural, one {vol à clôturer} other {vols à clôturer}} (temps de vol à inscrire)",
+      "flightRequests": "{count, plural, one {demande de vol à planifier} other {demandes de vol à planifier}}",
+      "awaitingReply": "{count, plural, one {conversation attend une réponse} other {conversations attendent une réponse}}",
+      "maintenanceOverdue": "{count, plural, one {maintenance a dépassé sa fin prévue} other {maintenances ont dépassé leur fin prévue}}",
+      "maintenanceSoon": "{count, plural, one {maintenance commence d'ici 48 h} other {maintenances commencent d'ici 48 h}}",
+      "lowHours": "{count, plural, one {part sous 10 % de ses heures} other {parts sous 10 % de leurs heures}}",
+      "ownersNeverInvited": "{count, plural, one {propriétaire jamais invité} other {propriétaires jamais invités}}",
+      "flightReports": "{count, plural, one {rapport de vol à vérifier} other {rapports de vol à vérifier}}",
+      "toInvoice": "{count, plural, one {vol approuvé à facturer} other {vols approuvés à facturer}}",
+      "overdueInvoices": "{count, plural, one {facture en retard de paiement} other {factures en retard de paiement}}"
+    },
+    "money": {
+      "flightReports": "À vérifier ({count})",
+      "toInvoice": "À facturer ({count})",
+      "overdueInvoices": "Factures en retard ({count})"
+    }
   },
   "owners": {
     "title": "Propriétaires",
@@ -304,7 +462,7 @@
     "logins": "Accès",
     "types": {
       "person": "Personne",
-      "company": "Compagnie"
+      "company": "Entreprise"
     },
     "new": "Nouveau propriétaire",
     "search": "Rechercher",
@@ -314,7 +472,7 @@
     "newTitle": "Nouveau propriétaire",
     "newSubtitle": "Une personne ou une compagnie qui détient une part d'appareil.",
     "editTitle": "Modifier le propriétaire",
-    "legalName": "Nom légal",
+    "legalName": "Nom ou raison sociale",
     "emailHint": "Pour les factures et les avis. Facultatif.",
     "phone": "Téléphone",
     "language": "Langue de communication",
@@ -336,8 +494,9 @@
     "loginsTitle": "Accès au portail",
     "noLogins": "Personne n'a encore accès. Envoyez une invitation.",
     "memberRoles": {
-      "primary": "Principal",
-      "viewer": "Lecture"
+      "owner": "Propriétaire",
+      "assistant": "Adjointe ou adjoint",
+      "read_only": "Lecture seule"
     },
     "removeLogin": "Retirer l'accès de {name}",
     "invitationPending": "Invitation envoyée",
@@ -346,7 +505,22 @@
     "archiveBody": "Le propriétaire disparaît des listes et ses accès sont retirés. Son historique est conservé.",
     "archive": "Archiver",
     "archiveConfirm": "Archiver ce propriétaire?",
-    "write": "Écrire"
+    "write": "Écrire",
+    "memberRoleFor": "Rôle de {name}",
+    "seesFinances": "Voit les finances",
+    "saveAccess": "Enregistrer",
+    "back": "Propriétaires",
+    "accounts": "{count, plural, one {# compte} other {# comptes}}",
+    "notInvited": "Pas encore invité",
+    "accessFilter": "Accès au portail",
+    "accessFilters": {
+      "all": "Tous",
+      "not_invited": "Pas encore invités",
+      "invited": "Invitation envoyée",
+      "active": "Avec un compte"
+    },
+    "noResultsFilterBody": "Aucun propriétaire dans ce filtre.",
+    "noLoginsYet": "Personne n'a encore accès au portail."
   },
   "invitations": {
     "title": "Invitations",
@@ -355,15 +529,16 @@
       "invalid": "Vérifiez le courriel et l'accès choisi.",
       "forbidden": "Vous n'avez pas la permission d'envoyer cette invitation."
     },
-    "sent": "Invitation envoyée à {email}. Lien à usage unique :",
+    "sent": "Invitation envoyée à {email}. Lien à usage unique :",
     "email": "Courriel",
     "access": "Accès",
     "ownersGroup": "Propriétaire",
     "staffGroup": "Équipe",
     "staffRoles": {
-      "admin": "Administrateur",
+      "admin": "Administration",
       "finance": "Finances",
-      "dispatcher": "Répartiteur"
+      "dispatcher": "Répartition",
+      "pilot": "Pilote"
     },
     "sending": "Envoi…",
     "send": "Envoyer l'invitation",
@@ -379,17 +554,27 @@
       "revoked": "Annulée",
       "not_found": "Introuvable"
     },
-    "revoke": "Annuler",
+    "revoke": "Révoquer",
     "withoutAccessTitle": "{count, plural, one {# propriétaire sans accès} other {# propriétaires sans accès}}",
     "withoutAccessBody": "Aucune connexion liée et aucune invitation en cours. L'ouverture est complète quand cette liste est vide.",
     "noEmail": "sans courriel",
     "bulkInvite": "{count, plural, one {Inviter # propriétaire} other {Inviter les # propriétaires}} avec courriel",
     "bulkSent": "{count, plural, =0 {Aucune invitation envoyée.} one {# invitation envoyée.} other {# invitations envoyées.}}",
-    "bulkMissing": "{count, plural, one {# propriétaire n'a pas de courriel : ajoutez-le sur sa fiche.} other {# propriétaires n'ont pas de courriel : ajoutez-le sur leur fiche.}}"
+    "bulkMissing": "{count, plural, one {# propriétaire n'a pas de courriel : ajoutez-le sur sa fiche.} other {# propriétaires n'ont pas de courriel : ajoutez-le sur leur fiche.}}",
+    "memberRole": "Rôle",
+    "memberRoleHints": {
+      "owner": "Voit tout, y compris les finances, et peut faire des demandes.",
+      "assistant": "Voit l'horaire et peut faire des demandes au nom du propriétaire.",
+      "read_only": "Peut consulter, sans faire de demandes."
+    },
+    "canSeeFinances": "Peut voir les finances",
+    "chooseOwner": "Choisir le propriétaire",
+    "chooseTarget": "Choisir le propriétaire ou le rôle"
   },
   "common": {
     "confirm": "Confirmer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "loading": "Chargement…"
   },
   "viewAs": {
     "banner": "Vous voyez le portail comme {name} · lecture seule",
@@ -401,7 +586,7 @@
     "forbidden": "Vous n'avez pas la permission de faire ce changement.",
     "not_found": "Cet élément n'existe plus.",
     "registration_taken": "Cette immatriculation est déjà utilisée par un autre appareil.",
-    "shares_over_100": "Les parts actives de cet appareil dépasseraient 100 %.",
+    "shares_over_100": "Les parts actives de cet appareil dépasseraient 100 %.",
     "owner_already_has_share": "Ce propriétaire a déjà une part active sur cet appareil.",
     "owner_has_active_shares": "Ce propriétaire détient encore une part active. Terminez-la d'abord, depuis la fiche de l'appareil.",
     "last_admin": "Il doit rester au moins un administrateur.",
@@ -412,7 +597,7 @@
       "legalName": "Entrez le nom (2 caractères minimum).",
       "email": "Entrez un courriel valide.",
       "phone": "Numéro trop long.",
-      "registration": "Format attendu : C-GJTA.",
+      "registration": "Format attendu : C-GJTA.",
       "model": "Entrez le modèle.",
       "serialNumber": "Numéro trop long.",
       "homeBase": "Code OACI de 3 ou 4 caractères, ex. CYUL.",
@@ -424,7 +609,7 @@
       "status": "Choisissez un statut.",
       "locale": "Choisissez une langue.",
       "notes": "Notes trop longues.",
-      "shareId": "Choisissez une part.",
+      "shareId": "Choisissez qui paie les heures, ou « Aucun — convoyage ».",
       "number": "Entrez le numéro de facture.",
       "total": "Montant invalide (ex. 8 297,00).",
       "issuedOn": "Choisissez une date.",
@@ -443,7 +628,7 @@
       "toAirport": "Code OACI de 3 ou 4 caractères, ex. KPBI.",
       "departsAt": "Choisissez une date et une heure.",
       "arrivesAt": "L'arrivée doit suivre le départ.",
-      "blockTime": "Entrez un temps comme 2:15 ou 2,25.",
+      "flightTime": "Entrez un temps comme 2:15 ou 2,25.",
       "title": "Décrivez les travaux (2 caractères minimum).",
       "startsAt": "Date et heure invalides.",
       "endsAt": "La fin doit suivre le début.",
@@ -457,7 +642,35 @@
       "url": "Adresse HTTPS valide requise.",
       "scopes": "Choisissez au moins un accès.",
       "events": "Choisissez au moins un événement.",
-      "name": "Entrez un nom (2 caractères minimum)."
+      "name": "Entrez un nom (2 caractères minimum).",
+      "registrationNumber": "Entrez au plus 500 caractères.",
+      "holdingCompanyId": "Choisissez une société de la liste.",
+      "from": "Choisissez l'aéroport de départ.",
+      "to": "Choisissez une destination, différente du départ.",
+      "date": "Choisissez la date du vol.",
+      "time": "Entrez une heure valide, ou laissez vide.",
+      "returnDate": "Le retour doit suivre l'aller.",
+      "passengers": "De 1 à 19 passagers.",
+      "fuelLitres": "Nombre de litres invalide.",
+      "expenses": "Vérifiez les dépenses : chaque ligne a besoin d’un montant (ex. 412,50).",
+      "effectiveFrom": "Choisissez une date.",
+      "fuel": "Montant invalide (ex. 750,00).",
+      "engine": "Montant invalide.",
+      "propeller": "Montant invalide.",
+      "airframe": "Montant invalide.",
+      "avionics": "Montant invalide.",
+      "pilot": "Montant invalide.",
+      "flightId": "Vol introuvable.",
+      "address": "Adresse trop longue.",
+      "gstNumber": "Numéro trop long.",
+      "qstNumber": "Numéro trop long.",
+      "invoicePrefix": "De 2 à 8 lettres ou chiffres, ex. UNI.",
+      "paymentTermsDays": "Entre 0 et 120 jours.",
+      "paymentInstructions": "Texte trop long.",
+      "category": "Choisissez un type.",
+      "target": "Montant invalide (ex. 200 000).",
+      "component": "Choisissez une réserve.",
+      "usdRate": "Entrez le taux, par exemple 1,3850."
     },
     "file_type_not_allowed": "Ce type de fichier n'est pas accepté.",
     "file_too_large": "Le fichier est trop volumineux.",
@@ -470,14 +683,14 @@
     "invoice_not_open": "Cette facture n'est plus ouverte.",
     "void_reason_required": "Indiquez la raison de l'annulation.",
     "invoice_already_void": "Cette facture est déjà annulée.",
-    "already_reversed": "Cette entrée a déjà été contrepassée.",
+    "already_reversed": "Cette écriture est déjà annulée.",
     "cannot_reverse_a_reversal": "Une contrepassation ne peut pas être contrepassée.",
     "purchase_must_be_positive": "Un achat d'heures doit être positif.",
     "no_previous_budget": "Aucun budget l'an dernier pour cette part.",
     "budget_exists": "Un budget existe déjà pour cette année.",
     "budget_missing": "Enregistrez le budget avant de le publier.",
     "nothing_to_import": "Aucune ligne valide à importer.",
-    "flight_not_scheduled": "Ce vol n'est plus prévu : il a déjà été terminé ou annulé.",
+    "flight_not_scheduled": "Ce vol n'est plus prévu : il a déjà été terminé ou annulé.",
     "flight_already_cancelled": "Ce vol est déjà annulé.",
     "share_not_on_aircraft": "Cette part n'appartient pas à cet appareil.",
     "share_ended": "Cette part est terminée à cette date.",
@@ -496,11 +709,34 @@
     "webhook_disabled": "Ce webhook est désactivé.",
     "webhook_private_address": "Cette adresse mène à un réseau privé; utilisez une adresse publique.",
     "webhook_test_failed": "Le test n'a pas été reçu.",
-    "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard."
+    "too_many_uploads": "Trop d'envois en une heure. Réessayez plus tard.",
+    "holding_company_has_aircraft": "Cette société possède encore un appareil. Rattachez-le à une autre société d'abord.",
+    "date_in_past": "Choisissez une date à venir.",
+    "unknown_airport": "Nous ne trouvons pas cet aéroport. Choisissez-le dans la liste.",
+    "flight_cancelled": "Ce vol a été annulé.",
+    "report_approved": "Ce rapport est déjà approuvé : il ne peut plus être modifié.",
+    "report_already_filed": "Un autre pilote a déjà envoyé le rapport de ce vol.",
+    "invalid_receipt": "Un des reçus est invalide. Reprenez la photo.",
+    "report_not_waiting": "Ce rapport a déjà été traité.",
+    "rate_empty": "Entrez au moins un montant.",
+    "no_holding_company": "L'appareil n'appartient à aucune société.",
+    "no_rate": "L'appareil n'a pas de tarif horaire pour la date du vol.",
+    "share_required": "Choisissez qui a volé avant de facturer.",
+    "report_not_approved": "Le rapport doit d'abord être approuvé.",
+    "report_already_invoiced": "Ce vol est déjà facturé.",
+    "prefix_taken": "Ce préfixe est déjà utilisé par une autre société.",
+    "no_account_for_email": "Aucun compte avec ce courriel. Demandez à la personne de s'inscrire d'abord.",
+    "staff_already_has_access": "Cette personne fait partie de l'équipe Univair : elle a déjà accès.",
+    "maintenance_self_review": "Vous avez envoyé ces travaux en vérification : une autre personne de l'équipe doit les approuver.",
+    "fx_rate_missing": "Des reçus en dollars américains n'ont pas encore de taux de change.",
+    "flight_already_invoiced": "Ce vol a déjà une facture en vigueur : annulez-la avant d'en émettre une autre.",
+    "invoice_paid": "Une facture payée ne s'annule pas : émettez plutôt un crédit ou un remboursement.",
+    "paid_in_future": "La date du paiement ne peut pas être dans le futur.",
+    "reserve_insufficient": "La réserve ne contient pas ce montant. Vérifiez le montant ou cochez « Payer quand même »."
   },
   "aircraft": {
     "title": "Appareils",
-    "subtitle": "La flotte et la répartition des parts.",
+    "subtitle": "Chaque appareil, sa société, ses propriétaires, ses vols et son entretien, au même endroit.",
     "new": "Nouvel appareil",
     "emptyTitle": "Aucun appareil",
     "emptyBody": "Ajoutez le premier appareil de la flotte.",
@@ -528,7 +764,7 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "edit": "Modifier",
-    "notComplete": "Les parts doivent totaliser 100 %.",
+    "notComplete": "Les parts doivent totaliser 100 %.",
     "currentOwners": "Propriétaires actuels",
     "noShares": "Aucune part attribuée.",
     "since": "Depuis le {date}",
@@ -537,44 +773,52 @@
     "pastOwners": "{count, plural, one {# ancien propriétaire} other {# anciens propriétaires}}",
     "addShareTitle": "Ajouter une part",
     "history": "Historique",
-    "fullyAssigned": "L'appareil est attribué à 100 %. Terminez une part pour en ajouter une autre.",
+    "fullyAssigned": "L'appareil est attribué à 100 %. Terminez une part pour en ajouter une autre.",
     "owner": "Propriétaire",
     "chooseOwner": "Choisir un propriétaire",
     "percent": "Part (%)",
-    "percentHint": "{remaining} % disponibles",
+    "percentHint": "{remaining} % disponibles",
     "annualHours": "Heures par année",
     "startsOn": "Début",
     "addShare": "Ajouter la part",
     "endsOn": "Date de fin",
     "endConfirm": "Terminer la part de {name}?",
-    "endShare": "Terminer"
+    "endShare": "Clôturer la part",
+    "holdingCompany": "Société de portefeuille",
+    "noHoldingCompany": "Aucune société",
+    "ownedBy": "Propriété de",
+    "assignedWarning": "Parts attribuées : {percent} (pas 100 %)",
+    "owners": "Propriétaires"
   },
   "team": {
-    "settingsTitle": "Réglages",
+    "settingsTitle": "Paramètres",
     "settingsSubtitle": "L'équipe, ses rôles et le journal d'audit.",
     "adminOnlyTitle": "Réservé aux administrateurs",
     "adminOnlyBody": "Demandez à un administrateur de modifier l'équipe.",
     "title": "Équipe",
     "invite": "Inviter un membre",
     "you": "Vous",
-    "twoFactorOn": "2 étapes activée",
-    "twoFactorOff": "2 étapes à configurer",
+    "twoFactorOn": "Vérification en 2 étapes : activée",
+    "twoFactorOff": "Vérification en 2 étapes : à configurer",
     "lastSignIn": "Dernière connexion {date}",
-    "neverSignedIn": "Jamais connecté",
+    "neverSignedIn": "Aucune connexion",
     "auditTitle": "Journal d'audit",
     "auditBody": "Qui a fait quoi, et quand.",
     "roleFor": "Rôle de {name}",
     "roles": {
-      "admin": "Administrateur",
+      "admin": "Administration",
       "finance": "Finances",
-      "dispatcher": "Répartiteur"
+      "dispatcher": "Répartition",
+      "pilot": "Pilote"
     },
     "removeFromTeam": "Retirer de l'équipe",
     "save": "Enregistrer",
     "privacyTitle": "Renseignements personnels (Loi 25)",
     "privacyBody": "Demandes des propriétaires et registre des incidents.",
     "developersTitle": "Développeurs",
-    "developersBody": "Clés d'API et webhooks pour relier d'autres logiciels."
+    "developersBody": "Clés d'API et webhooks pour relier d'autres logiciels.",
+    "members": "{count, plural, one {# personne} other {# personnes}} dans l'équipe Univair",
+    "profileBody": "Votre nom, votre photo, l'apparence et la sécurité."
   },
   "audit": {
     "empty": "Rien à afficher pour l'instant.",
@@ -591,7 +835,9 @@
       "team": "Équipe",
       "invoice": "Factures",
       "transaction": "Transactions",
-      "budget": "Budgets"
+      "budget": "Budgets",
+      "flight": "Vols",
+      "maintenance": "Maintenance"
     },
     "older": "Entrées plus anciennes",
     "actions": {
@@ -622,7 +868,85 @@
       "hours_add": "a ajouté des heures",
       "budget_save": "a enregistré un budget",
       "budget_publish": "a publié un budget",
-      "import_commit": "a importé un chiffrier"
+      "import_commit": "a importé un chiffrier",
+      "holding_company_create": "a créé la société",
+      "holding_company_update": "a modifié la société",
+      "holding_company_archive": "a archivé la société",
+      "owner_member_update": "a changé un accès",
+      "profile_update": "a modifié son profil",
+      "profile_avatar_set": "a changé sa photo",
+      "profile_avatar_remove": "a retiré sa photo",
+      "profile_onboarded": "a terminé l'accueil",
+      "profile_tour_restarted": "a demandé à revoir la visite",
+      "account_email_preferences": "a changé ses préférences de courriel",
+      "aircraft_photo": "a changé la photo de l'appareil",
+      "aircraft_rate_set": "a fixé le tarif horaire",
+      "api_key_create": "a créé une clé d'API",
+      "api_key_revoke": "a révoqué une clé d'API",
+      "availability_block": "a bloqué une période",
+      "availability_unblock": "a retiré un blocage",
+      "company_expense_add": "a ajouté une dépense de la société",
+      "company_expense_reverse": "a contrepassé une dépense de la société",
+      "conversation_assign": "a assigné une conversation",
+      "flight_cancel": "a annulé un vol",
+      "flight_complete": "a terminé un vol",
+      "flight_request": "a demandé un vol",
+      "flight_schedule": "a planifié un vol",
+      "flight_update": "a modifié un vol",
+      "flight_report_approve": "a approuvé un rapport de vol",
+      "flight_report_resubmit": "a renvoyé un rapport de vol corrigé",
+      "flight_report_return": "a retourné un rapport de vol au pilote",
+      "flight_report_submit": "a envoyé un rapport de vol",
+      "holding_company_billing": "a modifié la facturation de la société",
+      "holding_company_manager_add": "a ajouté un gestionnaire",
+      "holding_company_manager_remove": "a retiré un gestionnaire",
+      "integration_link_share": "a relié une part au logiciel de planification",
+      "invoice_issue": "a émis une facture",
+      "maintenance_plan": "a planifié un entretien",
+      "maintenance_status": "a changé l'étape d'un entretien",
+      "maintenance_update": "a modifié un entretien",
+      "privacy_export": "a exporté ses renseignements personnels",
+      "privacy_incident": "a inscrit un incident de confidentialité",
+      "privacy_incident_reporting": "a mis à jour la déclaration d'un incident",
+      "privacy_request": "a fait une demande Loi 25",
+      "privacy_request_close": "a fermé une demande Loi 25",
+      "privacy_retention": "a appliqué la durée de conservation",
+      "reserve_target": "a fixé la cible d'une réserve",
+      "reserve_work": "a payé des travaux à même la réserve",
+      "sync_block_created": "a importé un blocage",
+      "sync_block_updated": "a mis à jour un blocage",
+      "sync_block_unchanged": "a vérifié un blocage (aucun changement)",
+      "sync_flight_created": "a importé un vol",
+      "sync_flight_updated": "a mis à jour un vol",
+      "sync_flight_unchanged": "a vérifié un vol (aucun changement)",
+      "sync_maintenance_created": "a importé un entretien",
+      "sync_maintenance_updated": "a mis à jour un entretien",
+      "sync_maintenance_unchanged": "a vérifié un entretien (aucun changement)",
+      "webhook_create": "a créé un webhook",
+      "webhook_disable": "a désactivé un webhook",
+      "webhook_enable": "a activé un webhook"
+    },
+    "entities": {
+      "aircraft": "appareil",
+      "api_key": "clé d'API",
+      "conversation": "conversation",
+      "file": "fichier",
+      "flight": "vol",
+      "flight_report": "rapport de vol",
+      "holding_company": "société",
+      "import": "importation",
+      "incident": "incident",
+      "invitation": "invitation",
+      "invoice": "facture",
+      "maintenance": "entretien",
+      "message": "message",
+      "owner": "propriétaire",
+      "privacy_request": "demande Loi 25",
+      "session": "session",
+      "share": "part",
+      "transaction": "transaction",
+      "user": "utilisateur",
+      "webhook": "webhook"
     }
   },
   "files": {
@@ -653,8 +977,8 @@
       "void": "Annulée"
     },
     "viewPdf": "Voir le PDF",
-    "markPaid": "Marquer payée",
-    "void": "Annuler",
+    "markPaid": "Marquer comme payée",
+    "void": "Annuler la facture",
     "voidReason": "Raison de l'annulation",
     "noAccessTitle": "Accès réservé",
     "noAccessBody": "Les factures sont réservées aux finances et aux administrateurs.",
@@ -662,16 +986,36 @@
     "chooseShare": "Choisir l'appareil et le propriétaire",
     "number": "Numéro de facture",
     "total": "Montant total",
-    "totalHint": "Ex. 8 297,00",
+    "totalHint": "Ex. 8 297,00, en dollars canadiens",
     "issuedOn": "Date d'émission",
     "dueOn": "Échéance",
     "currency": "Devise",
     "pdf": "Facture (PDF)",
-    "pdfHint": "PDF, PNG ou JPG, 25 Mo maximum",
+    "pdfHint": "PDF, PNG ou JPG, 25 Mo maximum",
     "saving": "Émission…",
     "issue": "Émettre la facture",
     "cancel": "Annuler",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Exporter (CSV)",
+    "viewDetail": "Voir",
+    "overdue": "En retard",
+    "receivable": "À recevoir",
+    "openCount": "{count, plural, =0 {Aucune facture} one {# facture} other {# factures}}",
+    "overdueTotal": "En retard",
+    "noneOverdue": "Aucune facture en retard",
+    "dueShort": "échéance le {date}",
+    "paidShort": "payée le {date}",
+    "open": "Ouvrir",
+    "pagination": "Pages",
+    "previous": "Précédentes",
+    "next": "Suivantes",
+    "pageOf": "Page {page} sur {pages}",
+    "paidOn": "Date du paiement",
+    "paymentReference": "Référence (facultatif)",
+    "paymentReferencePlaceholder": "N° de chèque ou de virement",
+    "recordPayment": "Enregistrer le paiement",
+    "close": "Fermer",
+    "voidHint": "La facture reste visible, marquée annulée, et ses écritures sont contrepassées.",
+    "keepInvoice": "Garder la facture"
   },
   "ownerInvoices": {
     "title": "Factures",
@@ -683,7 +1027,14 @@
     "download": "Télécharger",
     "viewNumber": "Voir la facture {number}",
     "downloadNumber": "Télécharger la facture {number}",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Télécharger pour Excel",
+    "statuses": {
+      "issued": "À payer",
+      "overdue": "En retard",
+      "paid": "Payée",
+      "void": "Annulée"
+    },
+    "dueBefore": "à payer avant le {date}"
   },
   "transactions": {
     "title": "Transactions",
@@ -712,14 +1063,16 @@
     "newEntry": "Nouvelle entrée",
     "date": "Date",
     "amount": "Montant",
+    "amountHint": "En dollars canadiens. Ex. 1 234,56",
     "currency": "Devise",
     "category": "Catégorie",
     "noCategory": "Aucune",
     "description": "Description",
     "add": "Ajouter",
     "added": "Entrée ajoutée.",
-    "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne.",
-    "exportCsv": "Exporter (CSV)"
+    "ledgerRule": "Une entrée n'est jamais modifiée : pour corriger, contrepassez-la puis saisissez la bonne.",
+    "exportCsv": "Exporter (CSV)",
+    "truncated": "Les {count} entrées les plus récentes sont affichées. Choisissez une part pour voir les autres."
   },
   "budgets": {
     "title": "Budgets et heures",
@@ -743,9 +1096,9 @@
     "saved": "Budget enregistré.",
     "saveDraft": "Enregistrer le brouillon",
     "saveChanges": "Enregistrer les changements",
-    "publish": "Publier au propriétaire",
-    "publishedHint": "Publié : le propriétaire voit ce budget. Les changements lui sont visibles dès l'enregistrement.",
-    "draftHint": "Brouillon : le propriétaire ne le voit pas encore.",
+    "publish": "Rendre visible au propriétaire",
+    "publishedHint": "Publié : le propriétaire voit ce budget. Les changements lui sont visibles dès l'enregistrement.",
+    "draftHint": "Brouillon : le propriétaire ne le voit pas encore.",
     "copyPrevious": "Partir du budget de l'an dernier",
     "hoursTitle": "Banque d'heures",
     "hoursKind": "Type",
@@ -766,11 +1119,11 @@
     "noAccessTitle": "Accès réservé",
     "noAccessBody": "Les importations sont réservées aux finances et aux administrateurs.",
     "step1": "1. Choisir le fichier",
-    "step1Body": "Exportez votre chiffrier en CSV (Excel : Fichier › Enregistrer sous › CSV). Une ligne par transaction, avec une ligne d'en-têtes.",
+    "step1Body": "Exportez votre chiffrier en CSV (Excel : Fichier › Enregistrer sous › CSV). Une ligne par transaction, avec une ligne d'en-têtes.",
     "file": "Fichier CSV",
-    "fileHint": "CSV, 10 Mo et 5 000 lignes maximum",
+    "fileHint": "CSV, 10 Mo et 5 000 lignes maximum",
     "emptyFile": "Le fichier est vide ou n'a pas d'en-têtes.",
-    "tooManyRows": "Plus de {max} lignes : séparez le fichier en plusieurs.",
+    "tooManyRows": "Plus de {max} lignes : séparez le fichier en plusieurs.",
     "rowsFound": "{name} · {count, plural, one {# ligne} other {# lignes}}",
     "step2": "2. Associer les colonnes",
     "chooseColumn": "Choisir une colonne",
@@ -796,12 +1149,19 @@
       "description": "Description"
     },
     "errors": {
-      "invalid_date": "Date illisible (attendu : 2026-03-01 ou 01/03/2026)",
+      "invalid_date": "Date illisible (attendu : 2026-03-01 ou 01/03/2026)",
       "share_not_found": "Aucune part pour cette immatriculation et ce propriétaire",
       "invalid_kind": "Type inconnu (coût, revenu ou paiement)",
       "invalid_amount": "Montant illisible ou nul",
       "unknown_category": "Catégorie inconnue"
-    }
+    },
+    "dateOrderTitle": "Dans quel ordre sont les dates?",
+    "dateOrderBody": "Une date comme {example} peut se lire de deux façons, et aucune ligne du fichier ne permet de trancher.",
+    "dateOrders": {
+      "dmy": "Jour/mois/année (31/01/2026)",
+      "mdy": "Mois/jour/année (01/31/2026)"
+    },
+    "sampleCaption": "Les {count} premières lignes, telles qu'elles seront importées"
   },
   "finances": {
     "title": "Finances",
@@ -815,16 +1175,19 @@
     "remaining": "Restant",
     "byCategory": "Par catégorie",
     "byMonth": "Dépenses par mois",
-    "peak": "Mois le plus élevé : {amount}",
-    "exportCsv": "Exporter (CSV)",
-    "statementPdf": "Relevé {year} (PDF)"
+    "peak": "Mois le plus élevé : {amount}",
+    "exportCsv": "Télécharger pour Excel",
+    "statementPdf": "Relevé {year} (PDF)",
+    "billed": "Facturé",
+    "billedHint": "Factures émises en {year}, taxes incluses",
+    "reconcile": "« Dépensé » compte vos coûts avant taxes, dont {amount} inscrits directement sans facture (hangar, assurance…). « Facturé » compte les factures émises, taxes incluses."
   },
   "flights": {
     "title": "Vols",
-    "subtitle": "Planifiez les vols, puis terminez-les avec le temps bloc pour déduire les heures.",
+    "subtitle": "Planifiez les vols, puis terminez-les avec le temps de vol pour déduire les heures.",
     "new": "Planifier un vol",
     "newTitle": "Planifier un vol",
-    "newSubtitle": "Les heures sont déduites de la part choisie quand le vol est terminé.",
+    "newSubtitle": "Les heures sont déduites de la part facturée quand le vol est terminé.",
     "editTitle": "Modifier le vol",
     "saved": "Vol enregistré.",
     "view": "Période",
@@ -838,35 +1201,52 @@
     "filter": "Filtrer",
     "emptyUpcomingTitle": "Aucun vol à venir",
     "emptyUpcomingBody": "Les vols des 30 prochains jours apparaîtront ici.",
-    "emptyPastTitle": "Aucun vol récent",
-    "emptyPastBody": "Les vols des 60 derniers jours apparaîtront ici.",
+    "emptyPastTitle": "Aucun vol passé",
+    "emptyPastBody": "Les vols effectués apparaîtront ici, du plus récent au plus ancien.",
     "today": "Aujourd'hui",
     "statuses": {
       "scheduled": "Prévu",
       "completed": "Terminé",
-      "cancelled": "Annulé"
+      "cancelled": "Annulé",
+      "in_flight": "En vol",
+      "to_close": "À clôturer"
     },
     "synced": "Synchronisé",
-    "noShare": "Sans propriétaire (convoyage)",
-    "block": "{hours} bloc",
-    "share": "Heures de",
+    "noShare": "Aucun — convoyage",
+    "share": "Facturé à",
     "from": "Départ",
     "to": "Arrivée",
     "airportHint": "Code OACI, ex. CYUL.",
     "departsAt": "Heure de départ",
     "arrivesAt": "Heure d'arrivée (facultatif)",
-    "localTimeHint": "Heure de Montréal.",
+    "localTimeHint": "Heure de Montréal (HAE/HNE).",
     "saving": "Enregistrement…",
     "save": "Enregistrer",
     "cancel": "Annuler",
-    "blockTime": "Temps bloc",
-    "blockTimePlaceholder": "ex. 2:15",
+    "flightTime": "Temps de vol",
+    "flightTimePlaceholder": "2:15",
     "complete": "Terminer",
     "cancelReason": "Raison (facultatif)",
     "cancelFlight": "Annuler le vol",
     "cancelCompleted": "Annuler et rendre les heures",
     "edit": "Modifier",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Exporter (CSV)",
+    "flown": "{hours} de vol",
+    "planRequestTitle": "Planifier la demande · {registration}",
+    "planRequestSubtitle": "Tout ce que le propriétaire a demandé est déjà inscrit. À l'enregistrement, la demande est fermée et le propriétaire reçoit la confirmation.",
+    "moreActions": "Autres actions",
+    "flightTimeRead": "= {hours}",
+    "flightTimeReadOwner": "= {hours} · débité à {owner}",
+    "flightTimeInvalid": "Ex. 2:15, 2h15 ou 2,25",
+    "toCloseTitle": "À clôturer",
+    "toCloseBody": "Ces vols ont atterri : inscrivez le temps de vol pour le débiter de la banque d'heures.",
+    "saveAndReturn": "Enregistrer et planifier le retour",
+    "returnTitle": "Le retour · {route}",
+    "returnSubtitle": "Même appareil, même propriétaire, les aéroports inversés. Il reste l'heure à choisir.",
+    "chooseShare": "Choisir qui paie les heures",
+    "close": "Fermer",
+    "older": "Plus anciens",
+    "cancelledCount": "{count, plural, one {# vol annulé} other {# vols annulés}}"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -883,13 +1263,14 @@
       "planned": "Prévue",
       "in_progress": "En cours",
       "done": "Terminée",
-      "cancelled": "Annulée"
+      "cancelled": "Annulée",
+      "review": "En vérification"
     },
     "synced": "Synchronisée",
     "types": {
       "inspection": "Inspection",
       "unscheduled": "Imprévue",
-      "upgrade": "Amélioration",
+      "upgrade": "Modification",
       "other": "Autre"
     },
     "from": "À partir du {date}",
@@ -913,11 +1294,41 @@
     "finish": "Terminer",
     "edit": "Modifier",
     "cancelQuestion": "Annuler ces travaux?",
-    "cancelJob": "Annuler les travaux"
+    "cancelJob": "Annuler les travaux",
+    "next": {
+      "start": "Commencer",
+      "review": "Envoyer en vérification",
+      "done": "Approuver"
+    },
+    "moreActions": "Autres actions",
+    "sendBack": "Renvoyer en cours",
+    "columns": {
+      "planned": "Planifié",
+      "in_progress": "En cours",
+      "review": "En vérification",
+      "done": "Terminé"
+    },
+    "columnEmpty": "Rien ici.",
+    "boardSubtitle": "Chaque travail avance d'une colonne à l'autre, de la planification à l'approbation.",
+    "boardSubtitleDrag": "Glissez une carte vers la colonne suivante, ou utilisez ses boutons. Sur un téléphone, maintenez-la un instant avant de la glisser.",
+    "board": {
+      "picked": "« {title} » saisi. Déposez-le dans une colonne, ou appuyez sur Échap pour annuler.",
+      "dropped": "« {title} » reste à sa place.",
+      "moved": "« {title} » déplacé vers « {column} ».",
+      "reverted": "« {title} » est revenu dans « {column} ». {reason}",
+      "oneStep": "Les travaux avancent d'une colonne à la fois : passez d'abord par « {next} ».",
+      "noWayBack": "Ces travaux ne peuvent pas revenir dans « {column} »."
+    },
+    "syncedFromCamp": "CAMP",
+    "cancelledCount": "{count, plural, one {# travail annulé} other {# travaux annulés}}",
+    "doneOn": "Terminé le {date}",
+    "startedOn": "Commencé le {date}",
+    "seeHistory": "Voir dans l'historique de l'appareil",
+    "awaitingOther": "En attente d'une autre personne pour l'approbation."
   },
   "availability": {
-    "title": "Disponibilité",
-    "subtitle": "Les jours libres de votre appareil. Vos vols sont en bleu.",
+    "title": "Calendrier",
+    "subtitle": "Les jours libres de votre appareil. Touchez un jour libre pour demander un vol.",
     "previousMonth": "Mois précédent",
     "nextMonth": "Mois suivant",
     "legendLabel": "Légende",
@@ -925,7 +1336,8 @@
       "free": "Libre",
       "mine": "Votre vol",
       "booked": "Réservé",
-      "maintenance": "Maintenance"
+      "maintenance": "Maintenance",
+      "flight": "Vol"
     },
     "takenTitle": "Périodes occupées",
     "allFree": "Libre tout le mois.",
@@ -933,9 +1345,9 @@
     "noAircraftTitle": "Aucun appareil",
     "noAircraftBody": "Le calendrier apparaîtra dès que votre part sera enregistrée.",
     "chooseAircraft": "Choisir l'appareil",
-    "callToBook": "Appeler pour réserver",
-    "bookingHint": "Pour réserver un vol, appelez notre équipe : nous confirmons la disponibilité avec vous.",
-    "bookingHintNoPhone": "Pour réserver un vol, écrivez à notre équipe : nous confirmons la disponibilité avec vous.",
+    "callToBook": "Appeler",
+    "bookingHint": "Touchez un jour libre ou « Demander un vol » : l'équipe confirme la disponibilité avec vous. Pressé? Appelez-nous.",
+    "bookingHintNoPhone": "Touchez un jour libre ou « Demander un vol » : l'équipe confirme la disponibilité avec vous.",
     "blockTitle": "Bloquer une période",
     "blockBody": "Pour un prêt de l'appareil ou une indisponibilité connue.",
     "blockAdded": "Période bloquée.",
@@ -944,22 +1356,26 @@
     "blockKind": "Affiché comme",
     "addBlock": "Bloquer",
     "removeQuestion": "Retirer ce blocage?",
-    "remove": "Retirer"
+    "remove": "Retirer",
+    "requestOn": "Demander un vol le {date}",
+    "upcomingTitle": "À venir",
+    "allFreeRest": "Rien de prévu d'ici la fin du mois."
   },
   "ownerFlights": {
     "title": "Vos vols",
-    "subtitle": "Les vols sur votre part. Le temps bloc est déduit de vos heures.",
+    "subtitle": "Les vols sur votre part. Le temps de vol est déduit de vos heures.",
     "upcoming": "À venir",
     "past": "Passés",
     "noUpcomingTitle": "Aucun vol à venir",
     "noUpcomingBody": "Vos prochains vols apparaîtront ici dès qu'ils seront planifiés.",
     "noPastTitle": "Aucun vol passé",
     "noPastBody": "L'historique de vos vols apparaîtra ici.",
-    "exportCsv": "Exporter (CSV)"
+    "exportCsv": "Télécharger pour Excel",
+    "inFlight": "En vol"
   },
   "ownerAircraft": {
     "title": "Votre appareil",
-    "subtitle": "Fiche de l'appareil et suivi de la maintenance.",
+    "subtitle": "Fiche de l'appareil et périodes de maintenance.",
     "model": "Modèle",
     "serialNumber": "Numéro de série",
     "homeBase": "Base",
@@ -968,7 +1384,10 @@
     "since": "Depuis le",
     "seeAvailability": "Voir la disponibilité",
     "maintenance": "Maintenance",
-    "noMaintenance": "Aucune maintenance enregistrée."
+    "noMaintenance": "Aucune maintenance enregistrée.",
+    "window": "Maintenance du {from} au {to}",
+    "windowOpen": "Maintenance à partir du {from}",
+    "ownedBy": "Propriété de"
   },
   "integrations": {
     "title": "Intégrations",
@@ -988,15 +1407,14 @@
   "messages": {
     "title": "Messages",
     "subtitle": "Écrivez à notre équipe de répartition. Une vraie personne vous répond.",
-    "callUs": "Nous appeler",
     "conversationLabel": "Conversation",
     "threadLabel": "Messages de la conversation",
-    "ownerEmpty": "Posez votre question ou demandez un vol : notre équipe vous répond ici.",
+    "ownerEmpty": "Posez votre question ou demandez un vol : notre équipe vous répond ici.",
     "staffEmpty": "Aucun message pour l'instant. Écrivez le premier.",
     "ownerPlaceholder": "Écrivez votre message…",
     "staffPlaceholder": "Répondre…",
-    "viewAsReadOnly": "Vous consultez le portail comme ce propriétaire : l'envoi est désactivé.",
-    "responseHint": "Nous répondons pendant les heures d'ouverture, habituellement en moins d'une heure.",
+    "viewAsReadOnly": "Vous consultez le portail comme ce propriétaire : l'envoi est désactivé.",
+    "responseHint": "L'équipe répond habituellement en moins d'une heure.",
     "noOwner": "Les messages seront disponibles dès que votre compte sera relié à un propriétaire.",
     "today": "Aujourd'hui",
     "dispatchName": "Répartition · {name}",
@@ -1013,6 +1431,7 @@
     "inboxSubtitle": "Les conversations avec les propriétaires.",
     "filters": "Filtrer les conversations",
     "filterNames": {
+      "waiting": "À répondre",
       "open": "Ouvertes",
       "mine": "Les miennes",
       "resolved": "Résolues"
@@ -1020,7 +1439,8 @@
     "emptyFilter": {
       "open": "Aucune conversation ouverte.",
       "mine": "Aucune conversation ne vous est assignée.",
-      "resolved": "Aucune conversation résolue."
+      "resolved": "Aucune conversation résolue.",
+      "waiting": "Personne n'attend de réponse. Bravo."
     },
     "unassigned": "Non assignée",
     "unreadSuffix": "non lus",
@@ -1032,8 +1452,12 @@
     "backToInbox": "Retour aux messages",
     "assignTo": "Assigner à",
     "me": "{name} (moi)",
-    "resolve": "Résolue",
-    "reopen": "Rouvrir"
+    "resolve": "Marquer comme résolue",
+    "reopen": "Rouvrir",
+    "readOnlyMember": "Votre accès est en lecture seule : appelez ou textez l'équipe pour toute demande.",
+    "responseHintClosed": "Hors des heures de bureau : réponse dès 7 h. Une urgence? Appelez-nous.",
+    "replyAndResolve": "Répondre et résoudre",
+    "assignedTo": "Assignée à"
   },
   "notifications": {
     "title": "Notifications",
@@ -1054,22 +1478,26 @@
         "low_staff": "{ownerName} n'a plus que {hours} sur {aircraft}"
       },
       "maintenance": {
-        "planned": "{title} prévue sur {aircraft} le {when}"
+        "planned": "Maintenance prévue sur {aircraft} à partir du {when}"
       },
       "message": {
-        "from_dispatch": "Nouveau message de l'équipe : « {preview} »",
-        "from_owner": "{ownerName} : « {preview} »"
+        "from_dispatch": "Nouveau message de l'équipe : « {preview} »",
+        "from_owner": "{ownerName} : « {preview} »"
       },
       "access": {
         "uninvited_sign_up": "{email} s'est inscrit sans invitation"
       },
       "sync": {
-        "failed": "La synchronisation du logiciel de planification a {failed} erreur(s)"
+        "failed": "La synchronisation du logiciel de planification a {failed, plural, one {# erreur} other {# erreurs}}"
       },
       "privacy": {
         "request": "Demande Loi 25 de {email} ({kind})"
+      },
+      "flight": {
+        "confirmed": "Vol confirmé : {route} sur {aircraft}, le {when}"
       }
-    }
+    },
+    "emptyBodyStaff": "Les messages des propriétaires, les demandes de vol et les alertes apparaîtront ici."
   },
   "exports": {
     "date": "Date",
@@ -1090,7 +1518,7 @@
     "arrival": "Arrivée",
     "from": "De",
     "to": "À",
-    "blockHours": "Heures bloc",
+    "flightHours": "Heures de vol",
     "hours": "Heures",
     "kinds": {
       "cost": "Coût",
@@ -1114,12 +1542,12 @@
     },
     "statement": {
       "title": "Relevé annuel {year}",
-      "generated": "Produit le {date}",
-      "footer": "Relevé produit par le portail des propriétaires. Les montants suivent votre registre en date de production.",
+      "generated": "Établi le {date}",
+      "footer": "Relevé établi par le portail des propriétaires. Les montants suivent votre registre à la date d'établissement.",
       "summary": "Sommaire",
       "planned": "Prévu",
       "spent": "Dépensé",
-      "remaining": "Reste",
+      "remaining": "Restant",
       "revenue": "Revenus",
       "payments": "Paiements reçus",
       "notPublished": "Budget non publié",
@@ -1138,20 +1566,20 @@
   },
   "privacyPolicy": {
     "title": "Politique de confidentialité",
-    "updated": "Dernière mise à jour : {date}",
-    "intro": "{operator} gère des avions pour leurs propriétaires. Ce portail leur donne accès à leurs vols, leurs heures, leurs finances et leurs factures. Cette politique explique quels renseignements personnels nous recueillons, pourquoi, où ils sont conservés et comment exercer vos droits, conformément à la Loi sur la protection des renseignements personnels dans le secteur privé du Québec.",
+    "updated": "Dernière mise à jour : {date}",
+    "intro": "{operator} gère des appareils pour leurs propriétaires. Ce portail leur donne accès à leurs vols, leurs heures, leurs finances et leurs factures. Cette politique explique quels renseignements personnels nous recueillons, pourquoi, où ils sont conservés et comment exercer vos droits, conformément à la Loi sur la protection des renseignements personnels dans le secteur privé du Québec.",
     "officerTitle": "Responsable de la protection des renseignements personnels",
-    "officerBody": "Pour toute question ou demande : {officer}, <mail>{email}</mail>.",
+    "officerBody": "Pour toute question ou demande : {officer}, <mail>{email}</mail>.",
     "officerMissing": "Les coordonnées de notre responsable seront publiées ici avant l'ouverture du portail.",
     "sections": [
       {
         "title": "Ce que nous recueillons",
         "items": [
-          "Votre identité et vos coordonnées : nom, courriel, téléphone, langue.",
-          "Votre part d'appareil : pourcentage, heures allouées, vols effectués et leurs trajets.",
-          "Vos finances liées à l'appareil : budgets, coûts, paiements et factures.",
+          "Votre identité et vos coordonnées : nom, courriel, téléphone, langue.",
+          "Votre part d'appareil : pourcentage, heures allouées, vols effectués et leurs trajets.",
+          "Vos finances liées à l'appareil : budgets, coûts, paiements et factures.",
           "Vos messages avec notre équipe et les fichiers que vous y joignez.",
-          "Des données techniques de sécurité : adresse IP et navigateur lors des connexions, journal des actions faites dans le portail."
+          "Des données techniques de sécurité : adresse IP et navigateur lors des connexions, journal des actions faites dans le portail."
         ]
       },
       {
@@ -1159,7 +1587,7 @@
         "items": [
           "Gérer votre part d'appareil, planifier vos vols et tenir vos comptes.",
           "Vous facturer et vous transmettre budgets, relevés et avis.",
-          "Protéger votre compte : double authentification pour notre équipe, limites de tentatives, journal d'audit.",
+          "Protéger votre compte : vérification en deux étapes pour notre équipe, limites de tentatives, journal d'audit.",
           "Respecter nos obligations légales et fiscales.",
           "Nous n'utilisons pas vos renseignements à des fins publicitaires et nous ne les vendons pas."
         ]
@@ -1177,27 +1605,27 @@
         "title": "Qui y a accès",
         "items": [
           "Vous, et les autres personnes autorisées pour votre compte propriétaire.",
-          "Notre équipe, selon son rôle (répartition, finances, administration). Chaque consultation « vue propriétaire » et chaque modification est journalisée.",
-          "Les copropriétaires d'un même appareil ne voient jamais vos vols ni vos finances : seulement que l'appareil est réservé."
+          "Notre équipe, selon son rôle (répartition, finances, administration). Chaque consultation « vue propriétaire » et chaque modification est journalisée.",
+          "Les copropriétaires d'un même appareil ne voient jamais vos vols ni vos finances : seulement que l'appareil est réservé."
         ]
       },
       {
         "title": "Combien de temps",
         "items": [
-          "Les dossiers financiers (écritures, factures, budgets) sont conservés au moins six ans après la fin de l'année fiscale, comme l'exigent les lois fiscales.",
-          "Les sessions expirées et les liens de connexion sont supprimés automatiquement; les invitations non utilisées après 90 jours; les avis lus après un an.",
+          "Les dossiers financiers (écritures, factures, budgets) sont conservés au moins six ans après la fin de l'exercice financier, comme l'exigent les lois fiscales.",
+          "Les sessions expirées et les liens de connexion sont supprimés automatiquement; les invitations non utilisées après 90 jours; les avis lus après un an.",
           "À la fin de votre relation avec nous, les autres renseignements sont supprimés ou anonymisés une fois les délais légaux écoulés."
         ]
       },
       {
         "title": "Vos droits",
         "items": [
-          "Accéder à vos renseignements et en obtenir une copie dans un format structuré : téléchargez-la en tout temps depuis Mon compte.",
+          "Accéder à vos renseignements et en obtenir une copie dans un format structuré : téléchargez-la en tout temps depuis Mon compte.",
           "Faire corriger des renseignements inexacts.",
           "Demander la suppression de renseignements qui ne sont plus nécessaires, sous réserve de nos obligations légales.",
           "Retirer votre consentement aux courriels facultatifs depuis Mon compte.",
           "Déposer une plainte auprès de la Commission d'accès à l'information du Québec.",
-          "Nous répondons à toute demande dans un délai de 30 jours."
+          "Nous répondons à toute demande dans un délai de 30 jours."
         ]
       },
       {
@@ -1211,10 +1639,10 @@
   },
   "privacyAdmin": {
     "title": "Renseignements personnels",
-    "subtitle": "Les demandes à traiter en 30 jours et le registre des incidents de confidentialité exigé par la Loi 25.",
+    "subtitle": "Les demandes à traiter en 30 jours et le registre des incidents de confidentialité exigé par la Loi 25.",
     "requestsTitle": "Demandes ouvertes",
     "noOpenRequests": "Aucune demande ouverte.",
-    "daysLeft": "{count, plural, =0 {Échéance aujourd'hui} one {# jour restant} other {# jours restants}}",
+    "daysLeft": "{count, plural, =0 {Échéance aujourd'hui} one {# jour restant} other {# jours restants}}",
     "closedRequests": "{count, plural, one {# demande fermée} other {# demandes fermées}}",
     "response": "Réponse à la personne",
     "markDone": "Marquer traitée",
@@ -1243,7 +1671,7 @@
   },
   "developers": {
     "title": "Développeurs",
-    "subtitle": "Reliez la comptabilité, Zapier ou Make au portail : une API REST avec des clés à portée limitée, et des webhooks signés.",
+    "subtitle": "Reliez la comptabilité, Zapier ou Make au portail : une API REST avec des clés à portée limitée, et des webhooks signés.",
     "openapi": "Spécification OpenAPI",
     "keysTitle": "Clés d'API",
     "noKeys": "Aucune clé pour l'instant.",
@@ -1257,14 +1685,14 @@
     "scopes": "Accès accordés",
     "pickOne": "Choisissez au moins une option.",
     "createKey": "Créer la clé",
-    "keyCreated": "Copiez cette clé maintenant : elle ne sera plus affichée.",
+    "keyCreated": "Copiez cette clé maintenant : elle ne sera plus affichée.",
     "copy": "Copier",
     "copied": "Copiée",
     "scopeNames": {
       "owners_read": "Lire les propriétaires",
       "fleet_read": "Lire la flotte et les vols",
       "finance_read": "Lire les finances",
-      "finance_write": "Écrire au registre",
+      "finance_write": "Écrire dans le registre",
       "operations_write": "Planifier et terminer des vols"
     },
     "hooksTitle": "Webhooks",
@@ -1272,11 +1700,11 @@
     "active": "Actif",
     "disabled": "Désactivé",
     "delivered": "livré",
-    "retrying": "nouvel essai ({attempts} échecs)",
+    "retrying": "nouvel essai ({attempts, plural, one {# échec} other {# échecs}})",
     "gaveUp": "abandonné",
     "sendTest": "Envoyer un test",
     "testOk": "Test reçu ({status}).",
-    "testFailed": "Échec du test : {detail}",
+    "testFailed": "Échec du test : {detail}",
     "enable": "Réactiver",
     "disable": "Désactiver",
     "hookName": "Nom",
@@ -1284,7 +1712,870 @@
     "urlHint": "HTTPS obligatoire. Chaque envoi est signé (en-tête Jet-Signature).",
     "events": "Événements",
     "createHook": "Créer le webhook",
-    "secretCreated": "Copiez ce secret de signature maintenant : il ne sera plus affiché.",
+    "secretCreated": "Copiez ce secret de signature maintenant : il ne sera plus affiché.",
     "docsHint": "Les clés et webhooks sont réservés aux administrateurs. Le guide d'intégration se trouve dans docs/api.md du dépôt."
+  },
+  "contact": {
+    "call": "Appeler",
+    "text": "Texto"
+  },
+  "holdingCompanies": {
+    "title": "Sociétés de portefeuille",
+    "subtitle": "Les sociétés qui possèdent les appareils. Leurs actionnaires sont les propriétaires.",
+    "new": "Nouvelle société",
+    "newTitle": "Nouvelle société de portefeuille",
+    "newSubtitle": "Ajoutez la société, puis rattachez-lui son appareil depuis la fiche de l'appareil.",
+    "editTitle": "Modifier la société",
+    "edit": "Modifier",
+    "emptyTitle": "Aucune société",
+    "emptyBody": "Ajoutez la société de portefeuille de chaque appareil.",
+    "noAircraft": "Aucun appareil",
+    "legalName": "Raison sociale",
+    "registrationNumber": "NEQ",
+    "registrationNumberHint": "Numéro d'entreprise du Québec, ou autre immatriculation.",
+    "neq": "NEQ {number}",
+    "email": "Courriel",
+    "phone": "Téléphone",
+    "notes": "Notes",
+    "contact": "Coordonnées",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "aircraftTitle": "Appareils",
+    "noAircraftBody": "Aucun appareil n'est rattaché à cette société.",
+    "aircraftHint": "Pour rattacher un appareil, modifiez sa fiche et choisissez la société.",
+    "shareholders": "Actionnaires",
+    "noShareholders": "Aucun actionnaire pour l'instant : ajoutez des parts sur l'appareil.",
+    "history": "Historique",
+    "archiveTitle": "Archiver la société",
+    "archiveBody": "Possible seulement quand aucun appareil ne lui est rattaché.",
+    "archive": "Archiver",
+    "archiveConfirm": "Archiver cette société?"
+  },
+  "brand": {
+    "footer": "Univair · Saint-Hubert, Québec",
+    "eyebrow": "Gestion d'appareils · Univair",
+    "taglineLight": "Votre appareil,",
+    "taglineBold": "où qu'il soit.",
+    "description": "Le portail des propriétaires Univair"
+  },
+  "live": {
+    "states": {
+      "in_flight": "En vol",
+      "on_ground": "Au sol",
+      "maintenance": "En maintenance",
+      "unknown": "Position inconnue"
+    },
+    "inFlight": "En vol",
+    "coOwnerFlight": "Vol de {name}",
+    "inMaintenance": "En maintenance",
+    "onGroundAt": "Au sol à {city}",
+    "unknown": "Position inconnue",
+    "signalLost": "Signal perdu",
+    "progress": "{percent} % du trajet parcouru",
+    "altitude": "Altitude",
+    "speed": "Vitesse",
+    "heading": "Cap",
+    "arrival": "Arrivée prévue",
+    "feet": "{value} pi",
+    "knots": "{value} nœuds",
+    "inMinutes": "{minutes, plural, =0 {maintenant} one {dans # min} other {dans # min}}",
+    "nextFlight": "Prochain vol",
+    "maintenanceBody": "L'appareil est en maintenance. Nous vous aviserons dès son retour en service.",
+    "parkedBody": "L'appareil est stationné et prêt pour votre prochain vol.",
+    "seenSeconds": "Vu il y a {seconds} s",
+    "seenMinutes": "Vu il y a {minutes} min",
+    "noSignal": "Aucun signal reçu pour l'instant",
+    "sources": {
+      "demo": "Simulation",
+      "opensky": "Données ADS-B · OpenSky",
+      "flightaware": "Données FlightAware"
+    },
+    "mapLabel": "Carte en direct",
+    "fleetTitle": "La flotte en direct",
+    "fleetSubtitle": "Chaque appareil, là où il est maintenant.",
+    "whereIs": "Où est {registration}",
+    "inDuration": "{hours, plural, =0 {dans {minutes} min} other {dans # h {minutes} min}}",
+    "airborneCount": "{count, plural, =0 {Aucun appareil en vol} one {# en vol} other {# en vol}} sur {total}",
+    "unknownBody": "Nous ne recevons pas sa position pour le moment.",
+    "askTeam": "Demander à l'équipe",
+    "staleBody": "Dernière position reçue il y a {minutes} min. C'est fréquent à basse altitude ou au-dessus de l'eau; elle revient d'elle-même."
+  },
+  "shell": {
+    "client": "Espace propriétaire",
+    "admin": "Administration"
+  },
+  "authFrame": {
+    "footer": "Univair · Aéroport de Saint-Hubert, Québec",
+    "help": "Besoin d'aide? {phone}",
+    "privacy": "Confidentialité",
+    "signIn": {
+      "eyebrow": "Univair Management",
+      "light": "Votre appareil,",
+      "strong": "où qu'il soit."
+    },
+    "signUp": {
+      "eyebrow": "Bienvenue à bord",
+      "light": "Tout ce qui touche votre appareil,",
+      "strong": "en un seul endroit."
+    },
+    "invite": {
+      "eyebrow": "Invitation",
+      "light": "Votre place",
+      "strong": "vous attend."
+    },
+    "password": {
+      "eyebrow": "Accès",
+      "light": "Un nouveau mot de passe,",
+      "strong": "et vous repartez."
+    },
+    "security": {
+      "eyebrow": "Sécurité",
+      "light": "Votre compte, protégé",
+      "strong": "comme votre appareil."
+    },
+    "pending": {
+      "eyebrow": "Votre accès",
+      "light": "Presque prêt.",
+      "strong": "On s'occupe du reste."
+    }
+  },
+  "welcome": {
+    "metaTitle": "Bienvenue",
+    "progress": "Étape {n} sur {total}",
+    "continue": "Continuer",
+    "next": "Suivant",
+    "back": "Retour",
+    "welcome": {
+      "eyebrow": "Univair Management",
+      "title": "Bienvenue chez Univair, {name}.",
+      "body": "Votre appareil, vos heures, vos vols et votre équipe : tout se retrouve ici, à portée de main, où que vous soyez.",
+      "time": "Moins d'une minute pour faire connaissance.",
+      "start": "Commencer",
+      "titleStaff": "Bienvenue dans l'équipe, {name}.",
+      "bodyStaff": "Les appareils, les vols, la maintenance, les propriétaires et la facturation : tout le travail de la journée se retrouve ici.",
+      "titlePilot": "Bienvenue à bord, {name}.",
+      "bodyPilot": "Ici, vous déclarez chaque vol en deux minutes, depuis votre téléphone : temps de vol, carburant et reçus.",
+      "titleManager": "Bienvenue, {name}.",
+      "bodyManager": "La facturation de votre société et ses résultats, préparés par Univair et prêts à envoyer."
+    },
+    "name": {
+      "eyebrow": "Votre profil",
+      "title": "Faisons connaissance.",
+      "body": "Votre photo et votre nom, tels que l'équipe Univair les verra. La photo est facultative.",
+      "first": "Prénom",
+      "last": "Nom",
+      "language": "Langue",
+      "required": "Entrez votre prénom.",
+      "failed": "Impossible d'enregistrer. Réessayez."
+    },
+    "tour": {
+      "eyebrow": "Ce que vous trouverez ici",
+      "count": "{n} sur {total}",
+      "live": {
+        "caption": "Toujours savoir où il est.",
+        "title": "Votre appareil, en direct",
+        "body": "Sa position sur la carte, son altitude, sa vitesse et l'heure d'arrivée, mises à jour en continu.",
+        "a": "En vol ou au sol, vous le voyez en un coup d'œil",
+        "b": "Chaque vol tracé sur la carte, du départ à l'arrivée"
+      },
+      "hours": {
+        "caption": "Vos heures, sans calcul.",
+        "title": "Vos heures et sa disponibilité",
+        "body": "Les heures qu'il vous reste, celles déjà volées, et les jours où l'appareil est libre.",
+        "a": "Le calendrier des 14 prochains jours d'un regard",
+        "b": "Un rappel quand vos heures baissent"
+      },
+      "finances": {
+        "caption": "Chaque dollar à sa place.",
+        "title": "Vos finances, claires",
+        "body": "Ce qui est dépensé, ce qui est prévu et vos factures, toujours à jour.",
+        "a": "Votre budget de l'année et où vous en êtes",
+        "b": "Vos factures et relevés en PDF, en un clic"
+      },
+      "flights": {
+        "caption": "Vos départs, réglés d'avance.",
+        "title": "Vos vols",
+        "body": "Vos prochains départs et tout votre historique, au même endroit.",
+        "a": "Chaque vol avec sa route et son temps de vol",
+        "b": "Votre historique à exporter quand vous le souhaitez"
+      },
+      "eyebrowStaff": "Votre journée, en bref",
+      "todo": {
+        "caption": "Ce qui attend quelqu'un, d'abord.",
+        "title": "« À traiter », chaque matin",
+        "body": "Le tableau de bord commence par ce qui demande une action : demandes de vol, rapports à vérifier, messages sans réponse, maintenance qui approche.",
+        "a": "Chaque ligne vous mène directement au bon écran",
+        "b": "La carte montre la flotte en direct, avec les vols du jour"
+      },
+      "fleet": {
+        "caption": "Tout, appareil par appareil.",
+        "title": "Appareils : tout est rangé par avion",
+        "body": "Ouvrez un appareil pour trouver ses propriétaires et leurs parts, ses tarifs, sa maintenance, ses réserves et sa photo.",
+        "a": "Inviter un propriétaire se fait depuis sa fiche",
+        "b": "La recherche (⌘K ou Ctrl+K) trouve un appareil, un propriétaire ou un vol."
+      },
+      "ops": {
+        "caption": "Les vols et l'atelier, au même endroit.",
+        "title": "Vols et maintenance",
+        "body": "Planifiez un vol en quelques champs, puis fermez-le à l'arrivée. La maintenance avance en colonnes, de prévue à terminée.",
+        "a": "Chaque vol s'ouvre avec sa route sur la carte et le rapport du pilote",
+        "b": "Une tâche passe en vérification avant d'être approuvée"
+      },
+      "billing": {
+        "caption": "Du rapport de vol à la facture.",
+        "title": "Rapports de vol et factures",
+        "body": "Le pilote déclare le vol; vous vérifiez ses chiffres et ses reçus, puis la facture se prépare avec les bons tarifs et les taxes.",
+        "a": "Les réserves de maintenance se remplissent à chaque heure facturée",
+        "b": "Rien ne s'efface : chaque correction laisse une trace."
+      },
+      "report": {
+        "caption": "Après chaque vol, deux minutes.",
+        "title": "Déclarez vos vols",
+        "body": "Vos vols récents vous attendent dans « Rapports de vol ». Entrez le temps de vol et le carburant, puis envoyez.",
+        "a": "Le temps de vol s'écrit comme sur votre carnet : 1:35",
+        "b": "Les vols qui attendent votre rapport sont toujours en haut de la liste"
+      },
+      "receipts": {
+        "caption": "Le reçu, en photo.",
+        "title": "Vos dépenses et reçus",
+        "body": "Carburant, frais d'atterrissage, hôtel : ajoutez la dépense et photographiez le reçu, directement depuis votre téléphone.",
+        "a": "Indiquez si vous l'avez payée ou si c'est la carte d'Univair",
+        "b": "Ce que vous avez avancé vous est remboursé"
+      },
+      "returned": {
+        "caption": "Un doute? On vous le dit.",
+        "title": "Vérifié par la comptabilité",
+        "body": "Chaque rapport est vérifié avant la facture. S'il manque quelque chose, il vous revient avec une note : corrigez et renvoyez.",
+        "a": "Vous voyez où en est chacun de vos rapports",
+        "b": "Un rapport approuvé part à la facturation sans autre démarche"
+      },
+      "approved": {
+        "caption": "Prêt à facturer.",
+        "title": "Les vols approuvés, prêts à facturer",
+        "body": "Chaque vol vérifié par Univair arrive dans « Facturation », avec son temps de vol et ses dépenses.",
+        "a": "Une facture en un clic, numérotée pour votre société",
+        "b": "Le PDF est prêt à envoyer"
+      },
+      "taxes": {
+        "caption": "Les taxes, déjà calculées.",
+        "title": "TPS et TVQ comprises",
+        "body": "Les taxes sont calculées selon les règles du vol, avec vos numéros d'inscription sur chaque facture.",
+        "a": "Les tarifs viennent de l'appareil, à jour",
+        "b": "Rien ne s'efface : chaque correction laisse une trace."
+      },
+      "results": {
+        "caption": "Où en est la société.",
+        "title": "Les résultats de la société",
+        "body": "Revenus, dépenses et réserves de maintenance de l'année, mis à jour à chaque facture.",
+        "a": "Ce qui est mis de côté pour les grosses inspections",
+        "b": "Les dépenses de la société s'ajoutent en quelques champs"
+      }
+    },
+    "team": {
+      "eyebrow": "Toujours là pour vous",
+      "title": "Une vraie équipe, à un appel près.",
+      "body": "Un vol à planifier, un hôtel, une question sur votre appareil? Appelez ou textez : ce sont ces personnes qui vous répondent, 7 jours sur 7.",
+      "inApp": "Vous pouvez aussi nous écrire directement dans l'application.",
+      "eyebrowStaff": "Vos collègues",
+      "titleStaff": "L'équipe avec qui vous travaillez.",
+      "bodyStaff": "Les propriétaires voient ces visages quand ils nous appellent ou nous écrivent."
+    },
+    "ready": {
+      "eyebrow": "Tout est prêt",
+      "title": "À vous de jouer, {name}.",
+      "body": "Votre espace vous attend.",
+      "bodyAircraft": "{registration} vous attend.",
+      "enter": "Entrer dans mon espace",
+      "request": "Faire une première demande de vol",
+      "bodySecurity": "Une dernière étape : protégez votre compte avec un code de connexion. C'est obligatoire pour l'équipe, et ça prend une minute.",
+      "secure": "Protéger mon compte",
+      "bodyStaff": "Votre tableau de bord vous attend.",
+      "enterStaff": "Ouvrir le tableau de bord",
+      "bodyPilot": "Vos vols à déclarer vous attendent.",
+      "enterPilot": "Voir mes rapports de vol",
+      "bodyManager": "La facturation de votre société vous attend.",
+      "enterManager": "Ouvrir la facturation"
+    },
+    "skip": "Passer",
+    "settings": {
+      "replayTour": "Revoir la visite",
+      "replayTourBody": "Le guide de bienvenue, du début."
+    }
+  },
+  "avatar": {
+    "choose": "Choisir une photo",
+    "change": "Changer",
+    "remove": "Retirer",
+    "zoom": "Zoom",
+    "save": "Enregistrer la photo",
+    "saving": "Enregistrement…",
+    "hint": "Glissez une photo ici, ou touchez le cercle.",
+    "notAnImage": "Choisissez une image (JPG, PNG ou HEIC).",
+    "failed": "La photo n'a pas pu être enregistrée. Réessayez.",
+    "hintTouch": "Touchez le cercle pour ajouter une photo."
+  },
+  "teamReach": {
+    "title": "Toujours là pour vous",
+    "body": "Un appel ou un texto, 7 jours sur 7. Nous nous occupons du reste."
+  },
+  "emails": {
+    "greeting": "Bonjour,",
+    "signature": "L'équipe Univair",
+    "help": "Une question? Appelez ou textez-nous au {phone}.",
+    "preferences": "Vous recevez ce courriel selon vos préférences. Modifiez-les dans le portail.",
+    "preferencesLink": "Gérer mes courriels",
+    "linkFallback": "Le bouton ne fonctionne pas? Copiez ce lien :",
+    "templates": {
+      "verify": {
+        "subject": "Confirmez votre adresse courriel",
+        "body": "Confirmez votre adresse pour activer votre compte.",
+        "cta": "Confirmer mon adresse"
+      },
+      "reset": {
+        "subject": "Réinitialiser votre mot de passe",
+        "body": "Vous avez demandé un nouveau mot de passe. Ce lien expire dans une heure.",
+        "cta": "Choisir un nouveau mot de passe"
+      },
+      "magicLink": {
+        "subject": "Votre lien de connexion",
+        "body": "Utilisez ce lien pour vous connecter. Il expire dans 10 minutes.",
+        "cta": "Me connecter"
+      },
+      "invitation": {
+        "subject": "Votre accès au portail des propriétaires",
+        "body": "Univair vous ouvre l'accès à votre portail de propriétaire. Ce lien expire dans 7 jours.",
+        "cta": "Accepter l'invitation"
+      },
+      "invoiceIssued": {
+        "subject": "Nouvelle facture {number}",
+        "body": "Une nouvelle facture de {amount} pour {aircraft} est disponible dans votre portail.",
+        "cta": "Voir la facture"
+      },
+      "budgetPublished": {
+        "subject": "Votre budget {year} est disponible",
+        "body": "Le budget {year} de {aircraft} a été publié. Vous pouvez le consulter dans votre portail.",
+        "cta": "Voir mes finances"
+      },
+      "newMessage": {
+        "subject": "Nouveau message de notre équipe",
+        "body": "Notre équipe vous a répondu : « {preview} »",
+        "cta": "Lire et répondre"
+      },
+      "hoursLow": {
+        "subject": "Il vous reste {hours} sur {aircraft}",
+        "body": "Votre solde d'heures sur {aircraft} est passé sous 10 % de votre allocation annuelle : il reste {hours}.",
+        "cta": "Voir mon solde"
+      },
+      "maintenancePlanned": {
+        "subject": "Maintenance prévue sur {aircraft}",
+        "body": "{aircraft} sera en maintenance à partir du {when}. L'appareil ne sera pas disponible pendant ce temps.",
+        "cta": "Voir l'appareil"
+      },
+      "flightConfirmed": {
+        "subject": "Votre vol {route} est planifié",
+        "body": "Votre vol {route} du {when} sur {aircraft} est planifié. Vous le retrouverez dans vos prochains vols.",
+        "cta": "Voir mes vols"
+      }
+    },
+    "greetingName": "Bonjour {name},"
+  },
+  "requestFlight": {
+    "open": "Demander un vol",
+    "title": "Demander un vol",
+    "body": "Dites-nous où et quand : l'équipe confirme le vol et vous écrit dans Messages.",
+    "aircraft": "Appareil",
+    "from": "Départ",
+    "to": "Destination",
+    "toPlaceholder": "Ville ou code, ex. Teterboro",
+    "date": "Date",
+    "time": "Heure souhaitée",
+    "timeHint": "Laissez vide si vous êtes flexible.",
+    "returnTrip": "Aller-retour",
+    "returnDate": "Date du retour",
+    "passengers": "Passagers",
+    "notes": "Précisions (facultatif)",
+    "notesPlaceholder": "Traiteur, transport au sol, bagages…",
+    "send": "Envoyer la demande",
+    "sending": "Envoi…",
+    "cancel": "Annuler",
+    "sentTitle": "Demande envoyée",
+    "sentBody": "L'équipe vous confirme le vol sous peu, ici et par courriel. Un imprévu? Appelez-nous.",
+    "sentMessages": "Voir dans Messages",
+    "close": "Fermer",
+    "pending": "Demande envoyée",
+    "pendingHint": "En attente de confirmation",
+    "card": {
+      "title": "Demande de vol",
+      "return": "Retour le {date}",
+      "flexible": "Heure flexible",
+      "passengers": "{count, plural, one {# passager} other {# passagers}}",
+      "plan": "Planifier ce vol",
+      "scheduled": "Vol planifié",
+      "viewFlight": "Voir le vol",
+      "requested": "Demande envoyée"
+    },
+    "fewer": "Un passager de moins",
+    "more": "Un passager de plus"
+  },
+  "toasts": {
+    "flightScheduled": "Vol enregistré.",
+    "flightUpdated": "Vol modifié.",
+    "flightClosed": "Vol clôturé : les heures sont débitées.",
+    "flightCancelled": "Vol annulé.",
+    "maintenanceSaved": "Maintenance enregistrée.",
+    "maintenanceStatus": "Statut de la maintenance mis à jour.",
+    "invitationSent": "Invitation envoyée.",
+    "invitationRevoked": "Invitation révoquée.",
+    "profileSaved": "Profil enregistré.",
+    "close": "Fermer",
+    "reportSent": "Rapport envoyé aux finances.",
+    "reportApproved": "Rapport approuvé.",
+    "reportReturned": "Rapport renvoyé au pilote.",
+    "rateSaved": "Tarif enregistré.",
+    "invoiceIssued": "Facture émise et envoyée au propriétaire.",
+    "billingSaved": "Profil de facturation enregistré."
+  },
+  "search": {
+    "open": "Rechercher",
+    "placeholder": "Propriétaire, immatriculation, société, facture…",
+    "actionsTitle": "Actions rapides",
+    "resultsTitle": "Résultats",
+    "empty": "Aucun résultat.",
+    "actions": {
+      "newFlight": "Planifier un vol",
+      "newOwner": "Nouveau propriétaire",
+      "invite": "Inviter un propriétaire"
+    },
+    "kinds": {
+      "owner": "Propriétaire",
+      "company": "Société",
+      "aircraft": "Appareil",
+      "invoice": "Facture",
+      "conversation": "Conversation",
+      "flight": "Vol"
+    },
+    "pagesTitle": "Pages"
+  },
+  "pilot": {
+    "side": "Pilote",
+    "title": "Rapports de vol",
+    "hello": "Bonjour {name}",
+    "body": "Après chaque vol : le temps de vol, le carburant et vos dépenses, avec une photo de chaque reçu. Le rapport part aux finances, qui facturent le bon propriétaire.",
+    "toReport": "Vols à rapporter",
+    "nothingToReport": "Tout est rapporté",
+    "nothingToReportBody": "Les vols des 14 derniers jours apparaîtront ici une fois atterris.",
+    "returnedNote": "Renvoyé par les finances :",
+    "fix": "Corriger",
+    "report": "Remplir",
+    "sent": "Rapports envoyés",
+    "statuses": {
+      "submitted": "Envoyé",
+      "returned": "À corriger",
+      "approved": "Approuvé"
+    },
+    "reportTitle": "Rapport de vol",
+    "back": "Rapports de vol",
+    "form": {
+      "flightTime": "Temps de vol",
+      "flightTimeHint": "1:35 ou 1 h 35",
+      "fuelLitres": "Carburant ajouté (litres)",
+      "expenses": "Dépenses",
+      "expensesBody": "Une ligne par reçu. Prenez le reçu en photo : il est joint au rapport.",
+      "addExpense": "Ajouter une dépense",
+      "notes": "Remarques (facultatif)",
+      "notesPlaceholder": "Passagers, imprévus, état de l'appareil…",
+      "sending": "Envoi…",
+      "send": "Envoyer le rapport",
+      "expenseN": "Dépense {n}",
+      "removeExpense": "Retirer la dépense {n}",
+      "category": "Type",
+      "categories": {
+        "fuel": "Carburant",
+        "handling": "Assistance au sol et stationnement",
+        "airport_fees": "Frais d'aéroport",
+        "hotel": "Hôtel",
+        "per_diem": "Per diem",
+        "catering": "Traiteur",
+        "other": "Autre"
+      },
+      "amount": "Montant",
+      "paidBy": "Payé par",
+      "payers": {
+        "company_card": "Carte de la compagnie",
+        "pilot": "Moi (à rembourser)"
+      },
+      "expenseNote": "Détail (facultatif)",
+      "uploading": "Envoi de la photo…",
+      "receiptAttached": "Reçu joint",
+      "addReceipt": "Photo du reçu",
+      "viewReceipt": "Voir",
+      "uploadFailed": "La photo n'a pas pu être envoyée. Réessayez.",
+      "flightTimeEcho": "= {time}",
+      "currency": "Devise"
+    },
+    "toFix": "À corriger ({count})"
+  },
+  "rates": {
+    "title": "Tarif horaire",
+    "body": "Ce que coûte une heure de vol de cet appareil : carburant, réserves d'entretien par composante et pilote. Le tarif en vigueur le jour du vol s'applique.",
+    "perHour": "de l'heure",
+    "perHourShort": "/ h",
+    "since": "depuis le {date}",
+    "parts": {
+      "fuel": "Carburant",
+      "engine": "Réserve moteur",
+      "propeller": "Réserve hélice",
+      "airframe": "Réserve cellule et cabine",
+      "avionics": "Réserve avionique",
+      "pilot": "Pilote"
+    },
+    "reserve": "réserve",
+    "none": "Aucun tarif encore. Fixez-le pour que les rapports de vol se chiffrent.",
+    "upcoming": "{total} / h à partir du {date}",
+    "setTitle": "Nouveau tarif",
+    "effectiveFrom": "En vigueur à partir du",
+    "perHourHint": "$ par heure de vol",
+    "save": "Enregistrer le tarif"
+  },
+  "flightReports": {
+    "title": "Rapports de vol",
+    "subtitle": "Ce que les pilotes déclarent après chaque vol. Vérifiez qui a volé, puis approuvez ou renvoyez avec une note.",
+    "noAccessTitle": "Réservé aux finances",
+    "noAccessBody": "Les rapports de vol contiennent des montants : ils sont visibles par l'équipe des finances.",
+    "unknownPilot": "Pilote inconnu",
+    "noOwner": "Propriétaire à confirmer",
+    "expensesSummary": "{count, plural, one {# dépense} other {# dépenses}} · {total}",
+    "noExpenses": "Aucune dépense",
+    "statuses": {
+      "submitted": "À vérifier",
+      "returned": "À corriger",
+      "approved": "Approuvé"
+    },
+    "waiting": "À vérifier ({count})",
+    "emptyTitle": "Aucun rapport en attente",
+    "emptyBody": "Les rapports des pilotes arrivent ici dès qu'ils les envoient.",
+    "decided": "Derniers traités",
+    "detailTitle": "Rapport de vol",
+    "filedBy": "Rapport de {pilot} · vol du {date}",
+    "declared": "Déclaré par le pilote",
+    "expensesLabel": "Dépenses",
+    "lastNote": "Note envoyée au pilote :",
+    "openReceipt": "Ouvrir le reçu : {category}",
+    "noReceipt": "Sans reçu",
+    "chargesTitle": "Ce que le vol représente",
+    "chargesBody": "Le temps de vol au tarif de l'appareil le jour du vol, plus les dépenses refacturées au coût (en dollars canadiens).",
+    "expensesAtCost": "Dépenses refacturées au coût",
+    "beforeTaxes": "Total avant taxes",
+    "noRate": "Cet appareil n'a pas encore de tarif horaire.",
+    "setRate": "Fixer le tarif",
+    "decision": "Décision",
+    "approvedFor": "Approuvé, facturé à {owner}.",
+    "returnedToPilot": "Renvoyé au pilote. Il le corrigera depuis son téléphone.",
+    "readOnly": "Seule l’équipe des finances peut approuver un rapport.",
+    "billedTo": "Facturé à (qui a volé)",
+    "chooseShare": "Choisir le propriétaire",
+    "approve": "Approuver le rapport",
+    "returnNote": "Ce qu’il faut corriger",
+    "returnNotePlaceholder": "Ex. : il manque le reçu du carburant à KTEB.",
+    "sendBack": "Renvoyer au pilote",
+    "cancel": "Annuler",
+    "sendBackOpen": "Renvoyer au pilote avec une note",
+    "toInvoice": "À facturer ({count})",
+    "noCompanyShort": "Sans société",
+    "toInvoiceCta": "Facturer",
+    "invoiceTitle": "Facture",
+    "openInvoice": "Voir la facture",
+    "noCompany": "L'appareil n'appartient à aucune société : impossible d'émettre une facture à son nom.",
+    "setCompany": "Choisir la société",
+    "payers": {
+      "company_card": "Carte de la compagnie",
+      "pilot": "Payé par le pilote, à rembourser"
+    },
+    "fuelIncluded": "Carburant inclus au tarif horaire",
+    "fuelIncludedBody": "Le tarif de l'appareil comprend le carburant : ce reçu est un coût de la société, il n'est pas refacturé.",
+    "notBilled": "non facturé",
+    "usdAtApproval": "Les reçus en dollars américains sont convertis au taux saisi à l'approbation.",
+    "usdRate": "Taux de change USD → CAD",
+    "usdRateHint": "Dollars canadiens pour 1 $ US, d'après le relevé de la carte. Ex. 1,3850",
+    "approvedRate": "Taux USD → CAD : {rate}."
+  },
+  "invoiceDetail": {
+    "title": "Facture",
+    "back": "Factures",
+    "issuedOn": "Émise le {date}",
+    "dueOn": "payable au plus tard le {date}",
+    "downloadPdf": "Télécharger le PDF",
+    "from": "Émise par",
+    "to": "Facturée à",
+    "gst": "TPS",
+    "qst": "TVQ",
+    "notRegistered": "Société non inscrite aux fichiers de la TPS et de la TVQ : aucune taxe facturée.",
+    "atCost": "au coût",
+    "subtotal": "Sous-total",
+    "gstLine": "TPS (5 %)",
+    "qstLine": "TVQ (9,975 %)",
+    "total": "Total",
+    "howToPay": "Paiement :",
+    "voided": "Facture annulée : {reason}",
+    "pdfTitle": "Facture",
+    "number": "N°",
+    "date": "Date",
+    "due": "Échéance",
+    "flight": "Vol",
+    "description": "Description",
+    "quantity": "Quantité",
+    "unitPrice": "Prix unitaire",
+    "amount": "Montant",
+    "managedBy": "Gérée par Univair Management",
+    "previewFrom": "Sera émise au nom de {company}, à {owner}.",
+    "notCharged": "non facturée",
+    "noTaxNumbers": "Aucun numéro de TPS ni de TVQ dans le profil de la société : la facture sera sans taxes.",
+    "needsRate": "L'appareil n'a pas de tarif horaire : fixez-le avant d'émettre.",
+    "issue": "Émettre la facture",
+    "issueConfirm": "La facture sera numérotée et envoyée au propriétaire. Elle ne pourra plus être modifiée, seulement annulée.",
+    "issueYes": "Oui, émettre",
+    "issuing": "Émission…",
+    "cancel": "Annuler",
+    "ledgerTaxes": "TPS/TVQ",
+    "fuelIncluded": "Carburant inclus au tarif horaire",
+    "notBilled": "non facturé",
+    "receipts": "Reçus",
+    "needsFxRate": "Des reçus en dollars américains n'ont pas de taux de change : faites approuver le rapport par les finances avec le taux.",
+    "zeroRated": "Vol international : détaxé",
+    "zeroRatedHint": "Sans TPS ni TVQ. À confirmer avec votre comptable avant de cocher.",
+    "issueConfirmZeroRated": "La facture sera numérotée, sans TPS ni TVQ (vol international détaxé), et envoyée au propriétaire. Elle ne pourra plus être modifiée, seulement annulée.",
+    "notYet": "Pas maintenant",
+    "voidBanner": "Annulée le {date}",
+    "voidBannerNoDate": "Annulée",
+    "paidOn": "payée le {date}",
+    "zeroRatedLine": "Vol international détaxé : TPS et TVQ"
+  },
+  "billingProfile": {
+    "title": "Facturation",
+    "body": "Ce qui figure sur les factures de la société : adresse, numéros de taxes et numérotation. Sans numéro de TPS ou de TVQ, cette taxe n'est pas facturée.",
+    "address": "Adresse",
+    "gstNumber": "Numéro de TPS",
+    "qstNumber": "Numéro de TVQ",
+    "taxHint": "Laissez vide si la société n’est pas inscrite.",
+    "prefix": "Préfixe des factures",
+    "prefixHint": "Exemple : {example}",
+    "terms": "Délai de paiement (jours)",
+    "instructions": "Instructions de paiement",
+    "instructionsPlaceholder": "Virement Interac à factures@exemple.ca, ou chèque à l’ordre de la société.",
+    "save": "Enregistrer",
+    "notRegistered": "Non inscrite",
+    "managersTitle": "Gestionnaires de la société",
+    "managersBody": "Les adjointes ou techniciens qui tiennent les livres de la société : ils émettent ses factures depuis le portail.",
+    "noManagers": "Personne pour l’instant.",
+    "managerEmail": "Courriel",
+    "managerHint": "La personne doit d’abord avoir créé son compte.",
+    "addManager": "Ajouter",
+    "remove": "Retirer",
+    "removeManager": "Retirer {name}",
+    "results": "Résultats"
+  },
+  "billing": {
+    "title": "Facturation",
+    "subtitle": "Les vols approuvés par Univair, prêts à facturer au nom de la société, et les factures déjà émises.",
+    "toInvoice": "À facturer ({count})",
+    "emptyTitle": "Rien à facturer",
+    "emptyBody": "Les vols approuvés par Univair apparaissent ici, prêts à facturer.",
+    "prepare": "Préparer la facture",
+    "issued": "Factures émises",
+    "prepareTitle": "Préparer la facture",
+    "prepareBody": "Vérifiez les lignes et les taxes, puis émettez la facture au nom de la société.",
+    "results": "Résultats de la société",
+    "groups": {
+      "issued": "À recevoir ({count})",
+      "paid": "Payées ({count})",
+      "void": "Annulées ({count})"
+    },
+    "back": "Facturation"
+  },
+  "pnl": {
+    "title": "Résultats de la société",
+    "titleYear": "Résultats {year}",
+    "subtitle": "Ce que la société a facturé à ses propriétaires, ce qu'elle a payé, et ce qui reste.",
+    "ownerSubtitle": "La société propriétaire de {aircraft} : ce qu'elle a facturé, ce qu'elle a payé, et si elle s'équilibre.",
+    "revenue": "Revenus",
+    "expenses": "Dépenses",
+    "result": "Résultat",
+    "surplus": "Excédent",
+    "deficit": "Déficit",
+    "totalRevenue": "Total des revenus",
+    "totalExpenses": "Total des dépenses",
+    "noExpenses": "Aucune dépense inscrite.",
+    "revenueLines": {
+      "fuel": "Carburant facturé",
+      "pilot": "Pilote facturé",
+      "reserves": "Réserves d'entretien facturées",
+      "rebilled": "Dépenses refacturées",
+      "uploaded": "Factures téléversées (avant le portail)"
+    },
+    "expenseLines": {
+      "fuel": "Carburant",
+      "trip_handling": "Assistance au sol et stationnement",
+      "trip_airport_fees": "Frais d'aéroport",
+      "trip_hotel": "Hôtels",
+      "trip_per_diem": "Per diem",
+      "trip_catering": "Traiteur",
+      "trip_other": "Autres frais de vol",
+      "pilot_pay": "Rémunération des pilotes",
+      "insurance": "Assurances",
+      "hangar": "Hangar",
+      "maintenance": "Entretien",
+      "fees": "Frais et droits",
+      "other": "Autres",
+      "maintenance_reserves": "Entretien payé par les réserves"
+    },
+    "reservesTitle": "Réserves d'entretien",
+    "reservesBody": "Facturées avec chaque heure de vol et mises de côté pour les gros travaux : elles font partie des revenus, mais ne sont pas à dépenser.",
+    "setAside": "Mises de côté en {year}",
+    "spent": "Utilisées en {year}",
+    "balance": "Solde des réserves",
+    "exportCsv": "Exporter (CSV)",
+    "year": "Année",
+    "companyExpenses": "Dépenses de la société",
+    "companyExpensesBody": "Ce que la société paie en dehors des vols : pilotes, assurances, hangar… Une erreur se contrepasse par une écriture inverse.",
+    "noCompanyExpenses": "Aucune dépense inscrite cette année.",
+    "reversal": "contrepassation",
+    "reverse": "Contrepasser",
+    "addExpenseTitle": "Inscrire une dépense",
+    "category": "Type",
+    "amount": "Montant ($)",
+    "date": "Date",
+    "description": "Description (facultatif)",
+    "addExpense": "Inscrire",
+    "section": "Section",
+    "line": "Ligne",
+    "taxesIncluded": "(taxes incluses)"
+  },
+  "reserves": {
+    "title": "Réserves d'entretien",
+    "body": "Mises de côté à chaque heure facturée, par composante, pour payer les gros travaux quand ils arrivent.",
+    "ownerBody": "Ce qui est mis de côté à chaque heure de vol pour les gros travaux de votre appareil, par composante, et votre part selon votre pourcentage.",
+    "components": {
+      "engine": "Moteur",
+      "propeller": "Hélice",
+      "airframe": "Cellule et cabine",
+      "avionics": "Avionique"
+    },
+    "yourPart": "votre part : {amount}",
+    "covered": "{label} : {percent} couvert sur {target}",
+    "movements": "Travaux payés et corrections",
+    "payTitle": "Payer des travaux depuis une réserve",
+    "targetTitle": "Objectif d’une réserve",
+    "component": "Réserve",
+    "amount": "Montant ($)",
+    "date": "Date",
+    "note": "Travaux",
+    "notePlaceholder": "Ex. : révision de l’hélice",
+    "pay": "Payer depuis la réserve",
+    "target": "Objectif ($)",
+    "targetLabel": "Pour (facultatif)",
+    "targetLabelPlaceholder": "Ex. : révision de l’hélice",
+    "setTarget": "Enregistrer l’objectif",
+    "totalWithPart": "{total} en réserve · votre part : {part}",
+    "companiesTitle": "Résultats de la société",
+    "companiesBody": "Ce que la société propriétaire a facturé et payé cette année : s'équilibre-t-elle?",
+    "companyResults": "Résultats de {name}",
+    "payConfirm": "Le montant sera retiré de la réserve choisie. Une erreur se corrige par une contrepassation, jamais par une modification.",
+    "payYes": "Oui, payer depuis la réserve",
+    "notYet": "Pas maintenant",
+    "payAnyway": "Payer quand même : la réserve passera sous zéro."
+  },
+  "flightDetail": {
+    "title": "Vol",
+    "back": "Vols",
+    "inAir": "En vol",
+    "noMap": "Aéroports inconnus : pas de carte pour ce vol.",
+    "summary": "Le vol",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "flightTime": "Temps de vol",
+    "planned": "prévu",
+    "billedTo": "Facturé à",
+    "reportTitle": "Rapport du pilote",
+    "openReport": "Ouvrir le rapport",
+    "openInvoice": "Voir la facture",
+    "noReport": "Le pilote n'a pas encore envoyé son rapport.",
+    "noReportCancelled": "Vol annulé : aucun rapport.",
+    "filedBy": "Envoyé par {pilot} le {date}"
+  },
+  "fleet": {
+    "changePhoto": "Changer la photo",
+    "photoUploading": "Envoi…",
+    "photoFailed": "La photo n'a pas pu être enregistrée."
+  },
+  "aircraftHub": {
+    "sectionsLabel": "Sections de l'appareil",
+    "sections": {
+      "owners": "Propriétaires",
+      "company": "Société",
+      "rate": "Tarif et réserves",
+      "flights": "Vols",
+      "maintenance": "Entretien",
+      "availability": "Disponibilités",
+      "history": "Historique"
+    },
+    "ownersBody": "Qui détient l'appareil, leur part, leurs heures et leur accès au portail.",
+    "invite": "Inviter au portail",
+    "logins": "{count, plural, one {# accès au portail} other {# accès au portail}}",
+    "budget": "Budget et heures",
+    "companyBody": "La société qui détient l'appareil et émet les factures à ses propriétaires.",
+    "taxesRegistered": "Inscrite à la TPS/TVQ",
+    "taxesNotRegistered": "Non inscrite aux taxes",
+    "managers": "{count, plural, =0 {aucun gestionnaire} one {# gestionnaire} other {# gestionnaires}}",
+    "alsoOwns": "Détient aussi : {list}",
+    "results": "Résultats",
+    "companyPage": "Facturation et gestionnaires",
+    "chooseCompany": "Choisir la société",
+    "flights": {
+      "upcoming": "À venir",
+      "recent": "Derniers vols",
+      "upcomingEmpty": "Aucun vol prévu dans les 60 prochains jours.",
+      "recentEmpty": "Aucun vol dans les 60 derniers jours."
+    },
+    "noJobs": "Aucun entretien prévu ou en cours.",
+    "allMaintenance": "Tout l'entretien",
+    "back": "Appareils"
+  },
+  "teamInvite": {
+    "title": "Inviter dans l'équipe",
+    "body": "Un membre de l'équipe Univair. Les propriétaires s'invitent depuis leur appareil.",
+    "email": "Courriel",
+    "role": "Rôle",
+    "send": "Envoyer l'invitation",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "sent": "Invitation envoyée à {email}.",
+    "invalid": "Vérifiez le courriel.",
+    "forbidden": "Vous ne pouvez pas inviter dans l'équipe."
+  },
+  "financeAccess": {
+    "title": "Les finances ne font pas partie de votre accès",
+    "body": "Le propriétaire du compte peut vous y donner accès depuis ses paramètres, ou l'équipe Univair sur demande.",
+    "staffTitle": "Réservé aux finances",
+    "staffBody": "Votre rôle ne donne pas accès aux finances des propriétaires."
+  },
+  "ownerFlightDetail": {
+    "back": "Vols",
+    "departure": "Départ",
+    "arrival": "Arrivée",
+    "flightTime": "Temps de vol",
+    "planned": "prévu",
+    "pilot": "Pilote",
+    "invoice": "Voir la facture",
+    "inAir": "En vol",
+    "noMap": "Carte non disponible pour ce trajet.",
+    "question": "Une question sur ce vol? Écrivez-nous"
+  },
+  "notFound": {
+    "metaTitle": "Page introuvable",
+    "eyebrow": "Erreur 404",
+    "title": "Cette page n'existe pas",
+    "body": "Le lien est peut-être incomplet, ou la page a été déplacée. Revenez à votre espace pour retrouver votre chemin.",
+    "home": "Retour à mon espace"
   }
 }

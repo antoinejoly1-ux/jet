@@ -16,7 +16,7 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
   if (state !== "valid" || !invitation) {
     return (
       <div className="flex flex-col gap-4">
-        <h1 className="text-xl font-bold tracking-tight">{t("unavailableTitle")}</h1>
+        <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("unavailableTitle")}</h1>
         <p className="text-muted text-sm">{t(`states.${state}`)}</p>
         <Button asChild variant="secondary">
           <Link href="/sign-in">{t("goToSignIn")}</Link>
@@ -32,8 +32,8 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("title")}</h1>
-        <p className="text-muted mt-1 text-sm">{t("body", { target, email: invitation.email })}</p>
+        <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("title")}</h1>
+        <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("body", { target, email: invitation.email })}</p>
       </div>
       {typeof error === "string" ? (
         <Alert tone="danger">{t(`errors.${error === "email_mismatch" ? "email_mismatch" : "generic"}`)}</Alert>

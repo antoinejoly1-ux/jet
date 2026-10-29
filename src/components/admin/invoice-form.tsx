@@ -47,7 +47,7 @@ export function InvoiceForm({
   }
 
   return (
-    <form action={formAction} className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" noValidate>
+    <form action={formAction} className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]" noValidate>
       {/* The file comes first on a phone: dropping it can fill in the invoice number. */}
       <div className="lg:col-start-2 lg:row-start-1">
         <FileDrop
@@ -76,7 +76,7 @@ export function InvoiceForm({
             </option>
           ))}
         </SelectField>
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Field
             id="number"
             name="number"
@@ -112,18 +112,9 @@ export function InvoiceForm({
             defaultValue={submitted(state, "dueOn")}
             error={err("dueOn")}
           />
-          <SelectField
-            id="currency"
-            name="currency"
-            label={t("currency")}
-            defaultValue={submitted(state, "currency", "CAD")}
-          >
-            <option value="CAD">CAD</option>
-            <option value="USD">USD</option>
-          </SelectField>
         </div>
         <input type="hidden" name="fileId" value={fileId} />
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button type="submit" disabled={pending || drop.kind === "uploading"}>
             {pending ? t("saving") : t("issue")}
           </Button>

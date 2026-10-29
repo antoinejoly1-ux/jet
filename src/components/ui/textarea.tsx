@@ -8,7 +8,7 @@ export function TextareaField({ label, id, ...props }: ComponentProps<"textarea"
       <textarea
         id={id}
         rows={4}
-        className="border-border bg-surface placeholder:text-muted w-full rounded-md border px-3 py-2.5 text-base sm:text-sm"
+        className="border-border bg-surface-muted/40 placeholder:text-muted focus-visible:border-accent focus-visible:ring-accent/40 w-full rounded-[14px] border px-3.5 py-2.5 text-base transition-[border-color,box-shadow] focus-visible:ring-1 focus-visible:outline-none sm:text-sm"
         {...props}
       />
     </div>

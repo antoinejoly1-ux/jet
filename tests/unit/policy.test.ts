@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { authorize, can, ForbiddenError, type Actor, type Permission } from "@/lib/auth/policy";
+import { authorize, can, ForbiddenError, memberAccess, type Actor, type Permission } from "@/lib/auth/policy";
 
 const OWNER_A = "00000000-0000-7000-8000-00000000000a";
 const OWNER_B = "00000000-0000-7000-8000-00000000000b";
@@ -90,6 +90,38 @@ describe("owners", () => {
     for (const permission of ALL.filter((p) => !ownerPermissions.includes(p))) {
       expect(can(ownerA, permission, { ownerIds: [OWNER_A] })).toBe(false);
     }
+  });
+});
+
+describe("member roles", () => {
+  // How the session turns a membership into an actor.
+  const member = (role: "owner" | "assistant" | "read_only", canSeeFinances = false) => {
+    const a = memberAccess(role, canSeeFinances);
+    return actor({
+      ownerIds: [OWNER_A],
+      financeOwnerIds: a.finances ? [OWNER_A] : [],
+      actingOwnerIds: a.acts ? [OWNER_A] : [],
+    });
+  };
+  const mine = { ownerIds: [OWNER_A] };
+
+  it("owners see finances and act, whatever the finance setting", () => {
+    expect(can(member("owner"), "finance:read", mine)).toBe(true);
+    expect(can(member("owner"), "messages:send", mine)).toBe(true);
+  });
+
+  it("assistants see the schedule and act, and see finances only when allowed", () => {
+    expect(can(member("assistant"), "fleet:read", mine)).toBe(true);
+    expect(can(member("assistant"), "messages:send", mine)).toBe(true);
+    expect(can(member("assistant"), "finance:read", mine)).toBe(false);
+    expect(can(member("assistant", true), "finance:read", mine)).toBe(true);
+  });
+
+  it("read-only members look but never act", () => {
+    expect(can(member("read_only"), "fleet:read", mine)).toBe(true);
+    expect(can(member("read_only"), "owners:read", mine)).toBe(true);
+    expect(can(member("read_only", true), "finance:read", mine)).toBe(true);
+    expect(can(member("read_only", true), "messages:send", mine)).toBe(false);
   });
 });
 

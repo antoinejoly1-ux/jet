@@ -1,5 +1,6 @@
 import { Download, Eye, FileText } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,23 +8,32 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
 import { requireAccess } from "@/lib/auth/session";
+import { lacksFinanceAccess, NoFinanceAccess } from "@/components/billing/no-finance-access";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
 import { listOwnerInvoices } from "@/lib/services/invoices";
+import { scenes } from "@/lib/imagery";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("invoices") };
 }
 
-const TONE = { issued: "accent", paid: "success", void: "neutral" } as const;
+const TONE = { issued: "accent", overdue: "warning", paid: "success", void: "neutral" } as const;
 
 export default async function OwnerInvoicesPage() {
   const viewer = await requireAccess();
+  if (lacksFinanceAccess(viewer))
+    return (
+      <NoFinanceAccess title={(await getTranslations("nav.items"))("invoices")} staff={Boolean(viewer.staffRole)} />
+    );
   const t = await getTranslations("ownerInvoices");
-  const ti = await getTranslations("invoices");
   const locale = await getLocale();
   const format = await getFormatter();
   const rows = await listOwnerInvoices(db, viewer);
+  const today = new Date().toISOString().slice(0, 10);
+  /** What the owner needs to know: to pay, late, paid or voided. */
+  const shown = (r: (typeof rows)[number]) =>
+    r.status === "issued" && r.dueOn && r.dueOn < today ? "overdue" : r.status;
   const day = (iso: string) => format.dateTime(new Date(`${iso}T12:00:00`), { dateStyle: "medium" });
 
   // Grouped by year, newest first.
@@ -37,7 +47,7 @@ export default async function OwnerInvoicesPage() {
         actions={rows.length ? <DownloadLink href="/invoices/export">{t("exportCsv")}</DownloadLink> : null}
       />
       {rows.length === 0 ? (
-        <EmptyState icon={FileText} title={t("emptyTitle")} body={t("emptyBody")} />
+        <EmptyState icon={FileText} image={scenes.terminal} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
         <div className="flex flex-col gap-8">
           {years.map((year) => (
@@ -45,7 +55,7 @@ export default async function OwnerInvoicesPage() {
               <h2 id={`y-${year}`} className="text-muted mb-2 text-sm font-semibold">
                 {year}
               </h2>
-              <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+              <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
                 {rows
                   .filter((r) => r.issuedOn.startsWith(year))
                   .map((r) => (
@@ -54,8 +64,8 @@ export default async function OwnerInvoicesPage() {
                         <div className="min-w-0">
                           <p className="font-semibold whitespace-nowrap">{r.number}</p>
                           <p className="text-muted text-sm">
-                            {r.registration} · {day(r.issuedOn)}
-                            {r.dueOn && r.status === "issued" ? ` · ${t("due", { date: day(r.dueOn) })}` : ""}
+                            <span className="whitespace-nowrap">{r.registration}</span> · {day(r.issuedOn)}
+                            {r.dueOn && r.status === "issued" ? ` · ${t("dueBefore", { date: day(r.dueOn) })}` : ""}
                           </p>
                         </div>
                         <div className="flex shrink-0 flex-col items-end gap-1">
@@ -64,7 +74,7 @@ export default async function OwnerInvoicesPage() {
                           >
                             {formatMoney(r.totalCents, r.currency, locale)}
                           </span>
-                          <Badge tone={TONE[r.status]}>{ti(`statuses.${r.status}`)}</Badge>
+                          <Badge tone={TONE[shown(r)]}>{t(`statuses.${shown(r)}`)}</Badge>
                         </div>
                       </div>
                       {r.fileId ? (
@@ -82,6 +92,21 @@ export default async function OwnerInvoicesPage() {
                           </Button>
                           <Button asChild size="sm" variant="ghost">
                             <a href={`/files/${r.fileId}`} aria-label={t("downloadNumber", { number: r.number })}>
+                              <Download aria-hidden />
+                              {t("download")}
+                            </a>
+                          </Button>
+                        </div>
+                      ) : r.holdingCompanyId ? (
+                        <div className="-ml-3 flex gap-1 sm:ml-0">
+                          <Button asChild size="sm" variant="ghost">
+                            <Link href={`/invoices/${r.id}`} aria-label={t("viewNumber", { number: r.number })}>
+                              <Eye aria-hidden />
+                              {t("view")}
+                            </Link>
+                          </Button>
+                          <Button asChild size="sm" variant="ghost">
+                            <a href={`/invoices/${r.id}/pdf`} aria-label={t("downloadNumber", { number: r.number })}>
                               <Download aria-hidden />
                               {t("download")}
                             </a>

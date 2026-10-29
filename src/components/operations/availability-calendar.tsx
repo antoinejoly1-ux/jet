@@ -3,12 +3,13 @@ import type { Route } from "next";
 import Link from "next/link";
 import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
+import { RequestDay } from "@/components/flights/request-day";
 import { monthDays, shiftMonth, type DayStatus, type Period } from "@/lib/availability-days";
 import { zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
 
 const CELL: Record<DayStatus, string> = {
-  free: "bg-success/12 text-success",
+  free: "bg-success/12 text-success ring-1 ring-inset ring-success/30",
   mine: "bg-accent text-primary-foreground",
   booked: "bg-muted/35 text-text",
   maintenance: "bg-warning/25 text-warning",
@@ -24,10 +25,16 @@ export async function AvailabilityCalendar({
   periods,
   hrefFor,
   periodAction,
+  requestable = false,
+  staff = false,
 }: {
   month: string;
   periods: Period[];
   hrefFor: (month: string) => string;
+  /** Owners: a tap on a free day opens "Demander un vol" with that date. */
+  requestable?: boolean;
+  /** The team's view: no « Votre vol », just « Vol ». */
+  staff?: boolean;
   /** Extra control per period, e.g. removing a manual block. */
   periodAction?: (p: Period) => ReactNode;
 }) {
@@ -42,19 +49,24 @@ export async function AvailabilityCalendar({
     format.dateTime(new Date(Date.UTC(2024, 0, 1 + i)), { weekday: "narrow", timeZone: "UTC" }),
   );
   const today = zonedDay(new Date());
+  // What's still ahead matters; a month already under way lists only what hasn't ended.
+  const underWay = month <= today.slice(0, 7);
+  const listed = underWay ? periods.filter((p) => zonedDay(p.endsAt) >= today) : periods;
   const range = (p: Period) =>
-    `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "2-digit", minute: "2-digit" } : { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}`;
+    `${format.dateTime(p.startsAt, { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })} – ${format.dateTime(p.endsAt, zonedDay(p.startsAt) === zonedDay(p.endsAt) ? { hour: "numeric", minute: "2-digit" } : { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" })}`;
   const describe = (p: Period) => {
     if (p.kind === "maintenance") return p.label ? `${t("legend.maintenance")} · ${p.label}` : t("legend.maintenance");
-    if (p.kind === "booked") return t("legend.booked");
-    return [p.mine ? t("yourFlight") : null, p.label, p.ownerName].filter(Boolean).join(" · ");
+    if (p.kind === "booked") return [t("legend.booked"), p.ownerName].filter(Boolean).join(" · ");
+    return [p.mine ? t(staff ? "legend.flight" : "yourFlight") : null, p.label, p.ownerName]
+      .filter(Boolean)
+      .join(" · ");
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
       <div className="flex max-w-xl flex-col gap-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-bold tracking-tight first-letter:uppercase">{title}</h2>
+          <h2 className="text-xl font-light tracking-tight first-letter:uppercase">{title}</h2>
           <div className="flex gap-1">
             <Link
               href={hrefFor(shiftMonth(month, -1)) as Route}
@@ -73,36 +85,47 @@ export async function AvailabilityCalendar({
           </div>
         </div>
 
-        <div aria-hidden className="grid grid-cols-7 gap-1 sm:gap-1.5">
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
           {weekdays.map((w, i) => (
-            <span key={i} className="text-muted pb-1 text-center text-xs font-semibold uppercase">
+            <span key={i} aria-hidden className="text-muted pb-1 text-center text-xs font-semibold uppercase">
               {w}
             </span>
           ))}
           {Array.from({ length: lead }, (_, i) => (
             <span key={`lead-${i}`} />
           ))}
-          {days.map((d) => (
-            <span
-              key={d.day}
-              data-status={d.status}
-              className={cn(
-                "tabular flex aspect-square items-start justify-end rounded-md p-1 text-xs font-semibold sm:p-2 sm:text-sm",
-                // Past days go neutral but stay readable; their details remain in the list below.
-                d.day < today ? "bg-surface-muted text-muted" : CELL[d.status],
-                d.day === today && "ring-text ring-2 ring-offset-1 ring-offset-[var(--surface)]",
-              )}
-            >
-              {Number(d.day.slice(8))}
-            </span>
-          ))}
+          {days.map((d) => {
+            const className = cn(
+              "tabular flex aspect-square items-start justify-end rounded-md p-1 text-xs font-semibold sm:p-2 sm:text-sm",
+              // Past days go neutral but stay readable; their details remain in the list below.
+              d.day < today ? "bg-surface-muted text-muted" : CELL[d.status],
+              d.day === today && "ring-text ring-2 ring-offset-1 ring-offset-[var(--surface)]",
+            );
+            const n = Number(d.day.slice(8));
+            return requestable && d.status === "free" && d.day >= today ? (
+              <RequestDay
+                key={d.day}
+                day={d.day}
+                className={className}
+                label={t("requestOn", {
+                  date: format.dateTime(new Date(`${d.day}T12:00:00`), { day: "numeric", month: "long" }),
+                })}
+              >
+                {n}
+              </RequestDay>
+            ) : (
+              <span key={d.day} aria-hidden data-status={d.status} className={className}>
+                {n}
+              </span>
+            );
+          })}
         </div>
 
         <ul className="text-muted flex flex-wrap gap-x-4 gap-y-1 text-xs" aria-label={t("legendLabel")}>
           {(["free", "mine", "booked", "maintenance"] as const).map((s) => (
             <li key={s} className="inline-flex items-center gap-1.5">
               <span className={cn("size-3 rounded-sm", CELL[s])} aria-hidden />
-              {t(`legend.${s}`)}
+              {t(`legend.${staff && s === "mine" ? "flight" : s}`)}
             </li>
           ))}
         </ul>
@@ -110,13 +133,13 @@ export async function AvailabilityCalendar({
 
       <section aria-labelledby="taken-periods">
         <h3 id="taken-periods" className="mb-2 text-sm font-semibold">
-          {t("takenTitle")}
+          {underWay ? t("upcomingTitle") : t("takenTitle")}
         </h3>
-        {periods.length === 0 ? (
-          <p className="text-muted text-sm">{t("allFree")}</p>
+        {listed.length === 0 ? (
+          <p className="text-muted text-sm">{underWay ? t("allFreeRest") : t("allFree")}</p>
         ) : (
           <ul className="border-border divide-border divide-y rounded-lg border">
-            {periods.map((p, i) => (
+            {listed.map((p, i) => (
               <li key={i} className="flex items-start gap-3 px-3 py-2 text-sm">
                 <span
                   className={cn(

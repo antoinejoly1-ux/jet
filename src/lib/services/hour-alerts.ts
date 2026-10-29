@@ -34,7 +34,8 @@ export async function alertIfHoursLow(tx: Tx, shareId: string, minutesUsed: numb
   const line = share.annual * LOW;
   if (!(before > line && after <= line)) return [];
 
-  const hours = formatHours(Math.max(0, after), "fr");
+  const left = Math.max(0, after);
+  const hours = formatHours(left, "fr");
   const staff = await tx
     .select({ id: user.id })
     .from(user)
@@ -51,7 +52,7 @@ export async function alertIfHoursLow(tx: Tx, shareId: string, minutesUsed: numb
     tx,
     share.ownerId,
     "hours.low",
-    { aircraft: share.registration, hours },
+    (locale) => ({ aircraft: share.registration, hours: formatHours(left, locale) }),
     { template: "hoursLow", path: "/" },
   );
 }

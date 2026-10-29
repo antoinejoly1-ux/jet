@@ -6,7 +6,7 @@ import "server-only";
 import { and, eq, inArray, isNull, lte } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { notifications, user } from "@/lib/db/schema";
-import { actionEmail } from "@/lib/email/templates";
+import { actionEmail, firstNameOf } from "@/lib/email/templates";
 import { sendEmail } from "@/lib/email/send";
 import { env } from "@/lib/env";
 import { emailOffFor } from "./notification-center";
@@ -20,6 +20,7 @@ export async function sendDueMessageEmails(db: Db, now = new Date()) {
       userId: notifications.userId,
       data: notifications.data,
       email: user.email,
+      name: user.name,
       locale: user.locale,
     })
     .from(notifications)
@@ -49,6 +50,7 @@ export async function sendDueMessageEmails(db: Db, now = new Date()) {
         await sendEmail(
           actionEmail("newMessage", latest.email, `${env.BETTER_AUTH_URL}/messages`, latest.locale, {
             preview: String((latest.data as Record<string, string>).preview ?? ""),
+            firstName: firstNameOf(latest.name),
           }),
         );
         sent++;

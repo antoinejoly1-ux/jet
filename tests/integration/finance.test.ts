@@ -212,12 +212,15 @@ describe("invoices", () => {
   });
 
   it("is marked paid once, and voided with a reason, never deleted", async () => {
+    const paid = await createInvoice(db, finance, invoice({ number: "INV-2026-0009" }));
+    await markInvoicePaid(db, finance, paid.id);
+    await expect(markInvoicePaid(db, finance, paid.id)).rejects.toMatchObject({ code: "invoice_not_open" });
+    // Paid: a refund or a credit, not a void.
+    await expect(voidInvoice(db, finance, paid.id, "Erreur")).rejects.toMatchObject({ code: "invoice_paid" });
     const inv = await createInvoice(db, finance, invoice());
-    await markInvoicePaid(db, finance, inv.id);
-    await expect(markInvoicePaid(db, finance, inv.id)).rejects.toMatchObject({ code: "invoice_not_open" });
     await expect(voidInvoice(db, finance, inv.id, "")).rejects.toMatchObject({ code: "void_reason_required" });
     await voidInvoice(db, finance, inv.id, "Facturé au mauvais propriétaire");
-    const [mine] = await listOwnerInvoices(db, ownerA.actor);
+    const mine = (await listOwnerInvoices(db, ownerA.actor)).find((i) => i.id === inv.id);
     expect(mine).toMatchObject({ status: "void", voidReason: "Facturé au mauvais propriétaire" });
   });
 });

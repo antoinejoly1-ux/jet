@@ -1,4 +1,4 @@
-import { Eye, MailPlus, MessageSquare, Pencil, Trash2 } from "lucide-react";
+import { ChevronLeft, Eye, MailPlus, MessageSquare, Pencil, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,6 +6,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { startViewAsAction } from "@/app/actions/view-as";
 import { ArchiveForm } from "@/components/admin/archive-form";
 import { History } from "@/components/admin/history";
+import { MemberAccessForm } from "@/components/admin/member-access-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -17,7 +18,7 @@ import { formatHours } from "@/lib/format";
 import { NotFoundError } from "@/lib/services/errors";
 import { getOwner } from "@/lib/services/owners";
 import { openOwnerConversationAction } from "../../messages/actions";
-import { archiveOwnerAction, removeMemberAction } from "../actions";
+import { archiveOwnerAction, removeMemberAction, updateMemberAction } from "../actions";
 
 export async function generateMetadata({ params }: PageProps<"/admin/owners/[id]">): Promise<Metadata> {
   const { id } = await params;
@@ -40,6 +41,13 @@ export default async function OwnerDetailPage({ params }: PageProps<"/admin/owne
 
   return (
     <>
+      <Link
+        href="/admin/owners"
+        className="text-muted hover:text-text mb-2 -ml-1 inline-flex h-11 items-center gap-1 text-sm"
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        {t("back")}
+      </Link>
       <PageHeader
         title={owner.legalName}
         description={`${t(`types.${owner.type}`)}${owner.email ? ` · ${owner.email}` : ""}`}
@@ -79,7 +87,7 @@ export default async function OwnerDetailPage({ params }: PageProps<"/admin/owne
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardTitle className="mb-3">{t("shares")}</CardTitle>
           {shares.length === 0 ? (
@@ -135,23 +143,41 @@ export default async function OwnerDetailPage({ params }: PageProps<"/admin/owne
         <Card className="lg:col-span-2">
           <CardTitle className="mb-3">{t("loginsTitle")}</CardTitle>
           {members.length === 0 && pendingInvitations.length === 0 ? (
-            <p className="text-muted text-sm">{t("noLogins")}</p>
+            // Only those who can invite are told to send an invitation.
+            <p className="text-muted text-sm">{can(viewer, "owners:invite") ? t("noLogins") : t("noLoginsYet")}</p>
           ) : (
             <ul className="divide-border divide-y">
               {members.map((m) => (
-                <li key={m.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <div className="min-w-0 flex-1">
+                <li
+                  key={m.id}
+                  className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0 md:flex-row md:items-center md:gap-3"
+                >
+                  <div className="min-w-0 md:flex-1">
                     <p className="truncate text-sm font-semibold">{m.name}</p>
                     <p className="text-muted truncate text-xs">{m.email}</p>
                   </div>
-                  <Badge>{t(`memberRoles.${m.role}`)}</Badge>
-                  {canWrite ? (
-                    <form action={removeMemberAction.bind(null, owner.id, m.id)}>
-                      <Button type="submit" variant="ghost" size="sm" aria-label={t("removeLogin", { name: m.name })}>
-                        <Trash2 aria-hidden />
-                      </Button>
-                    </form>
-                  ) : null}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {canWrite ? (
+                      <MemberAccessForm
+                        name={m.name}
+                        role={m.role}
+                        canSeeFinances={m.canSeeFinances}
+                        action={updateMemberAction.bind(null, owner.id, m.id)}
+                      />
+                    ) : (
+                      <Badge>
+                        {t(`memberRoles.${m.role}`)}
+                        {m.role !== "owner" && m.canSeeFinances ? ` · ${t("seesFinances")}` : ""}
+                      </Badge>
+                    )}
+                    {canWrite ? (
+                      <form action={removeMemberAction.bind(null, owner.id, m.id)}>
+                        <Button type="submit" variant="ghost" size="sm" aria-label={t("removeLogin", { name: m.name })}>
+                          <Trash2 aria-hidden />
+                        </Button>
+                      </form>
+                    ) : null}
+                  </div>
                 </li>
               ))}
               {pendingInvitations.map((i) => (

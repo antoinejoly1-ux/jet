@@ -1,0 +1,173 @@
+/* Icons, animated like the Lustra Airline admin's: when the link, button or label around an
+   icon is hovered or keyboard-focused, every stroke redraws from its start (in turn), and the
+   icon makes its own small gesture. Still for people who prefer less motion. */
+
+:root {
+  --ic-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.ic {
+  display: inline-block;
+  vertical-align: middle;
+  overflow: visible;
+  flex: none;
+}
+.ic path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The redraw: each stroke traced from its start, the later ones a beat behind. */
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic path {
+    animation: ic-draw 0.7s var(--ic-ease) both;
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic path:nth-child(2) {
+    animation-delay: 0.06s;
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic path:nth-child(3) {
+    animation-delay: 0.12s;
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic path:nth-child(n + 4) {
+    animation-delay: 0.18s;
+  }
+
+  /* The gestures, one per icon. */
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible)
+    :is(.ic--inbox, .ic--mail, .ic--home, .ic--chat, .ic--wallet) {
+    animation: ic-hop 0.5s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) :is(.ic--plane, .ic--planeTakeoff) {
+    animation: ic-fly 0.6s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible)
+    :is(.ic--key, .ic--wrench, .ic--phone, .ic--search) {
+    animation: ic-wiggle 0.6s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic--bell {
+    transform-origin: 50% 15%;
+    animation: ic-wiggle 0.6s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible)
+    :is(.ic--plus, .ic--settings, .ic--code) {
+    animation: ic-spin90 0.45s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic--logout {
+    animation: ic-nudge 0.5s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic--upload {
+    animation: ic-fly-up 0.5s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) :is(.ic--invoice, .ic--receipt) {
+    animation: ic-drop 0.55s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible)
+    :is(
+      .ic--people,
+      .ic--shield,
+      .ic--user,
+      .ic--menu,
+      .ic--calendar,
+      .ic--clipboard,
+      .ic--ledger,
+      .ic--list,
+      .ic--bulb,
+      .ic--heart,
+      .ic--cards,
+      .ic--pulse
+    ) {
+    animation: ic-pop 0.5s var(--ic-ease);
+  }
+  /* The clock's hand goes round. */
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) .ic--clock .p1 {
+    animation: ic-spin 1.4s linear;
+    transform-origin: 12px 12px;
+    transform-box: view-box;
+  }
+  /* The dashboard's tiles pop one after the other. */
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) :is(.ic--gauge, .ic--grid) .p0 {
+    animation: ic-pop 0.45s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) :is(.ic--gauge, .ic--grid) .p1 {
+    animation: ic-pop 0.45s 0.06s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) :is(.ic--gauge, .ic--grid) .p2 {
+    animation: ic-pop 0.45s 0.12s var(--ic-ease);
+  }
+  :is(a, button, summary, label, .hov, .ai-trigger):is(:hover, :focus-visible) :is(.ic--gauge, .ic--grid) .p3 {
+    animation: ic-pop 0.45s 0.18s var(--ic-ease);
+  }
+}
+
+@keyframes ic-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes ic-hop {
+  40% {
+    transform: scale(1.12);
+  }
+  70% {
+    transform: scale(0.98);
+  }
+}
+@keyframes ic-fly {
+  45% {
+    transform: translate(2px, -2px) scale(0.94);
+    opacity: 0.3;
+  }
+  46% {
+    transform: translate(-2px, 2px);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes ic-wiggle {
+  20% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(9deg);
+  }
+  80% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes ic-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ic-spin90 {
+  to {
+    transform: rotate(90deg);
+  }
+}
+@keyframes ic-nudge {
+  50% {
+    transform: translateX(3px);
+  }
+}
+@keyframes ic-fly-up {
+  50% {
+    transform: translate(1.5px, -1.5px);
+  }
+}
+@keyframes ic-drop {
+  50% {
+    transform: scale(1.1);
+  }
+}
+@keyframes ic-pop {
+  45% {
+    transform: scale(1.14);
+  }
+}

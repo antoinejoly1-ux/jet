@@ -6,14 +6,19 @@ import { z } from "zod";
  */
 const schema = z.object({
   DATABASE_URL: z.string().url(),
+  /** Connections per server instance. Keep it small on serverless hosts behind a pooler. */
+  DB_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
   BETTER_AUTH_SECRET: z.string().min(32, "BETTER_AUTH_SECRET must be at least 32 characters"),
   BETTER_AUTH_URL: z.string().url(),
   GOOGLE_CLIENT_ID: z.string().optional().default(""),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(""),
   RESEND_API_KEY: z.string().optional().default(""),
-  EMAIL_FROM: z.string().default("Jet <noreply@example.com>"),
-  /** "s3" in staging and production (private bucket in ca-central-1); "local" for development and tests. */
-  STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
+  EMAIL_FROM: z.string().default("Univair Management <noreply@example.com>"),
+  /**
+   * "s3" in production (private bucket in ca-central-1); "local" for development and tests;
+   * "database" for staging deployments without a bucket (files kept in Postgres).
+   */
+  STORAGE_DRIVER: z.enum(["local", "s3", "database"]).default("local"),
   S3_BUCKET: z.string().optional().default(""),
   S3_REGION: z.string().default("ca-central-1"),
   LOCAL_STORAGE_DIR: z.string().default("tmp/storage"),
@@ -34,6 +39,14 @@ const schema = z.object({
   OPERATOR_LEGAL_NAME: z.string().optional().default(""),
   /** Shown to owners as a "call to book" button. Optional until the operator's number is settled. */
   OPERATOR_PHONE: z.string().optional().default(""),
+  /**
+   * Where live positions come from: `demo` simulates scheduled flights (development, demos),
+   * `opensky` is free live ADS-B, `flightaware` needs FLIGHTAWARE_API_KEY.
+   */
+  TRACKING_PROVIDER: z.enum(["demo", "opensky", "flightaware"]).default("demo"),
+  FLIGHTAWARE_API_KEY: z.string().optional().default(""),
+  OPENSKY_CLIENT_ID: z.string().optional().default(""),
+  OPENSKY_CLIENT_SECRET: z.string().optional().default(""),
   REQUIRE_STAFF_2FA: z
     .enum(["true", "false"])
     .default("true")

@@ -16,19 +16,19 @@ export default async function PrivacyPage() {
   const t = await getTranslations("privacyPolicy");
   const format = await getFormatter();
   const sections = t.raw("sections") as Section[];
-  const operator = env.OPERATOR_LEGAL_NAME || "Jet";
+  const operator = env.OPERATOR_LEGAL_NAME || "Univair";
 
   return (
     <article className="flex flex-col gap-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <h1 className="text-4xl font-light tracking-tight">{t("title")}</h1>
         <p className="text-muted mt-2 text-sm">
           {t("updated", { date: format.dateTime(new Date(`${POLICY_UPDATED}T12:00:00`), { dateStyle: "long" }) })}
         </p>
         <p className="mt-4 leading-relaxed">{t("intro", { operator })}</p>
       </header>
 
-      <section aria-labelledby="officer" className="border-border bg-surface rounded-lg border p-5">
+      <section aria-labelledby="officer" className="bg-surface border-border rounded-lg border p-5">
         <h2 id="officer" className="font-semibold">
           {t("officerTitle")}
         </h2>
@@ -49,7 +49,7 @@ export default async function PrivacyPage() {
 
       {sections.map((s, i) => (
         <section key={i} aria-labelledby={`s-${i}`}>
-          <h2 id={`s-${i}`} className="text-lg font-bold tracking-tight">
+          <h2 id={`s-${i}`} className="text-xl font-light tracking-tight">
             {s.title}
           </h2>
           <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5 leading-relaxed">

@@ -31,9 +31,9 @@ export default async function ImportsPage() {
   return (
     <>
       <PageHeader title={t("title")} description={t("subtitle")} />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <Card>
-          <ImportWizard lastMapping={lastMapping as Record<string, string> | null} />
+          <ImportWizard lastMapping={lastMapping as Record<string, string> | null} locale={viewer.locale} />
         </Card>
         <Card className="self-start">
           <CardTitle className="mb-3">{t("history")}</CardTitle>

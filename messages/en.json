@@ -11,7 +11,7 @@
     "items": {
       "home": "Home",
       "flights": "Flights",
-      "availability": "Availability",
+      "availability": "Calendar",
       "finances": "Finances",
       "invoices": "Invoices",
       "aircraft": "Aircraft",
@@ -23,12 +23,24 @@
       "budgets": "Budgets",
       "transactions": "Transactions",
       "imports": "Imports",
-      "settings": "Settings"
+      "settings": "Settings",
+      "holdingCompanies": "Holding companies",
+      "flightReports": "Flight reports",
+      "billing": "Billing"
     },
     "tabs": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "availability": "Calendar",
+      "request": "Request",
+      "owners": "Clients"
     },
-    "unread": "{count} unread"
+    "unread": "{count} unread",
+    "fabCall": "Call the team",
+    "fabNewFlight": "Schedule a flight",
+    "fabRequest": "Request a flight",
+    "expand": "Show labels",
+    "collapse": "Collapse",
+    "pending": "{count, plural, one {# to handle} other {# to handle}}"
   },
   "toggle": {
     "label": "Switch view",
@@ -38,7 +50,8 @@
   "userMenu": {
     "open": "Open account menu",
     "account": "My account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "tour": "See the tour again"
   },
   "comingSoon": {
     "title": "This screen is coming soon",
@@ -46,7 +59,7 @@
   },
   "auth": {
     "signInTitle": "Sign in",
-    "signInSubtitle": "Access your owner portal.",
+    "signInSubtitle": "Welcome back. Sign in to follow your aircraft, flights and invoices.",
     "or": "or",
     "email": "Email",
     "password": "Password",
@@ -55,12 +68,12 @@
     "signIn": "Sign in",
     "sending": "Sending…",
     "emailMeALink": "Email me a sign-in link",
-    "noAccount": "No account yet?",
-    "createAccount": "Create an account",
+    "noAccount": "Got an invitation from Univair?",
+    "createAccount": "Create my account",
     "magicLinkSent": "A sign-in link was sent to {email}.",
     "continueWithGoogle": "Continue with Google",
-    "signUpTitle": "Create an account",
-    "signUpSubtitle": "Your access turns on once your invitation is linked to the account.",
+    "signUpTitle": "Create your account",
+    "signUpSubtitle": "The portal is for Univair's owners and team.",
     "name": "Full name",
     "passwordHint": "At least 10 characters.",
     "creating": "Creating…",
@@ -84,8 +97,26 @@
       "generic": "Something went wrong. Try again.",
       "passwordTooShort": "Your password needs at least 10 characters.",
       "emailTaken": "An account already exists for this email. Sign in instead.",
-      "invalidLink": "This link is invalid or expired. Ask for a new one."
-    }
+      "invalidLink": "This link is invalid or expired. Ask for a new one.",
+      "fillBoth": "Enter your email and password.",
+      "fillAll": "Enter your name and email.",
+      "linkUsed": "This link was already used or has expired. Ask for a new one below.",
+      "linkExpired": "This link was already used or has expired. Sign in below; if needed, we'll send you a new confirmation link."
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "magicLinkHint": "No password to remember: we email you a link that signs you in with one click.",
+    "signUpSubtitleInvited": "Choose a password. Your invitation will be linked to this account as soon as you confirm your email.",
+    "inviteOnlyTitle": "Access is by invitation",
+    "inviteOnlyBody": "Use the email your invitation was sent to. Without one, your account waits until the team links it to your aircraft.",
+    "emailHint": "The same email as your invitation.",
+    "callTeam": "Call the team · {phone}",
+    "resetInvalidTitle": "This link no longer works",
+    "resetInvalidBody": "Reset links expire after an hour and work only once. Ask for a new one: it only takes a second.",
+    "requestNewLink": "Ask for a new link",
+    "resetSuccess": "Your password was changed. Sign in with the new one.",
+    "wrongAddress": "Wrong address?",
+    "startOver": "Start over"
   },
   "twoFactor": {
     "invalidCode": "Invalid code. Try again.",
@@ -125,19 +156,22 @@
     "copyKey": "Copy key",
     "next": "Continue",
     "confirmTitle": "Enter the code shown",
-    "confirmBody": "Type the 6-digit code the app is showing for Jet right now.",
+    "confirmBody": "Type the 6-digit code the app is showing for Univair right now.",
     "back": "Back to the QR code",
     "codesTitle": "Keep your backup codes",
     "codesBody": "If you lose your phone, each of these codes signs you in once. Store them in a password manager.",
     "copyCodes": "Copy",
     "downloadCodes": "Download",
     "codesSaved": "I've stored my backup codes somewhere safe",
-    "codesFileHeader": "Jet backup codes: each works only once.",
+    "codesFileHeader": "Univair backup codes: each works only once.",
     "disabledBody": "Add a code from your phone on top of your password to protect your account.",
     "setUp": "Turn on",
     "openInApp": "Open in authenticator app",
     "enableFailed": "Couldn't start setup. Try again.",
-    "tooManyAttempts": "Too many attempts. Sign in again to start a new check."
+    "tooManyAttempts": "Too many attempts. Sign in again to start a new check.",
+    "notYou": "Not you?",
+    "signOut": "Sign out",
+    "codesFileName": "univair-backup-codes.txt"
   },
   "invite": {
     "unavailableTitle": "Invitation unavailable",
@@ -151,7 +185,8 @@
     "staffRoles": {
       "admin": "the team (admin)",
       "finance": "the team (finance)",
-      "dispatcher": "the team (dispatch)"
+      "dispatcher": "the team (dispatch)",
+      "pilot": "the team (pilot)"
     },
     "title": "You're invited",
     "body": "This invitation gives {email} access to {target}.",
@@ -166,7 +201,9 @@
   },
   "pending": {
     "title": "Your access is being set up",
-    "body": "Your account ({email}) exists but isn't linked to an aircraft yet. Our team has been notified and will turn on your access shortly."
+    "body": "Your account ({email}) exists but isn't linked to an aircraft yet. Our team has been notified and will turn on your access shortly.",
+    "delay": "It's usually done within one business day.",
+    "refresh": "Check my access"
   },
   "home": {
     "greeting": "Hello, {name}",
@@ -182,18 +219,17 @@
     },
     "shareOf": "{percent} share",
     "hoursRemaining": "Hours remaining",
-    "ofAnnual": "of {hours} per year",
+    "ofAnnual": "of {hours} this year",
     "budget": "{year} budget",
     "ofPlanned": "spent of {amount} planned",
     "budgetEmpty": "This year's budget will be published by our team.",
     "nextFlight": "Next flight",
     "nextFlightEmpty": "No upcoming flights.",
-    "nextMaintenance": "Next maintenance",
+    "nextMaintenance": "Maintenance",
     "nextMaintenanceEmpty": "No maintenance planned.",
-    "dueOn": "Due {date}",
     "latestInvoice": "Latest invoice",
     "latestInvoiceEmpty": "Your first invoice will appear here after your first flight.",
-    "availability": "Availability",
+    "availability": "Calendar",
     "freeDays": "{count, plural, =0 {No free days} one {# free day} other {# free days}} in the next {days}",
     "seeCalendar": "See the calendar",
     "insights": {
@@ -201,8 +237,57 @@
       "hoursPace": "At this year's pace, your remaining hours will last about {months} months, until {until}.",
       "hoursUnused": "You haven't flown yet this year: all your hours are available.",
       "budgetOnTrack": "You've spent {spent} of the budget with {year} of the year gone: on track.",
-      "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned."
-    }
+      "budgetAhead": "You've spent {spent} of the budget with only {year} of the year gone: faster than planned.",
+      "details": "See details"
+    },
+    "maintenanceStarts": "From {date}",
+    "maintenanceEnds": "Until {date}",
+    "greetings": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}"
+    },
+    "heroOne": "Your aircraft,",
+    "heroMany": "Your aircraft,",
+    "heroNow": "right now",
+    "flownThisYear": "Flown in {year}",
+    "spentThisYear": "Spent in {year}",
+    "freeDaysShort": "{count, plural, one {# day} other {# days}}",
+    "freeDaysLabel": "free in the next {days}",
+    "seeInvoices": "See invoices",
+    "activityTitle": "Activity",
+    "activityAll": "Flight history",
+    "activityEmpty": "Flights, invoices and news from the team will show up here.",
+    "flightCompleted": "Flight completed",
+    "flightLength": "{hours} h {minutes}",
+    "teamEyebrow": "Your Univair team",
+    "teamTitle": "We take care of everything.",
+    "teamBody": "A flight to plan, a hotel, a question? Call or text and we'll answer.",
+    "ofPlannedShort": "of {amount} planned",
+    "hero": {
+      "flying": "Your {model} is in the air",
+      "flyingTo": "to {city} · expected at {time}",
+      "maintenance": "Your {model} is in maintenance",
+      "maintenanceUntil": "until {date}",
+      "waiting": "Your {model} is waiting for you",
+      "waitingAt": "in {city}, ready for your next departure",
+      "follow": "Follow live",
+      "nextDeparture": "next departure {date} · {route}",
+      "seeOnMap": "See on the map",
+      "factHours": "{hours} left",
+      "factFree": "Free {count} of {days} days"
+    },
+    "flownCaption": "since January 1",
+    "legendFree": "Free",
+    "legendMine": "Your flight",
+    "legendBooked": "Booked",
+    "legendMaintenance": "Maintenance",
+    "upcomingTitle": "Your next flights",
+    "allFlights": "All your flights",
+    "inTheAir": "In flight",
+    "planNext": "Thinking of your next trip? Tell us where and when; we take care of the rest.",
+    "planNextCta": "Or call us",
+    "seeInvoice": "View invoice"
   },
   "account": {
     "title": "My account",
@@ -221,8 +306,8 @@
       "en": "English"
     },
     "security": "Security",
-    "twoFactorOn": "Two-step verification is on",
-    "twoFactorOff": "Two-step verification is off",
+    "twoFactorOn": "On: a code is asked on each new device.",
+    "twoFactorOff": "Off — recommended to protect your finances.",
     "emailsTitle": "Emails",
     "emailsBody": "Choose what we send you by email. Everything stays visible in the portal.",
     "emailsAlwaysOn": "Security emails (sign-in links, password changes) are always sent.",
@@ -258,18 +343,24 @@
           "label": "Messages from the team",
           "hint": "If you haven't read them in the portal after 5 minutes."
         }
+      },
+      "flight": {
+        "confirmed": {
+          "label": "Confirmed flights",
+          "hint": "When the team schedules a flight you requested."
+        }
       }
     },
     "privacyTitle": "Your personal information",
     "privacyBody": "Download everything the portal keeps about you, or make a request: we answer within {days} days. See the <policy>privacy policy</policy>.",
-    "downloadData": "Download my data (JSON)",
+    "downloadData": "Download my data",
     "privacyKind": "Request",
     "privacyDetails": "Details (optional)",
     "privacySend": "Send the request",
     "privacySent": "Request sent. We'll answer here and by email.",
     "privacyKinds": {
       "correction": "Correct some information",
-      "access": "Know what you hold",
+      "access": "Access my information",
       "deletion": "Delete information",
       "portability": "Receive my data"
     },
@@ -277,7 +368,47 @@
       "open": "open",
       "done": "handled",
       "refused": "refused"
-    }
+    },
+    "settingsTitle": "Settings",
+    "settingsBody": "Your profile, how the portal looks, your security and your preferences.",
+    "sections": {
+      "profile": "Profile",
+      "appearance": "Appearance and language",
+      "security": "Security",
+      "notifications": "Notifications",
+      "privacy": "Privacy",
+      "team": "Your team"
+    },
+    "sectionsLabel": "Settings sections",
+    "profileBody": "Your name and photo, as the Univair team sees them.",
+    "photo": "Photo",
+    "saveProfile": "Save",
+    "profileSaved": "Profile saved.",
+    "appearanceBody": "The portal adapts to you, day or night.",
+    "theme": "Theme",
+    "themes": {
+      "dark": {
+        "label": "Dark",
+        "hint": "Univair's signature"
+      },
+      "light": {
+        "label": "Light",
+        "hint": "Bright, for daytime"
+      },
+      "system": {
+        "label": "System",
+        "hint": "Follows your device"
+      }
+    },
+    "securityBody": "Protect access to your aircraft and your finances.",
+    "password": "Password",
+    "passwordHint": "Get a link by email to choose a new one.",
+    "changePassword": "Change",
+    "twoFactor": "Two-step verification",
+    "manage": "Manage",
+    "teamBody": "A flight to plan, a question, something unexpected: call or text, 7 days a week.",
+    "readOnly": "Read-only while viewing as an owner.",
+    "enable": "Turn on"
   },
   "adminDashboard": {
     "title": "Dashboard",
@@ -285,11 +416,38 @@
     "owners": "Owners",
     "aircraft": "Aircraft",
     "pendingInvitations": "Pending invitations",
-    "accountsWaiting": "Accounts without access",
+    "accountsWaiting": "Accounts created, no access",
     "flightsToday": "Flights today",
     "flightsThisWeek": "Flights this week",
     "inMaintenance": "Aircraft in maintenance",
-    "ownersWithoutAccess": "Owners without access"
+    "ownersWithoutAccess": "Owners never invited",
+    "hello": "Hello, {name}",
+    "heroLight": "Operations,",
+    "heroNow": "right now",
+    "inTheAir": "Aircraft in the air",
+    "todayTitle": "Today's flights",
+    "todayEmpty": "No flights today.",
+    "newFlight": "Schedule a flight",
+    "ofFleet": "of {total} aircraft",
+    "queue": {
+      "title": "To do",
+      "empty": "Nothing to do right now. Have a good day.",
+      "flightsToClose": "{count, plural, one {flight to close} other {flights to close}} (flight time to enter)",
+      "flightRequests": "{count, plural, one {flight request to plan} other {flight requests to plan}}",
+      "awaitingReply": "{count, plural, one {conversation waiting for a reply} other {conversations waiting for a reply}}",
+      "maintenanceOverdue": "{count, plural, one {maintenance past its planned end} other {maintenance jobs past their planned end}}",
+      "maintenanceSoon": "{count, plural, one {maintenance starting within 48 h} other {maintenance jobs starting within 48 h}}",
+      "lowHours": "{count, plural, one {share under 10% of its hours} other {shares under 10% of their hours}}",
+      "ownersNeverInvited": "{count, plural, one {owner never invited} other {owners never invited}}",
+      "flightReports": "{count, plural, one {flight report to check} other {flight reports to check}}",
+      "toInvoice": "{count, plural, one {approved flight to invoice} other {approved flights to invoice}}",
+      "overdueInvoices": "{count, plural, one {invoice past due} other {invoices past due}}"
+    },
+    "money": {
+      "flightReports": "To review ({count})",
+      "toInvoice": "To invoice ({count})",
+      "overdueInvoices": "Overdue invoices ({count})"
+    }
   },
   "owners": {
     "title": "Owners",
@@ -336,8 +494,9 @@
     "loginsTitle": "Portal access",
     "noLogins": "Nobody has access yet. Send an invitation.",
     "memberRoles": {
-      "primary": "Primary",
-      "viewer": "Read-only"
+      "owner": "Owner",
+      "assistant": "Executive assistant",
+      "read_only": "Read-only"
     },
     "removeLogin": "Remove {name}'s access",
     "invitationPending": "Invitation sent",
@@ -346,7 +505,22 @@
     "archiveBody": "The owner disappears from lists and their access is removed. Their history is kept.",
     "archive": "Archive",
     "archiveConfirm": "Archive this owner?",
-    "write": "Message"
+    "write": "Message",
+    "memberRoleFor": "{name}'s role",
+    "seesFinances": "Sees finances",
+    "saveAccess": "Save",
+    "back": "Owners",
+    "accounts": "{count, plural, one {# account} other {# accounts}}",
+    "notInvited": "Not invited yet",
+    "accessFilter": "Portal access",
+    "accessFilters": {
+      "all": "All",
+      "not_invited": "Not invited yet",
+      "invited": "Invitation sent",
+      "active": "With an account"
+    },
+    "noResultsFilterBody": "No owners match this filter.",
+    "noLoginsYet": "Nobody has portal access yet."
   },
   "invitations": {
     "title": "Invitations",
@@ -361,9 +535,10 @@
     "ownersGroup": "Owner",
     "staffGroup": "Team",
     "staffRoles": {
-      "admin": "Admin",
+      "admin": "Administration",
       "finance": "Finance",
-      "dispatcher": "Dispatcher"
+      "dispatcher": "Dispatch",
+      "pilot": "Pilot"
     },
     "sending": "Sending…",
     "send": "Send invitation",
@@ -379,17 +554,27 @@
       "revoked": "Cancelled",
       "not_found": "Not found"
     },
-    "revoke": "Cancel",
+    "revoke": "Revoke",
     "withoutAccessTitle": "{count, plural, one {# owner without access} other {# owners without access}}",
     "withoutAccessBody": "No login linked and no open invitation. Launch is complete when this list is empty.",
     "noEmail": "no email",
     "bulkInvite": "Invite {count, plural, one {# owner} other {the # owners}} with an email",
     "bulkSent": "{count, plural, =0 {No invitations sent.} one {# invitation sent.} other {# invitations sent.}}",
-    "bulkMissing": "{count, plural, one {# owner has no email: add it on their page.} other {# owners have no email: add it on their page.}}"
+    "bulkMissing": "{count, plural, one {# owner has no email: add it on their page.} other {# owners have no email: add it on their page.}}",
+    "memberRole": "Role",
+    "memberRoleHints": {
+      "owner": "Sees everything, finances included, and can make requests.",
+      "assistant": "Sees the schedule and can make requests for the owner.",
+      "read_only": "Can look, but not make requests."
+    },
+    "canSeeFinances": "Can see finances",
+    "chooseOwner": "Choose the owner",
+    "chooseTarget": "Choose the owner or the role"
   },
   "common": {
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "loading": "Loading…"
   },
   "viewAs": {
     "banner": "You're viewing the portal as {name} · read-only",
@@ -424,7 +609,7 @@
       "status": "Choose a status.",
       "locale": "Choose a language.",
       "notes": "Notes too long.",
-      "shareId": "Choose a share.",
+      "shareId": "Choose who pays for the hours, or “None — ferry flight”.",
       "number": "Enter the invoice number.",
       "total": "Invalid amount (e.g. 8,297.00).",
       "issuedOn": "Choose a date.",
@@ -443,7 +628,7 @@
       "toAirport": "3 or 4 character ICAO code, e.g. KPBI.",
       "departsAt": "Choose a date and time.",
       "arrivesAt": "Arrival must be after departure.",
-      "blockTime": "Enter a time like 2:15 or 2.25.",
+      "flightTime": "Enter a time like 2:15 or 2.25.",
       "title": "Describe the work (at least 2 characters).",
       "startsAt": "Invalid date and time.",
       "endsAt": "End must be after start.",
@@ -457,7 +642,35 @@
       "url": "A valid HTTPS address is required.",
       "scopes": "Choose at least one access.",
       "events": "Choose at least one event.",
-      "name": "Enter a name (at least 2 characters)."
+      "name": "Enter a name (at least 2 characters).",
+      "registrationNumber": "Use 500 characters at most.",
+      "holdingCompanyId": "Choose a company from the list.",
+      "from": "Choose the departure airport.",
+      "to": "Choose a destination, different from the departure.",
+      "date": "Choose the flight date.",
+      "time": "Enter a valid time, or leave it empty.",
+      "returnDate": "The return must come after the outbound flight.",
+      "passengers": "From 1 to 19 passengers.",
+      "fuelLitres": "Invalid number of litres.",
+      "expenses": "Check the expenses: each line needs an amount (e.g. 412.50).",
+      "effectiveFrom": "Choose a date.",
+      "fuel": "Invalid amount (e.g. 750.00).",
+      "engine": "Invalid amount.",
+      "propeller": "Invalid amount.",
+      "airframe": "Invalid amount.",
+      "avionics": "Invalid amount.",
+      "pilot": "Invalid amount.",
+      "flightId": "Flight not found.",
+      "address": "Address too long.",
+      "gstNumber": "Number too long.",
+      "qstNumber": "Number too long.",
+      "invoicePrefix": "2 to 8 letters or digits, e.g. UNI.",
+      "paymentTermsDays": "Between 0 and 120 days.",
+      "paymentInstructions": "Text too long.",
+      "category": "Choose a type.",
+      "target": "Invalid amount (e.g. 200,000).",
+      "component": "Choose a reserve.",
+      "usdRate": "Enter the rate, e.g. 1.3850."
     },
     "file_type_not_allowed": "This file type isn't accepted.",
     "file_too_large": "The file is too large.",
@@ -470,7 +683,7 @@
     "invoice_not_open": "This invoice is no longer open.",
     "void_reason_required": "Give a reason for voiding.",
     "invoice_already_void": "This invoice is already void.",
-    "already_reversed": "This entry has already been reversed.",
+    "already_reversed": "This entry is already cancelled.",
     "cannot_reverse_a_reversal": "A reversal can't be reversed.",
     "purchase_must_be_positive": "An hours purchase must be positive.",
     "no_previous_budget": "No budget last year for this share.",
@@ -496,11 +709,34 @@
     "webhook_disabled": "This webhook is disabled.",
     "webhook_private_address": "This address leads to a private network; use a public one.",
     "webhook_test_failed": "The test wasn't received.",
-    "too_many_uploads": "Too many uploads in an hour. Try again later."
+    "too_many_uploads": "Too many uploads in an hour. Try again later.",
+    "holding_company_has_aircraft": "This company still owns an aircraft. Attach it to another company first.",
+    "date_in_past": "Choose a date that's still ahead.",
+    "unknown_airport": "We can't find that airport. Pick it from the list.",
+    "flight_cancelled": "This flight was cancelled.",
+    "report_approved": "This report is already approved and can no longer change.",
+    "report_already_filed": "Another pilot already sent the report for this flight.",
+    "invalid_receipt": "One of the receipts is invalid. Take the photo again.",
+    "report_not_waiting": "This report was already handled.",
+    "rate_empty": "Enter at least one amount.",
+    "no_holding_company": "The aircraft belongs to no company.",
+    "no_rate": "The aircraft has no hourly rate for the flight's date.",
+    "share_required": "Choose who flew before invoicing.",
+    "report_not_approved": "The report needs approving first.",
+    "report_already_invoiced": "This flight is already invoiced.",
+    "prefix_taken": "Another company already uses this prefix.",
+    "no_account_for_email": "No account with this email. Ask the person to sign up first.",
+    "staff_already_has_access": "This person is on the Univair team: they already have access.",
+    "maintenance_self_review": "You sent this work to review: someone else on the team has to approve it.",
+    "fx_rate_missing": "Some US-dollar receipts have no exchange rate yet.",
+    "flight_already_invoiced": "This flight already has a live invoice: void it before issuing another.",
+    "invoice_paid": "A paid invoice can't be voided: issue a credit or a refund instead.",
+    "paid_in_future": "The payment date can't be in the future.",
+    "reserve_insufficient": "The reserve doesn't hold that much. Check the amount or tick 'Pay anyway'."
   },
   "aircraft": {
     "title": "Aircraft",
-    "subtitle": "The fleet and how each plane's shares are split.",
+    "subtitle": "Each aircraft, its company, owners, flights and maintenance, in one place.",
     "new": "New aircraft",
     "emptyTitle": "No aircraft yet",
     "emptyBody": "Add the first aircraft in the fleet.",
@@ -547,7 +783,12 @@
     "addShare": "Add share",
     "endsOn": "End date",
     "endConfirm": "End {name}'s share?",
-    "endShare": "End"
+    "endShare": "Close the share",
+    "holdingCompany": "Holding company",
+    "noHoldingCompany": "No company",
+    "ownedBy": "Owned by",
+    "assignedWarning": "Shares assigned: {percent} (not 100%)",
+    "owners": "Owners"
   },
   "team": {
     "settingsTitle": "Settings",
@@ -557,24 +798,27 @@
     "title": "Team",
     "invite": "Invite a member",
     "you": "You",
-    "twoFactorOn": "2-step on",
-    "twoFactorOff": "2-step not set up",
+    "twoFactorOn": "Two-step verification: on",
+    "twoFactorOff": "Two-step verification: not set up",
     "lastSignIn": "Last signed in {date}",
     "neverSignedIn": "Never signed in",
     "auditTitle": "Audit log",
     "auditBody": "Who did what, and when.",
     "roleFor": "Role for {name}",
     "roles": {
-      "admin": "Admin",
+      "admin": "Administration",
       "finance": "Finance",
-      "dispatcher": "Dispatcher"
+      "dispatcher": "Dispatch",
+      "pilot": "Pilot"
     },
     "removeFromTeam": "Remove from team",
     "save": "Save",
     "privacyTitle": "Personal information (Law 25)",
     "privacyBody": "Owners' requests and the incident register.",
     "developersTitle": "Developers",
-    "developersBody": "API keys and webhooks to connect other software."
+    "developersBody": "API keys and webhooks to connect other software.",
+    "members": "{count, plural, one {# person} other {# people}} on the Univair team",
+    "profileBody": "Your name, photo, appearance and security."
   },
   "audit": {
     "empty": "Nothing to show yet.",
@@ -591,7 +835,9 @@
       "team": "Team",
       "invoice": "Invoices",
       "transaction": "Transactions",
-      "budget": "Budgets"
+      "budget": "Budgets",
+      "flight": "Flights",
+      "maintenance": "Maintenance"
     },
     "older": "Older entries",
     "actions": {
@@ -622,7 +868,85 @@
       "hours_add": "added hours",
       "budget_save": "saved a budget",
       "budget_publish": "published a budget",
-      "import_commit": "imported a spreadsheet"
+      "import_commit": "imported a spreadsheet",
+      "holding_company_create": "created the company",
+      "holding_company_update": "edited the company",
+      "holding_company_archive": "archived the company",
+      "owner_member_update": "changed an access",
+      "profile_update": "updated their profile",
+      "profile_avatar_set": "changed their photo",
+      "profile_avatar_remove": "removed their photo",
+      "profile_onboarded": "finished the welcome tour",
+      "profile_tour_restarted": "asked to see the tour again",
+      "account_email_preferences": "changed their email preferences",
+      "aircraft_photo": "changed the aircraft photo",
+      "aircraft_rate_set": "set the hourly rate",
+      "api_key_create": "created an API key",
+      "api_key_revoke": "revoked an API key",
+      "availability_block": "blocked a period",
+      "availability_unblock": "removed a block",
+      "company_expense_add": "added a company expense",
+      "company_expense_reverse": "reversed a company expense",
+      "conversation_assign": "assigned a conversation",
+      "flight_cancel": "cancelled a flight",
+      "flight_complete": "completed a flight",
+      "flight_request": "requested a flight",
+      "flight_schedule": "scheduled a flight",
+      "flight_update": "edited a flight",
+      "flight_report_approve": "approved a flight report",
+      "flight_report_resubmit": "resubmitted a flight report",
+      "flight_report_return": "returned a flight report to the pilot",
+      "flight_report_submit": "submitted a flight report",
+      "holding_company_billing": "changed the company's billing",
+      "holding_company_manager_add": "added a manager",
+      "holding_company_manager_remove": "removed a manager",
+      "integration_link_share": "linked a share to the scheduling software",
+      "invoice_issue": "issued an invoice",
+      "maintenance_plan": "planned maintenance",
+      "maintenance_status": "moved maintenance to another stage",
+      "maintenance_update": "edited maintenance",
+      "privacy_export": "exported their personal information",
+      "privacy_incident": "logged a privacy incident",
+      "privacy_incident_reporting": "updated an incident's reporting",
+      "privacy_request": "made a Law 25 request",
+      "privacy_request_close": "closed a Law 25 request",
+      "privacy_retention": "applied the retention policy",
+      "reserve_target": "set a reserve target",
+      "reserve_work": "paid for work from the reserve",
+      "sync_block_created": "imported a block",
+      "sync_block_updated": "updated a block",
+      "sync_block_unchanged": "checked a block (no change)",
+      "sync_flight_created": "imported a flight",
+      "sync_flight_updated": "updated a flight",
+      "sync_flight_unchanged": "checked a flight (no change)",
+      "sync_maintenance_created": "imported maintenance",
+      "sync_maintenance_updated": "updated maintenance",
+      "sync_maintenance_unchanged": "checked maintenance (no change)",
+      "webhook_create": "created a webhook",
+      "webhook_disable": "disabled a webhook",
+      "webhook_enable": "enabled a webhook"
+    },
+    "entities": {
+      "aircraft": "aircraft",
+      "api_key": "API key",
+      "conversation": "conversation",
+      "file": "file",
+      "flight": "flight",
+      "flight_report": "flight report",
+      "holding_company": "company",
+      "import": "import",
+      "incident": "incident",
+      "invitation": "invitation",
+      "invoice": "invoice",
+      "maintenance": "maintenance",
+      "message": "message",
+      "owner": "owner",
+      "privacy_request": "Law 25 request",
+      "session": "session",
+      "share": "share",
+      "transaction": "transaction",
+      "user": "user",
+      "webhook": "webhook"
     }
   },
   "files": {
@@ -654,7 +978,7 @@
     },
     "viewPdf": "View PDF",
     "markPaid": "Mark paid",
-    "void": "Void",
+    "void": "Void invoice",
     "voidReason": "Reason for voiding",
     "noAccessTitle": "Restricted",
     "noAccessBody": "Invoices are for finance and admins.",
@@ -662,7 +986,7 @@
     "chooseShare": "Choose the aircraft and owner",
     "number": "Invoice number",
     "total": "Total amount",
-    "totalHint": "e.g. 8,297.00",
+    "totalHint": "e.g. 8,297.00, in Canadian dollars",
     "issuedOn": "Issue date",
     "dueOn": "Due date",
     "currency": "Currency",
@@ -671,7 +995,27 @@
     "saving": "Issuing…",
     "issue": "Issue invoice",
     "cancel": "Cancel",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "viewDetail": "View",
+    "overdue": "Overdue",
+    "receivable": "Receivable",
+    "openCount": "{count, plural, =0 {No invoices} one {# invoice} other {# invoices}}",
+    "overdueTotal": "Overdue",
+    "noneOverdue": "Nothing overdue",
+    "dueShort": "due {date}",
+    "paidShort": "paid {date}",
+    "open": "Open",
+    "pagination": "Pages",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}",
+    "paidOn": "Payment date",
+    "paymentReference": "Reference (optional)",
+    "paymentReferencePlaceholder": "Cheque or transfer number",
+    "recordPayment": "Record payment",
+    "close": "Close",
+    "voidHint": "The invoice stays visible, marked voided, and its entries are reversed.",
+    "keepInvoice": "Keep the invoice"
   },
   "ownerInvoices": {
     "title": "Invoices",
@@ -683,7 +1027,14 @@
     "download": "Download",
     "viewNumber": "View invoice {number}",
     "downloadNumber": "Download invoice {number}",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Download for Excel",
+    "statuses": {
+      "issued": "To pay",
+      "overdue": "Overdue",
+      "paid": "Paid",
+      "void": "Voided"
+    },
+    "dueBefore": "due by {date}"
   },
   "transactions": {
     "title": "Transactions",
@@ -712,6 +1063,7 @@
     "newEntry": "New entry",
     "date": "Date",
     "amount": "Amount",
+    "amountHint": "In Canadian dollars, e.g. 1,234.56",
     "currency": "Currency",
     "category": "Category",
     "noCategory": "None",
@@ -719,7 +1071,8 @@
     "add": "Add",
     "added": "Entry added.",
     "ledgerRule": "Entries are never edited: to correct one, reverse it and enter the right one.",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "truncated": "Showing the {count} most recent entries. Choose a share to see the others."
   },
   "budgets": {
     "title": "Budgets and hours",
@@ -801,7 +1154,14 @@
       "invalid_kind": "Unknown type (cost, revenue or payment)",
       "invalid_amount": "Unreadable or zero amount",
       "unknown_category": "Unknown category"
-    }
+    },
+    "dateOrderTitle": "Which order are the dates in?",
+    "dateOrderBody": "A date like {example} reads two ways, and no row in the file settles it.",
+    "dateOrders": {
+      "dmy": "Day/month/year (31/01/2026)",
+      "mdy": "Month/day/year (01/31/2026)"
+    },
+    "sampleCaption": "The first {count} rows, as they'll be imported"
   },
   "finances": {
     "title": "Finances",
@@ -816,15 +1176,18 @@
     "byCategory": "By category",
     "byMonth": "Spending by month",
     "peak": "Highest month: {amount}",
-    "exportCsv": "Export (CSV)",
-    "statementPdf": "{year} statement (PDF)"
+    "exportCsv": "Download for Excel",
+    "statementPdf": "{year} statement (PDF)",
+    "billed": "Invoiced",
+    "billedHint": "Invoices issued in {year}, taxes included",
+    "reconcile": "“Spent” counts your costs before taxes, including {amount} entered directly without an invoice (hangar, insurance…). “Invoiced” counts the invoices issued, taxes included."
   },
   "flights": {
     "title": "Flights",
-    "subtitle": "Schedule flights, then complete them with block time to deduct hours.",
+    "subtitle": "Schedule flights, then complete them with flight time to deduct hours.",
     "new": "Schedule a flight",
     "newTitle": "Schedule a flight",
-    "newSubtitle": "Hours are deducted from the chosen share when the flight is completed.",
+    "newSubtitle": "Hours come off the billed share when the flight is completed.",
     "editTitle": "Edit flight",
     "saved": "Flight saved.",
     "view": "Period",
@@ -838,35 +1201,52 @@
     "filter": "Filter",
     "emptyUpcomingTitle": "No upcoming flights",
     "emptyUpcomingBody": "Flights in the next 30 days will appear here.",
-    "emptyPastTitle": "No recent flights",
-    "emptyPastBody": "Flights from the last 60 days will appear here.",
+    "emptyPastTitle": "No past flights",
+    "emptyPastBody": "Flights flown will appear here, newest first.",
     "today": "Today",
     "statuses": {
       "scheduled": "Scheduled",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "in_flight": "In flight",
+      "to_close": "To close"
     },
     "synced": "Synced",
-    "noShare": "No owner (positioning)",
-    "block": "{hours} block",
-    "share": "Hours from",
+    "noShare": "None — ferry flight",
+    "share": "Billed to",
     "from": "From",
     "to": "To",
     "airportHint": "ICAO code, e.g. CYUL.",
     "departsAt": "Departure time",
     "arrivesAt": "Arrival time (optional)",
-    "localTimeHint": "Montreal time.",
+    "localTimeHint": "Montréal time (EDT/EST).",
     "saving": "Saving…",
     "save": "Save",
     "cancel": "Cancel",
-    "blockTime": "Block time",
-    "blockTimePlaceholder": "e.g. 2:15",
+    "flightTime": "Flight time",
+    "flightTimePlaceholder": "2:15",
     "complete": "Complete",
     "cancelReason": "Reason (optional)",
     "cancelFlight": "Cancel flight",
     "cancelCompleted": "Cancel and return hours",
     "edit": "Edit",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Export (CSV)",
+    "flown": "{hours} flown",
+    "planRequestTitle": "Plan the request · {registration}",
+    "planRequestSubtitle": "Everything the owner asked for is filled in. Saving closes the request and sends the owner a confirmation.",
+    "moreActions": "More actions",
+    "flightTimeRead": "= {hours}",
+    "flightTimeReadOwner": "= {hours} · charged to {owner}",
+    "flightTimeInvalid": "E.g. 2:15, 2h15 or 2.25",
+    "toCloseTitle": "To close",
+    "toCloseBody": "These flights have landed: enter the flight time to charge it to the hour bank.",
+    "saveAndReturn": "Save and plan the return",
+    "returnTitle": "The return · {route}",
+    "returnSubtitle": "Same aircraft, same owner, airports swapped. Only the time is left to choose.",
+    "chooseShare": "Choose who pays for the hours",
+    "close": "Close",
+    "older": "Older",
+    "cancelledCount": "{count, plural, one {# cancelled flight} other {# cancelled flights}}"
   },
   "maintenance": {
     "title": "Maintenance",
@@ -883,7 +1263,8 @@
       "planned": "Planned",
       "in_progress": "In progress",
       "done": "Done",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "review": "In review"
     },
     "synced": "Synced",
     "types": {
@@ -913,11 +1294,41 @@
     "finish": "Finish",
     "edit": "Edit",
     "cancelQuestion": "Cancel this work?",
-    "cancelJob": "Cancel work"
+    "cancelJob": "Cancel work",
+    "next": {
+      "start": "Start",
+      "review": "Send for review",
+      "done": "Approve"
+    },
+    "moreActions": "More actions",
+    "sendBack": "Send back to in progress",
+    "columns": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "review": "In review",
+      "done": "Done"
+    },
+    "columnEmpty": "Nothing here.",
+    "boardSubtitle": "Each job moves from column to column, from planning to sign-off.",
+    "boardSubtitleDrag": "Drag a card to the next column, or use its buttons. On a phone, hold it for a moment before dragging.",
+    "board": {
+      "picked": "“{title}” picked up. Drop it in a column, or press Escape to cancel.",
+      "dropped": "“{title}” stays where it was.",
+      "moved": "“{title}” moved to “{column}”.",
+      "reverted": "“{title}” went back to “{column}”. {reason}",
+      "oneStep": "Jobs move one column at a time: go through “{next}” first.",
+      "noWayBack": "This job can't go back to “{column}”."
+    },
+    "syncedFromCamp": "CAMP",
+    "cancelledCount": "{count, plural, one {# cancelled job} other {# cancelled jobs}}",
+    "doneOn": "Completed {date}",
+    "startedOn": "Started {date}",
+    "seeHistory": "See in the aircraft's history",
+    "awaitingOther": "Waiting for someone else to approve."
   },
   "availability": {
-    "title": "Availability",
-    "subtitle": "Your aircraft's free days. Your flights are in blue.",
+    "title": "Calendar",
+    "subtitle": "Your aircraft's free days. Tap a free day to request a flight.",
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "legendLabel": "Legend",
@@ -925,7 +1336,8 @@
       "free": "Free",
       "mine": "Your flight",
       "booked": "Booked",
-      "maintenance": "Maintenance"
+      "maintenance": "Maintenance",
+      "flight": "Flight"
     },
     "takenTitle": "Taken periods",
     "allFree": "Free all month.",
@@ -933,9 +1345,9 @@
     "noAircraftTitle": "No aircraft",
     "noAircraftBody": "The calendar will appear once your share is recorded.",
     "chooseAircraft": "Choose the aircraft",
-    "callToBook": "Call to book",
-    "bookingHint": "To book a flight, call our team: we'll confirm availability with you.",
-    "bookingHintNoPhone": "To book a flight, message our team: we'll confirm availability with you.",
+    "callToBook": "Call",
+    "bookingHint": "Tap a free day or “Request a flight”: the team confirms availability with you. In a hurry? Call us.",
+    "bookingHintNoPhone": "Tap a free day or “Request a flight”: the team confirms availability with you.",
     "blockTitle": "Block a period",
     "blockBody": "For lending the aircraft out or a known outage.",
     "blockAdded": "Period blocked.",
@@ -944,22 +1356,26 @@
     "blockKind": "Shown as",
     "addBlock": "Block",
     "removeQuestion": "Remove this block?",
-    "remove": "Remove"
+    "remove": "Remove",
+    "requestOn": "Request a flight on {date}",
+    "upcomingTitle": "Coming up",
+    "allFreeRest": "Nothing planned for the rest of the month."
   },
   "ownerFlights": {
     "title": "Your flights",
-    "subtitle": "Flights on your share. Block time is deducted from your hours.",
+    "subtitle": "Flights on your share. Flight time is deducted from your hours.",
     "upcoming": "Upcoming",
     "past": "Past",
     "noUpcomingTitle": "No upcoming flights",
     "noUpcomingBody": "Your next flights will appear here once they're scheduled.",
     "noPastTitle": "No past flights",
     "noPastBody": "Your flight history will appear here.",
-    "exportCsv": "Export (CSV)"
+    "exportCsv": "Download for Excel",
+    "inFlight": "In flight"
   },
   "ownerAircraft": {
     "title": "Your aircraft",
-    "subtitle": "Aircraft details and maintenance tracking.",
+    "subtitle": "Aircraft details and maintenance periods.",
     "model": "Model",
     "serialNumber": "Serial number",
     "homeBase": "Home base",
@@ -968,7 +1384,10 @@
     "since": "Since",
     "seeAvailability": "See availability",
     "maintenance": "Maintenance",
-    "noMaintenance": "No maintenance recorded."
+    "noMaintenance": "No maintenance recorded.",
+    "window": "Maintenance from {from} to {to}",
+    "windowOpen": "Maintenance from {from}",
+    "ownedBy": "Owned by"
   },
   "integrations": {
     "title": "Integrations",
@@ -988,7 +1407,6 @@
   "messages": {
     "title": "Messages",
     "subtitle": "Write to our dispatch team. A real person answers.",
-    "callUs": "Call us",
     "conversationLabel": "Conversation",
     "threadLabel": "Messages in the conversation",
     "ownerEmpty": "Ask a question or request a flight: our team answers here.",
@@ -996,7 +1414,7 @@
     "ownerPlaceholder": "Write your message…",
     "staffPlaceholder": "Reply…",
     "viewAsReadOnly": "You're viewing the portal as this owner: sending is turned off.",
-    "responseHint": "We answer during business hours, usually within an hour.",
+    "responseHint": "The team usually replies within the hour.",
     "noOwner": "Messages will be available once your account is linked to an owner.",
     "today": "Today",
     "dispatchName": "Dispatch · {name}",
@@ -1013,6 +1431,7 @@
     "inboxSubtitle": "Conversations with owners.",
     "filters": "Filter conversations",
     "filterNames": {
+      "waiting": "To answer",
       "open": "Open",
       "mine": "Mine",
       "resolved": "Resolved"
@@ -1020,7 +1439,8 @@
     "emptyFilter": {
       "open": "No open conversations.",
       "mine": "No conversations are assigned to you.",
-      "resolved": "No resolved conversations."
+      "resolved": "No resolved conversations.",
+      "waiting": "Nobody is waiting for a reply. Nice work."
     },
     "unassigned": "Unassigned",
     "unreadSuffix": "unread",
@@ -1032,8 +1452,12 @@
     "backToInbox": "Back to messages",
     "assignTo": "Assign to",
     "me": "{name} (me)",
-    "resolve": "Resolved",
-    "reopen": "Reopen"
+    "resolve": "Mark resolved",
+    "reopen": "Reopen",
+    "readOnlyMember": "Your access is read-only: call or text the team with any request.",
+    "responseHintClosed": "Outside office hours: we'll reply from 7 a.m. Urgent? Call us.",
+    "replyAndResolve": "Reply and resolve",
+    "assignedTo": "Assigned to"
   },
   "notifications": {
     "title": "Notifications",
@@ -1054,7 +1478,7 @@
         "low_staff": "{ownerName} has only {hours} left on {aircraft}"
       },
       "maintenance": {
-        "planned": "{title} planned on {aircraft} on {when}"
+        "planned": "Maintenance planned on {aircraft} from {when}"
       },
       "message": {
         "from_dispatch": "New message from the team: “{preview}”",
@@ -1064,12 +1488,16 @@
         "uninvited_sign_up": "{email} signed up without an invitation"
       },
       "sync": {
-        "failed": "The scheduling software sync had {failed} error(s)"
+        "failed": "The scheduling software sync had {failed, plural, one {# error} other {# errors}}"
       },
       "privacy": {
         "request": "Privacy request from {email} ({kind})"
+      },
+      "flight": {
+        "confirmed": "Flight confirmed: {route} on {aircraft}, {when}"
       }
-    }
+    },
+    "emptyBodyStaff": "Owners' messages, flight requests and alerts will appear here."
   },
   "exports": {
     "date": "Date",
@@ -1090,7 +1518,7 @@
     "arrival": "Arrival",
     "from": "From",
     "to": "To",
-    "blockHours": "Block hours",
+    "flightHours": "Flight hours",
     "hours": "Hours",
     "kinds": {
       "cost": "Cost",
@@ -1114,7 +1542,7 @@
     },
     "statement": {
       "title": "{year} annual statement",
-      "generated": "Produced on {date}",
+      "generated": "Prepared on {date}",
       "footer": "Statement produced by the owner portal. Amounts reflect your ledger as of the production date.",
       "summary": "Summary",
       "planned": "Planned",
@@ -1139,7 +1567,7 @@
   "privacyPolicy": {
     "title": "Privacy policy",
     "updated": "Last updated: {date}",
-    "intro": "{operator} manages aircraft for their owners. This portal gives owners access to their flights, hours, finances and invoices. This policy explains what personal information we collect, why, where it is kept and how to exercise your rights, under Quebec's Act respecting the protection of personal information in the private sector.",
+    "intro": "{operator} manages aircraft for their owners. This portal gives owners access to their flights, hours, finances and invoices. This policy explains what personal information we collect, why, where it is kept and how to exercise your rights, under Québec's Act respecting the protection of personal information in the private sector.",
     "officerTitle": "Person in charge of protecting personal information",
     "officerBody": "For any question or request: {officer}, <mail>{email}</mail>.",
     "officerMissing": "Our privacy officer's contact details will be published here before the portal opens.",
@@ -1159,7 +1587,7 @@
         "items": [
           "To manage your aircraft share, schedule your flights and keep your accounts.",
           "To invoice you and send you budgets, statements and notices.",
-          "To protect your account: two-factor authentication for our team, attempt limits, an audit log.",
+          "To protect your account: two-step verification for our team, attempt limits, an audit log.",
           "To meet our legal and tax obligations.",
           "We don't use your information for advertising and we don't sell it."
         ]
@@ -1170,13 +1598,13 @@
           "The database and files (invoices, attachments) are hosted in Canada, in Amazon Web Services' Montreal region, encrypted at rest.",
           "The portal itself is served by Vercel; pages are built on servers in the United States, which process your information while showing a page without keeping it.",
           "Emails (notices, sign-in links) are sent by Resend, in the United States, which receives your email address and the message content.",
-          "Before communicating information outside Quebec, we assess the privacy factors and bind these providers by contract."
+          "Before communicating information outside Québec, we assess the privacy factors and bind these providers by contract."
         ]
       },
       {
         "title": "Who can see it",
         "items": [
-          "You, and the other people authorised on your owner account.",
+          "You, and the other people authorized on your owner account.",
           "Our team, according to their role (dispatch, finance, administration). Every “view as owner” session and every change is logged.",
           "Co-owners of the same aircraft never see your flights or finances: only that the aircraft is booked."
         ]
@@ -1186,7 +1614,7 @@
         "items": [
           "Financial records (entries, invoices, budgets) are kept at least six years after the end of the tax year, as tax law requires.",
           "Expired sessions and sign-in links are deleted automatically; unused invitations after 90 days; read notices after a year.",
-          "When our relationship ends, other information is deleted or anonymised once legal periods have passed."
+          "When our relationship ends, other information is deleted or anonymized once legal periods have passed."
         ]
       },
       {
@@ -1196,7 +1624,7 @@
           "Have inaccurate information corrected.",
           "Ask us to delete information that is no longer needed, subject to our legal obligations.",
           "Withdraw consent to optional emails from My account.",
-          "File a complaint with Quebec's Commission d'accès à l'information.",
+          "File a complaint with Québec's Commission d'accès à l'information.",
           "We answer every request within 30 days."
         ]
       },
@@ -1220,7 +1648,7 @@
     "markDone": "Mark handled",
     "refuse": "Refuse",
     "newIncident": "Record an incident",
-    "newIncidentBody": "Any unauthorised access, use, disclosure or loss of personal information must be recorded, even a minor one.",
+    "newIncidentBody": "Any unauthorized access, use, disclosure or loss of personal information must be recorded, even a minor one.",
     "incidentSaved": "Incident recorded.",
     "occurredOn": "Occurred on",
     "discoveredOn": "Discovered on",
@@ -1272,7 +1700,7 @@
     "active": "Active",
     "disabled": "Disabled",
     "delivered": "delivered",
-    "retrying": "retrying ({attempts} failed)",
+    "retrying": "retrying ({attempts, plural, one {# failure} other {# failures}})",
     "gaveUp": "gave up",
     "sendTest": "Send a test",
     "testOk": "Test received ({status}).",
@@ -1286,5 +1714,868 @@
     "createHook": "Create the webhook",
     "secretCreated": "Copy this signing secret now: it won't be shown again.",
     "docsHint": "Keys and webhooks are for admins only. The integration guide is docs/api.md in the repository."
+  },
+  "contact": {
+    "call": "Call",
+    "text": "Text"
+  },
+  "holdingCompanies": {
+    "title": "Holding companies",
+    "subtitle": "The companies that own the aircraft. Their shareholders are the owners.",
+    "new": "New company",
+    "newTitle": "New holding company",
+    "newSubtitle": "Add the company, then attach its aircraft from the aircraft's page.",
+    "editTitle": "Edit company",
+    "edit": "Edit",
+    "emptyTitle": "No companies",
+    "emptyBody": "Add each aircraft's holding company.",
+    "noAircraft": "No aircraft",
+    "legalName": "Legal name",
+    "registrationNumber": "NEQ",
+    "registrationNumberHint": "Quebec enterprise number, or other registration.",
+    "neq": "NEQ {number}",
+    "email": "Email",
+    "phone": "Phone",
+    "notes": "Notes",
+    "contact": "Contact",
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "aircraftTitle": "Aircraft",
+    "noAircraftBody": "No aircraft is attached to this company.",
+    "aircraftHint": "To attach an aircraft, edit it and choose the company.",
+    "shareholders": "Shareholders",
+    "noShareholders": "No shareholders yet: add shares on the aircraft.",
+    "history": "History",
+    "archiveTitle": "Archive the company",
+    "archiveBody": "Only possible when no aircraft is attached to it.",
+    "archive": "Archive",
+    "archiveConfirm": "Archive this company?"
+  },
+  "brand": {
+    "footer": "Univair · Saint-Hubert, Québec",
+    "eyebrow": "Aircraft management · Univair",
+    "taglineLight": "Your aircraft,",
+    "taglineBold": "wherever it is.",
+    "description": "The Univair owner portal"
+  },
+  "live": {
+    "states": {
+      "in_flight": "In flight",
+      "on_ground": "On the ground",
+      "maintenance": "In maintenance",
+      "unknown": "Position unknown"
+    },
+    "inFlight": "In flight",
+    "coOwnerFlight": "{name}'s flight",
+    "inMaintenance": "In maintenance",
+    "onGroundAt": "On the ground in {city}",
+    "unknown": "Position unknown",
+    "signalLost": "Signal lost",
+    "progress": "{percent}% of the way there",
+    "altitude": "Altitude",
+    "speed": "Speed",
+    "heading": "Heading",
+    "arrival": "Expected arrival",
+    "feet": "{value} ft",
+    "knots": "{value} kt",
+    "inMinutes": "{minutes, plural, =0 {now} one {in # min} other {in # min}}",
+    "nextFlight": "Next flight",
+    "maintenanceBody": "The aircraft is in maintenance. We'll let you know as soon as it's back in service.",
+    "parkedBody": "The aircraft is parked and ready for your next flight.",
+    "seenSeconds": "Seen {seconds} s ago",
+    "seenMinutes": "Seen {minutes} min ago",
+    "noSignal": "No signal received yet",
+    "sources": {
+      "demo": "Simulation",
+      "opensky": "ADS-B data · OpenSky",
+      "flightaware": "FlightAware data"
+    },
+    "mapLabel": "Live map",
+    "fleetTitle": "The fleet, live",
+    "fleetSubtitle": "Every aircraft, where it is now.",
+    "whereIs": "Where is {registration}",
+    "inDuration": "{hours, plural, =0 {in {minutes} min} other {in # h {minutes} min}}",
+    "airborneCount": "{count, plural, =0 {Nothing in the air} one {# in the air} other {# in the air}} of {total}",
+    "unknownBody": "We're not receiving its position right now.",
+    "askTeam": "Ask the team",
+    "staleBody": "Last position received {minutes} min ago. That's common at low altitude or over water; it comes back on its own."
+  },
+  "shell": {
+    "client": "Owner portal",
+    "admin": "Administration"
+  },
+  "authFrame": {
+    "footer": "Univair · Saint-Hubert Airport, Québec",
+    "help": "Need help? {phone}",
+    "privacy": "Privacy",
+    "signIn": {
+      "eyebrow": "Univair Management",
+      "light": "Your aircraft,",
+      "strong": "wherever it is."
+    },
+    "signUp": {
+      "eyebrow": "Welcome aboard",
+      "light": "Everything about your aircraft,",
+      "strong": "in one place."
+    },
+    "invite": {
+      "eyebrow": "Invitation",
+      "light": "Your seat",
+      "strong": "is ready."
+    },
+    "password": {
+      "eyebrow": "Access",
+      "light": "A new password,",
+      "strong": "and you're off."
+    },
+    "security": {
+      "eyebrow": "Security",
+      "light": "Your account, protected",
+      "strong": "like your aircraft."
+    },
+    "pending": {
+      "eyebrow": "Your access",
+      "light": "Almost there.",
+      "strong": "We'll take care of the rest."
+    }
+  },
+  "welcome": {
+    "metaTitle": "Welcome",
+    "progress": "Step {n} of {total}",
+    "continue": "Continue",
+    "next": "Next",
+    "back": "Back",
+    "welcome": {
+      "eyebrow": "Univair Management",
+      "title": "Welcome to Univair, {name}.",
+      "body": "Your aircraft, your hours, your flights and your team: everything is here, at hand, wherever you are.",
+      "time": "Less than a minute to get acquainted.",
+      "start": "Begin",
+      "titleStaff": "Welcome to the team, {name}.",
+      "bodyStaff": "Aircraft, flights, maintenance, owners and billing: the whole day's work is here.",
+      "titlePilot": "Welcome aboard, {name}.",
+      "bodyPilot": "Here you report each flight in two minutes, from your phone: flight time, fuel and receipts.",
+      "titleManager": "Welcome, {name}.",
+      "bodyManager": "Your company's billing and results, prepared by Univair and ready to send."
+    },
+    "name": {
+      "eyebrow": "Your profile",
+      "title": "Let's get acquainted.",
+      "body": "Your photo and name, as the Univair team will see them. The photo is optional.",
+      "first": "First name",
+      "last": "Last name",
+      "language": "Language",
+      "required": "Enter your first name.",
+      "failed": "Couldn't save. Try again."
+    },
+    "tour": {
+      "eyebrow": "What you'll find here",
+      "count": "{n} of {total}",
+      "live": {
+        "caption": "Always know where it is.",
+        "title": "Your aircraft, live",
+        "body": "Its position on the map, altitude, speed and arrival time, updated continuously.",
+        "a": "In the air or on the ground, you see it at a glance",
+        "b": "Every flight drawn on the map, from departure to arrival"
+      },
+      "hours": {
+        "caption": "Your hours, no math.",
+        "title": "Your hours and availability",
+        "body": "The hours you have left, the ones flown, and the days the aircraft is free.",
+        "a": "The next 14 days at a glance",
+        "b": "A reminder when your hours run low"
+      },
+      "finances": {
+        "caption": "Every dollar in its place.",
+        "title": "Your finances, clear",
+        "body": "What's spent, what's planned and your invoices, always up to date.",
+        "a": "Your budget for the year and where you stand",
+        "b": "Invoices and statements as PDFs, in one click"
+      },
+      "flights": {
+        "caption": "Your departures, handled.",
+        "title": "Your flights",
+        "body": "Your next departures and your whole history, in one place.",
+        "a": "Every flight with its route and flight time",
+        "b": "Your history to export whenever you like"
+      },
+      "eyebrowStaff": "Your day, in short",
+      "todo": {
+        "caption": "What's waiting on someone, first.",
+        "title": "\"To do\", every morning",
+        "body": "The dashboard starts with what needs action: flight requests, reports to review, unanswered messages, maintenance coming up.",
+        "a": "Each line takes you straight to the right screen",
+        "b": "The map shows the fleet live, with today's flights"
+      },
+      "fleet": {
+        "caption": "Everything, aircraft by aircraft.",
+        "title": "Aircraft: everything is filed by plane",
+        "body": "Open an aircraft to find its owners and their shares, its rates, maintenance, reserves and photo.",
+        "a": "Invite an owner from their page",
+        "b": "Search (⌘K or Ctrl+K) finds an aircraft, an owner or a flight."
+      },
+      "ops": {
+        "caption": "Flights and the shop, in one place.",
+        "title": "Flights and maintenance",
+        "body": "Plan a flight in a few fields, then close it on arrival. Maintenance moves across columns, from planned to done.",
+        "a": "Each flight opens with its route on the map and the pilot's report",
+        "b": "A job goes to review before it's approved"
+      },
+      "billing": {
+        "caption": "From flight report to invoice.",
+        "title": "Flight reports and invoices",
+        "body": "The pilot reports the flight; you check the figures and receipts, then the invoice is prepared with the right rates and taxes.",
+        "a": "Maintenance reserves fill with every hour billed",
+        "b": "Nothing is erased: every correction leaves a trace."
+      },
+      "report": {
+        "caption": "After each flight, two minutes.",
+        "title": "Report your flights",
+        "body": "Your recent flights wait in \"Flight reports\". Enter the flight time and fuel, then send.",
+        "a": "Flight time is written like your logbook: 1:35",
+        "b": "Flights waiting for your report are always at the top of the list"
+      },
+      "receipts": {
+        "caption": "The receipt, as a photo.",
+        "title": "Your expenses and receipts",
+        "body": "Fuel, landing fees, hotel: add the expense and take a photo of the receipt, straight from your phone.",
+        "a": "Say whether you paid it or used Univair's card",
+        "b": "What you paid is reimbursed to you"
+      },
+      "returned": {
+        "caption": "A question? We'll tell you.",
+        "title": "Checked by accounting",
+        "body": "Each report is checked before invoicing. If something's missing, it comes back to you with a note: fix it and send it again.",
+        "a": "You see where each of your reports stands",
+        "b": "An approved report goes to invoicing with nothing more to do"
+      },
+      "approved": {
+        "caption": "Ready to invoice.",
+        "title": "Approved flights, ready to invoice",
+        "body": "Every flight checked by Univair arrives in \"Billing\", with its flight time and expenses.",
+        "a": "An invoice in one click, numbered for your company",
+        "b": "The PDF is ready to send"
+      },
+      "taxes": {
+        "caption": "Taxes, already worked out.",
+        "title": "GST and QST included",
+        "body": "Taxes are calculated by the flight's rules, with your registration numbers on every invoice.",
+        "a": "Rates come from the aircraft, up to date",
+        "b": "Nothing is erased: every correction leaves a trace."
+      },
+      "results": {
+        "caption": "Where the company stands.",
+        "title": "The company's results",
+        "body": "The year's revenue, expenses and maintenance reserves, updated with every invoice.",
+        "a": "What's set aside for the big inspections",
+        "b": "Company expenses are added in a few fields"
+      }
+    },
+    "team": {
+      "eyebrow": "Always here for you",
+      "title": "A real team, one call away.",
+      "body": "A flight to plan, a hotel, a question about your aircraft? Call or text: these are the people who answer, 7 days a week.",
+      "inApp": "You can also write to us right in the app.",
+      "eyebrowStaff": "Your colleagues",
+      "titleStaff": "The team you work with.",
+      "bodyStaff": "Owners see these faces when they call or write to us."
+    },
+    "ready": {
+      "eyebrow": "All set",
+      "title": "Over to you, {name}.",
+      "body": "Your space is waiting.",
+      "bodyAircraft": "{registration} is waiting for you.",
+      "enter": "Enter my space",
+      "request": "Request my first flight",
+      "bodySecurity": "One last step: protect your account with a sign-in code. It's required for the team and takes a minute.",
+      "secure": "Protect my account",
+      "bodyStaff": "Your dashboard is waiting.",
+      "enterStaff": "Open the dashboard",
+      "bodyPilot": "Your flights to report are waiting.",
+      "enterPilot": "See my flight reports",
+      "bodyManager": "Your company's billing is waiting.",
+      "enterManager": "Open billing"
+    },
+    "skip": "Skip",
+    "settings": {
+      "replayTour": "See the tour again",
+      "replayTourBody": "The welcome guide, from the start."
+    }
+  },
+  "avatar": {
+    "choose": "Choose a photo",
+    "change": "Change",
+    "remove": "Remove",
+    "zoom": "Zoom",
+    "save": "Save photo",
+    "saving": "Saving…",
+    "hint": "Drop a photo here, or tap the circle.",
+    "notAnImage": "Choose an image (JPG, PNG or HEIC).",
+    "failed": "The photo couldn't be saved. Try again.",
+    "hintTouch": "Tap the circle to add a photo."
+  },
+  "teamReach": {
+    "title": "Always here for you",
+    "body": "A call or a text, 7 days a week. We take care of the rest."
+  },
+  "emails": {
+    "greeting": "Hello,",
+    "signature": "The Univair team",
+    "help": "Questions? Call or text us at {phone}.",
+    "preferences": "You're receiving this email based on your preferences. Change them in the portal.",
+    "preferencesLink": "Manage my emails",
+    "linkFallback": "Button not working? Copy this link:",
+    "templates": {
+      "verify": {
+        "subject": "Confirm your email address",
+        "body": "Confirm your address to activate your account.",
+        "cta": "Confirm my address"
+      },
+      "reset": {
+        "subject": "Reset your password",
+        "body": "You asked for a new password. This link expires in one hour.",
+        "cta": "Choose a new password"
+      },
+      "magicLink": {
+        "subject": "Your sign-in link",
+        "body": "Use this link to sign in. It expires in 10 minutes.",
+        "cta": "Sign me in"
+      },
+      "invitation": {
+        "subject": "Your access to the owner portal",
+        "body": "Univair is opening your access to the owner portal. This link expires in 7 days.",
+        "cta": "Accept the invitation"
+      },
+      "invoiceIssued": {
+        "subject": "New invoice {number}",
+        "body": "A new invoice for {amount} for {aircraft} is ready in your portal.",
+        "cta": "View the invoice"
+      },
+      "budgetPublished": {
+        "subject": "Your {year} budget is ready",
+        "body": "The {year} budget for {aircraft} has been published. You can review it in your portal.",
+        "cta": "View my finances"
+      },
+      "newMessage": {
+        "subject": "New message from our team",
+        "body": "Our team replied: “{preview}”",
+        "cta": "Read and reply"
+      },
+      "hoursLow": {
+        "subject": "{hours} left on {aircraft}",
+        "body": "Your hours on {aircraft} are below 10% of your annual allotment: {hours} remain.",
+        "cta": "See my balance"
+      },
+      "maintenancePlanned": {
+        "subject": "Maintenance planned on {aircraft}",
+        "body": "{aircraft} will be in maintenance from {when}. The aircraft won't be available during that time.",
+        "cta": "View the aircraft"
+      },
+      "flightConfirmed": {
+        "subject": "Your flight {route} is scheduled",
+        "body": "Your flight {route} on {when} aboard {aircraft} is scheduled. You'll find it in your upcoming flights.",
+        "cta": "View my flights"
+      }
+    },
+    "greetingName": "Hello {name},"
+  },
+  "requestFlight": {
+    "open": "Request a flight",
+    "title": "Request a flight",
+    "body": "Tell us where and when: the team confirms the flight and writes to you in Messages.",
+    "aircraft": "Aircraft",
+    "from": "From",
+    "to": "To",
+    "toPlaceholder": "City or code, e.g. Teterboro",
+    "date": "Date",
+    "time": "Preferred time",
+    "timeHint": "Leave empty if you're flexible.",
+    "returnTrip": "Round trip",
+    "returnDate": "Return date",
+    "passengers": "Passengers",
+    "notes": "Details (optional)",
+    "notesPlaceholder": "Catering, ground transport, luggage…",
+    "send": "Send the request",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "sentTitle": "Request sent",
+    "sentBody": "The team will confirm your flight shortly, here and by email. Something urgent? Call us.",
+    "sentMessages": "See it in Messages",
+    "close": "Close",
+    "pending": "Request sent",
+    "pendingHint": "Waiting for confirmation",
+    "card": {
+      "title": "Flight request",
+      "return": "Returning {date}",
+      "flexible": "Flexible time",
+      "passengers": "{count, plural, one {# passenger} other {# passengers}}",
+      "plan": "Plan this flight",
+      "scheduled": "Flight scheduled",
+      "viewFlight": "View the flight",
+      "requested": "Request sent"
+    },
+    "fewer": "One passenger fewer",
+    "more": "One more passenger"
+  },
+  "toasts": {
+    "flightScheduled": "Flight saved.",
+    "flightUpdated": "Flight updated.",
+    "flightClosed": "Flight closed: the hours are charged.",
+    "flightCancelled": "Flight cancelled.",
+    "maintenanceSaved": "Maintenance saved.",
+    "maintenanceStatus": "Maintenance status updated.",
+    "invitationSent": "Invitation sent.",
+    "invitationRevoked": "Invitation revoked.",
+    "profileSaved": "Profile saved.",
+    "close": "Close",
+    "reportSent": "Report sent to finance.",
+    "reportApproved": "Report approved.",
+    "reportReturned": "Report sent back to the pilot.",
+    "rateSaved": "Rate saved.",
+    "invoiceIssued": "Invoice issued and sent to the owner.",
+    "billingSaved": "Billing profile saved."
+  },
+  "search": {
+    "open": "Search",
+    "placeholder": "Owner, registration, company, invoice…",
+    "actionsTitle": "Quick actions",
+    "resultsTitle": "Results",
+    "empty": "No results.",
+    "actions": {
+      "newFlight": "Schedule a flight",
+      "newOwner": "New owner",
+      "invite": "Invite an owner"
+    },
+    "kinds": {
+      "owner": "Owner",
+      "company": "Company",
+      "aircraft": "Aircraft",
+      "invoice": "Invoice",
+      "conversation": "Conversation",
+      "flight": "Flight"
+    },
+    "pagesTitle": "Pages"
+  },
+  "pilot": {
+    "side": "Pilot",
+    "title": "Flight reports",
+    "hello": "Hello {name}",
+    "body": "After each flight: the flight time, the fuel and your expenses, with a photo of each receipt. The report goes to finance, who bill the right owner.",
+    "toReport": "Flights to report",
+    "nothingToReport": "All reported",
+    "nothingToReportBody": "Flights from the last 14 days show up here once they've landed.",
+    "returnedNote": "Sent back by finance:",
+    "fix": "Fix",
+    "report": "Fill in",
+    "sent": "Reports sent",
+    "statuses": {
+      "submitted": "Sent",
+      "returned": "To fix",
+      "approved": "Approved"
+    },
+    "reportTitle": "Flight report",
+    "back": "Flight reports",
+    "form": {
+      "flightTime": "Flight time",
+      "flightTimeHint": "1:35 or 1h35",
+      "fuelLitres": "Fuel added (litres)",
+      "expenses": "Expenses",
+      "expensesBody": "One line per receipt. Take a photo of the receipt: it's attached to the report.",
+      "addExpense": "Add an expense",
+      "notes": "Remarks (optional)",
+      "notesPlaceholder": "Passengers, surprises, aircraft condition…",
+      "sending": "Sending…",
+      "send": "Send the report",
+      "expenseN": "Expense {n}",
+      "removeExpense": "Remove expense {n}",
+      "category": "Type",
+      "categories": {
+        "fuel": "Fuel",
+        "handling": "Handling and parking",
+        "airport_fees": "Airport fees",
+        "hotel": "Hotel",
+        "per_diem": "Per diem",
+        "catering": "Catering",
+        "other": "Other"
+      },
+      "amount": "Amount",
+      "paidBy": "Paid by",
+      "payers": {
+        "company_card": "Company card",
+        "pilot": "Me (to reimburse)"
+      },
+      "expenseNote": "Detail (optional)",
+      "uploading": "Sending photo…",
+      "receiptAttached": "Receipt attached",
+      "addReceipt": "Receipt photo",
+      "viewReceipt": "View",
+      "uploadFailed": "The photo couldn't be sent. Try again.",
+      "flightTimeEcho": "= {time}",
+      "currency": "Currency"
+    },
+    "toFix": "To fix ({count})"
+  },
+  "rates": {
+    "title": "Hourly rate",
+    "body": "What one flight hour of this aircraft costs: fuel, maintenance reserves per component, and the pilot. The rate in force on the day of the flight applies.",
+    "perHour": "per hour",
+    "perHourShort": "/ h",
+    "since": "since {date}",
+    "parts": {
+      "fuel": "Fuel",
+      "engine": "Engine reserve",
+      "propeller": "Propeller reserve",
+      "airframe": "Airframe and cabin reserve",
+      "avionics": "Avionics reserve",
+      "pilot": "Pilot"
+    },
+    "reserve": "reserve",
+    "none": "No rate yet. Set one so flight reports can be priced.",
+    "upcoming": "{total} / h from {date}",
+    "setTitle": "New rate",
+    "effectiveFrom": "In force from",
+    "perHourHint": "$ per flight hour",
+    "save": "Save the rate"
+  },
+  "flightReports": {
+    "title": "Flight reports",
+    "subtitle": "What pilots declare after each flight. Check who flew, then approve or send back with a note.",
+    "noAccessTitle": "Finance only",
+    "noAccessBody": "Flight reports contain amounts: the finance team sees them.",
+    "unknownPilot": "Unknown pilot",
+    "noOwner": "Owner to confirm",
+    "expensesSummary": "{count, plural, one {# expense} other {# expenses}} · {total}",
+    "noExpenses": "No expenses",
+    "statuses": {
+      "submitted": "To check",
+      "returned": "To fix",
+      "approved": "Approved"
+    },
+    "waiting": "To check ({count})",
+    "emptyTitle": "No reports waiting",
+    "emptyBody": "Pilots' reports arrive here as soon as they send them.",
+    "decided": "Recently handled",
+    "detailTitle": "Flight report",
+    "filedBy": "Report by {pilot} · flight on {date}",
+    "declared": "Declared by the pilot",
+    "expensesLabel": "Expenses",
+    "lastNote": "Note sent to the pilot:",
+    "openReceipt": "Open the receipt: {category}",
+    "noReceipt": "No receipt",
+    "chargesTitle": "What the flight comes to",
+    "chargesBody": "Flight time at the aircraft's rate on the day, plus expenses rebilled at cost (in Canadian dollars).",
+    "expensesAtCost": "Expenses rebilled at cost",
+    "beforeTaxes": "Total before taxes",
+    "noRate": "This aircraft has no hourly rate yet.",
+    "setRate": "Set the rate",
+    "decision": "Decision",
+    "approvedFor": "Approved, billed to {owner}.",
+    "returnedToPilot": "Sent back to the pilot, who will fix it from their phone.",
+    "readOnly": "Only the finance team can approve a report.",
+    "billedTo": "Billed to (who flew)",
+    "chooseShare": "Choose the owner",
+    "approve": "Approve the report",
+    "returnNote": "What to fix",
+    "returnNotePlaceholder": "E.g. the fuel receipt at KTEB is missing.",
+    "sendBack": "Send back to the pilot",
+    "cancel": "Cancel",
+    "sendBackOpen": "Send back to the pilot with a note",
+    "toInvoice": "To invoice ({count})",
+    "noCompanyShort": "No company",
+    "toInvoiceCta": "Invoice",
+    "invoiceTitle": "Invoice",
+    "openInvoice": "Open the invoice",
+    "noCompany": "The aircraft belongs to no company: there's nobody to issue the invoice.",
+    "setCompany": "Choose the company",
+    "payers": {
+      "company_card": "Company card",
+      "pilot": "Paid by the pilot, to reimburse"
+    },
+    "fuelIncluded": "Fuel included in the hourly rate",
+    "fuelIncludedBody": "The aircraft's rate includes fuel: this receipt is the company's cost and isn't billed again.",
+    "notBilled": "not billed",
+    "usdAtApproval": "US-dollar receipts are converted at the rate entered on approval.",
+    "usdRate": "Exchange rate USD → CAD",
+    "usdRateHint": "Canadian dollars for US$1, from the card statement. E.g. 1.3850",
+    "approvedRate": "USD → CAD rate: {rate}."
+  },
+  "invoiceDetail": {
+    "title": "Invoice",
+    "back": "Invoices",
+    "issuedOn": "Issued {date}",
+    "dueOn": "due by {date}",
+    "downloadPdf": "Download PDF",
+    "from": "Issued by",
+    "to": "Billed to",
+    "gst": "GST",
+    "qst": "QST",
+    "notRegistered": "Company not registered for GST and QST: no tax charged.",
+    "atCost": "at cost",
+    "subtotal": "Subtotal",
+    "gstLine": "GST (5%)",
+    "qstLine": "QST (9.975%)",
+    "total": "Total",
+    "howToPay": "Payment:",
+    "voided": "Invoice voided: {reason}",
+    "pdfTitle": "Invoice",
+    "number": "No.",
+    "date": "Date",
+    "due": "Due",
+    "flight": "Flight",
+    "description": "Description",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "managedBy": "Managed by Univair Management",
+    "previewFrom": "Will be issued in the name of {company}, to {owner}.",
+    "notCharged": "not charged",
+    "noTaxNumbers": "No GST or QST number in the company's profile: the invoice will have no taxes.",
+    "needsRate": "The aircraft has no hourly rate: set it before issuing.",
+    "issue": "Issue the invoice",
+    "issueConfirm": "The invoice gets its number and goes to the owner. It can't be changed afterwards, only voided.",
+    "issueYes": "Yes, issue",
+    "issuing": "Issuing…",
+    "cancel": "Cancel",
+    "ledgerTaxes": "GST/QST",
+    "fuelIncluded": "Fuel included in the hourly rate",
+    "notBilled": "not billed",
+    "receipts": "Receipts",
+    "needsFxRate": "Some US-dollar receipts have no exchange rate: finance must approve the report with the rate.",
+    "zeroRated": "International flight: zero-rated",
+    "zeroRatedHint": "No GST or QST. Confirm with your accountant before ticking.",
+    "issueConfirmZeroRated": "The invoice will be numbered, without GST or QST (zero-rated international flight), and sent to the owner. It can't be changed afterwards, only voided.",
+    "notYet": "Not now",
+    "voidBanner": "Voided on {date}",
+    "voidBannerNoDate": "Voided",
+    "paidOn": "paid on {date}",
+    "zeroRatedLine": "Zero-rated international flight: GST and QST"
+  },
+  "billingProfile": {
+    "title": "Billing",
+    "body": "What the company's invoices say: address, tax numbers and numbering. Without a GST or QST number, that tax isn't charged.",
+    "address": "Address",
+    "gstNumber": "GST number",
+    "qstNumber": "QST number",
+    "taxHint": "Leave empty if the company isn't registered.",
+    "prefix": "Invoice prefix",
+    "prefixHint": "Example: {example}",
+    "terms": "Payment terms (days)",
+    "instructions": "Payment instructions",
+    "instructionsPlaceholder": "Interac e-Transfer to invoices@example.ca, or a cheque to the company.",
+    "save": "Save",
+    "notRegistered": "Not registered",
+    "managersTitle": "Company managers",
+    "managersBody": "The assistants or technicians who keep the company's books: they issue its invoices from the portal.",
+    "noManagers": "Nobody yet.",
+    "managerEmail": "Email",
+    "managerHint": "The person needs to have created their account first.",
+    "addManager": "Add",
+    "remove": "Remove",
+    "removeManager": "Remove {name}",
+    "results": "Results"
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Flights approved by Univair, ready to invoice in the company's name, and the invoices already issued.",
+    "toInvoice": "To invoice ({count})",
+    "emptyTitle": "Nothing to invoice",
+    "emptyBody": "Flights approved by Univair show up here, ready to invoice.",
+    "prepare": "Prepare the invoice",
+    "issued": "Issued invoices",
+    "prepareTitle": "Prepare the invoice",
+    "prepareBody": "Check the lines and taxes, then issue the invoice in the company's name.",
+    "results": "Company results",
+    "groups": {
+      "issued": "Awaiting payment ({count})",
+      "paid": "Paid ({count})",
+      "void": "Voided ({count})"
+    },
+    "back": "Billing"
+  },
+  "pnl": {
+    "title": "Company results",
+    "titleYear": "{year} results",
+    "subtitle": "What the company billed its owners, what it paid, and what's left.",
+    "ownerSubtitle": "The company that owns {aircraft}: what it billed, what it paid, and whether it balances.",
+    "revenue": "Revenue",
+    "expenses": "Expenses",
+    "result": "Result",
+    "surplus": "Surplus",
+    "deficit": "Deficit",
+    "totalRevenue": "Total revenue",
+    "totalExpenses": "Total expenses",
+    "noExpenses": "No expenses recorded.",
+    "revenueLines": {
+      "fuel": "Fuel billed",
+      "pilot": "Pilot billed",
+      "reserves": "Maintenance reserves billed",
+      "rebilled": "Expenses rebilled",
+      "uploaded": "Uploaded invoices (before the portal)"
+    },
+    "expenseLines": {
+      "fuel": "Fuel",
+      "trip_handling": "Handling and parking",
+      "trip_airport_fees": "Airport fees",
+      "trip_hotel": "Hotels",
+      "trip_per_diem": "Per diem",
+      "trip_catering": "Catering",
+      "trip_other": "Other trip costs",
+      "pilot_pay": "Pilot pay",
+      "insurance": "Insurance",
+      "hangar": "Hangar",
+      "maintenance": "Maintenance",
+      "fees": "Fees and dues",
+      "other": "Other",
+      "maintenance_reserves": "Maintenance paid from reserves"
+    },
+    "reservesTitle": "Maintenance reserves",
+    "reservesBody": "Billed with every flight hour and set aside for the big jobs: they're part of revenue, but not money to spend.",
+    "setAside": "Set aside in {year}",
+    "spent": "Used in {year}",
+    "balance": "Reserve balance",
+    "exportCsv": "Export (CSV)",
+    "year": "Year",
+    "companyExpenses": "Company expenses",
+    "companyExpensesBody": "What the company pays outside flights: pilots, insurance, hangar… A mistake is reversed with an opposite entry.",
+    "noCompanyExpenses": "No expenses recorded this year.",
+    "reversal": "reversal",
+    "reverse": "Reverse",
+    "addExpenseTitle": "Record an expense",
+    "category": "Type",
+    "amount": "Amount ($)",
+    "date": "Date",
+    "description": "Description (optional)",
+    "addExpense": "Record",
+    "section": "Section",
+    "line": "Line",
+    "taxesIncluded": "(taxes included)"
+  },
+  "reserves": {
+    "title": "Maintenance reserves",
+    "body": "Set aside with every billed hour, per component, to pay for the big jobs when they come.",
+    "ownerBody": "What's set aside with every flight hour for your aircraft's big jobs, per component, and your part by your percentage.",
+    "components": {
+      "engine": "Engine",
+      "propeller": "Propeller",
+      "airframe": "Airframe and cabin",
+      "avionics": "Avionics"
+    },
+    "yourPart": "your part: {amount}",
+    "covered": "{label}: {percent} covered of {target}",
+    "movements": "Work paid and corrections",
+    "payTitle": "Pay for work from a reserve",
+    "targetTitle": "A reserve's target",
+    "component": "Reserve",
+    "amount": "Amount ($)",
+    "date": "Date",
+    "note": "Work",
+    "notePlaceholder": "E.g. propeller overhaul",
+    "pay": "Pay from the reserve",
+    "target": "Target ($)",
+    "targetLabel": "For (optional)",
+    "targetLabelPlaceholder": "E.g. propeller overhaul",
+    "setTarget": "Save the target",
+    "totalWithPart": "{total} in reserve · your part: {part}",
+    "companiesTitle": "Company results",
+    "companiesBody": "What the owning company billed and paid this year: does it balance?",
+    "companyResults": "{name} results",
+    "payConfirm": "The amount comes out of the chosen reserve. A mistake is corrected by a reversing entry, never an edit.",
+    "payYes": "Yes, pay from the reserve",
+    "notYet": "Not now",
+    "payAnyway": "Pay anyway: the reserve will go below zero."
+  },
+  "flightDetail": {
+    "title": "Flight",
+    "back": "Flights",
+    "inAir": "In the air",
+    "noMap": "Unknown airports: no map for this flight.",
+    "summary": "The flight",
+    "departure": "Departure",
+    "arrival": "Arrival",
+    "flightTime": "Flight time",
+    "planned": "planned",
+    "billedTo": "Billed to",
+    "reportTitle": "Pilot's report",
+    "openReport": "Open the report",
+    "openInvoice": "View the invoice",
+    "noReport": "The pilot hasn't sent their report yet.",
+    "noReportCancelled": "Flight cancelled: no report.",
+    "filedBy": "Sent by {pilot} on {date}"
+  },
+  "fleet": {
+    "changePhoto": "Change photo",
+    "photoUploading": "Uploading…",
+    "photoFailed": "The photo couldn't be saved."
+  },
+  "aircraftHub": {
+    "sectionsLabel": "Aircraft sections",
+    "sections": {
+      "owners": "Owners",
+      "company": "Company",
+      "rate": "Rate and reserves",
+      "flights": "Flights",
+      "maintenance": "Maintenance",
+      "availability": "Availability",
+      "history": "History"
+    },
+    "ownersBody": "Who holds the aircraft, their share, their hours and their portal access.",
+    "invite": "Invite to the portal",
+    "logins": "{count, plural, one {# portal login} other {# portal logins}}",
+    "budget": "Budget and hours",
+    "companyBody": "The company that holds the aircraft and invoices its owners.",
+    "taxesRegistered": "Registered for GST/QST",
+    "taxesNotRegistered": "Not registered for taxes",
+    "managers": "{count, plural, =0 {no managers} one {# manager} other {# managers}}",
+    "alsoOwns": "Also holds: {list}",
+    "results": "Results",
+    "companyPage": "Billing and managers",
+    "chooseCompany": "Choose the company",
+    "flights": {
+      "upcoming": "Upcoming",
+      "recent": "Recent flights",
+      "upcomingEmpty": "No flights planned in the next 60 days.",
+      "recentEmpty": "No flights in the last 60 days."
+    },
+    "noJobs": "No maintenance planned or under way.",
+    "allMaintenance": "All maintenance",
+    "back": "Aircraft"
+  },
+  "teamInvite": {
+    "title": "Invite to the team",
+    "body": "Someone on the Univair team. Owners are invited from their aircraft.",
+    "email": "Email",
+    "role": "Role",
+    "send": "Send the invitation",
+    "cancel": "Cancel",
+    "close": "Close",
+    "sent": "Invitation sent to {email}.",
+    "invalid": "Check the email.",
+    "forbidden": "You can't invite to the team."
+  },
+  "financeAccess": {
+    "title": "Finances aren't part of your access",
+    "body": "The account's owner can give you access from their settings, or the Univair team on request.",
+    "staffTitle": "Finance team only",
+    "staffBody": "Your role doesn't include owners' finances."
+  },
+  "ownerFlightDetail": {
+    "back": "Flights",
+    "departure": "Departure",
+    "arrival": "Arrival",
+    "flightTime": "Flight time",
+    "planned": "planned",
+    "pilot": "Pilot",
+    "invoice": "View the invoice",
+    "inAir": "In the air",
+    "noMap": "No map for this route.",
+    "question": "A question about this flight? Write to us"
+  },
+  "notFound": {
+    "metaTitle": "Page not found",
+    "eyebrow": "Error 404",
+    "title": "This page doesn't exist",
+    "body": "The link may be incomplete, or the page has moved. Head back to your space to find your way.",
+    "home": "Back to my space"
   }
 }

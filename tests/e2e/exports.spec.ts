@@ -14,13 +14,13 @@ test("an owner downloads their yearly statement and their transactions", async (
       .first()
       .click(),
   ]);
-  expect(pdf.suggestedFilename()).toBe(`statement-${year}-C-GJTA.pdf`);
+  expect(pdf.suggestedFilename()).toBe(`releve-${year}-C-GJTA.pdf`);
   const pdfBytes = await (await pdf.createReadStream()).toArray();
   expect(Buffer.concat(pdfBytes).toString("latin1", 0, 5)).toBe("%PDF-");
 
   const [csv] = await Promise.all([
     page.waitForEvent("download"),
-    page.getByRole("link", { name: "Exporter (CSV)" }).click(),
+    page.getByRole("link", { name: "Télécharger pour Excel" }).click(),
   ]);
   const text = Buffer.concat(await (await csv.createReadStream()).toArray()).toString("utf8");
   expect(text.startsWith("﻿Date;Appareil;Type;Catégorie")).toBe(true);

@@ -4,7 +4,7 @@
  * points at the original, so every balance can be traced line by line.
  */
 import "server-only";
-import { and, asc, desc, eq, gte, isNotNull, lt, sql, sum, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNotNull, lt, ne, or, sql, sum, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import type { Db } from "@/lib/db";
 import { aircraft, budgetCategories, hourLedger, owners, shares, transactions, user } from "@/lib/db/schema";
@@ -18,6 +18,9 @@ const yearRange = (year: number): SQL[] => [
   gte(transactions.occurredOn, `${year}-01-01`),
   lt(transactions.occurredOn, `${year + 1}-01-01`),
 ];
+
+/** The most entries one list shows; the page says so when there are more and suggests a filter. */
+export const TRANSACTIONS_SHOWN = 500;
 
 export async function listTransactions(
   db: Db,
@@ -58,7 +61,7 @@ export async function listTransactions(
     .leftJoin(reversal, eq(reversal.reversesId, transactions.id))
     .where(filters.length ? and(...filters) : undefined)
     .orderBy(desc(transactions.occurredOn), desc(transactions.createdAt))
-    .limit(500);
+    .limit(TRANSACTIONS_SHOWN);
 }
 
 export async function addTransaction(
@@ -226,7 +229,14 @@ export async function monthlyTotals(db: Db, shareId: string, year: number) {
       cents: sum(transactions.amountCents).mapWith(Number),
     })
     .from(transactions)
-    .where(and(eq(transactions.shareId, shareId), ...yearRange(year)))
+    // Categorised entries only, like « Dépensé » itself: invoice tax rows aren't spending.
+    .where(
+      and(
+        eq(transactions.shareId, shareId),
+        or(ne(transactions.kind, "cost"), isNotNull(transactions.categoryId)),
+        ...yearRange(year),
+      ),
+    )
     .groupBy(sql`1`, transactions.kind)
     .orderBy(asc(sql`1`));
   return Array.from({ length: 12 }, (_, i) => ({

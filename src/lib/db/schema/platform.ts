@@ -1,5 +1,6 @@
 import {
   bigint,
+  customType,
   date,
   index,
   inet,
@@ -66,6 +67,26 @@ export const conversations = pgTable(
   (t) => [uniqueIndex("conversations_owner_uq").on(t.ownerId)],
 );
 
+/** A flight an owner asked for from the portal; dispatch plans it from the card. */
+export type FlightRequestMeta = {
+  kind: "flight_request";
+  status: "requested" | "scheduled";
+  shareId: string;
+  aircraftId: string;
+  registration: string;
+  from: string;
+  to: string;
+  /** "2026-11-05", in the operator's time zone. */
+  date: string;
+  /** "08:30", or null when the owner is flexible. */
+  time: string | null;
+  returnDate: string | null;
+  passengers: number;
+  notes: string | null;
+  flightId?: string;
+};
+export type MessageMeta = FlightRequestMeta;
+
 export const messages = pgTable(
   "messages",
   {
@@ -76,6 +97,8 @@ export const messages = pgTable(
     senderUserId: uuid("sender_user_id").references(() => user.id, { onDelete: "set null" }),
     body: text("body").notNull(),
     attachmentFileId: uuid("attachment_file_id").references(() => files.id, { onDelete: "set null" }),
+    /** Structured content shown as a card, such as a flight request (see services/flight-requests.ts). */
+    meta: jsonb("meta").$type<MessageMeta>(),
     readAt: timestamp("read_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
@@ -270,3 +293,17 @@ export const privacyRequests = pgTable(
   },
   (t) => [index("privacy_requests_status_idx").on(t.status, t.createdAt)],
 );
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({ dataType: () => "bytea" });
+
+/**
+ * File contents for STORAGE_DRIVER=database: staging and demo deployments
+ * whose servers have no lasting disk and no S3 bucket. Production keeps
+ * files in S3; this table stays empty there.
+ */
+export const storedFiles = pgTable("stored_files", {
+  key: text("key").primaryKey(),
+  contentType: text("content_type").notNull(),
+  bytes: bytea("bytes").notNull(),
+  createdAt: createdAt(),
+});

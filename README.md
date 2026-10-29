@@ -37,12 +37,24 @@ pnpm dev                            # http://localhost:3000
 
 Demo logins created by the seed (password `demo-password-2026`):
 
-| Email               | Role                   | 2FA                                     |
-| ------------------- | ---------------------- | --------------------------------------- |
-| `admin@jet.test`    | Admin                  | On (demo key printed by `pnpm db:seed`) |
-| `dispatch@jet.test` | Dispatcher             | On (same demo key)                      |
-| `finance@jet.test`  | Finance                | Not set up: signing in shows the setup  |
-| `owner@jet.test`    | Owner of 25% of C-GJTA | Not required for owners                 |
+| Email                | Role                                          | 2FA                                     |
+| -------------------- | --------------------------------------------- | --------------------------------------- |
+| `admin@jet.test`     | Admin                                         | On (demo key printed by `pnpm db:seed`) |
+| `dispatch@jet.test`  | Dispatcher                                    | On (same demo key)                      |
+| `finance@jet.test`   | Finance                                       | Not set up: signing in shows the setup  |
+| `owner@jet.test`     | Owner of 25% of C-GJTA                        | Not required for owners                 |
+| `assistant@jet.test` | The owner's executive assistant (no finances) | Not required for owners                 |
+
+Who gets which role at Univair:
+
+- **Staff.** Directors are `admin`. `finance` handles invoices, budgets and owners; `dispatcher` handles flights and
+  maintenance and answers owners. Only directors get access at first.
+- **Owner logins.** Each login has a role for the owner it acts for: `owner` sees everything and can make requests;
+  `assistant` (an executive assistant) sees the schedule and can make requests, and sees finances only when staff turn
+  on "Sees finances"; `read_only` can look but not make requests. Staff set this on the invitation and can change it
+  on the owner's page.
+- **Holding companies.** Each aircraft belongs to a holding company (Admin → Holding companies); the owners holding
+  shares in the aircraft are its shareholders.
 
 Add the demo key to any authenticator app, or use one of the printed backup codes.
 

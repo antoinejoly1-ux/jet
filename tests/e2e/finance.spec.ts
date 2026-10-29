@@ -26,12 +26,12 @@ test("an invoice with its PDF is issued, and only its owner can open the PDF", a
   await expect(page.getByText("Facture émise. Le propriétaire a été avisé.")).toBeVisible();
   await page.getByRole("searchbox").fill(number);
   await page.getByRole("button", { name: "Filtrer" }).click();
-  await expect(page.getByText("1 234,56 $")).toBeVisible();
+  await expect(page.getByText("1 234,56 $").first()).toBeVisible();
 
   // Someone else's invoice, to check isolation below.
-  await page.getByRole("searchbox").fill("Marie");
+  await page.getByRole("searchbox").fill("Nadia");
   await page.getByRole("button", { name: "Filtrer" }).click();
-  const otherFile = await page.getByRole("link", { name: "Voir le PDF" }).first().getAttribute("href");
+  const otherFile = await page.locator('a[href^="/files/"]').first().getAttribute("href");
 
   const owner = await (await browser.newContext()).newPage();
   await signIn(owner, "owner@jet.test");
@@ -72,7 +72,7 @@ test("a budget stays hidden until published, then the owner sees it", async ({ p
   await page.getByRole("button", { name: "Quitter" }).click();
 
   await page.goto(ownerUrl);
-  await page.getByRole("button", { name: "Publier au propriétaire" }).click();
+  await page.getByRole("button", { name: "Rendre visible au propriétaire" }).click();
   await expect(page.getByText("Publié").first()).toBeVisible();
 
   await page.goto("/admin/owners");
@@ -80,7 +80,7 @@ test("a budget stays hidden until published, then the owner sees it", async ({ p
   await page.getByRole("button", { name: "Voir comme ce propriétaire" }).click();
   await expect(page.getByRole("status").filter({ hasText: owner })).toBeVisible();
   await page.goto(`/finances?year=${year}`);
-  await expect(page.getByText("62 000,00 $").first()).toBeVisible();
+  await expect(page.getByText(/^62\s000(,00)?\s\$$/).first()).toBeVisible();
   await page.getByRole("button", { name: "Quitter" }).click();
 });
 
@@ -127,5 +127,10 @@ test("a spreadsheet is checked row by row, then imported", async ({ page }) => {
   await expect(page.getByText("2 transactions importées, 1 ligne ignorée.")).toBeVisible();
 
   await page.goto(`/admin/transactions?year=2026`);
+  await page
+    .getByRole("combobox", { name: "Part", exact: true })
+    .first()
+    .selectOption({ label: "C-GJTA · Jean Tremblay (25 %)" });
+  await page.getByRole("button", { name: "Filtrer" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: `Import ${tag} A` })).toContainText("Importée");
 });

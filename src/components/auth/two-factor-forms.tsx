@@ -3,12 +3,13 @@
 import { Check, Copy, Download, KeyRound, ShieldCheck, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 import QRCode from "qrcode";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { CodeInput } from "@/components/ui/code-input";
 import { Field } from "@/components/ui/field";
 import { authClient } from "@/lib/auth/auth-client";
+import { PasswordField } from "./password-field";
 import { fullPageLoad } from "@/lib/full-page-load";
 
 /**
@@ -44,6 +45,18 @@ export function TwoFactorChallenge({ next }: { next: string }) {
     fullPageLoad(next);
   }
 
+  /** Leaves the half-finished sign-in, for someone on a shared computer or the wrong account. */
+  async function signOut() {
+    await authClient.signOut().catch(() => {});
+    fullPageLoad("/sign-in");
+  }
+
+  const trustBox = (
+    <CheckRow checked={trust} onChange={setTrust}>
+      {t("trustDevice")}
+    </CheckRow>
+  );
+
   async function verifyBackup(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const code = String(new FormData(e.currentTarget).get("backup") ?? "").trim();
@@ -64,41 +77,76 @@ export function TwoFactorChallenge({ next }: { next: string }) {
         <ShieldCheck className="size-5" aria-hidden />
       </div>
       <div>
-        <h1 className="text-xl font-bold tracking-tight">{t("verifyTitle")}</h1>
-        <p className="text-muted mt-1 text-sm">{mode === "app" ? t("verifyBody") : t("backupBody")}</p>
+        <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("verifyTitle")}</h1>
+        <p className="text-muted mt-2 text-[15px] leading-relaxed">
+          {mode === "app" ? t("verifyBody") : t("backupBody")}
+        </p>
       </div>
       {error ? <Alert tone="danger">{error}</Alert> : null}
       {mode === "app" ? (
-        <CodeInput
-          key={attempt}
-          label={t("code")}
-          onComplete={verifyApp}
-          disabled={pending}
-          invalid={attempt > 0 && !!error}
-        />
+        <>
+          <CodeInput
+            key={attempt}
+            label={t("code")}
+            onComplete={verifyApp}
+            disabled={pending}
+            invalid={attempt > 0 && !!error}
+          />
+          {trustBox}
+        </>
       ) : (
         <form onSubmit={verifyBackup} className="flex flex-col gap-4" noValidate>
           <Field id="backup" name="backup" label={t("backupCode")} autoComplete="off" autoFocus required />
-          <Button type="submit" disabled={pending}>
+          {trustBox}
+          <Button type="submit" size="lg" disabled={pending}>
             {t("verify")}
           </Button>
         </form>
       )}
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={trust} onChange={(e) => setTrust(e.target.checked)} className="size-4" />
-        {t("trustDevice")}
-      </label>
       <button
         type="button"
         onClick={() => {
           setMode(mode === "app" ? "backup" : "app");
           setError(null);
         }}
-        className="text-accent self-start text-sm font-semibold hover:underline"
+        className="text-accent -my-3 self-start py-3 text-sm font-semibold hover:underline"
       >
         {mode === "app" ? t("useBackupCode") : t("useApp")}
       </button>
+      <p className="border-border text-muted border-t pt-5 text-sm">
+        {t("notYou")}{" "}
+        <button
+          type="button"
+          onClick={signOut}
+          className="text-accent -my-3 inline-block py-3 font-semibold hover:underline"
+        >
+          {t("signOut")}
+        </button>
+      </p>
     </div>
+  );
+}
+
+/** A checkbox in the accent colour on a label tall enough to tap. */
+function CheckRow({
+  checked,
+  onChange,
+  children,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  children: ReactNode;
+}) {
+  return (
+    <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="accent-accent size-5 shrink-0"
+      />
+      {children}
+    </label>
   );
 }
 
@@ -175,7 +223,7 @@ export function TwoFactorSetup({
     const blob = new Blob([`${t("codesFileHeader")}\n\n${backupCodes.join("\n")}\n`], { type: "text/plain" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "jet-backup-codes.txt";
+    a.download = t("codesFileName");
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -196,8 +244,10 @@ export function TwoFactorSetup({
       {step === "intro" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("setupTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{required ? t("setupRequiredBody") : t("setupBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("setupTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">
+              {required ? t("setupRequiredBody") : t("setupBody")}
+            </p>
           </div>
           <ul className="text-muted flex flex-col gap-2 text-sm">
             <li className="flex gap-2">
@@ -211,10 +261,9 @@ export function TwoFactorSetup({
           </ul>
           {hasPassword ? (
             <form onSubmit={start} className="flex flex-col gap-4" noValidate>
-              <Field
+              <PasswordField
                 id="password"
                 name="password"
-                type="password"
                 autoComplete="current-password"
                 label={t("confirmPassword")}
                 autoFocus
@@ -235,8 +284,8 @@ export function TwoFactorSetup({
       {step === "scan" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("scanTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{t("scanBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("scanTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("scanBody")}</p>
           </div>
           <div className="flex justify-center">
             {qr ? (
@@ -277,8 +326,8 @@ export function TwoFactorSetup({
       {step === "confirm" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("confirmTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{t("confirmBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("confirmTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("confirmBody")}</p>
           </div>
           <CodeInput
             key={attempt}
@@ -300,8 +349,8 @@ export function TwoFactorSetup({
       {step === "codes" ? (
         <>
           <div>
-            <h1 className="text-xl font-bold tracking-tight">{t("codesTitle")}</h1>
-            <p className="text-muted mt-1 text-sm">{t("codesBody")}</p>
+            <h1 className="text-[2rem] leading-tight font-light tracking-tight">{t("codesTitle")}</h1>
+            <p className="text-muted mt-2 text-[15px] leading-relaxed">{t("codesBody")}</p>
           </div>
           <ul
             data-testid="backup-codes"
@@ -321,10 +370,9 @@ export function TwoFactorSetup({
               {t("downloadCodes")}
             </Button>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={saved} onChange={(e) => setSaved(e.target.checked)} className="size-4" />
+          <CheckRow checked={saved} onChange={setSaved}>
             {t("codesSaved")}
-          </label>
+          </CheckRow>
           <Button type="button" disabled={!saved} onClick={() => fullPageLoad(next)}>
             {t("finish")}
           </Button>

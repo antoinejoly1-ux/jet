@@ -18,12 +18,14 @@ export const createInvitationInput = z.discriminatedUnion("kind", [
     kind: z.literal("owner"),
     email: z.string().trim().toLowerCase().email(),
     ownerId: z.string().uuid(),
-    memberRole: z.enum(["primary", "viewer"]).default("primary"),
+    memberRole: z.enum(["owner", "assistant", "read_only"]).default("owner"),
+    /** Only matters for assistants and read-only members; owners always see finances. */
+    canSeeFinances: z.boolean().default(false),
   }),
   z.object({
     kind: z.literal("staff"),
     email: z.string().trim().toLowerCase().email(),
-    staffRole: z.enum(["admin", "finance", "dispatcher"]),
+    staffRole: z.enum(["admin", "finance", "dispatcher", "pilot"]),
   }),
 ]);
 export type CreateInvitationInput = z.input<typeof createInvitationInput>;
@@ -51,6 +53,7 @@ export async function createInvitation(db: Db, actor: Actor, raw: CreateInvitati
         email: input.email,
         ownerId: input.kind === "owner" ? input.ownerId : null,
         memberRole: input.kind === "owner" ? input.memberRole : null,
+        canSeeFinances: input.kind === "owner" && input.memberRole !== "owner" && input.canSeeFinances,
         staffRole: input.kind === "staff" ? input.staffRole : null,
         tokenHash: hashToken(token),
         expiresAt: new Date(Date.now() + INVITATION_TTL_MS),
@@ -62,7 +65,13 @@ export async function createInvitation(db: Db, actor: Actor, raw: CreateInvitati
       action: "invitation.create",
       entityType: "invitation",
       entityId: row.id,
-      after: { email: row.email, ownerId: row.ownerId, staffRole: row.staffRole },
+      after: {
+        email: row.email,
+        ownerId: row.ownerId,
+        memberRole: row.memberRole,
+        canSeeFinances: row.canSeeFinances,
+        staffRole: row.staffRole,
+      },
     });
     return row;
   });
@@ -129,7 +138,12 @@ export async function acceptInvitation(db: Db, token: string, userId: string) {
     if (row.ownerId) {
       await tx
         .insert(ownerMembers)
-        .values({ ownerId: row.ownerId, userId, role: row.memberRole ?? "primary" })
+        .values({
+          ownerId: row.ownerId,
+          userId,
+          role: row.memberRole ?? "owner",
+          canSeeFinances: row.canSeeFinances,
+        })
         .onConflictDoNothing();
     } else if (row.staffRole) {
       await tx.update(user).set({ staffRole: row.staffRole }).where(eq(user.id, userId));

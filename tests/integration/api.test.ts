@@ -21,6 +21,7 @@ import * as aircraftRoute from "@/app/api/v1/aircraft/route";
 import * as completeRoute from "@/app/api/v1/flights/[id]/complete/route";
 import * as flightsRoute from "@/app/api/v1/flights/route";
 import * as openapiRoute from "@/app/api/v1/openapi.json/route";
+import * as positionRoute from "@/app/api/v1/aircraft/[id]/position/route";
 import * as transactionsRoute from "@/app/api/v1/transactions/route";
 import { createTestDb } from "../support/db";
 
@@ -134,16 +135,16 @@ describe("/api/v1", () => {
       "POST",
       `/flights/${flight.id}/complete`,
       key,
-      { blockMinutes: 95 },
+      { flightMinutes: 95 },
       { id: flight.id },
     );
-    expect(done).toMatchObject({ status: 200, json: { data: { status: "completed", blockMinutes: 95 } } });
+    expect(done).toMatchObject({ status: 200, json: { data: { status: "completed", flightMinutes: 95 } } });
     const again = await call(
       completeRoute,
       "POST",
       `/flights/${flight.id}/complete`,
       key,
-      { blockMinutes: 95 },
+      { flightMinutes: 95 },
       { id: flight.id },
     );
     expect(again).toMatchObject({ status: 409, json: { error: { code: "flight_not_scheduled" } } });
@@ -151,7 +152,7 @@ describe("/api/v1", () => {
     expect(ledger.reduce((n, e) => n + e.minutes, 0)).toBe(600 - 95);
   });
 
-  it("adds ledger entries from integer cents", async () => {
+  it("adds ledger entries from integer cents, in Canadian dollars only", async () => {
     const { key } = await createApiKey(db, admin, { name: "Compta", scopes: ["finance:read", "finance:write"] });
     const res = await call(transactionsRoute, "POST", "/transactions", key, {
       shareId,
@@ -161,6 +162,20 @@ describe("/api/v1", () => {
       currency: "CAD",
     });
     expect(res).toMatchObject({ status: 200, json: { data: { amountCents: 123456, source: "import" } } });
+    const usd = await call(transactionsRoute, "POST", "/transactions", key, {
+      shareId,
+      occurredOn: "2026-10-01",
+      kind: "cost",
+      amountCents: 100,
+      currency: "USD",
+    });
+    expect(usd).toMatchObject({ status: 400, json: { error: { code: "invalid" } } });
+  });
+
+  it("says where an aircraft is", async () => {
+    const { key } = await createApiKey(db, admin, { name: "Suivi", scopes: ["fleet:read"] });
+    const res = await call(positionRoute, "GET", `/aircraft/${planeId}/position`, key, undefined, { id: planeId });
+    expect(res).toMatchObject({ status: 200, json: { data: { registration: "C-GJTA", state: "unknown" } } });
   });
 
   it("publishes an OpenAPI document built from the same schemas", async () => {
@@ -204,7 +219,7 @@ describe("webhooks", () => {
       departsAt: "2026-10-11T12:00:00Z",
     });
     const id = (created.json.data as { id: string }).id;
-    await call(completeRoute, "POST", "", key, { blockMinutes: 60 }, { id });
+    await call(completeRoute, "POST", "", key, { flightMinutes: 60 }, { id });
 
     const { sent, impl } = receiver([500, 200]);
     const now = new Date();
@@ -212,7 +227,7 @@ describe("webhooks", () => {
     // flight.scheduled was not subscribed to, so only one delivery exists.
     expect(sent).toHaveLength(1);
     const { body, headers } = sent[0]!;
-    expect(JSON.parse(body)).toMatchObject({ type: "flight.completed", data: { flightId: id, blockMinutes: 60 } });
+    expect(JSON.parse(body)).toMatchObject({ type: "flight.completed", data: { flightId: id, flightMinutes: 60 } });
     const [, ts, sig] = headers["Jet-Signature"]!.match(/^t=(\d+),v1=([a-f0-9]{64})$/)!;
     expect(sig).toBe(createHmac("sha256", secret).update(`${ts}.${body}`).digest("hex"));
 

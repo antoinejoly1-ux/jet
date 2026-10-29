@@ -5,6 +5,7 @@ import type { Db } from "@/lib/db";
 import { aircraft, budgetCategories, imports, owners, shares, transactions } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
 import { parseMoneyToCents } from "@/lib/validation/finance";
+import { parseImportDate, type DateOrder } from "@/lib/import-dates";
 import { recordAudit } from "./audit";
 import { ConflictError } from "./errors";
 
@@ -35,6 +36,10 @@ type ParsedRow = {
   amountCents: number;
   categoryId: string | null;
   description: string | null;
+  /** As matched, for the preview. */
+  registration: string;
+  ownerName: string;
+  category: string | null;
 };
 
 const KINDS: Record<string, ParsedRow["kind"]> = {
@@ -51,25 +56,19 @@ const KINDS: Record<string, ParsedRow["kind"]> = {
 
 const norm = (s: string) => s.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-/** 2026-03-01, 01/03/2026 or 1-3-2026 (day first, as in Quebec) → 2026-03-01. */
-export function parseImportDate(input: string): string | null {
-  const s = input.trim();
-  let y: number, m: number, d: number;
-  const iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  const dmy = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
-  if (iso) [y, m, d] = [Number(iso[1]), Number(iso[2]), Number(iso[3])];
-  else if (dmy) [d, m, y] = [Number(dmy[1]), Number(dmy[2]), Number(dmy[3])];
-  else return null;
-  const date = new Date(Date.UTC(y, m - 1, d));
-  if (date.getUTCFullYear() !== y || date.getUTCMonth() !== m - 1 || date.getUTCDate() !== d) return null;
-  return date.toISOString().slice(0, 10);
-}
+export { parseImportDate };
 
 /**
  * Checks every row and returns what would be imported and what wouldn't, with
  * the reason per field. Nothing is written.
  */
-export async function validateImport(db: Db, actor: Actor, rawMapping: unknown, rawRows: unknown) {
+export async function validateImport(
+  db: Db,
+  actor: Actor,
+  rawMapping: unknown,
+  rawRows: unknown,
+  { dateOrder = "dmy" }: { dateOrder?: DateOrder } = {},
+) {
   authorize(actor, "finance:write");
   const mapping = mappingSchema.parse(rawMapping);
   const rows = rowsSchema.parse(rawRows);
@@ -88,13 +87,13 @@ export async function validateImport(db: Db, actor: Actor, rawMapping: unknown, 
       .where(isNull(owners.deletedAt)),
     db.select().from(budgetCategories),
   ]);
-  const shareIndex = new Map(shareRows.map((s) => [`${norm(s.registration)}|${norm(s.ownerName)}`, s.id]));
+  const shareIndex = new Map(shareRows.map((s) => [`${norm(s.registration)}|${norm(s.ownerName)}`, s]));
   const categoryIndex = new Map(
     categoryRows.flatMap(
       (c) =>
         [
-          [norm(c.nameFr), c.id],
-          [norm(c.nameEn), c.id],
+          [norm(c.nameFr), c],
+          [norm(c.nameEn), c],
         ] as const,
     ),
   );
@@ -106,11 +105,11 @@ export async function validateImport(db: Db, actor: Actor, rawMapping: unknown, 
     const get = (f: ImportField) => (mapping[f] ? (raw[mapping[f]!] ?? "").trim() : "");
     const rowErrors: RowError[] = [];
 
-    const occurredOn = parseImportDate(get("date"));
+    const occurredOn = parseImportDate(get("date"), dateOrder);
     if (!occurredOn) rowErrors.push({ row, field: "date", code: "invalid_date" });
 
-    const shareId = shareIndex.get(`${norm(get("registration"))}|${norm(get("owner"))}`);
-    if (!shareId) rowErrors.push({ row, field: "owner", code: "share_not_found" });
+    const share = shareIndex.get(`${norm(get("registration"))}|${norm(get("owner"))}`);
+    if (!share) rowErrors.push({ row, field: "owner", code: "share_not_found" });
 
     const kindText = get("kind");
     const kind = kindText ? KINDS[norm(kindText)] : "cost";
@@ -120,19 +119,22 @@ export async function validateImport(db: Db, actor: Actor, rawMapping: unknown, 
     if (amountCents === null || amountCents === 0) rowErrors.push({ row, field: "amount", code: "invalid_amount" });
 
     const categoryText = get("category");
-    const categoryId = categoryText ? (categoryIndex.get(norm(categoryText)) ?? null) : null;
-    if (categoryText && !categoryId) rowErrors.push({ row, field: "category", code: "unknown_category" });
+    const category = categoryText ? (categoryIndex.get(norm(categoryText)) ?? null) : null;
+    if (categoryText && !category) rowErrors.push({ row, field: "category", code: "unknown_category" });
 
     if (rowErrors.length) errors.push(...rowErrors);
     else
       valid.push({
         row,
-        shareId: shareId!,
+        shareId: share!.id,
         occurredOn: occurredOn!,
         kind: kind!,
         amountCents: amountCents!,
-        categoryId,
+        categoryId: category?.id ?? null,
         description: get("description").slice(0, 300) || null,
+        registration: share!.registration,
+        ownerName: share!.ownerName,
+        category: category ? category.nameFr : null,
       });
   });
 
@@ -143,8 +145,12 @@ export async function validateImport(db: Db, actor: Actor, rawMapping: unknown, 
  * Imports the valid rows as ledger entries in one transaction, and keeps a
  * record of the import (file, mapping, counts, rejected rows).
  */
-export async function commitImport(db: Db, actor: Actor, input: { fileId: string; mapping: unknown; rows: unknown }) {
-  const result = await validateImport(db, actor, input.mapping, input.rows);
+export async function commitImport(
+  db: Db,
+  actor: Actor,
+  input: { fileId: string; mapping: unknown; rows: unknown; dateOrder?: DateOrder },
+) {
+  const result = await validateImport(db, actor, input.mapping, input.rows, { dateOrder: input.dateOrder });
   if (result.valid.length === 0) throw new ConflictError("nothing_to_import");
   return db.transaction(async (tx) => {
     const [record] = await tx
@@ -153,7 +159,7 @@ export async function commitImport(db: Db, actor: Actor, input: { fileId: string
         kind: "transactions",
         fileId: input.fileId,
         status: "committed",
-        columnMapping: result.mapping,
+        columnMapping: { ...result.mapping, ...(input.dateOrder ? { dateOrder: input.dateOrder } : {}) },
         rowsImported: result.valid.length,
         rowsRejected: result.total - result.valid.length,
         errorReport: result.errors,

@@ -1,5 +1,6 @@
 import "server-only";
 import { and, asc, desc, eq, ilike, isNull, or, sql } from "drizzle-orm";
+import { z } from "zod";
 import type { Db } from "@/lib/db";
 import { aircraft, auditLog, invitations, ownerMembers, owners, shares, user } from "@/lib/db/schema";
 import { authorize, type Actor } from "@/lib/auth/policy";
@@ -7,10 +8,28 @@ import { ownerInput, type OwnerInput } from "@/lib/validation/admin";
 import { recordAudit } from "./audit";
 import { NotFoundError, ConflictError } from "./errors";
 
-/** Every active owner with the aircraft they hold shares in. Staff only. */
-export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}) {
+export type OwnerAccess = "active" | "invited" | "not_invited";
+
+const hasMembers = sql`exists (select 1 from owner_members m where m.owner_id = ${owners.id})`;
+const hasPendingInvitation = sql`exists (select 1 from invitations i where i.owner_id = ${owners.id}
+  and i.accepted_at is null and i.revoked_at is null and i.expires_at > now())`;
+
+/**
+ * Every active owner with the aircraft they hold shares in. Staff only.
+ * `access` narrows to owners with a login ("active"), with an invitation on
+ * its way ("invited"), or with neither ("not_invited").
+ */
+export async function listOwners(db: Db, actor: Actor, opts: { q?: string; access?: OwnerAccess } = {}) {
   authorize(actor, "owners:read");
   const q = opts.q?.trim();
+  const access =
+    opts.access === "active"
+      ? hasMembers
+      : opts.access === "invited"
+        ? and(sql`not ${hasMembers}`, hasPendingInvitation)
+        : opts.access === "not_invited"
+          ? and(sql`not ${hasMembers}`, sql`not ${hasPendingInvitation}`)
+          : undefined;
   return db
     .select({
       id: owners.id,
@@ -20,6 +39,9 @@ export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}
       aircraft: sql<string[]>`coalesce(array_agg(${aircraft.registration} order by ${aircraft.registration})
         filter (where ${aircraft.id} is not null and (${shares.endsOn} is null or ${shares.endsOn} > current_date)), '{}')`,
       members: sql<number>`(select count(*)::int from owner_members m where m.owner_id = ${owners.id})`,
+      invited: sql<boolean>`${hasPendingInvitation}`,
+      image: sql<string | null>`(select u.image from owner_members m join users u on u.id = m.user_id
+        where m.owner_id = ${owners.id} and u.image is not null order by (m.role = 'owner') desc limit 1)`,
     })
     .from(owners)
     .leftJoin(shares, eq(shares.ownerId, owners.id))
@@ -27,6 +49,7 @@ export async function listOwners(db: Db, actor: Actor, opts: { q?: string } = {}
     .where(
       and(
         isNull(owners.deletedAt),
+        access,
         q
           ? or(ilike(owners.legalName, `%${q}%`), ilike(owners.email, `%${q}%`), ilike(aircraft.registration, `%${q}%`))
           : undefined,
@@ -68,6 +91,7 @@ export async function getOwner(db: Db, actor: Actor, id: string) {
         name: user.name,
         email: user.email,
         role: ownerMembers.role,
+        canSeeFinances: ownerMembers.canSeeFinances,
         since: ownerMembers.createdAt,
       })
       .from(ownerMembers)
@@ -153,6 +177,42 @@ export async function archiveOwner(db: Db, actor: Actor, id: string) {
     if (!row) throw new NotFoundError("owner");
     await tx.delete(ownerMembers).where(eq(ownerMembers.ownerId, id));
     await recordAudit(tx, { actorUserId: actor.id, action: "owner.archive", entityType: "owner", entityId: id });
+  });
+}
+
+export const memberAccessInput = z.object({
+  role: z.enum(["owner", "assistant", "read_only"]),
+  canSeeFinances: z.boolean(),
+});
+export type MemberAccessInput = z.input<typeof memberAccessInput>;
+
+/** Changes what one login may do for an owner. Owners always see finances, so the flag only applies to others. */
+export async function updateOwnerMember(
+  db: Db,
+  actor: Actor,
+  ownerId: string,
+  memberId: string,
+  raw: MemberAccessInput,
+) {
+  authorize(actor, "owners:write");
+  const input = memberAccessInput.parse(raw);
+  const next = { role: input.role, canSeeFinances: input.role !== "owner" && input.canSeeFinances };
+  await db.transaction(async (tx) => {
+    const [before] = await tx
+      .select({ role: ownerMembers.role, canSeeFinances: ownerMembers.canSeeFinances, userId: ownerMembers.userId })
+      .from(ownerMembers)
+      .where(and(eq(ownerMembers.id, memberId), eq(ownerMembers.ownerId, ownerId)))
+      .for("update");
+    if (!before) throw new NotFoundError("member");
+    await tx.update(ownerMembers).set(next).where(eq(ownerMembers.id, memberId));
+    await recordAudit(tx, {
+      actorUserId: actor.id,
+      action: "owner.member_update",
+      entityType: "owner",
+      entityId: ownerId,
+      before,
+      after: { userId: before.userId, ...next },
+    });
   });
 }
 

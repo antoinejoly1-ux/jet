@@ -1,16 +1,17 @@
-import { Clock, Phone } from "lucide-react";
+import { Clock } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { ContactButtons } from "@/components/common/contact-buttons";
 import { AutoRefresh } from "@/components/messages/auto-refresh";
 import { Composer } from "@/components/messages/composer";
 import { Thread } from "@/components/messages/thread";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/ui/page-header";
+import { can } from "@/lib/auth/policy";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { env } from "@/lib/env";
 import { getOwnerThread } from "@/lib/services/messages";
+import { OPERATOR_TIME_ZONE } from "@/lib/time";
 import { sendOwnerMessageAction } from "./actions";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,40 +33,36 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
     );
 
   // Staff viewing as the owner see the thread but don't mark it read for them.
+  // Office hours, operator time: 7 h to 19 h. Outside them, say when to expect an answer and how to reach someone now.
+  const hour = Number(
+    new Intl.DateTimeFormat("en-CA", { hour: "numeric", hourCycle: "h23", timeZone: OPERATOR_TIME_ZONE }).format(
+      new Date(),
+    ),
+  );
+  const open = hour >= 7 && hour < 19;
   const thread = await getOwnerThread(db, viewer, ownerId, { markRead: !viewer.viewingAs });
-  const phone = env.OPERATOR_PHONE;
 
   return (
     <>
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-        actions={
-          phone ? (
-            <Button asChild size="sm" variant="secondary">
-              <a href={`tel:${phone.replace(/[^\d+]/g, "")}`}>
-                <Phone aria-hidden />
-                {t("callUs")}
-              </a>
-            </Button>
-          ) : null
-        }
-      />
+      <PageHeader title={t("title")} description={t("subtitle")} actions={<ContactButtons />} />
       <AutoRefresh />
       <section
         aria-label={t("conversationLabel")}
-        className="border-border bg-surface flex min-h-[50dvh] flex-col rounded-lg border"
+        // On a phone the conversation fills the screen above the tab bar, composer at the bottom.
+        className="bg-surface border-border flex h-[calc(100dvh-21.5rem-env(safe-area-inset-bottom))] min-h-[18rem] flex-col rounded-lg border sm:h-[calc(100dvh-17rem)] sm:min-h-[26rem]"
       >
         {/* Focusable so keyboard users can scroll the thread. */}
         <div
           tabIndex={0}
-          className="focus-visible:ring-ring flex max-h-[50dvh] flex-1 flex-col overflow-y-auto outline-none focus-visible:ring-2 sm:max-h-[60dvh]"
+          className="focus-visible:ring-ring flex min-h-0 flex-1 flex-col overflow-y-auto outline-none focus-visible:ring-2"
         >
           <Thread messages={thread.messages} perspective="owner" empty={t("ownerEmpty")} />
         </div>
         <div className="border-border border-t p-3 sm:p-4">
           {viewer.viewingAs ? (
             <p className="text-muted text-sm">{t("viewAsReadOnly")}</p>
+          ) : !can(viewer, "messages:send", { ownerIds: [ownerId] }) ? (
+            <p className="text-muted text-sm">{t("readOnlyMember")}</p>
           ) : (
             <Composer action={sendOwnerMessageAction.bind(null, ownerId)} placeholder={t("ownerPlaceholder")} />
           )}
@@ -73,7 +70,7 @@ export default async function OwnerMessagesPage({ searchParams }: PageProps<"/me
       </section>
       <p className="text-muted mt-3 flex items-center gap-1.5 text-xs">
         <Clock className="size-3.5" aria-hidden />
-        {t("responseHint")}
+        {open ? t("responseHint") : t("responseHintClosed")}
       </p>
     </>
   );

@@ -1,21 +1,29 @@
 "use client";
 
-import { LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { replayTourAction } from "@/app/actions/profile";
 import { authClient } from "@/lib/auth/auth-client";
+import { Avatar } from "@/components/ui/avatar";
+import { AnimatedIcon } from "@/components/animated-icons/AnimatedIcon";
 
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0]!.toUpperCase())
-    .join("");
-
-export function UserMenu({ name, email }: { name: string; email: string }) {
+export function UserMenu({
+  name,
+  email,
+  image,
+  settings = true,
+  tour = true,
+}: {
+  name: string;
+  email: string;
+  image?: string | null;
+  /** Pilots have no Settings page: the menu then only signs out. */
+  settings?: boolean;
+  /** People still waiting for access have no tour to replay. */
+  tour?: boolean;
+}) {
   const t = useTranslations("userMenu");
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -48,35 +56,49 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
         aria-expanded={open}
         aria-label={t("open")}
         onClick={() => setOpen((o) => !o)}
-        className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-full text-sm font-semibold"
+        className="rounded-full"
       >
-        {initials(name) || "?"}
+        <Avatar name={name} image={image} className="size-11" />
       </button>
       {open ? (
         <div
           role="menu"
-          className="border-border bg-surface absolute right-0 z-40 mt-2 w-64 rounded-lg border p-1.5 shadow-lg"
+          className="border-border bg-surface shadow-float absolute right-0 z-40 mt-2 w-64 rounded-[18px] border p-1.5"
         >
           <div className="px-3 py-2">
             <p className="truncate text-sm font-semibold">{name}</p>
             <p className="text-muted truncate text-xs">{email}</p>
           </div>
-          <Link
-            role="menuitem"
-            href="/account"
-            onClick={() => setOpen(false)}
-            className="hover:bg-surface-muted flex h-10 items-center gap-2 rounded-md px-3 text-sm"
-          >
-            <UserRound className="size-4" aria-hidden />
-            {t("account")}
-          </Link>
+          {settings ? (
+            <Link
+              role="menuitem"
+              href="/account"
+              onClick={() => setOpen(false)}
+              className="ai-trigger hover:bg-surface-muted flex h-11 items-center gap-2 rounded-full px-3 text-sm"
+            >
+              <AnimatedIcon name="user" size={18} />
+              {t("account")}
+            </Link>
+          ) : null}
+          {tour ? (
+            <form action={replayTourAction}>
+              <button
+                role="menuitem"
+                type="submit"
+                className="ai-trigger hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
+              >
+                <AnimatedIcon name="bulb" size={18} />
+                {t("tour")}
+              </button>
+            </form>
+          ) : null}
           <button
             role="menuitem"
             type="button"
             onClick={signOut}
-            className="hover:bg-surface-muted flex h-10 w-full items-center gap-2 rounded-md px-3 text-sm"
+            className="ai-trigger hover:bg-surface-muted flex h-11 w-full items-center gap-2 rounded-full px-3 text-sm"
           >
-            <LogOut className="size-4" aria-hidden />
+            <AnimatedIcon name="logout" size={18} />
             {t("signOut")}
           </button>
         </div>

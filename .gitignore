@@ -45,3 +45,7 @@ next-env.d.ts
 /tmp/
 /test-results/
 /playwright-report/
+
+# Call recordings and transcripts never go in the repository.
+*.m4a
+scripts/memo/out/

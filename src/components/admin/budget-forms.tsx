@@ -7,13 +7,14 @@ import { Field } from "@/components/ui/field";
 import { FormAlert } from "@/components/ui/form-alert";
 import { SelectField } from "@/components/ui/select";
 import { idle, submitted, type FormState } from "@/lib/forms";
+import { localeTag } from "@/lib/locale";
 
 type Row = { categoryId: string; name: string; plannedCents: number; spent: string; remaining: string; over: boolean };
 
 /** Amounts shown in the user's own number format ("105 000,00" in French); the server reads both. */
 const asInput = (cents: number, locale: string) =>
   cents
-    ? new Intl.NumberFormat(locale === "en" ? "en-CA" : "fr-CA", {
+    ? new Intl.NumberFormat(localeTag(locale), {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(cents / 100)

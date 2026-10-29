@@ -7,11 +7,18 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { DownloadLink } from "@/components/ui/download-link";
 import { PageHeader } from "@/components/ui/page-header";
+import { ReserveBars } from "@/components/billing/reserve-bars";
+import { Button } from "@/components/ui/button";
+import { listOwnerReserves } from "@/lib/services/reserves";
+import { listOwnerCompanies } from "@/lib/services/pnl";
 import { requireAccess } from "@/lib/auth/session";
+import { lacksFinanceAccess, NoFinanceAccess } from "@/components/billing/no-finance-access";
 import { db } from "@/lib/db";
-import { formatMoney } from "@/lib/format";
+import { formatMoney, formatMoneyRounded } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { getOwnerFinances } from "@/lib/services/budgets";
+import { scenes } from "@/lib/imagery";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("finances") };
@@ -19,14 +26,25 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FinancesPage({ searchParams }: PageProps<"/finances">) {
   const viewer = await requireAccess();
+  if (lacksFinanceAccess(viewer))
+    return (
+      <NoFinanceAccess title={(await getTranslations("nav.items"))("finances")} staff={Boolean(viewer.staffRole)} />
+    );
   const t = await getTranslations("finances");
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const { year: yearParam } = await searchParams;
   const thisYear = new Date().getFullYear();
   const year = Number(typeof yearParam === "string" ? yearParam : "") || thisYear;
-  const shares = await getOwnerFinances(db, viewer, year);
+  const [shares, reserves, companies] = await Promise.all([
+    getOwnerFinances(db, viewer, year),
+    listOwnerReserves(db, viewer),
+    listOwnerCompanies(db, viewer),
+  ]);
+  const tres = await getTranslations("reserves");
   const money = (cents: number, currency: "CAD" | "USD" = "CAD") => formatMoney(cents, currency, locale);
+  /** The headline figures, in whole dollars: the cents are in the detail below. */
+  const round = (cents: number, currency: "CAD" | "USD" = "CAD") => formatMoneyRounded(cents, currency, locale);
   const monthName = (m: number) => format.dateTime(new Date(Date.UTC(year, m - 1, 15)), { month: "short" });
 
   return (
@@ -38,7 +56,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
           <>
             <DownloadLink href={`/finances/export?year=${year}`}>{t("exportCsv")}</DownloadLink>
             <nav aria-label={t("year")} className="border-border bg-surface-muted inline-flex rounded-md border p-0.5">
-              {[thisYear - 2, thisYear - 1, thisYear].map((y) => (
+              {[thisYear, thisYear - 1, thisYear - 2].map((y) => (
                 <Link
                   key={y}
                   href={`/finances?year=${y}`}
@@ -56,7 +74,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
         }
       />
       {shares.length === 0 ? (
-        <EmptyState icon={Wallet} title={t("emptyTitle")} body={t("emptyBody")} />
+        <EmptyState icon={Wallet} image={scenes.cabinLifestyle} title={t("emptyTitle")} body={t("emptyBody")} />
       ) : (
         <div className="flex flex-col gap-10">
           {shares.map((s) => {
@@ -65,7 +83,7 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
             return (
               <section key={s.shareId} aria-labelledby={`fin-${s.shareId}`} className="flex flex-col gap-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h2 id={`fin-${s.shareId}`} className="text-lg font-bold tracking-tight">
+                  <h2 id={`fin-${s.shareId}`} className="text-xl font-light tracking-tight">
                     {s.registration} <span className="text-muted font-medium">· {s.model}</span>
                   </h2>
                   <DownloadLink href={`/finances/statement?share=${s.shareId}&year=${year}`}>
@@ -73,33 +91,45 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                   </DownloadLink>
                 </div>
                 {!s.published ? <Alert>{t("notPublished", { year })}</Alert> : null}
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <Card>
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 [&>*]:min-w-0">
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("planned")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-bold tracking-tight">
-                      {s.published ? money(s.totals.plannedCents, s.currency) : "—"}
+                    <p className="tabular mt-1 text-xl font-light tracking-tight sm:text-3xl">
+                      {s.published ? round(s.totals.plannedCents, s.currency) : "—"}
                     </p>
                   </Card>
-                  <Card>
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("spent")}</CardTitle>
-                    <p className="tabular mt-1 text-2xl font-bold tracking-tight">
-                      {money(s.totals.spentCents, s.currency)}
+                    <p className="tabular mt-1 text-xl font-light tracking-tight sm:text-3xl">
+                      {round(s.totals.spentCents, s.currency)}
                     </p>
                   </Card>
-                  <Card>
+                  <Card className="p-4 sm:p-7">
+                    <CardTitle>{t("billed")}</CardTitle>
+                    <p className="tabular mt-1 text-xl font-light tracking-tight sm:text-3xl">
+                      {round(s.totals.billedCents, s.currency)}
+                    </p>
+                    <p className="text-muted mt-1 text-xs">{t("billedHint", { year })}</p>
+                  </Card>
+                  <Card className="p-4 sm:p-7">
                     <CardTitle>{t("remaining")}</CardTitle>
                     <p
                       className={cn(
-                        "tabular mt-1 text-2xl font-bold tracking-tight",
+                        "tabular mt-1 text-xl font-light tracking-tight sm:text-3xl",
                         s.published && remaining < 0 && "text-danger",
                       )}
                     >
-                      {s.published ? money(remaining, s.currency) : "—"}
+                      {s.published ? round(remaining, s.currency) : "—"}
                     </p>
                   </Card>
                 </div>
+                {s.totals.notInvoicedCents ? (
+                  <p className="text-muted -mt-1 text-sm">
+                    {t("reconcile", { amount: money(s.totals.notInvoicedCents, s.currency) })}
+                  </p>
+                ) : null}
 
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <Card>
                     <CardTitle className="mb-4">{t("byCategory")}</CardTitle>
                     <ul className="flex flex-col gap-4">
@@ -153,13 +183,18 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
                     {/* Bars for sighted users; the same numbers as a table for screen readers. */}
                     <div aria-hidden className="flex h-40 items-end gap-1.5">
                       {s.months.map((m) => (
-                        <div key={m.month} className="flex h-full flex-1 flex-col justify-end gap-1">
+                        <div key={m.month} className="flex h-full min-w-0 flex-1 flex-col justify-end gap-1">
                           <div
                             className="bg-accent/80 rounded-t-sm"
                             style={{ height: `${Math.max(0, (m.costCents / maxMonth) * 100)}%` }}
                             title={`${monthName(m.month)} · ${money(m.costCents, s.currency)}`}
                           />
-                          <span className="text-muted text-center text-[10px]">{monthName(m.month).slice(0, 3)}</span>
+                          <span className="text-muted text-center text-[11px]">
+                            <span className="sm:hidden">
+                              {format.dateTime(new Date(Date.UTC(year, m.month - 1, 15)), { month: "narrow" })}
+                            </span>
+                            <span className="hidden sm:inline">{monthName(m.month).replace(".", "")}</span>
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -181,6 +216,48 @@ export default async function FinancesPage({ searchParams }: PageProps<"/finance
           })}
         </div>
       )}
+
+      {reserves.length ? (
+        <section aria-labelledby="reserves-title" className="mt-14">
+          <h2 id="reserves-title" className="text-2xl font-light tracking-tight">
+            {tres("title")}
+          </h2>
+          <p className="text-muted mt-1.5 max-w-2xl text-sm leading-relaxed">{tres("ownerBody")}</p>
+          <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {reserves.map((r) => (
+              <Card key={r.aircraftId}>
+                <div className="mb-5 flex flex-wrap items-baseline justify-between gap-2">
+                  <p className="font-medium">
+                    {r.registration} <span className="text-muted font-normal">· {r.model}</span>
+                  </p>
+                  <p className="text-muted text-sm">
+                    {tres("totalWithPart", { total: money(r.totalCents), part: money(r.mineCents) })}
+                  </p>
+                </div>
+                <ReserveBars components={r.components} locale={locale} shareBp={r.percentageBp} />
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {companies.length ? (
+        <section aria-labelledby="companies-title" className="mt-14">
+          <h2 id="companies-title" className="text-2xl font-light tracking-tight">
+            {tres("companiesTitle")}
+          </h2>
+          <p className="text-muted mt-1.5 max-w-2xl text-sm leading-relaxed">{tres("companiesBody")}</p>
+          <ul className="mt-5 flex flex-wrap gap-2">
+            {companies.map((c) => (
+              <li key={c.id}>
+                <Button asChild variant="secondary">
+                  <Link href={`/results/${c.id}?year=${year}`}>{tres("companyResults", { name: c.legalName })}</Link>
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </>
   );
 }

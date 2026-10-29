@@ -23,7 +23,7 @@ export const timestamps = () => ({
   updatedAt: updatedAt(),
 });
 
-export const staffRole = pgEnum("staff_role", ["admin", "finance", "dispatcher"]);
+export const staffRole = pgEnum("staff_role", ["admin", "finance", "dispatcher", "pilot"]);
 export const locale = pgEnum("locale", ["fr", "en"]);
 export const currency = pgEnum("currency", ["CAD", "USD"]);
 export const dataSource = pgEnum("data_source", ["manual", "import", "sync"]);

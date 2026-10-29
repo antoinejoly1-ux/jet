@@ -9,13 +9,13 @@ and write the same data as the screens, under the same rules. The full descripti
 An admin creates keys in **Admin → Settings → Developers**. A key is shown once, stored only as a hash, and can be
 revoked at any time. Each key carries scopes:
 
-| Scope              | Allows                                                    |
-| ------------------ | --------------------------------------------------------- |
-| `owners:read`      | `GET /owners`                                             |
-| `fleet:read`       | `GET /aircraft`, `GET /shares`, `GET /flights`            |
-| `finance:read`     | `GET /invoices`, `GET /transactions`                      |
-| `finance:write`    | `POST /transactions`                                      |
-| `operations:write` | `POST /flights`, `POST /flights/{id}/complete`, `/cancel` |
+| Scope              | Allows                                                                        |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `owners:read`      | `GET /owners`                                                                 |
+| `fleet:read`       | `GET /aircraft`, `GET /aircraft/{id}/position`, `GET /shares`, `GET /flights` |
+| `finance:read`     | `GET /invoices`, `GET /transactions`                                          |
+| `finance:write`    | `POST /transactions`                                                          |
+| `operations:write` | `POST /flights`, `POST /flights/{id}/complete`, `/cancel`                     |
 
 Every change made with a key goes through the same services, validation and audit log as the screens; the audit log
 records the admin who created the key. Limit: 120 requests per minute per key (HTTP 429 beyond).
@@ -24,7 +24,7 @@ records the admin who created the key. Limit: 120 requests per minute per key (H
 
 - `Authorization: Bearer jet_xxxxxxxx_…`
 - Responses: `{ "data": … }`. Errors: `{ "error": { "code", "message", "fields"? } }` with 400, 401, 403, 404, 409 or 429.
-- Money is integer **cents** with a `currency`; durations are **minutes**; times are ISO 8601 (responses in UTC).
+- Money is integer **cents** with a `currency`, always `CAD` (it may be left out when writing); durations are **minutes**; times are ISO 8601 (responses in UTC).
 - Ledger entries are never edited through the API: a correction is a reversal, made in the portal.
 
 ```sh
@@ -54,7 +54,7 @@ Jet-Event: flight.completed
 Jet-Delivery: 0192…            (the same id on every retry: use it to ignore duplicates)
 Jet-Signature: t=1792990000,v1=5f2c…
 
-{"id":"0192…","type":"flight.completed","createdAt":"2026-10-26T14:02:11.000Z","data":{"flightId":"…","blockMinutes":95,…}}
+{"id":"0192…","type":"flight.completed","createdAt":"2026-10-26T14:02:11.000Z","data":{"flightId":"…","flightMinutes":95,…}}
 ```
 
 Verify the signature before trusting a delivery:

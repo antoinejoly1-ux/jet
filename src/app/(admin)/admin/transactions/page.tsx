@@ -14,8 +14,9 @@ import { can } from "@/lib/auth/policy";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/format";
-import { listCategories, listTransactions } from "@/lib/services/ledger";
+import { listCategories, listTransactions, TRANSACTIONS_SHOWN } from "@/lib/services/ledger";
 import { addTransactionAction, reverseTransactionAction } from "./actions";
+import { lang } from "@/lib/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("transactions") };
@@ -32,7 +33,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
       </>
     );
   }
-  const locale = await getLocale();
+  const locale = lang(await getLocale());
   const format = await getFormatter();
   const sp = await searchParams;
   const str = (k: string) => (typeof sp[k] === "string" ? (sp[k] as string) : "");
@@ -63,7 +64,7 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
           </DownloadLink>
         }
       />
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
           <form className="mb-4 flex flex-wrap gap-2">
             <Select name="share" defaultValue={shareId} aria-label={t("share")} className="min-w-56 flex-1">
@@ -93,10 +94,13 @@ export default async function TransactionsPage({ searchParams }: PageProps<"/adm
               {t("filter")}
             </Button>
           </form>
+          {rows.length >= TRANSACTIONS_SHOWN ? (
+            <p className="text-muted mb-3 text-sm">{t("truncated", { count: TRANSACTIONS_SHOWN })}</p>
+          ) : null}
           {rows.length === 0 ? (
             <EmptyState icon={ClipboardList} title={t("emptyTitle")} body={t("emptyBody")} />
           ) : (
-            <ul className="border-border bg-surface divide-border divide-y rounded-lg border">
+            <ul className="bg-surface divide-border border-border divide-y rounded-lg border">
               {rows.map((r) => (
                 <li key={r.id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:gap-4">
                   <div className="min-w-0 flex-1">

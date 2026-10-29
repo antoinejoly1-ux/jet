@@ -74,7 +74,7 @@ test("a newly invited staff member is guided through setup before reaching Admin
   await signIn(page, "admin@jet.test");
   await page.goto("/admin/invitations");
   await page.getByLabel(/^(Courriel|Email)$/).fill(email);
-  await page.getByLabel(/^(Accès|Access)$/).selectOption({ label: "Répartiteur" });
+  await page.getByLabel(/^(Accès|Access)$/).selectOption({ label: "Répartition" });
   await page.getByRole("button", { name: /Envoyer l'invitation|Send invitation/ }).click();
   await expect(page.getByRole("status")).toContainText(email);
 
@@ -83,12 +83,21 @@ test("a newly invited staff member is guided through setup before reaching Admin
   await staff.getByRole("link", { name: /Créer mon compte|Create my account/ }).click();
   await staff.getByLabel(/Nom complet|Full name/).fill("Nouvelle Répartitrice");
   await staff.getByLabel(/^(Mot de passe|Password)$/).fill(PASSWORD);
-  await staff.getByRole("button", { name: /Créer un compte|Create an account/ }).click();
+  await staff.getByRole("button", { name: /Créer mon compte|Create my account/ }).click();
   await expect(staff.getByRole("heading", { name: /Vérifiez vos courriels|Check your email/ })).toBeVisible();
   await staff.goto(latestLink(email));
   await staff.getByRole("button", { name: /Accepter l'invitation|Accept the invitation/ }).click();
 
-  // Straight into the guided setup.
+  // The tour first, which ends on the security step, then the guided setup.
+  await expect(staff).toHaveURL("/welcome");
+  await staff.getByRole("button", { name: /^(Commencer|Begin)/ }).click();
+  await staff.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  const next = staff.getByRole("button", { name: /^(Suivant|Next)/ });
+  await expect(next).toBeVisible();
+  while (await next.isVisible()) await next.click();
+  await staff.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  await staff.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  await staff.getByRole("button", { name: /Protéger mon compte|Protect my account/ }).click();
   await expect(staff).toHaveURL(/\/setup-2fa/);
   await staff.getByLabel(/Confirmez votre mot de passe|Confirm your password/).fill(PASSWORD);
   await staff.getByRole("button", { name: /Commencer|Get started/ }).click();
@@ -102,5 +111,6 @@ test("a newly invited staff member is guided through setup before reaching Admin
   await expect(done).toBeDisabled();
   await staff.getByRole("checkbox").check();
   await done.click();
+  // The tour is already done: straight to Admin.
   await expect(staff).toHaveURL("/admin");
 });

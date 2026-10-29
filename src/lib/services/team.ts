@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, desc, eq, isNotNull, like, lt, ne, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, isNotNull, like, lt, max, ne, type SQL } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import { auditLog, session, user } from "@/lib/db/schema";
 import type { StaffRole } from "@/lib/db/schema/_shared";
@@ -10,19 +10,25 @@ import { ConflictError, NotFoundError } from "./errors";
 
 export async function listStaff(db: Db, actor: Actor) {
   authorize(actor, "team:manage");
+  // A join, not a correlated subquery: in a single-table select Drizzle writes columns
+  // unqualified, and `where user_id = id` would compare the session with itself.
+  const lastSession = db
+    .select({ userId: session.userId, at: max(session.createdAt).as("last_sign_in_at") })
+    .from(session)
+    .groupBy(session.userId)
+    .as("last_session");
   return db
     .select({
       id: user.id,
       name: user.name,
       email: user.email,
+      image: user.image,
       staffRole: user.staffRole,
       twoFactorEnabled: user.twoFactorEnabled,
-      lastSignInAt:
-        sql`(select max(${session.createdAt}) from ${session} where ${session.userId} = ${user.id})`.mapWith((v) =>
-          v ? new Date(v as string) : null,
-        ),
+      lastSignInAt: lastSession.at,
     })
     .from(user)
+    .leftJoin(lastSession, eq(lastSession.userId, user.id))
     .where(isNotNull(user.staffRole))
     .orderBy(asc(user.name));
 }

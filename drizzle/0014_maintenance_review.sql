@@ -1,0 +1,1 @@
+ALTER TYPE "public"."maintenance_status" ADD VALUE 'review' BEFORE 'done';

@@ -51,3 +51,31 @@ export async function signIn(page: Page, email: string, { secondFactor = true } 
   }
   await expect(page).not.toHaveURL(/\/sign-in/);
 }
+
+/**
+ * Goes through the welcome tour a new account sees once: name, a profile
+ * photo (any real image; the browser crops and resizes it), the tour, the team.
+ */
+export async function completeWelcome(page: Page, { firstName }: { firstName: string }) {
+  await expect(page).toHaveURL("/welcome");
+  await page.getByRole("button", { name: /^(Commencer|Begin)/ }).click();
+  // Photo and name share one step.
+  await page.locator("input[type=file]").setInputFiles({
+    name: "me.webp",
+    mimeType: "image/webp",
+    buffer: readFileSync("public/images/team/marie-laurence-boisvert.webp"),
+  });
+  await page.getByRole("button", { name: /Enregistrer la photo|Save photo/ }).click();
+  await expect(page.getByRole("button", { name: /^(Changer|Change)$/ })).toBeVisible();
+  await page.getByLabel(/^(Prénom|First name)$/).fill(firstName);
+  await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  // The name saves first; wait for the tour before walking its slides.
+  const next = page.getByRole("button", { name: /^(Suivant|Next)/ });
+  await expect(next).toBeVisible();
+  while (await next.isVisible()) await next.click();
+  await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  await expect(page.getByRole("link", { name: /^(Appeler|Call)/ }).first()).toBeVisible();
+  await page.getByRole("button", { name: /^(Continuer|Continue)/ }).click();
+  await page.getByRole("button", { name: /Entrer dans mon espace|Enter my space/ }).click();
+  await expect(page).not.toHaveURL(/\/welcome/);
+}

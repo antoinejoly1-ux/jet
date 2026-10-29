@@ -1,21 +1,26 @@
 import "server-only";
-import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, ne, sql, sum } from "drizzle-orm";
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lt, ne, or, sql, sum } from "drizzle-orm";
 import type { Db } from "@/lib/db";
 import {
   aircraft,
   budgetLines,
   budgets,
+  conversations,
   flights,
   hourLedger,
   invitations,
   invoices,
   maintenanceEvents,
+  messages,
   owners,
   shares,
   transactions,
   user,
 } from "@/lib/db/schema";
-import { authorize, type Actor } from "@/lib/auth/policy";
+import { authorize, can, financeOwnerIds, type Actor } from "@/lib/auth/policy";
+import { listNotifications } from "./notification-center";
+import { countReportsWaiting } from "./flight-reports";
+import { listToInvoice } from "./billing";
 
 export type ShareSummary = {
   shareId: string;
@@ -28,8 +33,12 @@ export type ShareSummary = {
   annualMinutes: number | null;
   budget: { year: number; plannedCents: number; spentCents: number; currency: "CAD" | "USD" } | null;
   nextFlight: { fromAirport: string; toAirport: string; departsAt: Date } | null;
-  nextMaintenance: { title: string; startsAt: Date | null; dueOn: string | null } | null;
+  /** Owners see maintenance only as a window: the details stay with Univair and the shop. */
+  /** False for members who don't see this owner's finances: no budget or invoice cards. */
+  showFinances: boolean;
+  nextMaintenance: { startsAt: Date; endsAt: Date | null } | null;
   latestInvoice: {
+    id: string;
     number: string;
     issuedOn: string;
     totalCents: number;
@@ -44,11 +53,14 @@ export type ShareSummary = {
  */
 export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]> {
   if (actor.ownerIds.length === 0) return [];
-  authorize(actor, "finance:read", { ownerIds: actor.ownerIds });
+  authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
+  // Assistants and read-only members see budgets and invoices only when allowed.
+  const withFinances = new Set(financeOwnerIds(actor));
 
   const rows = await db
     .select({
       shareId: shares.id,
+      ownerId: shares.ownerId,
       ownerName: owners.legalName,
       percentageBp: shares.percentageBp,
       annualMinutes: shares.annualHoursMinutes,
@@ -95,22 +107,20 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
           .orderBy(asc(flights.departsAt))
           .limit(1),
         db
-          .select({
-            title: maintenanceEvents.title,
-            startsAt: maintenanceEvents.startsAt,
-            dueOn: maintenanceEvents.dueOn,
-          })
+          .select({ startsAt: maintenanceEvents.startsAt, endsAt: maintenanceEvents.endsAt })
           .from(maintenanceEvents)
           .where(
             and(
               eq(maintenanceEvents.aircraftId, r.aircraftId),
-              inArray(maintenanceEvents.status, ["planned", "in_progress"]),
+              inArray(maintenanceEvents.status, ["planned", "in_progress", "review"]),
+              isNotNull(maintenanceEvents.startsAt),
             ),
           )
-          .orderBy(sql`coalesce(${maintenanceEvents.startsAt}, ${maintenanceEvents.dueOn}::timestamptz) asc nulls last`)
+          .orderBy(asc(maintenanceEvents.startsAt))
           .limit(1),
         db
           .select({
+            id: invoices.id,
             number: invoices.number,
             issuedOn: invoices.issuedOn,
             totalCents: invoices.totalCents,
@@ -123,8 +133,9 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
           .limit(1),
       ]);
 
+      const showFinances = withFinances.has(r.ownerId);
       let budgetSummary: ShareSummary["budget"] = null;
-      if (budget) {
+      if (budget && showFinances) {
         const [[planned], [spent]] = await Promise.all([
           db
             .select({ cents: sum(budgetLines.plannedCents).mapWith(Number) })
@@ -137,6 +148,8 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
               and(
                 eq(transactions.shareId, r.shareId),
                 eq(transactions.kind, "cost"),
+                // Same as Finances › Dépensé: before taxes, categorised costs only.
+                isNotNull(transactions.categoryId),
                 gte(transactions.occurredOn, `${year}-01-01`),
                 sql`${transactions.occurredOn} < ${`${year + 1}-01-01`}`,
               ),
@@ -160,8 +173,11 @@ export async function getOwnerHome(db: Db, actor: Actor): Promise<ShareSummary[]
         annualMinutes: r.annualMinutes,
         budget: budgetSummary,
         nextFlight: nextFlight ?? null,
-        nextMaintenance: nextMaintenance ?? null,
-        latestInvoice: latestInvoice ?? null,
+        nextMaintenance: nextMaintenance
+          ? { startsAt: nextMaintenance.startsAt!, endsAt: nextMaintenance.endsAt }
+          : null,
+        latestInvoice: showFinances ? (latestInvoice ?? null) : null,
+        showFinances,
       };
     }),
   );
@@ -221,4 +237,172 @@ export async function getAdminStats(db: Db, actor: Actor, todayStart: Date) {
     inMaintenance: inMaintenance.n,
     ownersWithoutAccess: noAccess.n,
   };
+}
+
+export type ActivityItem =
+  | { kind: "flight"; id: string; at: Date; registration: string; from: string; to: string; minutes: number | null }
+  | { kind: "notice"; id: string; at: Date; type: string; data: Record<string, string>; href: string; unread: boolean };
+
+/**
+ * The owner Home's "live" feed: the viewer's own notifications (already
+ * limited to what their role may see) and the flights completed on their
+ * shares, newest first.
+ */
+export async function getOwnerActivity(db: Db, actor: Actor, { limit = 8 } = {}): Promise<ActivityItem[]> {
+  if (actor.ownerIds.length === 0) return [];
+  authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
+  const [notices, flown] = await Promise.all([
+    listNotifications(db, actor, { limit }),
+    db
+      .select({
+        id: flights.id,
+        registration: aircraft.registration,
+        from: flights.fromAirport,
+        to: flights.toAirport,
+        minutes: flights.flightMinutes,
+        at: sql<Date>`coalesce(${flights.arrivesAt}, ${flights.departsAt})`.mapWith((v) => new Date(v)),
+      })
+      .from(flights)
+      .innerJoin(shares, eq(shares.id, flights.shareId))
+      .innerJoin(aircraft, eq(aircraft.id, flights.aircraftId))
+      .where(and(inArray(shares.ownerId, [...actor.ownerIds]), eq(flights.status, "completed")))
+      .orderBy(desc(flights.departsAt))
+      .limit(limit),
+  ]);
+  const items: ActivityItem[] = [
+    ...notices.map((n) => ({
+      kind: "notice" as const,
+      id: n.id,
+      at: n.createdAt,
+      type: n.type,
+      data: n.data,
+      href: n.href,
+      unread: !n.readAt,
+    })),
+    ...flown.map((f) => ({ kind: "flight" as const, ...f })),
+  ];
+  return items.sort((a, b) => b.at.getTime() - a.at.getTime()).slice(0, limit);
+}
+
+export type QueueKey =
+  | "flightReports"
+  | "toInvoice"
+  | "overdueInvoices"
+  | "flightsToClose"
+  | "flightRequests"
+  | "awaitingReply"
+  | "maintenanceSoon"
+  | "maintenanceOverdue"
+  | "lowHours"
+  | "ownersNeverInvited";
+
+/**
+ * "À traiter": what needs someone on the team today, each with how many.
+ * Only what this person's role can act on; zero rows are left out.
+ */
+export async function getAdminQueue(db: Db, actor: Actor, now = new Date()) {
+  authorize(actor, "admin:access");
+  const ops = can(actor, "operations:write");
+  const replies = can(actor, "messages:reply");
+  const invites = can(actor, "owners:invite");
+  const zero = Promise.resolve([{ n: 0 }]);
+  const in48h = new Date(now.getTime() + 48 * 3_600_000);
+  // A flight counts as flown once it has landed, or two hours after departure without an arrival time.
+  const landed = sql`coalesce(${flights.arrivesAt}, ${flights.departsAt} + interval '2 hours') < ${now}`;
+
+  const [[toClose], [requests], [awaiting], [soon], [overdue], [low], [neverInvited]] = await Promise.all([
+    ops
+      ? db
+          .select({ n: count() })
+          .from(flights)
+          .where(and(eq(flights.status, "scheduled"), landed))
+      : zero,
+    ops
+      ? db
+          .select({ n: count() })
+          .from(messages)
+          .where(and(sql`${messages.meta}->>'kind' = 'flight_request'`, sql`${messages.meta}->>'status' = 'requested'`))
+      : zero,
+    replies
+      ? // Open threads whose latest message is the owner's: someone is waiting for us.
+        db
+          .select({ n: count() })
+          .from(conversations)
+          .where(
+            and(
+              isNull(conversations.resolvedAt),
+              sql`(select u.staff_role from messages m left join users u on u.id = m.sender_user_id
+                 where m.conversation_id = ${conversations.id} order by m.created_at desc limit 1) is null`,
+              sql`exists (select 1 from messages m where m.conversation_id = ${conversations.id})`,
+            ),
+          )
+      : zero,
+    ops
+      ? db
+          .select({ n: count() })
+          .from(maintenanceEvents)
+          .where(
+            and(
+              eq(maintenanceEvents.status, "planned"),
+              gte(maintenanceEvents.startsAt, now),
+              lt(maintenanceEvents.startsAt, in48h),
+            ),
+          )
+      : zero,
+    ops
+      ? db
+          .select({ n: count() })
+          .from(maintenanceEvents)
+          .where(and(inArray(maintenanceEvents.status, ["in_progress", "review"]), lt(maintenanceEvents.endsAt, now)))
+      : zero,
+    // Active shares at or under 10% of their yearly hours.
+    db
+      .select({ n: count() })
+      .from(shares)
+      .where(
+        and(
+          or(isNull(shares.endsOn), sql`${shares.endsOn} > current_date`),
+          sql`${shares.annualHoursMinutes} > 0`,
+          sql`coalesce((select sum(h.minutes) from hour_ledger h where h.share_id = ${shares.id}), 0)
+              <= ${shares.annualHoursMinutes} * 0.1`,
+        ),
+      ),
+    invites
+      ? db
+          .select({ n: count() })
+          .from(owners)
+          .where(
+            and(
+              isNull(owners.deletedAt),
+              sql`not exists (select 1 from owner_members m where m.owner_id = ${owners.id})`,
+              sql`not exists (select 1 from invitations i where i.owner_id = ${owners.id})`,
+            ),
+          )
+      : zero,
+  ]);
+  const money = can(actor, "finance:write");
+  const [reports, toInvoice, [overdueInvoices]] = await Promise.all([
+    countReportsWaiting(db, actor),
+    money ? listToInvoice(db, actor).then((r) => r.length) : 0,
+    // Issued, unpaid and past their due date: someone should follow up.
+    money
+      ? db
+          .select({ n: count() })
+          .from(invoices)
+          .where(and(eq(invoices.status, "issued"), sql`${invoices.dueOn} < current_date`))
+      : zero,
+  ]);
+  const rows: { key: QueueKey; count: number; href: string }[] = [
+    { key: "flightReports", count: reports, href: "/admin/flight-reports" },
+    { key: "toInvoice", count: toInvoice, href: "/admin/flight-reports#to-invoice" },
+    { key: "overdueInvoices", count: overdueInvoices!.n, href: "/admin/invoices?status=issued" },
+    { key: "flightsToClose", count: toClose!.n, href: "/admin/flights#to-close" },
+    { key: "flightRequests", count: requests!.n, href: "/admin/messages" },
+    { key: "awaitingReply", count: awaiting!.n, href: "/admin/messages" },
+    { key: "maintenanceOverdue", count: overdue!.n, href: "/admin/maintenance" },
+    { key: "maintenanceSoon", count: soon!.n, href: "/admin/maintenance" },
+    { key: "lowHours", count: low!.n, href: "/admin/budgets" },
+    { key: "ownersNeverInvited", count: neverInvited!.n, href: "/admin/invitations" },
+  ];
+  return rows.filter((r) => r.count > 0);
 }

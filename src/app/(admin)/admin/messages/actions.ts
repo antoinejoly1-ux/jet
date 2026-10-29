@@ -17,10 +17,13 @@ export async function replyAction(conversationId: string, _prev: FormState, form
   const viewer = await requireStaff();
   try {
     await replyAsStaff(db, viewer, conversationId, formValues(formData) as unknown as MessageInput);
+    if (formData.get("then") === "resolve") await setResolved(db, viewer, conversationId, true);
   } catch (err) {
     return formError(err, formValues(formData));
   }
   revalidatePath("/admin/messages", "layout");
+  // "Répondre et résoudre": back to the inbox, on to the next one.
+  if (formData.get("then") === "resolve") redirect("/admin/messages");
   return { status: "success" };
 }
 

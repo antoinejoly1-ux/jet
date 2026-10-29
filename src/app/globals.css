@@ -1,81 +1,132 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Components use only these semantic names, never raw colors,
- * so a rebrand or a new theme is a change here and nowhere else.
+ * Design tokens: Univair's ink, ivory and champagne. "Ivoire" (light) is the
+ * default; "Hangar Night" (dark) is chosen in Settings, or follows the device
+ * with "system". The base block below is the dark palette that light
+ * overrides. Components use only these semantic names.
  */
 :root {
-  --background: #f6f7f9;
+  --background: #0c0b0a;
+  --surface: #141311;
+  --surface-muted: #1b1a17;
+  --surface-sunken: #080807;
+  --text: #f2ede4;
+  --text-muted: #a8a196;
+  --border: #2a2723;
+  --primary: #f2ede4;
+  --primary-foreground: #0c0b0a;
+  /* Champagne: readable as text on the dark surfaces and on its own tint. --bronze is for lines and marks. */
+  --accent: #d2b48c;
+  --accent-foreground: #0c0b0a;
+  --bronze: #b8895a;
+  --success: #7fcf9f;
+  --warning: #e6b866;
+  --danger: #f0918a;
+  --live: #7fcf9f;
+  --ring: #d2b48c;
+  --glass: rgb(16 15 13 / 0.55);
+  --glass-strong: rgb(16 15 13 / 0.78);
+  --glass-line: rgb(255 255 255 / 0.12);
+  --shadow-card: none;
+  --shadow-float: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+  --card-border: #2a2723;
+  --map-water: #0a0a09;
+  --map-land: #141311;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --background: #f5f2ec;
   --surface: #ffffff;
-  --surface-muted: #eef0f3;
-  --text: #0b1220;
-  --text-muted: #5b6475;
-  --border: #e2e5ea;
-  --primary: #0b1220;
+  --surface-muted: #efeae2;
+  --surface-sunken: #e9e3d9;
+  --text: #161514;
+  --text-muted: #625c54;
+  --border: #e5dfd5;
+  --primary: #161514;
   --primary-foreground: #ffffff;
-  /* Light-mode status colours are dark enough for 4.5:1 text on their own 12% tints (WCAG AA). */
-  --accent: #1d4ed8;
-  --success: #166534;
+  --accent: #7a5530;
+  --accent-foreground: #ffffff;
+  --bronze: #9c7247;
+  --success: #1f6b3a;
   --warning: #92400e;
-  --danger: #b91c1c;
-  --ring: #1d4ed8;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --danger: #a1311f;
+  --live: #1f7a45;
+  --ring: #9c7247;
+  --glass: rgb(16 15 13 / 0.5);
+  --glass-strong: rgb(16 15 13 / 0.72);
+  --glass-line: rgb(255 255 255 / 0.16);
+  --shadow-card: none;
+  --shadow-float: 0 24px 60px -24px rgb(22 21 20 / 0.35);
+  --card-border: #e5dfd5;
+  --map-water: #dfe2e0;
+  --map-land: #f3f1ed;
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --background: #070b14;
-    --surface: #0e1422;
-    --surface-muted: #161e30;
-    --text: #e8ecf3;
-    --text-muted: #94a0b8;
-    --border: #222c40;
-    --primary: #e8ecf3;
-    --primary-foreground: #070b14;
-    --accent: #60a5fa;
-    --success: #4ade80;
-    --warning: #fbbf24;
-    --danger: #f87171;
-    --ring: #60a5fa;
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --background: #f5f2ec;
+    --surface: #ffffff;
+    --surface-muted: #efeae2;
+    --surface-sunken: #e9e3d9;
+    --text: #161514;
+    --text-muted: #625c54;
+    --border: #e5dfd5;
+    --primary: #161514;
+    --primary-foreground: #ffffff;
+    --accent: #7a5530;
+    --accent-foreground: #ffffff;
+    --bronze: #9c7247;
+    --success: #1f6b3a;
+    --warning: #92400e;
+    --danger: #a1311f;
+    --live: #1f7a45;
+    --ring: #9c7247;
+    --glass: rgb(16 15 13 / 0.5);
+    --glass-strong: rgb(16 15 13 / 0.72);
+    --glass-line: rgb(255 255 255 / 0.16);
+    --shadow-card: none;
+    --shadow-float: 0 24px 60px -24px rgb(22 21 20 / 0.35);
+    --card-border: #e5dfd5;
+    --map-water: #dfe2e0;
+    --map-land: #f3f1ed;
+    color-scheme: light;
   }
-}
-
-:root[data-theme="dark"] {
-  --background: #070b14;
-  --surface: #0e1422;
-  --surface-muted: #161e30;
-  --text: #e8ecf3;
-  --text-muted: #94a0b8;
-  --border: #222c40;
-  --primary: #e8ecf3;
-  --primary-foreground: #070b14;
-  --accent: #60a5fa;
-  --success: #4ade80;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --ring: #60a5fa;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
   --color-text: var(--text);
   --color-muted: var(--text-muted);
   --color-border: var(--border);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-bronze: var(--bronze);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-live: var(--live);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-line: var(--glass-line);
   --color-ring: var(--ring);
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);
   --radius-lg: var(--radius-lg);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --shadow-card: var(--shadow-card);
+  --shadow-float: var(--shadow-float);
+  --font-sans: var(--font-montserrat), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 }
 
 @keyframes shake {
@@ -93,7 +144,6 @@
 
 @layer base {
   html {
-    color-scheme: light dark;
     /* Whatever the browser scrolls to (a focused field, an anchor) stays clear of the sticky top bar
        and, below 1024px, of the bottom tab bar: focus is never hidden under them (WCAG 2.4.11). */
     scroll-padding-top: 5rem;
@@ -108,8 +158,17 @@
     background: var(--background);
     color: var(--text);
     font-family: var(--font-sans);
-    font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--bronze);
+    color: #fff;
+  }
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.02em;
   }
   /* Numbers line up in columns of amounts and hours. */
   .tabular {
@@ -127,4 +186,225 @@
       animation-duration: 0.01ms !important;
     }
   }
+}
+
+/* Small uppercase labels, widely spaced, as on univairaviation.com. */
+@utility eyebrow {
+  /* 11.5px: the smallest size that stays legible in capitals on dark, outdoors. */
+  font-size: 0.71875rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---------- Motion ---------- */
+
+/* Content rises in on first paint; children of .stagger follow one another. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@utility animate-rise {
+  animation: rise 0.6s var(--ease-out) both;
+}
+.stagger > * {
+  animation: rise 0.6s var(--ease-out) both;
+}
+.stagger > :nth-child(2) {
+  animation-delay: 60ms;
+}
+.stagger > :nth-child(3) {
+  animation-delay: 120ms;
+}
+.stagger > :nth-child(4) {
+  animation-delay: 180ms;
+}
+.stagger > :nth-child(5) {
+  animation-delay: 240ms;
+}
+.stagger > :nth-child(n + 6) {
+  animation-delay: 300ms;
+}
+
+/* A row just saved: it glows in the accent, then settles back. */
+@keyframes highlight {
+  from,
+  40% {
+    background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+}
+@utility animate-highlight {
+  animation: highlight 2.4s var(--ease-out) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-highlight {
+    animation-duration: 0.01s;
+  }
+}
+
+/* A live dot: a solid centre and a ring that keeps breathing. */
+@keyframes live-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  80%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* ---------- Live map ---------- */
+/* MapLibre's controls ship white with dark icons: they follow the theme here. */
+:root {
+  --map-icon-filter: invert(1);
+}
+:root[data-theme="light"] {
+  --map-icon-filter: none;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="system"] {
+    --map-icon-filter: none;
+  }
+}
+.um-map .maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
+.um-map .maplibregl-ctrl-attrib,
+.um-map .maplibregl-ctrl-attrib.maplibregl-compact {
+  background-color: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--text-muted);
+}
+.um-map .maplibregl-ctrl-attrib a {
+  color: var(--text-muted);
+}
+.um-map .maplibregl-ctrl-group {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.um-map .maplibregl-ctrl-group button + button {
+  border-top-color: var(--border);
+}
+.um-map .maplibregl-ctrl-group button:not(:disabled):hover {
+  background-color: var(--surface-muted);
+}
+.um-map .maplibregl-ctrl-icon,
+.um-map .maplibregl-ctrl-attrib-button {
+  filter: var(--map-icon-filter);
+}
+.um-plane {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0;
+}
+:root .um-plane {
+  color: #7a5530;
+}
+.um-plane-icon {
+  position: relative;
+  display: block;
+  transition: transform 1s var(--ease-out);
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.25));
+}
+.um-plane-halo {
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background: rgb(156 114 71 / 0.25);
+}
+.um-plane[data-state="in_flight"] .um-plane-halo {
+  animation: live-ping 2.2s ease-out infinite;
+}
+.um-plane:not([data-state="in_flight"]) .um-plane-halo {
+  background: rgb(156 114 71 / 0.15);
+}
+.um-plane-tag {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font: 600 10px/1.4 var(--font-sans);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  box-shadow: var(--shadow-float);
+}
+/* Parked aircraft crowd one airport: their names show on hover only. */
+.um-plane:not([data-state="in_flight"]) .um-plane-tag {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.um-plane:is(:hover, :focus-visible) .um-plane-tag {
+  opacity: 1;
+  z-index: 2;
+}
+
+/* A photograph that drifts slowly, like a film still. */
+@keyframes ken-burns {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.14) translate3d(-1.5%, -1%, 0);
+  }
+}
+@utility animate-ken-burns {
+  animation: ken-burns 30s ease-out both;
+}
+/* Photographs fade in once loaded instead of popping. */
+@keyframes photo-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+}
+@utility animate-photo-in {
+  animation: photo-in 1.2s var(--ease-out) both;
+}
+
+/* Always-dark islands (photo heroes, the live map) keep the cinematic look in the light theme too. */
+.theme-dark {
+  --background: #0c0b0a;
+  --surface: #141311;
+  --surface-muted: #1b1a17;
+  --surface-sunken: #080807;
+  --text: #f2ede4;
+  --text-muted: #a8a196;
+  --border: #2a2723;
+  --primary: #f2ede4;
+  --primary-foreground: #0c0b0a;
+  /* Champagne: readable as text on the dark surfaces and on its own tint. --bronze is for lines and marks. */
+  --accent: #d2b48c;
+  --accent-foreground: #0c0b0a;
+  --bronze: #b8895a;
+  --success: #7fcf9f;
+  --warning: #e6b866;
+  --danger: #f0918a;
+  --live: #7fcf9f;
+  --ring: #d2b48c;
+  --glass: rgb(16 15 13 / 0.55);
+  --glass-strong: rgb(16 15 13 / 0.78);
+  --glass-line: rgb(255 255 255 / 0.12);
+  --shadow-card: none;
+  --shadow-float: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+  --card-border: #2a2723;
+  --map-water: #0a0a09;
+  --map-land: #141311;
+  color-scheme: dark;
+  color: var(--text);
 }

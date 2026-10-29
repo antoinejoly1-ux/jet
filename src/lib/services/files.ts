@@ -3,8 +3,19 @@ import { and, count, eq, gt, ne } from "drizzle-orm";
 import { v7 as uuidv7 } from "uuid";
 import { z } from "zod";
 import type { Db } from "@/lib/db";
-import { conversations, files, imports, invoices, messages, shares } from "@/lib/db/schema";
-import { authorize, can, type Actor } from "@/lib/auth/policy";
+import {
+  aircraft,
+  conversations,
+  files,
+  flightReportExpenses,
+  flightReports,
+  flights,
+  imports,
+  invoices,
+  messages,
+  shares,
+} from "@/lib/db/schema";
+import { actingOwnerIds, authorize, can, type Actor } from "@/lib/auth/policy";
 import { storage } from "@/lib/storage";
 import { recordAudit } from "./audit";
 import { ConflictError, NotFoundError } from "./errors";
@@ -16,6 +27,12 @@ export const UPLOAD_RULES = {
   invoice: { types: ["application/pdf", "image/png", "image/jpeg"], maxBytes: 25 * MB },
   import: { types: ["text/csv", "application/vnd.ms-excel", "text/plain"], maxBytes: 10 * MB },
   message: { types: ["application/pdf", "image/png", "image/jpeg"], maxBytes: 10 * MB },
+  /** Profile photos, resized to 512px in the browser before they are sent. */
+  avatar: { types: ["image/webp", "image/jpeg", "image/png"], maxBytes: 5 * MB },
+  /** Receipt photos from a pilot's phone (made JPEG and resized in the browser) or PDFs. */
+  receipt: { types: ["image/jpeg", "image/png", "image/webp", "application/pdf"], maxBytes: 15 * MB },
+  /** An aircraft's photo, resized to 1600px WebP in the browser. */
+  photo: { types: ["image/webp", "image/jpeg", "image/png"], maxBytes: 10 * MB },
 } as const;
 export type UploadPurpose = keyof typeof UPLOAD_RULES;
 
@@ -26,10 +43,11 @@ const EXTENSIONS: Record<string, string> = {
   "text/csv": "csv",
   "application/vnd.ms-excel": "csv",
   "text/plain": "csv",
+  "image/webp": "webp",
 };
 
 const uploadRequest = z.object({
-  purpose: z.enum(["invoice", "import", "message"]),
+  purpose: z.enum(["invoice", "import", "message", "avatar", "receipt", "photo"]),
   filename: z.string().trim().min(1).max(255),
   contentType: z.string(),
   sizeBytes: z.number().int().positive(),
@@ -43,9 +61,14 @@ export type UploadRequest = z.input<typeof uploadRequest>;
  */
 /** Finance uploads invoices and imports; anyone in a chat (staff or the owner) can attach to a message. */
 function authorizeUpload(actor: Actor, purpose: UploadPurpose) {
+  // Anyone signed in may upload their own profile photo; it is attached to them only (profile.ts).
+  if (purpose === "avatar") return;
+  // Pilots attach receipts to their reports; finance may add one while reviewing.
+  if (purpose === "receipt") return can(actor, "finance:write") ? undefined : authorize(actor, "reports:file");
+  if (purpose === "photo") return authorize(actor, "fleet:write");
   if (purpose !== "message") return authorize(actor, "finance:write");
   if (can(actor, "messages:reply")) return;
-  authorize(actor, "messages:send", { ownerIds: actor.ownerIds });
+  authorize(actor, "messages:send", { ownerIds: actingOwnerIds(actor) });
 }
 
 /** Uploads one person may start per hour: generous for real work, a ceiling for a runaway script. */
@@ -114,7 +137,8 @@ export async function completeUpload(db: Db, actor: Actor, raw: UploadRequest & 
 
 /**
  * A signed link to a file, after checking who may see it: an invoice's file
- * is visible to staff with finance access and to that share's owner.
+ * is visible to staff with finance access and to that share's owner; a
+ * receipt to finance and the pilot who filed it.
  */
 export async function fileDownloadUrl(db: Db, actor: Actor, fileId: string, opts: { inline?: boolean } = {}) {
   const [file] = await db.select().from(files).where(eq(files.id, fileId));
@@ -134,8 +158,28 @@ export async function fileDownloadUrl(db: Db, actor: Actor, fileId: string, opts
         .innerJoin(conversations, eq(conversations.id, messages.conversationId))
         .where(eq(messages.attachmentFileId, fileId))
         .limit(1);
+  const [receipt] =
+    invoice || attachment
+      ? []
+      : await db
+          .select({ pilotUserId: flightReports.pilotUserId, companyId: aircraft.holdingCompanyId })
+          .from(flightReportExpenses)
+          .innerJoin(flightReports, eq(flightReports.id, flightReportExpenses.reportId))
+          .innerJoin(flights, eq(flights.id, flightReports.flightId))
+          .innerJoin(aircraft, eq(aircraft.id, flights.aircraftId))
+          .where(eq(flightReportExpenses.receiptFileId, fileId))
+          .limit(1);
   if (invoice) authorize(actor, "finance:read", { ownerIds: [invoice.ownerId] });
-  else if (attachment) {
+  else if (receipt) {
+    // A receipt: finance, the pilot who filed it, and the managers of the company that bills it.
+    const manages = !!receipt.companyId && !!actor.managedCompanyIds?.includes(receipt.companyId);
+    if (receipt.pilotUserId !== actor.id && !manages) authorize(actor, "finance:read");
+  } else if (file.storageKey.startsWith("photos/")) {
+    // Aircraft photos: the team sees them here; owners through /aircraft-photos/[id].
+    authorize(actor, "fleet:read");
+  } else if (file.uploadedByUserId === actor.id && file.storageKey.startsWith("receipts/")) {
+    // The pilot seeing the receipt they just photographed, before the report is sent.
+  } else if (attachment) {
     if (!can(actor, "messages:reply")) authorize(actor, "messages:send", { ownerIds: [attachment.ownerId] });
   } else if (file.uploadedByUserId === actor.id && file.storageKey.startsWith("messages/")) {
     // The sender previewing their own attachment before it's sent.

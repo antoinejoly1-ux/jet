@@ -16,16 +16,19 @@ type Defaults = {
   homeBase: string | null;
   status: string;
   icaoHex: string | null;
+  holdingCompanyId: string | null;
 };
 
 export function AircraftForm({
   action,
   defaults,
   cancelHref,
+  holdingCompanies,
 }: {
   action: (state: FormState, data: FormData) => Promise<FormState>;
   defaults?: Defaults;
   cancelHref: string;
+  holdingCompanies: { id: string; legalName: string }[];
 }) {
   const t = useTranslations("aircraft");
   const tf = useTranslations("formErrors");
@@ -36,7 +39,7 @@ export function AircraftForm({
   return (
     <form action={formAction} className="flex max-w-xl flex-col gap-5" noValidate>
       <FormAlert state={state} />
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <Field
           id="registration"
           name="registration"
@@ -93,7 +96,21 @@ export function AircraftForm({
           ))}
         </SelectField>
       </div>
-      <div className="flex gap-2">
+      <SelectField
+        id="holdingCompanyId"
+        name="holdingCompanyId"
+        label={t("holdingCompany")}
+        defaultValue={submitted(state, "holdingCompanyId", defaults?.holdingCompanyId ?? "")}
+        error={err("holdingCompanyId")}
+      >
+        <option value="">{t("noHoldingCompany")}</option>
+        {holdingCompanies.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.legalName}
+          </option>
+        ))}
+      </SelectField>
+      <div className="flex flex-wrap gap-2">
         <Button type="submit" disabled={pending}>
           {pending ? t("saving") : t("save")}
         </Button>

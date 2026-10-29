@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireStaff } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { formError, formValues, type FormState } from "@/lib/forms";
-import { archiveOwner, createOwner, removeOwnerMember, updateOwner } from "@/lib/services/owners";
+import { archiveOwner, createOwner, removeOwnerMember, updateOwner, updateOwnerMember } from "@/lib/services/owners";
 import type { OwnerInput } from "@/lib/validation/admin";
 
 export async function createOwnerAction(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -45,5 +45,14 @@ export async function archiveOwnerAction(id: string, _prev: FormState): Promise<
 export async function removeMemberAction(ownerId: string, memberId: string) {
   const viewer = await requireStaff();
   await removeOwnerMember(db, viewer, ownerId, memberId);
+  revalidatePath(`/admin/owners/${ownerId}`);
+}
+
+export async function updateMemberAction(ownerId: string, memberId: string, formData: FormData) {
+  const viewer = await requireStaff();
+  await updateOwnerMember(db, viewer, ownerId, memberId, {
+    role: String(formData.get("role")) as "owner" | "assistant" | "read_only",
+    canSeeFinances: formData.get("canSeeFinances") === "on",
+  });
   revalidatePath(`/admin/owners/${ownerId}`);
 }

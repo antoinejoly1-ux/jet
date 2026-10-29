@@ -1,313 +1,676 @@
-import { CalendarClock, FileText, Lightbulb, Plane, PlaneTakeoff, TriangleAlert, Wallet, Wrench } from "lucide-react";
-import type { Metadata } from "next";
+import { Clock3, Plane, PlaneTakeoff, Wallet } from "lucide-react";
+import type { Metadata, Route } from "next";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { getFormatter, getLocale, getTranslations } from "next-intl/server";
-import { Badge } from "@/components/ui/badge";
+import { TeamFaces } from "@/components/brand/team";
+import { ContactButtons } from "@/components/common/contact-buttons";
+import { RouteLabel } from "@/components/flights/route-label";
+import { RequestFlightButton } from "@/components/flights/request-flight";
+import { LiveAircraft } from "@/components/tracking/live-aircraft";
+import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
-import { PageHeader } from "@/components/ui/page-header";
+import { AnimatedIcon, type AnimatedIconName } from "@/components/animated-icons/AnimatedIcon";
+import { Instrument, InstrumentStrip } from "@/components/ui/instrument";
+import { LiveDot } from "@/components/ui/live-dot";
+import { aircraftPhoto } from "@/lib/aircraft-photos";
 import { daysFrom, dayStart, type DayStatus } from "@/lib/availability-days";
-import type { Actor } from "@/lib/auth/policy";
+import type { Viewer } from "@/lib/auth/session";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { formatHours, formatMoney } from "@/lib/format";
+import { formatHours, formatMoney, formatMoneyRounded } from "@/lib/format";
+import { scenes } from "@/lib/imagery";
 import { insightsFor, type Insight } from "@/lib/insights";
 import { getAvailability } from "@/lib/services/availability";
-import { getOwnerHome, type ShareSummary } from "@/lib/services/dashboard";
-import { zonedDay } from "@/lib/time";
+import { getOwnerActivity, getOwnerHome, type ActivityItem, type ShareSummary } from "@/lib/services/dashboard";
+import { listOpenFlightRequests } from "@/lib/services/flight-requests";
+import { listOwnerFlights } from "@/lib/services/flights";
+import { getAircraftLive, type AircraftLive } from "@/lib/services/tracking";
+import { OPERATOR_TIME_ZONE, zonedDay } from "@/lib/time";
 import { cn } from "@/lib/utils";
+import { notificationValues } from "@/lib/notification-types";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { title: (await getTranslations("nav.items"))("home") };
 }
 
+/** Morning, afternoon or evening in Montreal, where Univair and its owners are. */
+function partOfDay(now: Date) {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-CA", { hour: "numeric", hour12: false, timeZone: OPERATOR_TIME_ZONE }).format(now),
+  );
+  return hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+}
+
+/** "Pilatus PC-12 NGX" → "PC-12": how owners talk about their aircraft. */
+const shortModel = (model: string) =>
+  model
+    .replace(/^(Pilatus|Beechcraft|Bombardier|Cessna|Embraer|Textron)\s+/i, "")
+    .replace(/\s+(NGX|NG|i|E)$/i, "")
+    .trim();
+
+/** The hero photograph: the PC-12 with its pilot for PC-12 owners, the type's own photo otherwise. */
+const heroPhoto = (model: string): StaticImageData =>
+  /pc-?12/i.test(model) ? scenes.hangarPilot : aircraftPhoto(model);
+
 export default async function HomePage() {
   const viewer = await requireAccess();
   const t = await getTranslations("home");
-  const summaries = await getOwnerHome(db, viewer);
-  const firstName = viewer.name.split(" ")[0];
+  const [summaries, activity, flights, requests] = await Promise.all([
+    getOwnerHome(db, viewer),
+    getOwnerActivity(db, viewer),
+    listOwnerFlights(db, viewer),
+    listOpenFlightRequests(db, viewer),
+  ]);
 
-  return (
-    <>
-      <PageHeader title={t("greeting", { name: firstName })} description={t("subtitle")} />
-      {summaries.length === 0 ? (
+  if (summaries.length === 0)
+    return (
+      <div className="pt-6">
         <EmptyState
           icon={Plane}
+          image={scenes.hangar}
           title={t("noShareTitle")}
           body={viewer.staffRole ? t("noShareStaffBody") : t("noShareBody")}
         />
-      ) : (
-        <div className="flex flex-col gap-10">
-          {summaries.map((s) => (
-            <ShareSection key={s.shareId} summary={s} showOwner={summaries.length > 1} viewer={viewer} />
-          ))}
-        </div>
-      )}
-    </>
+      </div>
+    );
+
+  return (
+    <div className="flex flex-col gap-16 pb-8 sm:gap-20">
+      {summaries.map((s, i) => (
+        <ShareSection key={s.shareId} summary={s} viewer={viewer} first={i === 0} showOwner={summaries.length > 1} />
+      ))}
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <UpcomingFlights flights={flights.upcoming.slice(0, 4)} requests={requests} />
+        <TeamPanel />
+      </div>
+
+      <ActivityFeed items={activity} />
+    </div>
   );
 }
 
-const STATUS_TONE = { available: "success", flying: "accent", maintenance: "warning", inactive: "neutral" } as const;
-
 const AHEAD = 14;
+// The same colours as the Calendrier page: free is green, booked is grey.
 const DOT: Record<DayStatus, string> = {
-  free: "bg-success/70",
+  free: "bg-success/30 ring-1 ring-inset ring-success/40",
   mine: "bg-accent",
-  booked: "bg-muted/45",
-  maintenance: "bg-warning",
+  booked: "bg-muted/35",
+  maintenance: "bg-warning/50",
 };
 
 async function ShareSection({
   summary: s,
-  showOwner,
   viewer,
+  first,
+  showOwner,
 }: {
   summary: ShareSummary;
+  viewer: Viewer;
+  first: boolean;
   showOwner: boolean;
-  viewer: Actor;
 }) {
   const t = await getTranslations("home");
-  const first = zonedDay(new Date());
-  const from = dayStart(first);
-  const { periods } = await getAvailability(
-    db,
-    viewer,
-    s.aircraft.id,
-    from,
-    new Date(from.getTime() + (AHEAD + 1) * 86_400_000),
-    { ownerView: true },
-  );
-  const ahead = daysFrom(first, AHEAD, periods);
-  const freeDays = ahead.filter((d) => d.status === "free").length;
-  const locale = await getLocale();
   const format = await getFormatter();
+  const locale = await getLocale();
+  const day0 = zonedDay(new Date());
+  const from = dayStart(day0);
+  const [{ periods }, live] = await Promise.all([
+    getAvailability(db, viewer, s.aircraft.id, from, new Date(from.getTime() + (AHEAD + 1) * 86_400_000), {
+      ownerView: true,
+    }),
+    getAircraftLive(db, viewer, s.aircraft.id, { ownerView: true }),
+  ]);
+  const ahead = daysFrom(day0, AHEAD, periods);
+  const freeDays = ahead.filter((d) => d.status === "free").length;
+  const year = new Date().getFullYear();
   const remaining = s.annualMinutes ? Math.min(1, Math.max(0, s.minutesRemaining / s.annualMinutes)) : null;
-  const budgetUsed = s.budget && s.budget.plannedCents > 0 ? s.budget.spentCents / s.budget.plannedCents : null;
-  const dateTime = (d: Date) =>
-    format.dateTime(d, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
-  const day = (iso: string) =>
-    format.dateTime(new Date(`${iso}T12:00:00`), { day: "numeric", month: "long", year: "numeric" });
+  const shortDay = (d: Date) => format.dateTime(d, { day: "numeric", month: "short" });
+
+  const insights = insightsFor({
+    now: new Date(),
+    minutesRemaining: s.minutesRemaining,
+    usedThisYearMinutes: s.usedThisYearMinutes,
+    budget: s.budget,
+  });
 
   return (
-    <section aria-labelledby={`share-${s.shareId}`}>
-      <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <h2 id={`share-${s.shareId}`} className="text-lg font-bold tracking-tight">
-          {s.aircraft.registration} <span className="text-muted font-medium">· {s.aircraft.model}</span>
-        </h2>
-        <Badge tone={STATUS_TONE[s.aircraft.status as keyof typeof STATUS_TONE] ?? "neutral"}>
-          {t(`status.${s.aircraft.status}`)}
-        </Badge>
-        <span className="text-muted text-sm">
-          {t("shareOf", { percent: format.number(s.percentageBp / 10000, { style: "percent" }) })}
-          {showOwner ? ` · ${s.ownerName}` : ""}
-        </span>
-      </div>
-
-      <Insights
-        items={insightsFor({
-          now: new Date(),
-          minutesRemaining: s.minutesRemaining,
-          usedThisYearMinutes: s.usedThisYearMinutes,
-          budget: s.budget,
-        })}
+    <section aria-labelledby={`share-${s.shareId}`} className="flex flex-col gap-10 sm:gap-12">
+      <Hero
+        summary={s}
+        live={live}
+        greeting={first}
+        showOwner={showOwner}
+        firstName={viewer.viewingAs ? viewer.viewingAs.ownerName : (viewer.name.split(" ")[0] ?? "")}
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <Card className="flex items-center gap-5 sm:col-span-2 xl:col-span-1">
-          <ProgressRing value={remaining} label={t("hoursRemaining")} />
-          <div>
-            <CardTitle>{t("hoursRemaining")}</CardTitle>
-            <p className="tabular mt-1 text-3xl font-bold tracking-tight">{formatHours(s.minutesRemaining, locale)}</p>
-            {s.annualMinutes ? (
-              <p className="tabular text-muted mt-1 text-sm">
-                {t("ofAnnual", { hours: formatHours(s.annualMinutes, locale) })}
-              </p>
-            ) : null}
-          </div>
-        </Card>
+      {/* The instrument strip: four readings, hairlines between, no boxes. */}
+      <InstrumentStrip>
+        <Instrument
+          label={t("hoursRemaining")}
+          value={formatHours(s.minutesRemaining, locale)}
+          caption={s.annualMinutes ? t("ofAnnual", { hours: formatHours(s.annualMinutes, locale) }) : undefined}
+          meter={remaining}
+        />
+        <Instrument
+          label={t("flownThisYear", { year })}
+          value={formatHours(s.usedThisYearMinutes, locale)}
+          caption={t("flownCaption")}
+        />
+        {s.showFinances ? (
+          <Instrument
+            label={t("spentThisYear", { year })}
+            value={s.budget ? formatMoneyRounded(s.budget.spentCents, s.budget.currency, locale) : "—"}
+            caption={
+              s.budget
+                ? t("ofPlannedShort", {
+                    amount: formatMoneyRounded(s.budget.plannedCents, s.budget.currency, locale),
+                  })
+                : t("budgetEmpty")
+            }
+            meter={s.budget && s.budget.plannedCents > 0 ? s.budget.spentCents / s.budget.plannedCents : null}
+          />
+        ) : (
+          <Instrument
+            label={t("availability")}
+            value={t("freeDaysShort", { count: freeDays })}
+            caption={t("freeDaysLabel", { days: AHEAD })}
+          />
+        )}
+        <Instrument
+          label={t("nextMaintenance")}
+          value={s.nextMaintenance ? shortDay(s.nextMaintenance.startsAt) : "—"}
+          caption={
+            s.nextMaintenance
+              ? s.nextMaintenance.endsAt
+                ? t("maintenanceEnds", { date: shortDay(s.nextMaintenance.endsAt) })
+                : undefined
+              : t("nextMaintenanceEmpty")
+          }
+        />
+      </InstrumentStrip>
 
-        <Card>
-          <div className="flex items-center gap-2">
-            <Wallet className="text-muted size-4" aria-hidden />
-            <CardTitle>{t("budget", { year: new Date().getFullYear() })}</CardTitle>
-          </div>
-          {s.budget ? (
-            <>
-              <p className="tabular mt-2 text-2xl font-bold tracking-tight">
-                {formatMoney(s.budget.spentCents, s.budget.currency, locale)}
-              </p>
-              <p className="tabular text-muted text-sm">
-                {t("ofPlanned", { amount: formatMoney(s.budget.plannedCents, s.budget.currency, locale) })}
-              </p>
-              <Meter value={budgetUsed} label={t("budget", { year: new Date().getFullYear() })} />
-            </>
-          ) : (
-            <p className="text-muted mt-2 text-sm">{t("budgetEmpty")}</p>
-          )}
-        </Card>
+      {insights.length ? <InsightLine items={insights} /> : null}
 
-        <InfoCard icon={PlaneTakeoff} title={t("nextFlight")} empty={t("nextFlightEmpty")}>
-          {s.nextFlight ? (
-            <>
-              <p className="text-lg font-semibold">
-                {s.nextFlight.fromAirport} → {s.nextFlight.toAirport}
-              </p>
-              <p className="text-muted text-sm">{dateTime(s.nextFlight.departsAt)}</p>
-            </>
-          ) : null}
-        </InfoCard>
+      <LiveAircraft initial={live} photo={heroPhoto(s.aircraft.model)} />
 
-        <InfoCard icon={Wrench} title={t("nextMaintenance")} empty={t("nextMaintenanceEmpty")}>
-          {s.nextMaintenance ? (
-            <>
-              <p className="text-lg font-semibold">{s.nextMaintenance.title}</p>
-              <p className="text-muted text-sm">
-                {s.nextMaintenance.startsAt
-                  ? dateTime(s.nextMaintenance.startsAt)
-                  : s.nextMaintenance.dueOn
-                    ? t("dueOn", { date: day(s.nextMaintenance.dueOn) })
-                    : null}
-              </p>
-            </>
-          ) : null}
-        </InfoCard>
-
-        <InfoCard icon={FileText} title={t("latestInvoice")} empty={t("latestInvoiceEmpty")}>
-          {s.latestInvoice ? (
-            <>
-              <p className="tabular text-lg font-semibold">
-                {formatMoney(s.latestInvoice.totalCents, s.latestInvoice.currency, locale)}
-              </p>
-              <p className="text-muted text-sm">
-                {s.latestInvoice.number} · {day(s.latestInvoice.issuedOn)}
-              </p>
-            </>
-          ) : null}
-        </InfoCard>
-
-        <Card>
-          <div className="mb-2 flex items-center gap-2">
-            <CalendarClock className="text-muted size-4" aria-hidden />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <Card className="group">
+          <div className="flex items-baseline justify-between gap-4">
             <CardTitle>{t("availability")}</CardTitle>
+            <Link
+              href={`/availability?aircraft=${s.aircraft.id}`}
+              className="text-accent text-xs font-medium tracking-[0.04em] hover:underline"
+            >
+              {t("seeCalendar")}
+            </Link>
           </div>
-          <p className="text-lg font-semibold">{t("freeDays", { count: freeDays, days: AHEAD })}</p>
-          <ol className="mt-3 grid grid-cols-14 gap-1" aria-hidden>
+          <p className="mt-4 text-2xl font-light tracking-tight">{t("freeDays", { count: freeDays, days: AHEAD })}</p>
+          <ol className="mt-6 grid grid-cols-14 gap-1.5" aria-hidden>
             {ahead.map((d) => (
-              <li key={d.day} className={cn("h-6 rounded-sm", DOT[d.status])} title={d.day} />
+              <li key={d.day} className="flex flex-col items-center gap-2">
+                <span className={cn("h-10 w-full rounded-full", DOT[d.status])} title={d.day} />
+                <span className="text-muted text-xs">
+                  {format.dateTime(new Date(`${d.day}T12:00:00`), { day: "numeric" })}
+                </span>
+              </li>
             ))}
           </ol>
-          <Link
-            href={`/availability?aircraft=${s.aircraft.id}`}
-            className="text-accent mt-3 inline-block text-sm font-medium hover:underline"
-          >
-            {t("seeCalendar")}
-          </Link>
+          <div className="text-muted mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+            <Legend className={DOT.free} label={t("legendFree")} />
+            <Legend className={DOT.mine} label={t("legendMine")} />
+            <Legend className={DOT.booked} label={t("legendBooked")} />
+            <Legend className={DOT.maintenance} label={t("legendMaintenance")} />
+          </div>
         </Card>
+
+        {s.showFinances ? (
+          <Card className="group flex flex-col">
+            <CardTitle>{t("latestInvoice")}</CardTitle>
+            {s.latestInvoice ? (
+              <>
+                <p className="tabular mt-4 text-3xl font-light tracking-tight">
+                  {formatMoney(s.latestInvoice.totalCents, s.latestInvoice.currency, locale)}
+                </p>
+                <p className="text-muted mt-1 text-sm">
+                  {s.latestInvoice.number} ·{" "}
+                  {format.dateTime(new Date(`${s.latestInvoice.issuedOn}T12:00:00`), { dateStyle: "long" })}
+                </p>
+                <div className="mt-auto pt-6">
+                  <Button asChild variant="secondary" size="sm">
+                    <Link href={`/invoices/${s.latestInvoice.id}`}>{t("seeInvoice")}</Link>
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <p className="text-muted mt-4 text-sm">{t("latestInvoiceEmpty")}</p>
+            )}
+          </Card>
+        ) : null}
       </div>
     </section>
   );
 }
 
-function InfoCard({
-  icon: Icon,
-  title,
-  empty,
-  children,
+/** The cinematic top of the page: the aircraft, where it is, and the one thing that matters now. */
+async function Hero({
+  summary: s,
+  live,
+  greeting,
+  showOwner,
+  firstName,
 }: {
-  icon: typeof Plane;
-  title: string;
-  empty: string;
-  children?: React.ReactNode;
+  summary: ShareSummary;
+  live: AircraftLive;
+  greeting: boolean;
+  showOwner: boolean;
+  firstName: string;
 }) {
+  const t = await getTranslations("home");
+  const tr = await getTranslations("requestFlight");
+  const tl = await getTranslations("live");
+  const format = await getFormatter();
+  const now = new Date();
+  const model = shortModel(s.aircraft.model);
+  const today = format.dateTime(now, { weekday: "long", day: "numeric", month: "long", timeZone: OPERATOR_TIME_ZONE });
+  // With the zone (« 22 h 13 HAE »): owners travel, and an arrival time means nothing without it.
+  const time = (iso: string) =>
+    format.dateTime(new Date(iso), { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+
+  const [headline, subline] =
+    live.state === "in_flight"
+      ? [
+          t("hero.flying", { model }),
+          live.leg
+            ? t("hero.flyingTo", {
+                city: live.leg.to.city || live.leg.to.icao,
+                time: live.leg.eta ? time(live.leg.eta) : "—",
+              })
+            : live.flightOf === "co_owner" && live.coOwnerName
+              ? tl("coOwnerFlight", { name: live.coOwnerName })
+              : null,
+        ]
+      : live.state === "maintenance"
+        ? [
+            t("hero.maintenance", { model }),
+            s.nextMaintenance?.endsAt
+              ? t("hero.maintenanceUntil", {
+                  date: format.dateTime(s.nextMaintenance.endsAt, { day: "numeric", month: "long" }),
+                })
+              : null,
+          ]
+        : [
+            t("hero.waiting", { model }),
+            live.nextFlight
+              ? t("hero.nextDeparture", {
+                  date: format.dateTime(new Date(live.nextFlight.departsAt), {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    hour: "numeric",
+                    minute: "2-digit",
+                  }),
+                  route: `${live.nextFlight.fromCode} → ${live.nextFlight.toCode}`,
+                })
+              : live.place
+                ? t("hero.waitingAt", { city: live.place.city || live.place.icao })
+                : null,
+          ];
+  // One h1 per page: the first aircraft's headline; any others are section headings.
+  const Heading = greeting ? "h1" : "h2";
+
   return (
-    <Card>
-      <div className="mb-2 flex items-center gap-2">
-        <Icon className="text-muted size-4" aria-hidden />
-        <CardTitle>{title}</CardTitle>
+    <header className="theme-dark relative isolate -mx-4 overflow-hidden sm:mx-0 sm:rounded-[28px]">
+      {/* Phones: the content sets the height (it never runs under the chips); wider screens: a fixed cinematic frame. */}
+      <div className="relative flex min-h-[64vh] flex-col justify-end sm:block sm:h-[68vh] sm:max-h-[700px] sm:min-h-0">
+        <Image
+          src={heroPhoto(s.aircraft.model)}
+          alt=""
+          fill
+          priority
+          sizes="(min-width: 1400px) 1320px, 100vw"
+          placeholder="blur"
+          className="animate-ken-burns object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/20" aria-hidden />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/10 to-transparent" aria-hidden />
+
+        <div className="absolute inset-x-5 top-5 flex items-center justify-between gap-3 sm:inset-x-8 sm:top-8">
+          <p className="border-glass-line bg-glass rounded-full border px-4 py-2 text-[11px] font-medium tracking-[0.18em] text-white/85 uppercase backdrop-blur-md">
+            <span id={`share-${s.shareId}`}>{s.aircraft.registration}</span>
+            <span className="text-white/45"> · {s.aircraft.model}</span>
+          </p>
+          <p className="hidden text-[11px] tracking-[0.18em] text-white/70 uppercase sm:block">
+            {t("shareOf", { percent: format.number(s.percentageBp / 10000, { style: "percent" }) })}
+            {showOwner ? ` · ${s.ownerName}` : ""}
+          </p>
+        </div>
+
+        <div className="animate-rise relative px-5 pt-24 pb-7 sm:absolute sm:inset-x-10 sm:bottom-10 sm:p-0">
+          {greeting ? (
+            <p className="eyebrow mb-4 text-white/70">
+              {t(`greetings.${partOfDay(now)}`, { name: firstName })} ·{" "}
+              <span className="first-letter:uppercase">{today}</span>
+            </p>
+          ) : null}
+          <Heading className="max-w-3xl text-[2.4rem] leading-[1.02] font-light tracking-[-0.03em] text-white sm:text-7xl">
+            {headline}
+          </Heading>
+          {subline ? (
+            <p className="mt-4 max-w-2xl text-lg text-white/85 first-letter:uppercase sm:text-2xl sm:font-light">
+              {subline}
+            </p>
+          ) : null}
+
+          {live.state === "in_flight" && live.leg ? (
+            <div className="mt-8 max-w-xl">
+              <div className="flex items-center gap-4 text-xs font-medium tracking-[0.16em] text-white/80">
+                <span>{live.leg.from.icao}</span>
+                <div className="relative h-px flex-1 bg-white/25">
+                  <div
+                    className="absolute inset-y-0 left-0 bg-white"
+                    style={{ width: `${Math.round(live.leg.progress * 100)}%` }}
+                  />
+                  <Plane
+                    className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rotate-45 text-white"
+                    strokeWidth={1.5}
+                    style={{ left: `${Math.round(live.leg.progress * 100)}%` }}
+                    aria-hidden
+                  />
+                </div>
+                <span>{live.leg.to.icao}</span>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <RequestFlightButton className="!bg-white !text-black">
+              <PlaneTakeoff aria-hidden />
+              {tr("open")}
+            </RequestFlightButton>
+            <Button asChild variant="glass">
+              <a href="#live">
+                <LiveDot tone={live.state === "in_flight" ? "live" : "muted"} />
+                {live.state === "in_flight" ? t("hero.follow") : t("hero.seeOnMap")}
+              </a>
+            </Button>
+          </div>
+        </div>
       </div>
-      {children ?? <p className="text-muted text-sm">{empty}</p>}
+    </header>
+  );
+}
+
+function Legend({ className, label }: { className: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={cn("size-2.5 rounded-full", className)} aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+/** Upcoming flights as routes, each with its date set large like a boarding pass. */
+async function UpcomingFlights({
+  flights,
+  requests,
+}: {
+  flights: Awaited<ReturnType<typeof listOwnerFlights>>["upcoming"];
+  requests: Awaited<ReturnType<typeof listOpenFlightRequests>>;
+}) {
+  const t = await getTranslations("home");
+  const tr = await getTranslations("requestFlight");
+  const format = await getFormatter();
+  const now = new Date();
+  return (
+    <Card className="flex flex-col">
+      <div className="flex items-baseline justify-between gap-4">
+        <CardTitle>{t("upcomingTitle")}</CardTitle>
+        <Link href="/flights" className="text-accent text-xs font-medium tracking-[0.04em] hover:underline">
+          {t("allFlights")}
+        </Link>
+      </div>
+      {flights.length === 0 && requests.length === 0 ? (
+        <p className="text-muted mt-6 text-sm">{t("nextFlightEmpty")}</p>
+      ) : (
+        <ul className="divide-border mt-4 divide-y">
+          {/* Asked for, not yet confirmed: shown first so the owner knows it was heard. */}
+          {requests.map((r) => (
+            <li key={r.id} className="flex items-center gap-5 py-5">
+              <div className="border-warning/50 text-warning flex w-14 shrink-0 flex-col items-center rounded-[14px] border border-dashed py-2">
+                <span className="text-[11px] font-medium tracking-[0.12em] uppercase">
+                  {format.dateTime(new Date(`${r.date}T12:00:00`), { month: "short" }).replace(".", "")}
+                </span>
+                <span className="tabular text-2xl font-light">
+                  {format.dateTime(new Date(`${r.date}T12:00:00`), { day: "numeric" })}
+                </span>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-lg font-light">
+                  <RouteLabel from={r.from} to={r.to} />
+                </p>
+                <p className="text-muted mt-1 text-xs">
+                  <span className="text-warning font-medium">{tr("pending")}</span> · {tr("pendingHint")} ·{" "}
+                  <span className="whitespace-nowrap">{r.registration}</span>
+                </p>
+              </div>
+            </li>
+          ))}
+          {flights.map((f) => {
+            const flying = f.status === "scheduled" && f.departsAt <= now;
+            return (
+              <li key={f.id}>
+                <Link
+                  href={`/flights/${f.id}`}
+                  className="hover:bg-surface-muted/60 -mx-3 flex items-center gap-5 rounded-[14px] px-3 py-5"
+                >
+                  <div className="border-border flex w-14 shrink-0 flex-col items-center rounded-[14px] border py-2">
+                    <span className="text-muted text-xs font-medium tracking-[0.16em] uppercase">
+                      {format.dateTime(f.departsAt, { month: "short" }).replace(".", "")}
+                    </span>
+                    <span className="tabular text-2xl font-light">
+                      {format.dateTime(f.departsAt, { day: "numeric" })}
+                    </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-light">
+                      <RouteLabel from={f.fromAirport} to={f.toAirport} />
+                    </p>
+                    <p className="text-muted mt-1 text-xs">
+                      {flying ? (
+                        <span className="text-live inline-flex items-center gap-1.5">
+                          <LiveDot className="size-2" /> {t("inTheAir")}
+                        </span>
+                      ) : (
+                        format.dateTime(f.departsAt, {
+                          weekday: "long",
+                          hour: "numeric",
+                          minute: "2-digit",
+                          timeZoneName: "short",
+                        })
+                      )}
+                      {" · "}
+                      <span className="whitespace-nowrap">{f.registration}</span>
+                    </p>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </Card>
   );
 }
 
-/** Share of annual hours still available, as a ring that drains. Null when no allotment is set. */
-function ProgressRing({ value, label }: { value: number | null; label: string }) {
-  const r = 30;
-  const c = 2 * Math.PI * r;
+/** The people behind the aircraft, over a photograph of a toast in the cabin. */
+async function TeamPanel() {
+  const t = await getTranslations("home");
+  const tt = await getTranslations("teamReach");
   return (
-    <svg
-      viewBox="0 0 72 72"
-      className="size-20 shrink-0 -rotate-90"
-      role="img"
-      aria-label={value === null ? undefined : `${label} ${Math.round(value * 100)}%`}
-    >
-      <circle cx="36" cy="36" r={r} fill="none" stroke="var(--surface-muted)" strokeWidth="8" />
-      {value !== null ? (
-        <circle
-          cx="36"
-          cy="36"
-          r={r}
-          fill="none"
-          stroke={value < 0.1 ? "var(--warning)" : "var(--accent)"}
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - value)}
-        />
-      ) : null}
-    </svg>
+    <section className="theme-dark relative isolate flex min-h-[340px] flex-col justify-end overflow-hidden rounded-[22px]">
+      <Image
+        src={scenes.toast}
+        alt=""
+        fill
+        sizes="(min-width: 1024px) 40vw, 100vw"
+        placeholder="blur"
+        className="object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/10" aria-hidden />
+      <div className="relative p-7">
+        <TeamFaces />
+        <p className="eyebrow mt-6 text-white/70">{t("teamEyebrow")}</p>
+        <h2 className="mt-2 text-3xl leading-tight font-light text-white">{tt("title")}</h2>
+        <p className="mt-2 text-sm text-white/75">{tt("body")}</p>
+        <div className="[&_a]:border-glass-line mt-6 [&_a:last-child]:bg-white/10 [&_a:last-child]:text-white">
+          <ContactButtons />
+        </div>
+      </div>
+    </section>
   );
 }
 
-function Meter({ value, label }: { value: number | null; label: string }) {
-  if (value === null) return null;
-  const pct = Math.min(100, Math.round(value * 100));
-  const tone = value >= 1 ? "bg-danger" : value >= 0.9 ? "bg-warning" : "bg-accent";
+const NOTICE_ICON: Record<string, AnimatedIconName> = {
+  "invoice.issued": "invoice",
+  "budget.published": "wallet",
+  "hours.low": "clock",
+  "maintenance.planned": "wrench",
+  "message.from_dispatch": "chat",
+  "flight.confirmed": "planeTakeoff",
+};
+
+/** "Activité": what happened lately, as a quiet hairline list. */
+async function ActivityFeed({ items }: { items: ActivityItem[] }) {
+  const t = await getTranslations("home");
+  const tn = await getTranslations("notifications");
+  const format = await getFormatter();
   return (
-    <div
-      className="bg-surface-muted mt-3 h-2 overflow-hidden rounded-full"
-      role="meter"
-      aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={pct}
-    >
-      <div className={`h-full rounded-full ${tone}`} style={{ width: `${pct}%` }} />
-    </div>
+    <section aria-labelledby="activity">
+      <div className="mb-2 flex items-baseline justify-between gap-4">
+        <h2 id="activity" className="flex items-center gap-3 text-2xl font-light tracking-tight">
+          <LiveDot />
+          {t("activityTitle")}
+        </h2>
+        <Link href="/flights" className="text-accent text-xs font-medium tracking-[0.04em] hover:underline">
+          {t("activityAll")}
+        </Link>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-muted py-6 text-sm">{t("activityEmpty")}</p>
+      ) : (
+        <ul className="divide-border border-border divide-y border-t">
+          {items.map((item) => {
+            const glyph: AnimatedIconName = item.kind === "flight" ? "plane" : (NOTICE_ICON[item.type] ?? "bell");
+            const body =
+              item.kind === "flight" ? (
+                <>
+                  {t("flightCompleted")}{" "}
+                  <span>
+                    <RouteLabel from={item.from} to={item.to} codes={false} />
+                  </span>
+                  <span className="text-muted block text-xs">
+                    {item.registration}
+                    {item.minutes
+                      ? ` · ${t("flightLength", { hours: Math.floor(item.minutes / 60), minutes: String(item.minutes % 60).padStart(2, "0") })}`
+                      : ""}
+                  </span>
+                </>
+              ) : (
+                <span className={cn(item.unread && "text-text")}>
+                  {tn(`types.${item.type}`, notificationValues(item.data))}
+                </span>
+              );
+            const row = (
+              <>
+                <span className="border-border relative flex size-10 shrink-0 items-center justify-center rounded-full border">
+                  <AnimatedIcon name={glyph} size={18} />
+                  {item.kind === "notice" && item.unread ? (
+                    <span
+                      className="bg-accent ring-background absolute -top-0.5 -right-0.5 size-2.5 rounded-full ring-2"
+                      aria-hidden
+                    />
+                  ) : null}
+                </span>
+                <span className="min-w-0 flex-1 text-[15px] leading-snug font-light">{body}</span>
+                <time dateTime={item.at.toISOString()} className="text-muted shrink-0 text-xs">
+                  {format.relativeTime(item.at)}
+                </time>
+              </>
+            );
+            return (
+              <li key={`${item.kind}-${item.id}`}>
+                {item.kind === "notice" ? (
+                  <Link
+                    href={item.href as Route}
+                    className="ai-trigger hover:bg-surface/60 -mx-3 flex items-center gap-4 rounded-[14px] px-3 py-4"
+                  >
+                    {row}
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/flights/${item.id}`}
+                    className="hover:bg-surface/60 -mx-3 flex items-center gap-4 rounded-[14px] px-3 py-4"
+                  >
+                    {row}
+                  </Link>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
   );
 }
 
-/** One or two plain sentences about pace, from the owner's own numbers. */
-async function Insights({ items }: { items: Insight[] }) {
+/** One quiet line of perspective under the instruments, instead of boxes of advice. */
+async function InsightLine({ items }: { items: Insight[] }) {
   const t = await getTranslations("home.insights");
   const format = await getFormatter();
-  if (items.length === 0) return null;
   const pct = (n: number) => format.number(n, { style: "percent", maximumFractionDigits: 0 });
   const month = (ym: string) =>
     format.dateTime(new Date(`${ym}-15T12:00:00Z`), { month: "long", year: "numeric", timeZone: "UTC" });
+  const text = (i: Insight) =>
+    i.kind === "hoursPace"
+      ? t("hoursPace", { months: format.number(i.months, { maximumFractionDigits: 1 }), until: month(i.until) })
+      : i.kind === "hoursUnused"
+        ? t("hoursUnused")
+        : t(i.tone === "warning" ? "budgetAhead" : "budgetOnTrack", {
+            spent: pct(i.spentShare),
+            year: pct(i.yearShare),
+          });
   return (
-    <ul className="mb-4 flex flex-col gap-2" aria-label={t("label")}>
+    <ul aria-label={t("label")} className="-mt-4 grid gap-3 md:grid-cols-2">
       {items.map((i) => {
-        const Icon = i.tone === "warning" ? TriangleAlert : Lightbulb;
-        const text =
-          i.kind === "hoursPace"
-            ? t("hoursPace", { months: format.number(i.months, { maximumFractionDigits: 1 }), until: month(i.until) })
-            : i.kind === "hoursUnused"
-              ? t("hoursUnused")
-              : t(i.tone === "warning" ? "budgetAhead" : "budgetOnTrack", {
-                  spent: pct(i.spentShare),
-                  year: pct(i.yearShare),
-                });
+        const money = i.kind === "budgetPace";
+        const Glyph = money ? Wallet : Clock3;
         return (
           <li
             key={i.kind}
             className={cn(
-              "flex items-start gap-2.5 rounded-lg px-3.5 py-2.5 text-sm",
-              i.tone === "warning" ? "bg-warning/12 text-warning" : "bg-surface-muted",
+              "flex items-start gap-3 rounded-[18px] border px-4 py-3.5 text-sm leading-relaxed",
+              i.tone === "warning" ? "border-warning/40 bg-warning/5" : "border-border",
             )}
           >
-            <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
-            <span>{text}</span>
+            <Glyph
+              strokeWidth={1.75}
+              aria-hidden
+              className={cn("mt-0.5 size-4 shrink-0", i.tone === "warning" ? "text-warning" : "text-muted")}
+            />
+            <span className="flex-1">
+              {text(i)}
+              {money ? (
+                <>
+                  {" "}
+                  <Link href="/finances" className="text-accent font-medium whitespace-nowrap hover:underline">
+                    {t("details")}
+                  </Link>
+                </>
+              ) : null}
+            </span>
           </li>
         );
       })}

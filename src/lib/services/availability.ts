@@ -1,12 +1,21 @@
 /**
  * When an aircraft is free. Nothing is stored as "available": it's whatever
  * isn't taken by a flight, a maintenance window or a manual block. Owners see
- * their own flights in detail and everyone else's only as "booked".
+ * their own flights in detail, a co-owner's as "booked" with the co-owner's
+ * name (co-owners know each other), and charter flights only as "booked".
  */
 import "server-only";
-import { and, asc, eq, gt, inArray, isNull, lt, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, lt, ne, or } from "drizzle-orm";
 import type { Db } from "@/lib/db";
-import { aircraft, availabilityBlocks, flights, maintenanceEvents, owners, shares } from "@/lib/db/schema";
+import {
+  aircraft,
+  availabilityBlocks,
+  flights,
+  holdingCompanies,
+  maintenanceEvents,
+  owners,
+  shares,
+} from "@/lib/db/schema";
 import { authorize, isStaff, type Actor } from "@/lib/auth/policy";
 import type { Period } from "@/lib/availability-days";
 import { blockInput, type BlockInput } from "@/lib/validation/operations";
@@ -56,7 +65,7 @@ export async function getAvailability(
         toAirport: flights.toAirport,
         departsAt: flights.departsAt,
         arrivesAt: flights.arrivesAt,
-        blockMinutes: flights.blockMinutes,
+        flightMinutes: flights.flightMinutes,
         ownerId: shares.ownerId,
         ownerName: owners.legalName,
       })
@@ -83,7 +92,7 @@ export async function getAvailability(
       .where(
         and(
           eq(maintenanceEvents.aircraftId, aircraftId),
-          inArray(maintenanceEvents.status, ["planned", "in_progress", "done"]),
+          inArray(maintenanceEvents.status, ["planned", "in_progress", "review", "done"]),
           lt(maintenanceEvents.startsAt, to),
           or(isNull(maintenanceEvents.endsAt), gt(maintenanceEvents.endsAt, from)),
         ),
@@ -106,7 +115,7 @@ export async function getAvailability(
   const periods: Period[] = [];
   for (const f of flightRows) {
     const endsAt =
-      f.arrivesAt ?? new Date(f.departsAt.getTime() + (f.blockMinutes ? f.blockMinutes * 60_000 : DEFAULT_FLIGHT_MS));
+      f.arrivesAt ?? new Date(f.departsAt.getTime() + (f.flightMinutes ? f.flightMinutes * 60_000 : DEFAULT_FLIGHT_MS));
     if (endsAt <= from) continue;
     const mine = !!f.ownerId && actor.ownerIds.includes(f.ownerId);
     periods.push(
@@ -119,12 +128,14 @@ export async function getAvailability(
             label: `${f.fromAirport} → ${f.toAirport}`,
             ownerName: staff ? f.ownerName : null,
           }
-        : { kind: "booked", startsAt: f.departsAt, endsAt, mine: false, label: null, ownerName: null },
+        : { kind: "booked", startsAt: f.departsAt, endsAt, mine: false, label: null, ownerName: f.ownerName },
     );
   }
   for (const j of jobs) {
     // An open job with no end yet keeps the aircraft unavailable through the window.
-    const endsAt = j.endsAt ?? (j.status === "in_progress" ? to : new Date(j.startsAt!.getTime() + 24 * HOUR));
+    const endsAt =
+      j.endsAt ??
+      (j.status === "in_progress" || j.status === "review" ? to : new Date(j.startsAt!.getTime() + 24 * HOUR));
     if (endsAt <= from) continue;
     periods.push({
       kind: "maintenance",
@@ -149,7 +160,11 @@ export async function getAvailability(
   return { aircraft: plane, periods };
 }
 
-/** The aircraft the signed-in owner holds a share in, with their share and open maintenance. */
+/**
+ * The aircraft the signed-in owner holds a share in, with their share and
+ * maintenance windows. Owners see only when the aircraft is in maintenance,
+ * never what the work is.
+ */
 export async function listOwnerAircraft(db: Db, actor: Actor) {
   if (actor.ownerIds.length === 0) return [];
   authorize(actor, "fleet:read", { ownerIds: actor.ownerIds });
@@ -163,14 +178,17 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
       homeBase: aircraft.homeBase,
       status: aircraft.status,
       shareId: shares.id,
+      ownerId: shares.ownerId,
       percentageBp: shares.percentageBp,
       annualHoursMinutes: shares.annualHoursMinutes,
       startsOn: shares.startsOn,
       ownerName: owners.legalName,
+      holdingCompanyName: holdingCompanies.legalName,
     })
     .from(shares)
     .innerJoin(aircraft, eq(aircraft.id, shares.aircraftId))
     .innerJoin(owners, eq(owners.id, shares.ownerId))
+    .leftJoin(holdingCompanies, eq(holdingCompanies.id, aircraft.holdingCompanyId))
     .where(
       and(
         inArray(shares.ownerId, [...actor.ownerIds]),
@@ -185,9 +203,6 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
     .select({
       id: maintenanceEvents.id,
       aircraftId: maintenanceEvents.aircraftId,
-      type: maintenanceEvents.type,
-      title: maintenanceEvents.title,
-      dueOn: maintenanceEvents.dueOn,
       startsAt: maintenanceEvents.startsAt,
       endsAt: maintenanceEvents.endsAt,
       status: maintenanceEvents.status,
@@ -200,13 +215,17 @@ export async function listOwnerAircraft(db: Db, actor: Actor) {
           rows.map((r) => r.id),
         ),
         ne(maintenanceEvents.status, "cancelled"),
+        isNotNull(maintenanceEvents.startsAt),
       ),
     )
-    .orderBy(sql`coalesce(${maintenanceEvents.startsAt}, ${maintenanceEvents.dueOn}::timestamptz) desc nulls first`);
+    .orderBy(desc(maintenanceEvents.startsAt));
 
   return rows.map((r) => ({
     ...r,
-    maintenance: jobs.filter((j) => j.aircraftId === r.id).slice(0, 10),
+    maintenance: jobs
+      .filter((j) => j.aircraftId === r.id)
+      .slice(0, 10)
+      .map((j) => ({ ...j, startsAt: j.startsAt! })),
   }));
 }
 

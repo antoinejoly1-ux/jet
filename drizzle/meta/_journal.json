@@ -29,6 +29,90 @@
       "when": 1792988671243,
       "tag": "0003_api_and_webhooks",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793129595490,
+      "tag": "0004_flight_time",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793130525574,
+      "tag": "0005_holding_companies_and_roles",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793137037749,
+      "tag": "0006_aircraft_positions",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793142480793,
+      "tag": "0007_onboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793146046764,
+      "tag": "0008_flight_requests",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793191360069,
+      "tag": "0009_stored_files",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793191872225,
+      "tag": "0010_flight_reports",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793192731725,
+      "tag": "0011_holding_company_invoices",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793193930972,
+      "tag": "0012_reserves_and_pnl",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793200955846,
+      "tag": "0013_aircraft_photo",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793202214814,
+      "tag": "0014_maintenance_review",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793214904351,
+      "tag": "0015_money_review",
+      "breakpoints": true
     }
   ]
 }

@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { flightInput, parseDurationToMinutes } from "@/lib/validation/operations";
 
-describe("block time", () => {
+describe("flight time", () => {
   it("reads hours:minutes and decimal hours in either locale", () => {
     expect(parseDurationToMinutes("2:15")).toBe(135);
     expect(parseDurationToMinutes("0:45")).toBe(45);
     expect(parseDurationToMinutes("2.25")).toBe(135);
     expect(parseDurationToMinutes("2,5")).toBe(150);
     expect(parseDurationToMinutes(" 3 ")).toBe(180);
+    expect(parseDurationToMinutes("2h15")).toBe(135);
+    expect(parseDurationToMinutes("2 h 15")).toBe(135);
+    expect(parseDurationToMinutes("1H")).toBe(60);
   });
 
   it("rejects anything else", () => {

@@ -74,7 +74,11 @@ describe("email preferences", () => {
     expect((await getEmailPreferences(db, anne.actor)).every((p) => p.email)).toBe(true);
     await saveEmailPreferences(db, anne.actor, { on: ["invoice.issued", "budget.published", "hours.low"] });
     const prefs = await getEmailPreferences(db, anne.actor);
-    expect(prefs.filter((p) => !p.email).map((p) => p.type)).toEqual(["maintenance.planned", "message.from_dispatch"]);
+    expect(prefs.filter((p) => !p.email).map((p) => p.type)).toEqual([
+      "maintenance.planned",
+      "message.from_dispatch",
+      "flight.confirmed",
+    ]);
 
     await planMaintenance(db, dispatcher, {
       aircraftId: planeId,
@@ -95,7 +99,8 @@ describe("email preferences", () => {
       endsAt: "",
     });
     expect(sent.map((e) => e.subject)).toEqual(["Maintenance prévue sur C-GJTA"]);
-    expect(sent[0]!.text).toContain("Inspection de phase");
+    expect(sent[0]!.text).toContain("C-GJTA sera en maintenance à partir du 10 janvier 2027");
+    expect(sent[0]!.text).not.toContain("Inspection de phase");
   });
 
   it("refuses types that can't be turned off", async () => {
@@ -106,7 +111,7 @@ describe("email preferences", () => {
 describe("low hours", () => {
   it("warns once when the balance crosses 10% of the annual hours", async () => {
     await addHours(db, finance, anne.shareId, { kind: "purchase", hours: "3" }); // 180 min; the line is 120
-    const fly = async (block: string) => {
+    const fly = async (flown: string) => {
       const f = await scheduleFlight(db, dispatcher, {
         aircraftId: planeId,
         shareId: anne.shareId,
@@ -115,7 +120,7 @@ describe("low hours", () => {
         departsAt: "2026-09-01T08:00",
         arrivesAt: "",
       });
-      await completeFlight(db, dispatcher, f.id, { blockTime: block, arrivesAt: "" });
+      await completeFlight(db, dispatcher, f.id, { flightTime: flown, arrivesAt: "" });
     };
     await fly("0:30"); // 150 left: still above
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(0);
@@ -123,7 +128,7 @@ describe("low hours", () => {
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(1);
     expect(await ofType(finance.id, "hours.low_staff")).toHaveLength(1);
     expect(await ofType(dispatcher.id, "hours.low_staff")).toHaveLength(0);
-    expect(sent.map((e) => e.subject)).toEqual(["Il vous reste 1,8 h sur C-GJTA"]);
+    expect(sent.map((e) => e.subject)).toEqual(["Il vous reste 1\u00a0h\u00a045 sur C-GJTA"]);
     await fly("0:30"); // already below: no second warning
     expect(await ofType(anne.actor.id, "hours.low")).toHaveLength(1);
   });

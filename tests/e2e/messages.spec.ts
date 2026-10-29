@@ -33,8 +33,23 @@ test("an owner and dispatch talk in the portal", async ({ page, browser }) => {
   await expect(owner.getByText(/Répartition · /).last()).toBeVisible();
 
   // Resolving moves it out of the open list.
-  await page.getByRole("button", { name: "Résolue" }).click();
+  await page.getByRole("button", { name: "Marquer comme résolue" }).click();
   await page.waitForURL(/\/admin\/messages$/);
   await page.getByRole("link", { name: "Résolues" }).click();
   await expect(page.getByRole("link", { name: /Jean Tremblay/ })).toBeVisible();
+});
+
+test("owners can call or text the team from Home and Messages", async ({ page }) => {
+  await signIn(page, "owner@jet.test");
+  for (const path of ["/", "/messages"]) {
+    await page.goto(path);
+    await expect(page.getByRole("link", { name: "Appeler", exact: true }).first()).toHaveAttribute(
+      "href",
+      "tel:+15145550100",
+    );
+    await expect(page.getByRole("link", { name: "Texto", exact: true }).first()).toHaveAttribute(
+      "href",
+      "sms:+15145550100",
+    );
+  }
 });

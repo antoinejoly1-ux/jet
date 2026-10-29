@@ -4,7 +4,8 @@
  *
  *   pnpm db:seed           wipes the domain tables and reseeds
  *
- * Refuses to run when NODE_ENV=production.
+ * Refuses to run against production (NODE_ENV or VERCEL_ENV). On a Vercel preview
+ * with SEED_ON_BUILD=true, every build reseeds the demo database.
  */
 import { createOTP } from "@better-auth/utils/otp";
 import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
@@ -12,15 +13,21 @@ import { createHash } from "node:crypto";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
+import { eq, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { v7 as uuidv7 } from "uuid";
+import en from "../messages/en.json";
+import fr from "../messages/fr.json";
 import * as s from "../src/lib/db/schema";
 
 config({ path: ".env.local" });
 config();
 
-if (process.env.NODE_ENV === "production") throw new Error("Refusing to seed a production database.");
+// Vercel builds previews with NODE_ENV=production too: a preview may be seeded, production never.
+const vercelEnv = process.env.VERCEL_ENV;
+if (vercelEnv === "production" || (process.env.NODE_ENV === "production" && vercelEnv !== "preview"))
+  throw new Error("Refusing to seed a production database.");
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 2 });
 const db = drizzle(pool, { schema: s, casing: "snake_case" });
@@ -51,10 +58,15 @@ function demoPdf(lines: string[]): Buffer {
 
 const storageDir = path.resolve(process.env.LOCAL_STORAGE_DIR ?? "tmp/storage");
 
-async function storeDemoFile(name: string, bytes: Buffer) {
-  const key = `invoices/${uuidv7()}.pdf`;
-  await mkdir(path.join(storageDir, "invoices"), { recursive: true });
-  await writeFile(path.join(storageDir, key), bytes);
+async function storeDemoFile(name: string, bytes: Buffer, folder: "invoices" | "receipts" = "invoices") {
+  const key = `${folder}/${uuidv7()}.pdf`;
+  // Staging keeps files in the database (no lasting disk on Vercel); elsewhere, the local folder.
+  if (process.env.STORAGE_DRIVER === "database")
+    await db.insert(s.storedFiles).values({ key, contentType: "application/pdf", bytes });
+  else {
+    await mkdir(path.join(storageDir, folder), { recursive: true });
+    await writeFile(path.join(storageDir, key), bytes);
+  }
   const [file] = await db
     .insert(s.files)
     .values({
@@ -80,10 +92,23 @@ const rand = () => (state = (state * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
 const pick = <T>(xs: readonly T[]) => xs[Math.floor(rand() * xs.length)]!;
 const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
-async function createLogin(email: string, name: string, staffRole: s.StaffRole | null, withTwoFactor = false) {
+async function createLogin(
+  email: string,
+  name: string,
+  staffRole: s.StaffRole | null,
+  withTwoFactor = false,
+  { onboarded = true } = {},
+) {
   const [u] = await db
     .insert(s.user)
-    .values({ name, email, emailVerified: true, staffRole, twoFactorEnabled: withTwoFactor })
+    .values({
+      name,
+      email,
+      emailVerified: true,
+      staffRole,
+      twoFactorEnabled: withTwoFactor,
+      onboardedAt: onboarded ? new Date() : null,
+    })
     .returning();
   await db.insert(s.account).values({
     userId: u.id,
@@ -125,32 +150,77 @@ async function main() {
     .returning();
   const cat = Object.fromEntries(categories.map((c) => [c.nameEn, c.id]));
 
+  // Each aircraft belongs to a holding company whose shareholders are its owners.
+  const companies = await db
+    .insert(s.holdingCompanies)
+    .values([
+      {
+        legalName: "Gestion Aviation JTA inc.",
+        registrationNumber: "1171234567",
+        email: "jta@example.com",
+        // Registered for GST and QST: its invoices carry both taxes.
+        address: "3300, chemin de l'Aéroport\nLongueuil (Québec) J3Y 8Y9",
+        gstNumber: "741852963 RT0001",
+        qstNumber: "1234567890 TQ0001",
+        invoicePrefix: "JTA",
+        paymentTermsDays: 30,
+        paymentInstructions:
+          "Virement Interac à comptes@jta.example.com, ou chèque à l'ordre de Gestion Aviation JTA inc.",
+      },
+      { legalName: "Altitude PC-12 S.E.C.", registrationNumber: "3372345678" },
+      { legalName: "Citation Québec S.E.C.", registrationNumber: "3373456789" },
+      { legalName: "King Air Laurentien inc.", registrationNumber: "1174567890" },
+      { legalName: "Saint-Laurent Jet Partners inc.", registrationNumber: "1175678901" },
+    ])
+    .returning();
+
   const fleet = await db
     .insert(s.aircraft)
     .values([
       {
+        holdingCompanyId: companies[0]!.id,
         registration: "C-GJTA",
-        model: "Pilatus PC-24",
-        serialNumber: "PC24-112",
-        homeBase: "CYUL",
+        model: "Pilatus PC-12 NGX",
+        serialNumber: "2112",
+        homeBase: "CYHU",
         status: "available",
         icaoHex: "c05a1b",
       },
       {
+        holdingCompanyId: companies[1]!.id,
         registration: "C-FJTB",
-        model: "Embraer Phenom 300E",
-        serialNumber: "50500611",
-        homeBase: "CYUL",
+        model: "Pilatus PC-12 NGX",
+        serialNumber: "2087",
+        homeBase: "CYHU",
         status: "maintenance",
         icaoHex: "c03b7e",
       },
       {
+        holdingCompanyId: companies[2]!.id,
         registration: "C-GJTC",
         model: "Cessna Citation CJ4",
         serialNumber: "525C-0388",
         homeBase: "CYQB",
         status: "available",
         icaoHex: "c06d22",
+      },
+      {
+        holdingCompanyId: companies[3]!.id,
+        registration: "C-GUVR",
+        model: "Beechcraft King Air 350i",
+        serialNumber: "FL-1187",
+        homeBase: "CYHU",
+        status: "available",
+        icaoHex: "c07b44",
+      },
+      {
+        holdingCompanyId: companies[4]!.id,
+        registration: "C-FUNV",
+        model: "Bombardier Challenger 350",
+        serialNumber: "20812",
+        homeBase: "CYUL",
+        status: "available",
+        icaoHex: "c02e91",
       },
     ])
     .returning();
@@ -166,10 +236,16 @@ async function main() {
       { legalName: "Luc Bergeron", type: "person", email: "luc.bergeron@example.com" },
       { legalName: "Nadia Pelletier", type: "person", email: "nadia.pelletier@example.com" },
       { legalName: "Atlantique Capital", type: "company", email: "ops@atlantique.example.com", locale: "en" },
+      { legalName: "Hélène Fortin", type: "person", email: "helene.fortin@example.com" },
+      { legalName: "Philippe Lavoie", type: "person", email: "philippe.lavoie@example.com" },
+      { legalName: "Groupe Boréal inc.", type: "company", email: "direction@boreal.example.com" },
+      { legalName: "Isabelle Martel", type: "person", email: "isabelle.martel@example.com" },
+      { legalName: "Mathieu Gendron", type: "person", email: "mathieu.gendron@example.com", locale: "en" },
     ])
     .returning();
 
-  // Four quarter shares on the PC-24, two halves on the Phenom, two halves on the CJ4.
+  // Thirteen owners across the five aircraft: quarters on C-GJTA, halves on the other PC-12 and
+  // the CJ4, thirds on the King Air, 60/40 on the Challenger.
   const plan: [number, number, number][] = [
     [0, 0, 2500],
     [1, 0, 2500],
@@ -179,6 +255,11 @@ async function main() {
     [5, 1, 5000],
     [6, 2, 5000],
     [7, 2, 5000],
+    [8, 3, 3400],
+    [9, 3, 3300],
+    [10, 3, 3300],
+    [11, 4, 6000],
+    [12, 4, 4000],
   ];
   const shareRows = await db
     .insert(s.shares)
@@ -194,6 +275,43 @@ async function main() {
     .returning();
 
   console.log("Flights, hours, money…");
+  // What an hour costs, on Charles's numbers: about $1,400 on a PC-12, $750 of it fuel, the rest
+  // set aside per component for the big jobs (an overhaul, a propeller) and the pilot.
+  const pc12 = { fuel: 75_000, engine: 23_000, propeller: 8_500, airframe: 12_000, avionics: 3_500, pilot: 18_000 };
+  const scale = [1, 1, 1.9, 1.3, 3]; // PC-12, PC-12, CJ4, King Air, Challenger
+  await db.insert(s.aircraftRates).values(
+    fleet.map((plane, i) => {
+      const c = (cents: number) => Math.round((cents * scale[i]!) / 100) * 100;
+      return {
+        aircraftId: plane.id,
+        effectiveFrom: `${year - 1}-01-01`,
+        fuelCentsPerHour: c(pc12.fuel),
+        engineReserveCentsPerHour: c(pc12.engine),
+        propellerReserveCentsPerHour: c(pc12.propeller),
+        airframeReserveCentsPerHour: c(pc12.airframe),
+        avionicsReserveCentsPerHour: c(pc12.avionics),
+        pilotCentsPerHour: c(pc12.pilot),
+      };
+    }),
+  );
+  // C-GJTA's company issues its invoices from the portal: its past flights are billed the same way
+  // (approved report → invoice at the rate → the owner's ledger, labelled in the owner's language),
+  // so one invoice per flight is the only source of that flight's costs. The other aircraft keep
+  // invoices uploaded as PDFs, each with its own cost lines.
+  const jta = companies[0]!;
+  const ownerLocale = new Map(ownerRows.map((o) => [o.id, o.locale === "en" ? ("en" as const) : ("fr" as const)]));
+  const labels = { fr, en };
+  const ratePerHour = { ...pc12 } as Record<keyof typeof pc12, number>;
+  const lineCategory: Record<string, string | undefined> = {
+    fuel: cat.Fuel,
+    engine: cat.Maintenance,
+    propeller: cat.Maintenance,
+    airframe: cat.Maintenance,
+    avionics: cat.Maintenance,
+    pilot: cat.Crew,
+    airport_fees: cat["Airport fees"],
+  };
+  let jtaSeq = 0;
   const airports = ["CYUL", "CYQB", "CYYZ", "KTEB", "KPBI", "KMIA", "MYNN", "TNCM", "CYVR", "KBOS"];
   let invoiceSeq = 1;
   for (const share of shareRows) {
@@ -228,7 +346,7 @@ async function main() {
         const from = pick(airports);
         let to = pick(airports);
         while (to === from) to = pick(airports);
-        const block = 60 + Math.floor(rand() * 120);
+        const flown = 60 + Math.floor(rand() * 120);
         const [flight] = await db
           .insert(s.flights)
           .values({
@@ -237,18 +355,137 @@ async function main() {
             fromAirport: from,
             toAirport: to,
             departsAt: departs,
-            arrivesAt: new Date(departs.getTime() + block * 60_000),
-            blockMinutes: block,
+            arrivesAt: new Date(departs.getTime() + flown * 60_000),
+            flightMinutes: flown,
             status: "completed",
           })
           .returning();
         await db
           .insert(s.hourLedger)
-          .values({ shareId: share.id, kind: "flight", minutes: -block, flightId: flight!.id });
+          .values({ shareId: share.id, kind: "flight", minutes: -flown, flightId: flight!.id });
 
-        const fuel = Math.round(block * (28 + rand() * 8)) * 100;
-        const crew = Math.round(block * 10) * 100;
+        const fuel = Math.round(flown * (28 + rand() * 8)) * 100;
+        const crew = Math.round(flown * 10) * 100;
         const fees = Math.round(400 + rand() * 900) * 100;
+        if (share.aircraftId === fleet[0]!.id) {
+          const locale = ownerLocale.get(share.ownerId) ?? "fr";
+          const L = labels[locale];
+          const issuedOn = isoDay(new Date(departs.getTime() + 2 * 86_400_000));
+          const paid = departs.getTime() < today.getTime() - 40 * 86_400_000;
+          const number = `JTA-${year}-${String(++jtaSeq).padStart(4, "0")}`;
+          const hourLines = (Object.keys(ratePerHour) as (keyof typeof pc12)[]).map((part) => ({
+            kind: "hours" as const,
+            part,
+            minutes: flown,
+            unitCents: ratePerHour[part],
+            amountCents: Math.round((ratePerHour[part] * flown) / 60),
+            description: null,
+          }));
+          const lines = [
+            ...hourLines,
+            // Fuel bought on the way is in the hourly rate: shown, not billed again.
+            {
+              kind: "included" as const,
+              part: "fuel",
+              minutes: null,
+              unitCents: null,
+              amountCents: 0,
+              description: null,
+            },
+            {
+              kind: "expense" as const,
+              part: "airport_fees",
+              minutes: null,
+              unitCents: null,
+              amountCents: fees,
+              description: null,
+            },
+          ];
+          const subtotal = lines.reduce((n, l) => n + l.amountCents, 0);
+          const gst = Math.round(subtotal * 0.05);
+          const qst = Math.round(subtotal * 0.09975);
+          const [invoice] = await db
+            .insert(s.invoices)
+            .values({
+              shareId: share.id,
+              flightId: flight!.id,
+              number,
+              issuedOn,
+              dueOn: isoDay(new Date(departs.getTime() + 32 * 86_400_000)),
+              totalCents: subtotal + gst + qst,
+              subtotalCents: subtotal,
+              gstCents: gst,
+              qstCents: qst,
+              status: paid ? "paid" : "issued",
+              paidOn: paid ? isoDay(new Date(departs.getTime() + 20 * 86_400_000)) : null,
+              holdingCompanyId: jta.id,
+              issuer: {
+                legalName: jta.legalName,
+                address: jta.address,
+                gstNumber: jta.gstNumber,
+                qstNumber: jta.qstNumber,
+                paymentInstructions: jta.paymentInstructions,
+              },
+            })
+            .returning();
+          await db.insert(s.invoiceLines).values(lines.map((l, i) => ({ ...l, invoiceId: invoice!.id, sortOrder: i })));
+          const [report] = await db
+            .insert(s.flightReports)
+            .values({
+              flightId: flight!.id,
+              flightMinutes: flown,
+              shareId: share.id,
+              status: "approved",
+              reviewedAt: new Date(departs.getTime() + 86_400_000),
+              submittedAt: new Date(departs.getTime() + 4 * 3_600_000),
+              invoiceId: invoice!.id,
+            })
+            .returning();
+          const fuelReceipt = Math.round(flown * (11 + rand() * 2)) * 100;
+          await db.insert(s.flightReportExpenses).values([
+            { reportId: report!.id, category: "fuel", amountCents: fuelReceipt, amountCadCents: fuelReceipt },
+            { reportId: report!.id, category: "airport_fees", amountCents: fees, amountCadCents: fees },
+          ]);
+          await db.insert(s.reserveLedger).values(
+            hourLines
+              .filter((l) => l.part !== "fuel" && l.part !== "pilot")
+              .map((l) => ({
+                aircraftId: fleet[0]!.id,
+                component: l.part as "engine" | "propeller" | "airframe" | "avionics",
+                kind: "flight" as const,
+                amountCents: l.amountCents,
+                occurredOn: isoDay(departs),
+                invoiceId: invoice!.id,
+              })),
+          );
+          const label = (l: (typeof lines)[number]) =>
+            l.kind === "hours"
+              ? L.rates.parts[l.part as keyof typeof L.rates.parts]
+              : `${L.pilot.form.categories[l.part as keyof typeof L.pilot.form.categories]} (${L.invoiceDetail.atCost})`;
+          await db.insert(s.transactions).values([
+            ...lines
+              .filter((l) => l.amountCents > 0)
+              .map((l) => ({
+                shareId: share.id,
+                occurredOn: isoDay(departs),
+                categoryId: lineCategory[l.part] ?? null,
+                kind: "cost" as const,
+                amountCents: l.amountCents,
+                invoiceId: invoice!.id,
+                description: `${number} · ${label(l)}`,
+              })),
+            {
+              shareId: share.id,
+              occurredOn: isoDay(departs),
+              categoryId: null,
+              kind: "cost" as const,
+              amountCents: gst + qst,
+              invoiceId: invoice!.id,
+              description: `${number} · ${L.invoiceDetail.ledgerTaxes}`,
+            },
+          ]);
+          continue;
+        }
         const total = fuel + crew + fees;
         const number = `INV-${year}-${String(invoiceSeq++).padStart(4, "0")}`;
         const fileId = await storeDemoFile(
@@ -331,6 +568,12 @@ async function main() {
     }
   }
 
+  // The portal numbers JTA's next invoice after the ones above.
+  await db
+    .update(s.holdingCompanies)
+    .set({ invoiceSeq: jtaSeq, invoiceSeqYear: year })
+    .where(eq(s.holdingCompanies.id, jta.id));
+
   // Upcoming flights and maintenance per aircraft.
   const now = Date.now();
   for (const [i, plane] of fleet.entries()) {
@@ -341,12 +584,23 @@ async function main() {
       await db.insert(s.flights).values({
         aircraftId: plane.id,
         shareId: holders[k % holders.length]!.id,
-        fromAirport: "CYUL",
+        fromAirport: plane.homeBase ?? "CYHU",
         toAirport: pick(["KPBI", "KTEB", "TNCM", "CYVR"]),
         departsAt: departs,
         status: "scheduled",
       });
     }
+    // A charter: Univair sells the aircraft's time when owners aren't flying it.
+    const charter = new Date(now + (9 + i) * 86_400_000);
+    charter.setUTCHours(15, 0, 0, 0);
+    await db.insert(s.flights).values({
+      aircraftId: plane.id,
+      shareId: null,
+      fromAirport: plane.homeBase ?? "CYHU",
+      toAirport: "CYYZ",
+      departsAt: charter,
+      status: "scheduled",
+    });
     await db.insert(s.maintenanceEvents).values({
       aircraftId: plane.id,
       type: i === 1 ? "unscheduled" : "inspection",
@@ -357,14 +611,186 @@ async function main() {
     });
   }
 
+  // In the air right now, so the live map has something to show: Jean's PC-12 to Palm Beach,
+  // and a charter on the Challenger. Re-seed before a demo; they land after a few hours.
+  const jeanShare = shareRows.find((sh) => sh.ownerId === ownerRows[0]!.id)!;
+  await db.insert(s.flights).values([
+    {
+      aircraftId: fleet[0]!.id,
+      shareId: jeanShare.id,
+      fromAirport: "CYHU",
+      toAirport: "KPBI",
+      departsAt: new Date(now - 70 * 60_000),
+      arrivesAt: new Date(now + 3 * 3_600_000 + 50 * 60_000),
+      status: "scheduled",
+    },
+    {
+      aircraftId: fleet[4]!.id,
+      shareId: null,
+      fromAirport: "CYUL",
+      toAirport: "KTEB",
+      departsAt: new Date(now - 25 * 60_000),
+      arrivesAt: new Date(now + 55 * 60_000),
+      status: "scheduled",
+    },
+  ]);
+
+  console.log("Rates and flight reports…");
+  // On a Vercel preview, testers sign in without an authenticator app (REQUIRE_STAFF_2FA=false there).
+  const staff2fa = !process.env.VERCEL;
+  // On a Vercel preview the team, pilot and manager demo accounts meet the welcome tour on first sign-in;
+  // local and CI seeds skip it so the e2e helpers land straight on their pages.
+  const tour = { onboarded: !process.env.VERCEL };
+  // Reserves carried over from earlier years, what each is saving for, and a job paid from one.
+  const opening = `${year}-01-01`;
+  for (const [i, plane] of fleet.entries()) {
+    const c = (cents: number) => Math.round(cents * scale[i]!);
+    await db.insert(s.reserveLedger).values(
+      (
+        [
+          ["engine", 18_400_000],
+          ["propeller", 12_400_000],
+          ["airframe", 6_100_000],
+          ["avionics", 2_300_000],
+        ] as const
+      ).map(([component, cents]) => ({
+        aircraftId: plane.id,
+        component,
+        kind: "adjustment" as const,
+        amountCents: c(cents),
+        occurredOn: opening,
+        note: "Solde reporté",
+      })),
+    );
+    await db.insert(s.reserveTargets).values([
+      { aircraftId: plane.id, component: "engine", targetCents: c(45_000_000), label: "Révision générale du moteur" },
+      { aircraftId: plane.id, component: "propeller", targetCents: c(20_000_000), label: "Révision de l'hélice" },
+    ]);
+  }
+  await db.insert(s.reserveLedger).values({
+    aircraftId: fleet[0]!.id,
+    component: "avionics",
+    kind: "work",
+    amountCents: -1_850_000,
+    occurredOn: `${year}-03-14`,
+    note: "Mise à jour de la base de données et remplacement d'un écran",
+  });
+  // What Gestion Aviation JTA paid outside the flights, month by month.
+  const months = new Date().getMonth() + 1;
+  for (let m = 1; m <= months; m++) {
+    const on = `${year}-${String(m).padStart(2, "0")}-01`;
+    await db.insert(s.companyExpenses).values([
+      {
+        holdingCompanyId: companies[0]!.id,
+        occurredOn: on,
+        category: "pilot_pay",
+        amountCents: 1_150_000,
+        description: "Pilotes",
+      },
+      {
+        holdingCompanyId: companies[0]!.id,
+        occurredOn: on,
+        category: "hangar",
+        amountCents: 350_000,
+        description: "Hangar CYHU",
+      },
+      {
+        holdingCompanyId: companies[0]!.id,
+        occurredOn: on,
+        category: "insurance",
+        amountCents: 410_000,
+        description: "Assurance coque et responsabilité",
+      },
+    ]);
+  }
+  const pilot = await createLogin("pilote@jet.test", "Marc Pilote", "pilot", staff2fa, tour);
+  // The past reports were Marc's too: they read « Marc Pilote », not an unknown pilot.
+  await db.update(s.flightReports).set({ pilotUserId: pilot.id }).where(isNull(s.flightReports.pilotUserId));
+  // Jean's trip to Teterboro two days ago: the pilot's report waits for finance, with its receipts.
+  const tripDeparts = new Date(now - 2 * 86_400_000);
+  tripDeparts.setUTCHours(13, 0, 0, 0);
+  const [trip] = await db
+    .insert(s.flights)
+    .values({
+      aircraftId: fleet[0]!.id,
+      shareId: jeanShare.id,
+      fromAirport: "CYHU",
+      toAirport: "KTEB",
+      departsAt: tripDeparts,
+      arrivesAt: new Date(tripDeparts.getTime() + 105 * 60_000),
+      flightMinutes: 105,
+      status: "completed",
+    })
+    .returning();
+  await db.insert(s.hourLedger).values({ shareId: jeanShare.id, kind: "flight", minutes: -105, flightId: trip!.id });
+  const [report] = await db
+    .insert(s.flightReports)
+    .values({
+      flightId: trip!.id,
+      pilotUserId: pilot.id,
+      flightMinutes: 105,
+      fuelLitres: 640,
+      notes: "Deux passagers. Dégivrage au départ de CYHU.",
+      shareId: jeanShare.id,
+      submittedAt: new Date(tripDeparts.getTime() + 4 * 3_600_000),
+    })
+    .returning();
+  const receipt = (lines: string[]) => storeDemoFile("recu.pdf", demoPdf(lines), "receipts");
+  await db.insert(s.flightReportExpenses).values([
+    {
+      reportId: report!.id,
+      category: "fuel",
+      amountCents: 148_960,
+      paidBy: "company_card",
+      receiptFileId: await receipt(["Signature Flight Support KTEB", "Jet-A 640 L", "Total: 1489.60 USD->CAD"]),
+    },
+    {
+      reportId: report!.id,
+      category: "handling",
+      amountCents: 42_500,
+      paidBy: "company_card",
+      receiptFileId: await receipt(["Signature Flight Support KTEB", "Handling + ramp fee", "Total: 425.00"]),
+    },
+    {
+      reportId: report!.id,
+      category: "per_diem",
+      amountCents: 7_500,
+      paidBy: "pilot",
+      note: "Repas",
+    },
+  ]);
+  // The CJ4 came back from Palm Beach yesterday: the pilot still has to file it.
+  const cj4Back = new Date(now - 30 * 3_600_000);
+  await db.insert(s.flights).values({
+    aircraftId: fleet[2]!.id,
+    shareId: shareRows.find((sh) => sh.aircraftId === fleet[2]!.id)!.id,
+    fromAirport: "KPBI",
+    toAirport: "CYHU",
+    departsAt: cj4Back,
+    arrivesAt: new Date(cj4Back.getTime() + 170 * 60_000),
+    status: "scheduled",
+  });
+
+  // Sophie keeps Gestion Aviation JTA's books: she issues its invoices from the portal.
+  const manager = await createLogin("gestion@jet.test", "Sophie Gagnon", null, false, tour);
+  await db.insert(s.holdingCompanyManagers).values({ holdingCompanyId: companies[0]!.id, userId: manager.id });
+
   console.log("Demo logins…");
-  await createLogin("admin@jet.test", "Alex Admin", "admin", true);
-  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", true);
-  await createLogin("finance@jet.test", "Fred Finance", "finance", false);
+  await createLogin("admin@jet.test", "Alex Admin", "admin", staff2fa, tour);
+  const dispatch = await createLogin("dispatch@jet.test", "Dani Dispatch", "dispatcher", staff2fa, tour);
+  await createLogin("finance@jet.test", "Fred Finance", "finance", false, tour);
   const owner = await createLogin("owner@jet.test", "Jean Tremblay", null);
+  await db.insert(s.ownerMembers).values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "owner" });
+  // A brand-new owner (Hélène Fortin, King Air), to show the welcome tour on first sign-in.
+  const newcomer = await createLogin("nouveau@jet.test", "Hélène Fortin", null, false, { onboarded: false });
   await db
     .insert(s.ownerMembers)
-    .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: owner.id, role: "primary" });
+    .values({ id: uuidv7(), ownerId: ownerRows[8]!.id, userId: newcomer.id, role: "owner" });
+  // Jean's executive assistant: sees the schedule, not the finances.
+  const assistant = await createLogin("assistant@jet.test", "Julie Assistante", null);
+  await db
+    .insert(s.ownerMembers)
+    .values({ id: uuidv7(), ownerId: ownerRows[0]!.id, userId: assistant.id, role: "assistant" });
 
   // A short conversation with dispatch, already read on both sides.
   const [conversation] = await db
@@ -396,7 +822,9 @@ async function main() {
   console.log("  admin@jet.test     admin       2FA on");
   console.log("  dispatch@jet.test  dispatcher  2FA on");
   console.log("  finance@jet.test   finance     2FA not set up yet: shows the setup flow");
-  console.log("  owner@jet.test     owner of 25% of C-GJTA");
+  console.log("  owner@jet.test     owner of 25% of C-GJTA (in the air now)");
+  console.log("  assistant@jet.test the owner's assistant: schedule, no finances");
+  console.log("  nouveau@jet.test   a new owner: goes through the welcome tour");
   console.log(`\nDemo 2FA key for admin and dispatch (add it to an authenticator app):`);
   console.log(`  ${new URL(otpauth).searchParams.get("secret")}`);
   console.log(`  backup codes: ${DEMO_BACKUP_CODES.join(", ")}\n`);

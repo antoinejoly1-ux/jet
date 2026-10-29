@@ -1,3 +1,4 @@
+import { getLocale } from "next-intl/server";
 import type { NextRequest } from "next/server";
 import { requireAccess } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -12,6 +13,9 @@ export async function GET(request: NextRequest) {
   const year = yearParam(sp.get("year"));
   return orNotFound(async () => {
     const statement = await getAnnualStatement(db, viewer, sp.get("share") ?? "", year, { ownerView: true });
-    return pdfResponse(await statementPdf(statement), `statement-${year}-${statement.share.registration}.pdf`);
+    return pdfResponse(
+      await statementPdf(statement),
+      `${(await getLocale()).startsWith("fr") ? "releve" : "statement"}-${year}-${statement.share.registration}.pdf`,
+    );
   });
 }
